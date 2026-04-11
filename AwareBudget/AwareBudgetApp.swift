@@ -7,9 +7,8 @@ struct AwareBudgetApp: App {
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
-                NavigationStack {
-                    HomeView()
-                }
+                RootTabView()
+                    .task { await NotificationService.requestPermission() }
             } else {
                 OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
             }

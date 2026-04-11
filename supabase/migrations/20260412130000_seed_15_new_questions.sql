@@ -1,0 +1,21 @@
+-- Migration: insert 15 new question_pool rows from PRD v1.1.
+-- Reaches 30 total questions. Does NOT touch the existing 15 rows.
+-- Existing rows still have bias_category = NULL; that backfill is a
+-- separate task.
+
+insert into question_pool (question, why_explanation, bias_name, bias_category, difficulty) values
+('Did you open a bill or financial email you had been ignoring?', 'The anticipation of bad news is nearly always worse than the news itself. Each time you open the envelope anyway, the fear response weakens.', 'Ostrich Effect', 'Avoidance', 'intermediate'),
+('Did fear of losing money stop you from a decision that made sense?', 'Loss aversion can cause paralysis. Asking "what would I advise a friend?" bypasses the emotional charge.', 'Loss Aversion', 'Decision Making', 'intermediate'),
+('Did you choose immediate comfort over a future financial goal?', 'Present bias is not laziness — it is how human brains are wired. The antidote is making future goals more vivid, not more disciplined.', 'Present Bias', 'Time Perception', 'intermediate'),
+('Did you have savings in one place while carrying a debt elsewhere?', 'Keeping savings while paying high-interest debt is often irrational. But mentally we keep accounts separate, which costs us.', 'Mental Accounting', 'Money Psychology', 'intermediate'),
+('Did a number you encountered early in a decision influence the outcome more than it should?', 'Anchors are everywhere in financial life. Identifying the anchor gives you the power to set your own reference point.', 'Anchoring', 'Decision Making', 'intermediate'),
+('Did you keep a subscription or membership going just because you had already paid?', 'Ask: if I had not paid anything, would I choose this today? If no — it is a sunk cost.', 'Sunk Cost Fallacy', 'Decision Making', 'intermediate'),
+('Did you spend to keep up with what people around you seemed to be spending?', 'Everyone is performing a version of financial health. Most people are doing the same thing simultaneously, creating a spiral that serves no one.', 'Social Proof', 'External Influence', 'intermediate'),
+('Did you skip research because you felt you already knew enough?', 'The most expensive mistakes come not from ignorance but from confidence that outstrips knowledge. A second opinion costs little and can save much.', 'Overconfidence Bias', 'Self Perception', 'advanced'),
+('Did you avoid switching something financial because changing felt like too much effort?', 'The effort of switching is almost always smaller than we imagine, and the cost of staying is often larger than we notice.', 'Status Quo Bias', 'Inertia', 'intermediate'),
+('Did you feel more desire for something because it was scarce or hard to get?', 'Scarcity signals value — but only sometimes correctly. We want things more when we might lose access, regardless of whether they genuinely serve us.', 'Scarcity Heuristic', 'External Influence', 'intermediate'),
+('Did something cost more or take longer than you expected this week?', 'We consistently underestimate costs and timelines. Building a 30% buffer into every estimate corrects for this documented pattern.', 'Planning Fallacy', 'Time Perception', 'beginner'),
+('Did a financial win make you feel licensed to splurge elsewhere?', 'Moral licensing is not about willpower — it is about how the brain tracks virtue and reward. Decoupling financial decisions from self-reward removes the trigger.', 'Moral Licensing', 'Self Perception', 'advanced'),
+('Did a recent news story change how you felt about your own financial security?', 'We judge likelihood by how easily examples come to mind. Recession news makes our own situation feel worse than data supports.', 'Availability Heuristic', 'Decision Making', 'intermediate'),
+('Did a friend or family member''s money situation change how you evaluated your own?', 'Vivid nearby examples feel more representative than they are. Our sample of visible people is small and skewed.', 'Availability Heuristic', 'Decision Making', 'advanced'),
+('Did a monthly price feel more affordable than the same thing expressed as an annual cost?', '£10 a month feels trivial. £120 a year feels significant. Same number, different frame. Annual framing reveals true cost more accurately.', 'Framing Effect', 'Money Psychology', 'beginner');

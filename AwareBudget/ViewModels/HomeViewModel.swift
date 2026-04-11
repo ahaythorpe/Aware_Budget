@@ -10,6 +10,7 @@ final class HomeViewModel {
     var todaysCheckIn: CheckIn?
     var recentEvents: [MoneyEvent] = []
     var nextQuestionTeaser: String?
+    var weekDots: [Bool] = Array(repeating: false, count: 7)
     var isLoading = false
     var errorMessage: String?
 
@@ -68,6 +69,9 @@ final class HomeViewModel {
             todaysCheckIn = try await service.fetchTodaysCheckIn()
             recentEvents = try await service.fetchRecentMoneyEvents(limit: 3)
 
+            let weekHistory = try await service.fetchRecentCheckIns(limit: 14)
+            weekDots = Self.computeWeekDots(from: weekHistory)
+
             let now = Date()
             let month = try await service.fetchOrCreateBudgetMonth(for: now)
             incomeTarget = month.incomeTarget
@@ -101,6 +105,19 @@ final class HomeViewModel {
             await load()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    private static func computeWeekDots(from checkIns: [CheckIn]) -> [Bool] {
+        var cal = Calendar(identifier: .iso8601)
+        cal.firstWeekday = 2 // Monday
+        let now = Date()
+        guard let monday = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return Array(repeating: false, count: 7)
+        }
+        return (0..<7).map { offset in
+            guard let day = cal.date(byAdding: .day, value: offset, to: monday) else { return false }
+            return checkIns.contains { cal.isDate($0.date, inSameDayAs: day) }
         }
     }
 

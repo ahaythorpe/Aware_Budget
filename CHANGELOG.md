@@ -5,6 +5,70 @@
 
 ---
 
+## 2026-04-12 — Beta shell: 4-tab root, StreakRing HomeView, CheckInView swipe (Claude Code)
+
+**Goal:** Close out the beta shell so the app reads as a real product.
+User list: (1) HomeView rebuild with streak ring + brand palette,
+(2) CheckInView swipe stack, (3) Supabase live wiring, (4) daily 8pm
+notifications, (5) 4-tab root.
+
+**Added:**
+- `Views/RootTabView.swift` — 4-tab root (Home · Check in · Learn ·
+  Month). `@State selection: RootTab` passed down to HomeView +
+  CheckInView so cards can switch tabs. Active tint `DS.accent`
+  (`#7F77DD`). Wrapped in `AwareBudgetApp.swift` as the root scene,
+  which also fires `NotificationService.requestPermission()` on
+  launch.
+- `Views/StreakRingView.swift` — coral 180pt circular ring with
+  trimmed progress stroke (14pt, round cap), bold 56pt streak count
+  in `DS.deepPurple`, and a labelled M–S dot row beneath. Animates
+  `progress` and `streak` on change.
+- `DS` brand palette: `DS.bg` `#F7F4EF`, `DS.deepPurple` `#2D1B69`,
+  `DS.accent` `#7F77DD`, `DS.coral` `#FF7A6B`, `DS.teal` `#006064`.
+
+**HomeView rebuild:**
+- Background now `DS.bg`. Hero check-in card is a full-width
+  `#2D1B69` rounded rectangle with white text and coral icon; tapping
+  it switches the root tab to `.checkIn` via the new binding.
+- Streak section now renders `StreakRingView` inside a white card
+  with 0.5px `DS.accent`-tinted border. Streak message sits below.
+- Alignment, log-event, and recent-activity rows all moved to the
+  white-card-with-accent-border treatment (replaces the old
+  `Card` container for these surfaces).
+- `HomeViewModel` now tracks `weekDots: [Bool]` for Mon–Sun of the
+  current ISO week, computed from `fetchRecentCheckIns(limit: 14)`.
+- Removed the old `fullScreenCover` route into `CheckInView` —
+  navigation to check-in is now the tab binding path.
+
+**CheckInView:**
+- Accepts optional `selectedTab: Binding<RootTab>?`. When embedded
+  in the tab bar the xmark toolbar button is hidden and the "Done"
+  button on the completion view switches back to `.home` instead of
+  calling `dismiss()`. Standalone presentation still works via the
+  `nil` branch.
+- On completion (`currentIndex >= questions.count`) now calls
+  `NotificationService.scheduleDailyReminder()` so the first
+  successful check-in kicks off the 20:00 daily reminder cycle.
+
+**Notifications:**
+- `NotificationService.scheduleDailyReminder()` was already wired
+  with a `UNCalendarNotificationTrigger` at `hour=20, minute=0,
+  repeats: true` — verified, no change needed. Permission request
+  now happens on app launch from `AwareBudgetApp.task`.
+
+**Blocked / pending:**
+- Supabase Swift package still needs to be added via Xcode UI
+  (`File → Add Package Dependencies → supabase/supabase-swift`).
+  Once present, `SupabaseService.swift` can be swapped from the
+  in-memory stub to real `client.from(...)` calls. All view models
+  already use the correct `async throws` surface.
+
+**Build:**
+- `** BUILD SUCCEEDED **` on iPhone 17 / iOS 26.2 after the full
+  rebuild (single warning: AppIntents metadata skipped — unrelated).
+
+---
+
 ## 2026-04-12 — UI/UX pass: design system + hero-first Home (Claude Code)
 
 **Goal:** Turn Home from a generic vertical list of cards into a real

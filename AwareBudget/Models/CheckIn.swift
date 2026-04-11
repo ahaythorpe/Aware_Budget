@@ -25,9 +25,9 @@ struct CheckIn: Identifiable, Codable, Hashable {
 
         var emoji: String {
             switch self {
-            case .calm: return "🌿"
-            case .neutral: return "😌"
-            case .anxious: return "😣"
+            case .calm: return "😌"
+            case .neutral: return "😐"
+            case .anxious: return "😟"
             }
         }
     }

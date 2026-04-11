@@ -2,25 +2,21 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
-    @State private var showCheckIn = false
     @State private var showMoneyEvent = false
     @State private var showTargetEditor = false
     @State private var targetInput = ""
 
+    var selectedTab: Binding<RootTab>? = nil
+
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
             content
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
-        .fullScreenCover(isPresented: $showCheckIn, onDismiss: {
-            Task { await viewModel.load() }
-        }) {
-            NavigationStack { CheckInView() }
-        }
         .sheet(isPresented: $showMoneyEvent, onDismiss: {
             Task { await viewModel.load() }
         }) {
@@ -46,31 +42,30 @@ struct HomeView: View {
             VStack(spacing: DS.sectionGap) {
                 greetingHeader
                 heroCheckInCard
-                statsRow
+                streakSection
+                alignmentCard
                 logEventButton
                 recentActivitySection
-                monthLink
             }
             .padding(.horizontal, DS.hPadding)
             .padding(.top, 8)
             .padding(.bottom, 40)
         }
-        .sensoryFeedback(.success, trigger: viewModel.isCheckedInToday)
     }
 
-    // MARK: - Sections
+    // MARK: - Header
 
     private var greetingHeader: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(viewModel.greeting)
                     .font(.title2.weight(.bold))
+                    .foregroundStyle(DS.deepPurple)
                 Text(viewModel.todayLabel)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            // Settings placeholder — disabled in beta
             Image(systemName: "gearshape")
                 .font(.title3)
                 .foregroundStyle(.tertiary)
@@ -79,84 +74,83 @@ struct HomeView: View {
         .padding(.top, 8)
     }
 
+    // MARK: - Hero check-in card (#2D1B69)
+
     private var heroCheckInCard: some View {
         Button {
-            showCheckIn = true
+            selectedTab?.wrappedValue = .checkIn
         } label: {
-            Card {
-                VStack(alignment: .leading, spacing: 14) {
-                    HStack(spacing: 8) {
-                        Image(systemName: viewModel.isCheckedInToday
-                              ? "checkmark.seal.fill"
-                              : "sparkles")
-                            .foregroundStyle(viewModel.isCheckedInToday ? .green : .blue)
-                        Text(viewModel.isCheckedInToday
-                             ? "Checked in today"
-                             : "Today's check-in")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                            .tracking(0.6)
-                        Spacer()
-                        if !viewModel.isCheckedInToday {
-                            Image(systemName: "arrow.right")
-                                .foregroundStyle(.blue)
-                        }
-                    }
-
-                    if viewModel.isCheckedInToday, let tone = viewModel.todaysCheckIn?.emotionalTone {
-                        Text("You showed up. See you tomorrow.")
-                            .font(.title3.weight(.semibold))
-                        HStack(spacing: 6) {
-                            Text(tone.emoji)
-                            Text("Today's tone · \(tone.label)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    } else {
-                        Text(viewModel.nextQuestionTeaser ?? "One question. 60 seconds.")
-                            .font(.title3.weight(.semibold))
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text("Tap to check in")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 8) {
+                    Image(systemName: viewModel.isCheckedInToday ? "checkmark.seal.fill" : "sparkles")
+                        .foregroundStyle(viewModel.isCheckedInToday ? Color.green : DS.coral)
+                    Text(viewModel.isCheckedInToday ? "Checked in today" : "Today's check-in")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .textCase(.uppercase)
+                        .tracking(0.8)
+                    Spacer()
+                    if !viewModel.isCheckedInToday {
+                        Image(systemName: "arrow.right")
+                            .foregroundStyle(.white.opacity(0.75))
                     }
                 }
+
+                if viewModel.isCheckedInToday, let tone = viewModel.todaysCheckIn?.emotionalTone {
+                    Text("You showed up. See you tomorrow.")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.leading)
+                    HStack(spacing: 6) {
+                        Text(tone.emoji)
+                        Text("Today's tone · \(tone.label)")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                } else {
+                    Text(viewModel.nextQuestionTeaser ?? "One question. 60 seconds.")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Tap to check in")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.7))
+                }
             }
+            .padding(22)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(DS.deepPurple)
+            )
         }
         .buttonStyle(.plain)
     }
 
-    private var statsRow: some View {
-        HStack(spacing: 12) {
-            streakCard
-            alignmentCard
+    // MARK: - Streak ring
+
+    private var streakSection: some View {
+        VStack(spacing: 4) {
+            StreakRingView(streak: viewModel.streak, weekDots: viewModel.weekDots)
+                .padding(.vertical, 20)
+            Text(viewModel.streakMessage)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                .fill(.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                )
+        )
     }
 
-    private var streakCard: some View {
-        Card(padding: 16) {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    Image(systemName: "flame.fill")
-                        .foregroundStyle(.orange)
-                    Text("Streak")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                        .tracking(0.5)
-                }
-                Text("\(viewModel.streak)")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .contentTransition(.numericText())
-                Text(viewModel.streakMessage)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2, reservesSpace: true)
-            }
-        }
-    }
+    // MARK: - Alignment card
 
     private var alignmentCard: some View {
         Button {
@@ -165,38 +159,49 @@ struct HomeView: View {
                 showTargetEditor = true
             }
         } label: {
-            Card(padding: 16) {
+            HStack(alignment: .top, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
                         Image(systemName: "scope")
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(DS.accent)
                         Text("Alignment")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.secondary)
                             .textCase(.uppercase)
-                            .tracking(0.5)
+                            .tracking(0.6)
                     }
-
                     if viewModel.isTargetSet {
                         Text("\(Int(viewModel.alignmentPct))%")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .font(.system(size: 36, weight: .bold, design: .rounded))
                             .foregroundStyle(viewModel.alignmentColor)
                             .contentTransition(.numericText())
                     } else {
                         Text("Set target")
                             .font(.system(size: 22, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(DS.accent)
                     }
-
                     Text(viewModel.alignmentReassurance)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2, reservesSpace: true)
                 }
+                Spacer()
             }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                            .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                    )
+            )
         }
         .buttonStyle(.plain)
     }
+
+    // MARK: - Log event
 
     private var logEventButton: some View {
         Button {
@@ -210,26 +215,40 @@ struct HomeView: View {
         .buttonStyle(SecondaryButtonStyle())
     }
 
+    // MARK: - Recent activity
+
     private var recentActivitySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Recent activity")
+            Text("Recent activity")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(DS.accent)
+                .textCase(.uppercase)
+                .tracking(0.9)
 
             if viewModel.recentEvents.isEmpty {
-                Card(padding: 20) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "tray")
-                            .font(.title3)
-                            .foregroundStyle(.tertiary)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Nothing logged yet")
-                                .font(.subheadline.weight(.medium))
-                            Text("Tap above to log your first event.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
+                HStack(spacing: 12) {
+                    Image(systemName: "tray")
+                        .font(.title3)
+                        .foregroundStyle(.tertiary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Nothing logged yet")
+                            .font(.subheadline.weight(.medium))
+                        Text("Tap above to log your first event.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
+                    Spacer()
                 }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .fill(.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                        )
+                )
             } else {
                 VStack(spacing: 8) {
                     ForEach(viewModel.recentEvents) { event in
@@ -241,45 +260,36 @@ struct HomeView: View {
     }
 
     private func eventRow(_ event: MoneyEvent) -> some View {
-        Card(padding: 14) {
-            HStack(spacing: 12) {
-                Text(event.eventType.emoji)
-                    .font(.title3)
-                    .frame(width: 36, height: 36)
-                    .background(Color(.tertiarySystemBackground))
-                    .clipShape(Circle())
+        HStack(spacing: 12) {
+            Text(event.eventType.emoji)
+                .font(.title3)
+                .frame(width: 36, height: 36)
+                .background(DS.bg)
+                .clipShape(Circle())
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(event.category ?? event.eventType.label)
-                        .font(.subheadline.weight(.medium))
-                    Text(event.date, style: .date)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                Text(event.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                    .font(.subheadline.weight(.semibold))
-                    .monospacedDigit()
-            }
-        }
-    }
-
-    private var monthLink: some View {
-        NavigationLink {
-            MonthView()
-        } label: {
-            HStack {
-                Text("This month")
+            VStack(alignment: .leading, spacing: 2) {
+                Text(event.category ?? event.eventType.label)
                     .font(.subheadline.weight(.medium))
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(DS.deepPurple)
+                Text(event.date, style: .date)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 4)
-            .padding(.vertical, 6)
+            Spacer()
+            Text(event.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(DS.deepPurple)
         }
-        .buttonStyle(.plain)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                .fill(.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                )
+        )
     }
 }
 
