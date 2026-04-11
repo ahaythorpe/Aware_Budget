@@ -9,86 +9,118 @@ struct OnboardingView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("AwareBudget")
-                        .font(.largeTitle.bold())
-                    Text("Stay aware. Adjust early. No shame.")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    header
+                    steps
+                    signUpForm
+                    Spacer(minLength: 40)
                 }
-                .padding(.top, 40)
-
-                VStack(alignment: .leading, spacing: 16) {
-                    stepRow(number: "1",
-                            title: "Check in daily",
-                            detail: "One behavioural question. 60 seconds.")
-                    stepRow(number: "2",
-                            title: "Log money events",
-                            detail: "Surprises, wins, and expected costs — all manual.")
-                    stepRow(number: "3",
-                            title: "Stay aware",
-                            detail: "Build a streak. Watch alignment. No shame.")
-                }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Create your account")
-                        .font(.headline)
-                    TextField("Email", text: $email)
-                        .textContentType(.emailAddress)
-                        .autocorrectionDisabled(true)
-                    #if !os(macOS)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                    #endif
-                        .textFieldStyle(.roundedBorder)
-                    SecureField("Password", text: $password)
-                        .textContentType(.newPassword)
-                        .textFieldStyle(.roundedBorder)
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                    }
-
-                    Button {
-                        Task { await submit() }
-                    } label: {
-                        HStack {
-                            Spacer()
-                            if isSubmitting {
-                                ProgressView()
-                            } else {
-                                Text("Get started")
-                                    .fontWeight(.semibold)
-                            }
-                            Spacer()
-                        }
-                        .padding()
-                        .background(.blue)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .disabled(isSubmitting || email.isEmpty || password.isEmpty)
-                }
-                .padding(.top, 12)
+                .padding(24)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(24)
         }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("AwareBudget")
+                .font(.largeTitle.bold())
+                .foregroundStyle(.primary)
+            Text("Stay aware. Adjust early. No shame.")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.top, 20)
+    }
+
+    private var steps: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            stepRow(number: "1",
+                    title: "Check in daily",
+                    detail: "One behavioural question. 60 seconds.")
+            stepRow(number: "2",
+                    title: "Log money events",
+                    detail: "Surprises, wins, and expected costs — all manual.")
+            stepRow(number: "3",
+                    title: "Stay aware",
+                    detail: "Build a streak. Watch alignment. No shame.")
+        }
+    }
+
+    private var signUpForm: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Create your account")
+                .font(.headline)
+                .foregroundStyle(.primary)
+
+            TextField("Email", text: $email)
+                .textContentType(.emailAddress)
+                .autocorrectionDisabled(true)
+            #if !os(macOS)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+            #endif
+                .padding(12)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            SecureField("Password", text: $password)
+                .textContentType(.newPassword)
+                .padding(12)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
+
+            Button {
+                Task { await submit() }
+            } label: {
+                HStack {
+                    Spacer()
+                    if isSubmitting {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Text("Get started")
+                            .fontWeight(.semibold)
+                    }
+                    Spacer()
+                }
+                .padding()
+                .background(Color.blue)
+                .foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+            .disabled(isSubmitting || email.isEmpty || password.isEmpty)
+            .opacity((email.isEmpty || password.isEmpty) ? 0.5 : 1.0)
+        }
+        .padding(.top, 12)
     }
 
     private func stepRow(number: String, title: String, detail: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Text(number)
                 .font(.headline)
-                .frame(width: 28, height: 28)
+                .foregroundStyle(.blue)
+                .frame(width: 32, height: 32)
                 .background(Color.blue.opacity(0.15))
                 .clipShape(Circle())
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.headline)
-                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -105,4 +137,8 @@ struct OnboardingView: View {
             errorMessage = error.localizedDescription
         }
     }
+}
+
+#Preview {
+    OnboardingView(hasCompletedOnboarding: .constant(false))
 }

@@ -6,18 +6,10 @@ struct AwareBudgetApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(hasCompletedOnboarding: $hasCompletedOnboarding)
-        }
-    }
-}
-
-struct RootView: View {
-    @Binding var hasCompletedOnboarding: Bool
-
-    var body: some View {
-        NavigationStack {
             if hasCompletedOnboarding {
-                HomeView()
+                NavigationStack {
+                    HomeView()
+                }
             } else {
                 OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
             }

@@ -6,6 +6,13 @@ struct HomeView: View {
     @State private var showMoneyEvent = false
 
     var body: some View {
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
+            content
+        }
+    }
+
+    private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 header

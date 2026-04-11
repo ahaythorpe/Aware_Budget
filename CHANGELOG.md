@@ -5,6 +5,38 @@
 
 ---
 
+## 2026-04-12 — Fix blank white screen at launch (Claude Code)
+
+**Problem:** App built and ran on iPhone 17 / iOS 26.2 simulator but
+showed a fully white screen — no nav bar, no content.
+
+**Likely cause:** iOS 26's `NavigationStack` at the root `WindowGroup`
+was swallowing the `if/else` branch layout in `RootView`. Nothing was
+rendering because the nav bar region + the scroll view's default
+background were both white-on-white, with no visible bounds.
+
+**Fix:**
+- Removed the `RootView` wrapper struct. `AwareBudgetApp` now returns
+  `OnboardingView` directly at first launch, or `NavigationStack {
+  HomeView() }` once `hasCompletedOnboarding` is true. Onboarding
+  doesn't need navigation so it has no `NavigationStack` at all.
+- Wrapped `OnboardingView` body in a `ZStack` with an explicit
+  `Color(.systemBackground).ignoresSafeArea()` base layer so the view
+  bounds are always drawn.
+- Replaced `.textFieldStyle(.roundedBorder)` with explicit padded
+  `Color(.secondarySystemBackground)` capsules on the email + password
+  fields. This also looks nicer than the default system rounded border.
+- Added the same `ZStack` + `.systemBackground` base to `HomeView`.
+- Added a `#Preview` for `OnboardingView` so future agents can see it
+  in the Xcode canvas without building the whole app.
+
+**If the screen is still blank after this build:** the simulator may
+have `hasCompletedOnboarding = true` stored in UserDefaults from a
+previous run. Delete the AwareBudget app from the simulator
+(long-press → Remove App) and relaunch.
+
+---
+
 ## 2026-04-12 — Fix iOS-only build errors (Claude Code)
 
 **Problem:** Xcode showed 4 build errors in `OnboardingView.swift`:
