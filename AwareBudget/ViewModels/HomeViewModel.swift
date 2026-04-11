@@ -6,14 +6,32 @@ import SwiftUI
 final class HomeViewModel {
     var streak: Int = 0
     var alignmentPct: Double = 0
+    var incomeTarget: Double = 0
     var todaysCheckIn: CheckIn?
     var recentEvents: [MoneyEvent] = []
+    var nextQuestionTeaser: String?
     var isLoading = false
     var errorMessage: String?
 
     private let service = SupabaseService.shared
 
     var isCheckedInToday: Bool { todaysCheckIn != nil }
+    var isTargetSet: Bool { incomeTarget > 0 }
+
+    var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 0..<12: return "Good morning"
+        case 12..<18: return "Good afternoon"
+        default: return "Good evening"
+        }
+    }
+
+    var todayLabel: String {
+        let f = DateFormatter()
+        f.dateFormat = "EEEE, d MMMM"
+        return f.string(from: Date())
+    }
 
     var streakMessage: String {
         switch streak {
@@ -26,6 +44,7 @@ final class HomeViewModel {
     }
 
     var alignmentColor: Color {
+        guard isTargetSet else { return .secondary }
         switch alignmentPct {
         case 80...: return .green
         case 50..<80: return .orange
@@ -34,6 +53,7 @@ final class HomeViewModel {
     }
 
     var alignmentReassurance: String {
+        guard isTargetSet else { return "Set a target to start tracking." }
         switch alignmentPct {
         case 80...: return "Looking aligned — keep it up."
         case 50..<80: return "Adjust early — awareness is the lever."
@@ -48,26 +68,44 @@ final class HomeViewModel {
             todaysCheckIn = try await service.fetchTodaysCheckIn()
             recentEvents = try await service.fetchRecentMoneyEvents(limit: 3)
 
-            let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+            let now = Date()
+            let month = try await service.fetchOrCreateBudgetMonth(for: now)
+            incomeTarget = month.incomeTarget
+
+            let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now) ?? now
             if let today = todaysCheckIn {
                 streak = today.streakCount
                 alignmentPct = today.alignmentPct
             } else if let y = try await service.fetchCheckIn(on: yesterday) {
                 streak = y.streakCount
-                alignmentPct = y.alignmentPct
+                alignmentPct = try await computeAlignment(month: month)
             } else {
                 streak = 0
-                alignmentPct = try await computeAlignment()
+                alignmentPct = try await computeAlignment(month: month)
+            }
+
+            if todaysCheckIn == nil {
+                nextQuestionTeaser = try? await service.fetchNextQuestion().question
+            } else {
+                nextQuestionTeaser = nil
             }
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    private func computeAlignment() async throws -> Double {
-        let now = Date()
-        let month = try await service.fetchOrCreateBudgetMonth(for: now)
-        let events = try await service.fetchMoneyEvents(forMonth: now)
+    func saveTarget(_ amount: Double) async {
+        guard amount > 0 else { return }
+        do {
+            try await service.updateIncomeTarget(amount, for: Date())
+            await load()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func computeAlignment(month: BudgetMonth) async throws -> Double {
+        let events = try await service.fetchMoneyEvents(forMonth: month.month)
         let unplanned = events
             .filter { $0.eventType == .surprise }
             .reduce(0.0) { $0 + $1.amount }

@@ -5,81 +5,26 @@ struct MoneyEventView: View {
     @State private var viewModel = MoneyEventViewModel()
 
     var body: some View {
-        Form {
-            Section("Amount") {
-                TextField("0.00", text: $viewModel.amountText)
-                #if !os(macOS)
-                    .keyboardType(.decimalPad)
-                #endif
-                    .font(.title2.weight(.semibold))
-            }
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
 
-            Section("Type") {
-                HStack(spacing: 12) {
-                    ForEach(MoneyEvent.EventType.allCases) { type in
-                        Button {
-                            viewModel.eventType = type
-                        } label: {
-                            VStack(spacing: 4) {
-                                Text(type.emoji).font(.title2)
-                                Text(type.label).font(.caption)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(
-                                viewModel.eventType == type
-                                    ? Color.blue.opacity(0.15)
-                                    : Color(.secondarySystemBackground)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .foregroundStyle(.primary)
-                        }
-                        .buttonStyle(.plain)
+            ScrollView {
+                VStack(spacing: DS.sectionGap) {
+                    amountHero
+                    typeSelector
+                    categorySelector
+                    noteField
+                    dateField
+                    if let errorMessage = viewModel.errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
                     }
+                    saveButton
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            }
-
-            Section("Category") {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(MoneyCategory.allCases) { cat in
-                            Button {
-                                viewModel.category = cat
-                            } label: {
-                                Text(cat.rawValue)
-                                    .font(.footnote.weight(.medium))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        viewModel.category == cat
-                                            ? Color.blue
-                                            : Color(.secondarySystemBackground)
-                                    )
-                                    .foregroundStyle(
-                                        viewModel.category == cat ? .white : .primary
-                                    )
-                                    .clipShape(Capsule())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
-
-            Section("Note") {
-                TextField("Optional", text: $viewModel.note, axis: .vertical)
-                    .lineLimit(2, reservesSpace: true)
-            }
-
-            Section("Date") {
-                DatePicker("", selection: $viewModel.date, displayedComponents: .date)
-                    .labelsHidden()
-            }
-
-            if let errorMessage = viewModel.errorMessage {
-                Section { Text(errorMessage).foregroundStyle(.red).font(.footnote) }
+                .padding(.horizontal, DS.hPadding)
+                .padding(.top, 12)
+                .padding(.bottom, 32)
             }
         }
         .navigationTitle("Log money event")
@@ -88,15 +33,151 @@ struct MoneyEventView: View {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
             }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
-                    Task {
-                        await viewModel.save()
-                        if viewModel.didSave { dismiss() }
-                    }
+        }
+    }
+
+    // MARK: - Sections
+
+    private var amountHero: some View {
+        Card(padding: 24) {
+            VStack(alignment: .center, spacing: 10) {
+                Text("AMOUNT")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .tracking(0.8)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(Locale.current.currencySymbol ?? "$")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.secondary)
+                    TextField("0", text: $viewModel.amountText)
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .fixedSize()
+                    #if !os(macOS)
+                        .keyboardType(.decimalPad)
+                    #endif
                 }
-                .disabled(!viewModel.canSave || viewModel.isSaving)
+                .frame(maxWidth: .infinity)
             }
         }
     }
+
+    private var typeSelector: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Type")
+            HStack(spacing: 12) {
+                ForEach(MoneyEvent.EventType.allCases) { type in
+                    typeButton(type)
+                }
+            }
+        }
+    }
+
+    private func typeButton(_ type: MoneyEvent.EventType) -> some View {
+        let selected = viewModel.eventType == type
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                viewModel.eventType = type
+            }
+        } label: {
+            VStack(spacing: 6) {
+                Text(type.emoji)
+                    .font(.system(size: 28))
+                Text(type.label)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(selected ? .primary : .secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(selected ? Color.blue.opacity(0.12) : Color(.secondarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .stroke(selected ? Color.blue : .clear, lineWidth: 2)
+            )
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: selected)
+    }
+
+    private var categorySelector: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Category")
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(MoneyCategory.allCases) { cat in
+                        let selected = viewModel.category == cat
+                        Button {
+                            viewModel.category = cat
+                        } label: {
+                            Text(cat.rawValue)
+                                .font(.footnote.weight(.semibold))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    Capsule().fill(
+                                        selected
+                                            ? Color.blue
+                                            : Color(.secondarySystemBackground)
+                                    )
+                                )
+                                .foregroundStyle(selected ? .white : .primary)
+                        }
+                        .buttonStyle(.plain)
+                        .sensoryFeedback(.selection, trigger: selected)
+                    }
+                }
+                .padding(.horizontal, 2)
+            }
+        }
+    }
+
+    private var noteField: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Note")
+            Card(padding: 14) {
+                TextField("Optional — what was this for?", text: $viewModel.note, axis: .vertical)
+                    .font(.subheadline)
+                    .lineLimit(2, reservesSpace: true)
+            }
+        }
+    }
+
+    private var dateField: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Date")
+            Card(padding: 12) {
+                DatePicker("", selection: $viewModel.date, displayedComponents: .date)
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private var saveButton: some View {
+        Button {
+            Task {
+                await viewModel.save()
+                if viewModel.didSave { dismiss() }
+            }
+        } label: {
+            HStack {
+                if viewModel.isSaving {
+                    ProgressView().tint(.white)
+                } else {
+                    Text("Save event")
+                    Image(systemName: "checkmark")
+                }
+            }
+        }
+        .buttonStyle(PrimaryButtonStyle())
+        .disabled(!viewModel.canSave || viewModel.isSaving)
+        .opacity(viewModel.canSave ? 1.0 : 0.5)
+    }
+}
+
+#Preview {
+    NavigationStack { MoneyEventView() }
 }

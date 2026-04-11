@@ -5,6 +5,75 @@
 
 ---
 
+## 2026-04-12 — UI/UX pass: design system + hero-first Home (Claude Code)
+
+**Goal:** Turn Home from a generic vertical list of cards into a real
+dashboard. Apply the same design language to Check-in and Money Event.
+Remove the behavioural-UX foot-gun of showing a red 0% to a brand new
+user who hasn't set an income target yet.
+
+**Added:**
+- `Views/DesignSystem.swift` — shared tokens (`DS.cardRadius`,
+  `DS.hPadding`, `DS.sectionGap`), a reusable `Card` container,
+  `PrimaryButtonStyle`, `SecondaryButtonStyle`, and `SectionHeader`
+  with an optional trailing action. Every view now uses these so
+  spacing + corners + button sizing are consistent.
+
+**HomeView redesign:**
+- Greeting header: "Good morning/afternoon/evening" + full date
+  ("Sunday, 12 April"). Gear icon retained but greyed out (settings
+  is out of beta scope).
+- Hero check-in card — tappable full-width card that shows either
+  the next question teaser ("Tap to check in") or, if already done,
+  a "You showed up. See you tomorrow." + tone chip.
+- Stats row — streak and alignment as side-by-side compact cards.
+- **Alignment card is now context-aware**: if `incomeTarget == 0`
+  it shows "Set target" as a call-to-action in blue (tap opens an
+  income target editor alert) instead of a red 0%. This fixes the
+  "no red without context" rule for brand-new users.
+- `contentTransition(.numericText())` on streak + alignment so
+  numbers animate when they change.
+- "Log money event" is now a real full-width secondary button with
+  a plus icon, not a text link.
+- Recent activity section has a proper empty state card with a
+  tray icon + nudge copy.
+- "This month" → small inline chevron link at the bottom.
+- `.sensoryFeedback(.success, trigger: isCheckedInToday)` for haptics
+  on state change.
+
+**CheckInView redesign:**
+- Bigger typography on the question text, bias name in blue.
+- "Why this matters" disclosure moved into the card, with a
+  lightbulb icon. Still collapsed by default.
+- Response field now has its own labelled sub-card.
+- Tone picker: larger tap targets, spring animation on selection,
+  selected state uses a blue border + tinted fill.
+- Close affordance is a circular `xmark` button instead of a
+  text "Close" toolbar item.
+- Completion screen: big green circle + checkmark, "Nice work"
+  headline, streak pill, `.sensoryFeedback(.success)`.
+
+**MoneyEventView redesign:**
+- Dropped `Form` for a scroll-view + custom cards layout.
+- Amount hero card: huge rounded-display numeric input with a
+  leading currency symbol.
+- Type selector: 3 big cards with spring animation, same pattern as
+  tone picker.
+- Category pills: filled blue capsule for the selected state.
+- Save button: full-width primary button with a checkmark icon.
+- Haptic feedback on type + category selection.
+
+**HomeViewModel:**
+- Added `incomeTarget`, `isTargetSet`, `greeting`, `todayLabel`,
+  `nextQuestionTeaser`, and a `saveTarget(_:)` async action for the
+  alignment CTA.
+- `alignmentColor` returns `.secondary` (not red) when no target
+  is set.
+- `alignmentReassurance` returns "Set a target to start tracking."
+  when no target is set.
+
+---
+
 ## 2026-04-12 — Fix blank white screen at launch (Claude Code)
 
 **Problem:** App built and ran on iPhone 17 / iOS 26.2 simulator but
