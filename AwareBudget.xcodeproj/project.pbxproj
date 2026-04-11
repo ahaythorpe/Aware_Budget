@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		28BA621F2F8AEB76006A2426 /* AwareBudget */ = {
+		28BA622B2F8AEB78006A2426 /* AwareBudget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AwareBudget;
 			sourceTree = "<group>";
@@ -32,7 +32,7 @@
 		28BA62142F8AEB76006A2426 = {
 			isa = PBXGroup;
 			children = (
-				28BA621F2F8AEB76006A2426 /* AwareBudget */,
+				28BA622B2F8AEB78006A2426 /* AwareBudget */,
 				28BA621E2F8AEB76006A2426 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,7 +61,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				28BA621F2F8AEB76006A2426 /* AwareBudget */,
+				28BA622B2F8AEB78006A2426 /* AwareBudget */,
 			);
 			name = AwareBudget;
 			packageProductDependencies = (
