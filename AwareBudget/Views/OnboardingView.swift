@@ -37,8 +37,11 @@ struct OnboardingView: View {
                         .font(.headline)
                     TextField("Email", text: $email)
                         .textContentType(.emailAddress)
+                        .autocorrectionDisabled(true)
+                    #if !os(macOS)
                         .keyboardType(.emailAddress)
-                        .autocapitalization(.none)
+                        .textInputAutocapitalization(.never)
+                    #endif
                         .textFieldStyle(.roundedBorder)
                     SecureField("Password", text: $password)
                         .textContentType(.newPassword)

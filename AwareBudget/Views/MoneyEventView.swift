@@ -8,7 +8,9 @@ struct MoneyEventView: View {
         Form {
             Section("Amount") {
                 TextField("0.00", text: $viewModel.amountText)
+                #if !os(macOS)
                     .keyboardType(.decimalPad)
+                #endif
                     .font(.title2.weight(.semibold))
             }
 

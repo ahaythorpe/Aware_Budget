@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-04-12 — Fix iOS-only build errors (Claude Code)
+
+**Problem:** Xcode showed 4 build errors in `OnboardingView.swift`:
+`keyboardType`, `autocapitalization(.none)`, and a cascading
+`.roundedBorder` "cannot infer base" error. Root cause: the target's
+`SUPPORTED_PLATFORMS` was `"iphoneos iphonesimulator macosx xros xrsimulator"`
+(Xcode 26 multi-platform default), so the compiler was also resolving
+each TextField chain against macOS, where `keyboardType` and
+`autocapitalization` don't exist.
+
+**Fix:**
+- Scoped the project to iOS only in `project.pbxproj`:
+  `SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"`,
+  `SDKROOT = iphoneos`, `TARGETED_DEVICE_FAMILY = "1,2"` (iPhone + iPad,
+  dropped Mac Catalyst / visionOS). The PRD is iOS-only so nothing is
+  lost.
+- Defensive `#if !os(macOS)` guards around `.keyboardType` and
+  `.textInputAutocapitalization` in `OnboardingView`, `MoneyEventView`,
+  and `MonthView`. Replaced the deprecated `.autocapitalization(.none)`
+  with `.textInputAutocapitalization(.never)` + `.autocorrectionDisabled(true)`.
+
+---
+
 ## 2026-04-12 — Supabase project initialised and schema pushed (Claude Code)
 
 **Ran:**

@@ -68,7 +68,10 @@ struct MonthView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .alert("Income target", isPresented: $isEditingTarget) {
-            TextField("Amount", text: $targetText).keyboardType(.decimalPad)
+            TextField("Amount", text: $targetText)
+            #if !os(macOS)
+                .keyboardType(.decimalPad)
+            #endif
             Button("Save") {
                 Task {
                     let value = Double(targetText.replacingOccurrences(of: ",", with: ".")) ?? 0
