@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — Supabase LIVE. CheckInView rebuilt with swipe YES/NO + ±15° rotation + green/coral overlays + white opacity tone picker. InsightFeedView rebuilt with native Charts: 6-week unplanned bar chart, horizontal bias frequency bars, planned/unplanned donut. Nudge asset wired from images/Nudge_Asset.png. All hero cards use gradient. Build succeeds.
+**Current phase:** PRD v1.1 — Supabase LIVE. Text polish pass applied: premium Apple-style copy across HomeView, CheckInView, InsightFeedView, LearnView. No exclamation marks, sentence case, calm empty states, verb+noun buttons. All hero cards use gradient. Build succeeds.
 
 ---
 

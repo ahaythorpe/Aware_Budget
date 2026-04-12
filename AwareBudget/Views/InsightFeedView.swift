@@ -73,7 +73,7 @@ struct InsightFeedView: View {
                     .tracking(1.2)
 
                 if weekEvents.isEmpty {
-                    Text("Start logging to see your impact")
+                    Text("Log events to see your weekly trends")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(.white)
                 } else {
@@ -138,7 +138,7 @@ struct InsightFeedView: View {
             let weeklyData = computeWeeklyUnplanned()
 
             if weeklyData.isEmpty {
-                emptyCard(message: "Log events to see your unplanned spend trend.")
+                emptyCard(message: "Log a money event to see your patterns.")
             } else {
                 Chart(weeklyData) { item in
                     BarMark(
@@ -189,7 +189,7 @@ struct InsightFeedView: View {
             let patterns = computeBiasPatterns()
 
             if patterns.isEmpty {
-                emptyCard(message: "Complete check-ins and log events to discover your patterns.")
+                emptyCard(message: "Check in and log events to see bias patterns.")
             } else {
                 Chart(patterns) { item in
                     BarMark(
@@ -245,7 +245,7 @@ struct InsightFeedView: View {
             let unplannedPct = total > 0 ? Int((unplanned / total) * 100) : 0
 
             if allEvents.isEmpty {
-                emptyCard(message: "Log events to see your planned vs unplanned ratio.")
+                emptyCard(message: "Log events to see your planned vs unplanned split.")
             } else {
                 let slices: [DonutSlice] = [
                     DonutSlice(label: "Planned", value: planned, color: DS.positive),
@@ -455,7 +455,7 @@ struct InsightFeedView: View {
         let unplannedPct = total > 0 ? Int((unplanned / total) * 100) : 0
 
         if weekEvents.isEmpty {
-            return .text("No events this week yet. Nudge is patient. Mostly.")
+            return .text("No events this week yet. The data builds when you do.")
         }
 
         let patterns = computeBiasPatterns()
@@ -475,7 +475,7 @@ struct InsightFeedView: View {
             return .text("Only \(unplannedPct)% unplanned this week. Future you is winning.")
         }
 
-        return .text("\(weekEvents.count) events logged this week. The data is building. Nudge is watching.")
+        return .text("\(weekEvents.count) events logged this week. The picture is forming.")
     }
 }
 

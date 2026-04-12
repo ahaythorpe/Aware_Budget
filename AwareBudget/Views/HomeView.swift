@@ -125,30 +125,30 @@ struct HomeView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
                             .foregroundStyle(DS.paleGreen)
-                        Text("Checked in today")
+                        Text("Done for today")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.white.opacity(0.75))
                             .textCase(.uppercase)
                             .tracking(0.8)
                     }
-                    Text("You showed up. See you tomorrow.")
+                    Text("You showed up. Back tomorrow.")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                     HStack(spacing: 6) {
                         Text(tone.emoji)
-                        Text("Today's tone \u{00B7} \(tone.label)")
+                        Text("Tone \u{00B7} \(tone.label)")
                             .font(.subheadline)
                             .foregroundStyle(.white.opacity(0.7))
                     }
                 } else {
-                    Text(viewModel.nextQuestionTeaser ?? "One question. 60 seconds.")
+                    Text(viewModel.nextQuestionTeaser ?? "Today's check-in")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("Start check-in \u{2192}")
+                    Text("Start check-in")
                         .font(.system(size: 13, weight: .bold))
                         .goldButtonStyle()
                 }
@@ -236,7 +236,7 @@ struct HomeView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "plus.circle.fill")
-                Text("Log money event")
+                Text("Log event")
             }
         }
         .buttonStyle(SecondaryButtonStyle())
@@ -254,10 +254,10 @@ struct HomeView: View {
                         .font(.title3)
                         .foregroundStyle(DS.textTertiary)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Nothing logged yet")
+                        Text("No events logged yet")
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(DS.textPrimary)
-                        Text("Tap above to log your first event.")
+                        Text("Tap below to log your first event.")
                             .font(.caption)
                             .foregroundStyle(DS.textSecondary)
                     }

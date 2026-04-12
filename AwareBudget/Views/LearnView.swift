@@ -66,10 +66,10 @@ struct LearnView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Understanding your money mind")
+            Text("Your money mind")
                 .font(.title3.weight(.bold))
                 .foregroundStyle(DS.textPrimary)
-            Text("Swipe through biases. Learn one. Notice it tomorrow.")
+            Text("Swipe to explore. Learn one, notice it tomorrow.")
                 .font(.caption)
                 .foregroundStyle(DS.textSecondary)
         }
@@ -253,7 +253,7 @@ struct LearnView: View {
 
                 // Gold CTA pinned to bottom
                 NavigationLink(value: lesson) {
-                    Text("How to counter it \u{2192}")
+                    Text("See pattern")
                         .font(.system(size: 12, weight: .bold))
                         .goldButtonStyle()
                 }
@@ -310,7 +310,7 @@ struct LearnView: View {
             Image(systemName: "sparkles")
                 .font(.largeTitle)
                 .foregroundStyle(DS.textTertiary)
-            Text("No biases in this category yet")
+            Text("No biases in this category")
                 .font(.subheadline)
                 .foregroundStyle(DS.textSecondary)
         }

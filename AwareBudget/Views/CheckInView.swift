@@ -324,7 +324,7 @@ struct CheckInView: View {
     private var followUpCard: some View {
         VStack(spacing: 24) {
             VStack(spacing: 8) {
-                Text("Tell me more")
+                Text("Follow up")
                     .font(.title2.weight(.bold))
                     .foregroundStyle(DS.textPrimary)
                 if currentIndex > 0, currentIndex - 1 < questions.count {
@@ -354,10 +354,10 @@ struct CheckInView: View {
     private var driverPickView: some View {
         VStack(spacing: 28) {
             VStack(spacing: 8) {
-                Text("What drove this?")
+                Text("What drove this")
                     .font(.title2.weight(.bold))
                     .foregroundStyle(DS.textPrimary)
-                Text("No wrong answers. Just noticing.")
+                Text("No wrong answers. Just noticing")
                     .font(.subheadline)
                     .foregroundStyle(DS.textSecondary)
             }
@@ -438,10 +438,10 @@ struct CheckInView: View {
             .sensoryFeedback(.success, trigger: phase == .done)
 
             VStack(spacing: 6) {
-                Text("Nice work")
+                Text("Done")
                     .font(.title.weight(.bold))
                     .foregroundStyle(DS.textPrimary)
-                Text("\(attemptedCount) question\(attemptedCount == 1 ? "" : "s") reflected on today.")
+                Text("\(attemptedCount) question\(attemptedCount == 1 ? "" : "s") reflected on")
                     .font(.subheadline)
                     .foregroundStyle(DS.textSecondary)
                     .multilineTextAlignment(.center)
