@@ -5,6 +5,40 @@
 
 ---
 
+## 2026-04-12 — Spending driver tags: post-check-in behaviour tagging (Claude Code)
+
+**Goal:** Track *why* decisions happen, not just *what*. After each
+check-in, ask "What drove this?" and let the user tag the behavioural
+driver. This is the foundation for weekly pattern-awareness insights
+("Most of your spending comes from convenience, not necessity").
+
+**Added:**
+- `CheckIn.SpendingDriver` enum (6 cases): Present Bias ("I want
+  this now"), Social ("Others are doing it"), Reward ("I deserve
+  this"), Convenience ("This is easier"), Identity ("This reflects
+  who I am"), Friction Avoidance ("Too hard to change"). Each has
+  rawValue, label, shortDescription, emoji.
+- `spending_driver` optional field on `CheckIn` model with
+  `CodingKey` mapping to `spending_driver`.
+- Migration `20260412150000_add_spending_driver.sql`: nullable
+  `spending_driver` text column with CHECK constraint on
+  `daily_checkins`.
+
+**CheckInView changes:**
+- 3-phase flow: `questions` → `driverPick` → `done`.
+- After all question cards are swiped, transitions to a "What drove
+  this?" screen with 2x3 `LazyVGrid` of pill-style driver buttons.
+  Each pill: emoji + label + one-line description. Single-select,
+  optional skip. Tone: "No wrong answers. Just noticing."
+- Continue/Skip button advances to completion. Completion view now
+  shows selected driver chip if one was picked.
+- `NotificationService.scheduleDailyReminder()` fires on Continue/
+  Skip (moved from advance() to the driverPick → done transition).
+
+**Build:** `** BUILD SUCCEEDED **` (clean build, iPhone 17 / iOS 26.2).
+
+---
+
 ## 2026-04-12 — Beta shell: 4-tab root, StreakRing HomeView, CheckInView swipe (Claude Code)
 
 **Goal:** Close out the beta shell so the app reads as a real product.

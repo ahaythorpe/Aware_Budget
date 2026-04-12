@@ -4,6 +4,8 @@ struct CheckInView: View {
     @Environment(\.dismiss) private var dismiss
     var selectedTab: Binding<RootTab>? = nil
 
+    // MARK: - State
+
     @State private var questions: [Question] = []
     @State private var currentIndex = 0
     @State private var attemptedCount = 0
@@ -12,7 +14,16 @@ struct CheckInView: View {
     @State private var response: String = ""
     @State private var showWhy: Bool = false
     @State private var selectedTone: CheckIn.EmotionalTone? = nil
-    @State private var finished: Bool = false
+
+    // Flow phases: questions → driverPick → done
+    @State private var phase: Phase = .questions
+    @State private var selectedDriver: CheckIn.SpendingDriver? = nil
+
+    private enum Phase {
+        case questions, driverPick, done
+    }
+
+    // MARK: - Colours
 
     private let frontBg  = Color(red: 45/255,  green: 27/255,  blue: 105/255) // #2D1B69
     private let middleBg = Color(red: 61/255,  green: 43/255,  blue: 133/255) // #3D2B85
@@ -22,6 +33,8 @@ struct CheckInView: View {
     private let swipeThreshold: CGFloat = 80
     private let cardCornerRadius: CGFloat = 28
     private let cardHeight: CGFloat = 560
+
+    // MARK: - Body
 
     var body: some View {
         ZStack {
@@ -34,17 +47,24 @@ struct CheckInView: View {
 
                 Spacer(minLength: 0)
 
-                if finished {
+                switch phase {
+                case .questions:
+                    if questions.isEmpty {
+                        ProgressView()
+                    } else {
+                        cardStack
+                    }
+                case .driverPick:
+                    driverPickView
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                case .done:
                     completionView
-                } else if questions.isEmpty {
-                    ProgressView()
-                } else {
-                    cardStack
+                        .transition(.opacity)
                 }
 
                 Spacer(minLength: 0)
 
-                if !finished && !questions.isEmpty {
+                if phase == .questions && !questions.isEmpty {
                     swipeHints
                         .padding(.horizontal, DS.hPadding)
                         .padding(.bottom, 24)
@@ -76,7 +96,7 @@ struct CheckInView: View {
         }
     }
 
-    // MARK: - Progress dots (one per question attempted today)
+    // MARK: - Progress dots
 
     private var progressDots: some View {
         HStack(spacing: 8) {
@@ -146,7 +166,6 @@ struct CheckInView: View {
 
     private func frontContent(for q: Question) -> some View {
         VStack(alignment: .leading, spacing: 18) {
-            // 1. Bias pill (gold)
             HStack(spacing: 6) {
                 Text(q.biasName)
                     .font(.footnote.weight(.semibold))
@@ -160,21 +179,18 @@ struct CheckInView: View {
             .padding(.vertical, 8)
             .background(gold.opacity(0.12), in: Capsule())
 
-            // 2. Question text
             Text(q.question)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // 3. Optional response field
-            TextField("", text: $response, prompt: Text("Optional response…").foregroundColor(.white.opacity(0.4)), axis: .vertical)
+            TextField("", text: $response, prompt: Text("Optional response...").foregroundColor(.white.opacity(0.4)), axis: .vertical)
                 .font(.subheadline)
                 .foregroundStyle(.white)
                 .lineLimit(2, reservesSpace: true)
                 .padding(12)
                 .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-            // 4. Why toggle (collapsed by default, chevron rotates)
             Button {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     showWhy.toggle()
@@ -202,7 +218,6 @@ struct CheckInView: View {
 
             Spacer(minLength: 0)
 
-            // 5. Tone picker (3 equal buttons, all optional)
             HStack(spacing: 10) {
                 ForEach(CheckIn.EmotionalTone.allCases) { tone in
                     toneButton(tone)
@@ -243,14 +258,89 @@ struct CheckInView: View {
 
     private var swipeHints: some View {
         HStack {
-            Text("skip →")
+            Text("skip \u{2192}")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
             Spacer()
-            Text("↑ complete")
+            Text("\u{2191} complete")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
         }
+    }
+
+    // MARK: - Driver pick ("What drove this?")
+
+    private var driverPickView: some View {
+        VStack(spacing: 28) {
+            VStack(spacing: 8) {
+                Text("What drove this?")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(DS.deepPurple)
+                Text("No wrong answers. Just noticing.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            // 2x3 grid of driver pills
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                ForEach(CheckIn.SpendingDriver.allCases) { driver in
+                    driverPill(driver)
+                }
+            }
+            .padding(.horizontal, DS.hPadding)
+
+            VStack(spacing: 12) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        phase = .done
+                    }
+                    NotificationService.scheduleDailyReminder()
+                } label: {
+                    Text(selectedDriver != nil ? "Continue" : "Skip")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(DS.deepPurple, in: RoundedRectangle(cornerRadius: DS.buttonRadius, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, DS.hPadding)
+            }
+        }
+        .padding(.top, 20)
+    }
+
+    private func driverPill(_ driver: CheckIn.SpendingDriver) -> some View {
+        let isSelected = selectedDriver == driver
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                selectedDriver = isSelected ? nil : driver
+            }
+        } label: {
+            VStack(spacing: 8) {
+                Text(driver.emoji)
+                    .font(.system(size: 28))
+                Text(driver.label)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(isSelected ? DS.deepPurple : .primary)
+                Text(driver.shortDescription)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .padding(.horizontal, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(isSelected ? DS.accent.opacity(0.12) : Color(.secondarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(isSelected ? DS.accent : .clear, lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Completion
@@ -265,7 +355,7 @@ struct CheckInView: View {
                     .font(.system(size: 56, weight: .bold))
                     .foregroundStyle(.green)
             }
-            .sensoryFeedback(.success, trigger: finished)
+            .sensoryFeedback(.success, trigger: phase == .done)
 
             VStack(spacing: 6) {
                 Text("Nice work")
@@ -274,6 +364,13 @@ struct CheckInView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+
+                if let driver = selectedDriver {
+                    Text("Driver: \(driver.emoji) \(driver.label)")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(DS.accent)
+                        .padding(.top, 4)
+                }
             }
 
             Button("Done") {
@@ -319,9 +416,8 @@ struct CheckInView: View {
         dragOffset = .zero
         if currentIndex >= questions.count {
             withAnimation(.easeInOut(duration: 0.3)) {
-                finished = true
+                phase = .driverPick
             }
-            NotificationService.scheduleDailyReminder()
         }
     }
 }

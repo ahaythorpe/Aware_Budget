@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — 4-tab root live, HomeView rebuilt with StreakRingView + brand palette, CheckInView + LearnView + BiasDetailView swipe stacks compile clean. Supabase live wiring blocked on Xcode package add.
+**Current phase:** PRD v1.1 — 4-tab root live, HomeView rebuilt with StreakRingView + brand palette, CheckInView swipe stack + post-check-in spending driver tags, LearnView + BiasDetailView compile clean. Supabase live wiring blocked on Xcode package add.
 
 ---
 
@@ -61,11 +61,24 @@
   TextField, "Why this matters" toggle with rotating chevron collapsed
   by default, tone picker 😌/😐/😟 (all optional). Progress dots at
   top (gold, one per attempted question). Swipe hints at edges.
-  Completion view: green circle + checkmark + "Nice work" + Done
-  button. Mock data from `QuestionPool.seed.shuffled().prefix(5)` —
+  After all cards: transitions to **spending driver pick** screen —
+  "What drove this?" with 2x3 grid of pill-style `SpendingDriver`
+  tags (Present Bias / Social / Reward / Convenience / Identity /
+  Friction). Single-select, optional skip. Tone: "curious, not
+  corrective". Continue/Skip button advances to completion view.
+  Completion view: green circle + checkmark + "Nice work" + selected
+  driver chip (if any) + Done button.
+  Mock data from `QuestionPool.seed.shuffled().prefix(5)` —
   no Supabase yet. Accepts optional `selectedTab: Binding<RootTab>?`
   to integrate with root tab bar (hides xmark when embedded). On
   completion, schedules `NotificationService.scheduleDailyReminder()`.
+  `CheckIn.SpendingDriver` enum added to `CheckIn.swift`: 6 cases
+  with rawValue matching the `spending_driver` DB column
+  (`present_bias`, `social`, `emotional`, `convenience`, `identity`,
+  `friction_avoid`). Each case has label, shortDescription, emoji.
+  Migration `20260412150000_add_spending_driver.sql` adds nullable
+  `spending_driver` text column with CHECK constraint to
+  `daily_checkins`.
 - `LearnView.swift` — **NEW** PRD v1.1 swipe card deck. Header
   "Understanding your money mind", horizontal-scroll filter pill row
   (All + 7 categories with static `categoryColour(for:)` returning
