@@ -19,6 +19,10 @@ struct CheckInView: View {
     @State private var nudgeCompletionMessage: NudgeMessage?
     @State private var showFollowUp: Bool = false
     @State private var lastAnswerWasYes: Bool = false
+    @State private var savedStreak: Int = 0
+    @State private var isSaving = false
+
+    private let service = SupabaseService.shared
 
     private enum Phase {
         case questions, driverPick, done
@@ -66,12 +70,6 @@ struct CheckInView: View {
                 }
 
                 Spacer(minLength: 0)
-
-                if phase == .questions && !questions.isEmpty {
-                    swipeHints
-                        .padding(.horizontal, DS.hPadding)
-                        .padding(.bottom, 24)
-                }
             }
         }
         .navigationTitle("Daily check-in")
@@ -94,7 +92,7 @@ struct CheckInView: View {
         }
         .task {
             if questions.isEmpty {
-                questions = Array(QuestionPool.seed.shuffled().prefix(5))
+                await loadQuestions()
             }
         }
     }
@@ -138,7 +136,7 @@ struct CheckInView: View {
                 yesNoOverlays
             }
             .offset(dragOffset)
-            .rotationEffect(.degrees(Double(dragOffset.width / (UIScreen.main.bounds.width / 2)) * maxRotation))
+            .rotationEffect(.degrees(Double(dragOffset.width) / 20))
             .gesture(
                 DragGesture()
                     .onChanged { value in
@@ -268,54 +266,44 @@ struct CheckInView: View {
 
             Spacer(minLength: 0)
 
-            // Tone picker — white opacity buttons, NOT yellow squares
-            HStack(spacing: 10) {
-                ForEach(CheckIn.EmotionalTone.allCases) { tone in
-                    toneButton(tone)
+            // YES / NO buttons inside card
+            HStack(spacing: 12) {
+                Button {
+                    swipeNo()
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("\u{2715}")
+                        Text("No")
+                    }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(DS.warning)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(Color.white.opacity(0.15))
+                    )
                 }
-            }
-        }
-    }
+                .buttonStyle(.plain)
 
-    private func toneButton(_ tone: CheckIn.EmotionalTone) -> some View {
-        let selected = selectedTone == tone
-        return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedTone = selected ? nil : tone
+                Button {
+                    swipeYes()
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("Yes")
+                        Text("\u{2713}")
+                    }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Color(hex: "1B3A00"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(DS.nuggetGold)
+                    )
+                }
+                .buttonStyle(.plain)
             }
-        } label: {
-            VStack(spacing: 6) {
-                Text(tone.emoji)
-                    .font(.system(size: 28))
-                Text(tone.label)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(selected ? 1.0 : 0.6))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.white.opacity(selected ? 0.20 : 0.08))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.white.opacity(selected ? 0.5 : 0.0), lineWidth: 1.5)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Swipe hints
-
-    private var swipeHints: some View {
-        HStack {
-            Text("\u{2190} No")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(DS.warning)
-            Spacer()
-            Text("Yes \u{2192}")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(DS.positive)
         }
     }
 
@@ -370,20 +358,20 @@ struct CheckInView: View {
             .padding(.horizontal, DS.hPadding)
 
             Button {
-                nudgeCompletionMessage = NudgeEngine.checkInResponse(
-                    streakDays: attemptedCount,
-                    questionsReflected: attemptedCount,
-                    driver: selectedDriver,
-                    emotionalTone: selectedTone
-                )
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    phase = .done
-                }
-                NotificationService.scheduleDailyReminder()
+                guard !isSaving else { return }
+                Task { await saveCheckIn() }
             } label: {
-                Text(selectedDriver != nil ? "Continue" : "Skip")
-                    .font(.system(size: 13, weight: .bold))
-                    .goldButtonStyle()
+                if isSaving {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(Color(hex: "3A2000"))
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 11)
+                } else {
+                    Text(selectedDriver != nil ? "Continue" : "Skip")
+                        .font(.system(size: 13, weight: .bold))
+                        .goldButtonStyle()
+                }
             }
             .buttonStyle(.plain)
         }
@@ -438,7 +426,7 @@ struct CheckInView: View {
             .sensoryFeedback(.success, trigger: phase == .done)
 
             VStack(spacing: 6) {
-                Text("Done")
+                Text("Day \(savedStreak)")
                     .font(.title.weight(.bold))
                     .foregroundStyle(DS.textPrimary)
                 Text("\(attemptedCount) question\(attemptedCount == 1 ? "" : "s") reflected on")
@@ -470,6 +458,80 @@ struct CheckInView: View {
             .padding(.top, 8)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Load questions from Supabase (fallback to local mock)
+
+    private func loadQuestions() async {
+        do {
+            var fetched: [Question] = []
+            for _ in 0..<5 {
+                let q = try await service.fetchNextQuestion()
+                if !fetched.contains(where: { $0.id == q.id }) {
+                    fetched.append(q)
+                }
+            }
+            questions = fetched.isEmpty ? Array(QuestionPool.seed.shuffled().prefix(5)) : fetched
+        } catch {
+            questions = Array(QuestionPool.seed.shuffled().prefix(5))
+        }
+    }
+
+    // MARK: - Save check-in to Supabase
+
+    private func saveCheckIn() async {
+        isSaving = true
+        defer { isSaving = false }
+
+        guard let uid = await service.currentUserId else { return }
+
+        // Compute streak
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+        let yesterdayCheckIn = try? await service.fetchCheckIn(on: yesterday)
+        let streak = (yesterdayCheckIn?.streakCount ?? 0) + 1
+
+        // Compute alignment
+        let now = Date()
+        let month = try? await service.fetchOrCreateBudgetMonth(for: now)
+        let events = try? await service.fetchMoneyEvents(forMonth: now)
+        let unplanned = (events ?? [])
+            .filter { $0.plannedStatus.isUnplanned }
+            .reduce(0.0) { $0 + $1.amount }
+        let target = month?.incomeTarget ?? 0
+        let alignment = target > 0 ? max(0, min(100, (1 - unplanned / target) * 100)) : 0
+
+        let checkIn = CheckIn(
+            id: UUID(),
+            userId: uid,
+            date: Date(),
+            questionId: questions.first?.id,
+            response: nil,
+            emotionalTone: .neutral,
+            spendingDriver: selectedDriver,
+            streakCount: streak,
+            alignmentPct: alignment,
+            createdAt: Date()
+        )
+
+        do {
+            try await service.saveCheckIn(checkIn)
+        } catch {
+            // Continue to completion even if save fails
+        }
+
+        savedStreak = streak
+
+        nudgeCompletionMessage = NudgeEngine.checkInResponse(
+            streakDays: streak,
+            questionsReflected: attemptedCount,
+            driver: selectedDriver,
+            emotionalTone: nil
+        )
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            phase = .done
+        }
+        NotificationService.scheduleDailyReminder()
     }
 
     // MARK: - Swipe actions

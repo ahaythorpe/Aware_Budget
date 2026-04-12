@@ -5,6 +5,7 @@ struct HomeView: View {
     @State private var showMoneyEvent = false
     @State private var showTargetEditor = false
     @State private var targetInput = ""
+    @State private var isLoadingDemo = false
 
     var selectedTab: Binding<RootTab>? = nil
 
@@ -41,6 +42,7 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: DS.sectionGap) {
                 greetingHeader
+                demoDataLink
                 if let msg = viewModel.nudgeMessage {
                     NudgeCardView(
                         message: msg,
@@ -163,18 +165,66 @@ struct HomeView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Streak ring
+    // MARK: - Streak ring (or welcome empty state)
 
     private var streakSection: some View {
-        VStack(spacing: 4) {
-            StreakRingView(streak: viewModel.streak, weekDots: viewModel.weekDots)
-                .padding(.vertical, 20)
-            Text(viewModel.streakMessage)
-                .font(.footnote)
-                .foregroundStyle(DS.textSecondary)
+        Group {
+            if viewModel.streak == 0 && !viewModel.isCheckedInToday {
+                welcomeEmptyState
+            } else {
+                VStack(spacing: 4) {
+                    StreakRingView(streak: viewModel.streak, weekDots: viewModel.weekDots)
+                        .padding(.vertical, 20)
+                    Text(viewModel.streakMessage)
+                        .font(.footnote)
+                        .foregroundStyle(DS.textSecondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .fill(DS.cardBg)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                                .stroke(DS.paleGreen, lineWidth: 0.5)
+                        )
+                )
+            }
         }
+    }
+
+    private var welcomeEmptyState: some View {
+        VStack(spacing: 20) {
+            NudgeAvatar(size: 120)
+
+            VStack(spacing: 8) {
+                Text("Hi, I'm Nudge")
+                    .font(.title.weight(.bold))
+                    .foregroundStyle(DS.textPrimary)
+
+                Text("Ready to understand your money mind?")
+                    .font(.title3)
+                    .foregroundStyle(DS.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+            }
+
+            Button {
+                selectedTab?.wrappedValue = .checkIn
+            } label: {
+                HStack {
+                    Spacer()
+                    Text("Start your first check-in")
+                        .font(.headline.weight(.bold))
+                    Spacer()
+                }
+                .goldButtonStyle()
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, DS.hPadding)
+        }
+        .padding(.vertical, 32)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
                 .fill(DS.cardBg)
@@ -281,6 +331,34 @@ struct HomeView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Demo data (hidden dev link)
+
+    private var demoDataLink: some View {
+        Button {
+            guard !isLoadingDemo else { return }
+            isLoadingDemo = true
+            Task {
+                do {
+                    try await DemoDataService.seed()
+                    await viewModel.load()
+                } catch {
+                    viewModel.errorMessage = error.localizedDescription
+                }
+                isLoadingDemo = false
+            }
+        } label: {
+            if isLoadingDemo {
+                ProgressView()
+                    .controlSize(.small)
+            } else {
+                Text("Load demo data \u{2192}")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(DS.accent)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private func eventRow(_ event: MoneyEvent) -> some View {

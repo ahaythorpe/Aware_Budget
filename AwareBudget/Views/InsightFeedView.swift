@@ -6,31 +6,75 @@ struct InsightFeedView: View {
     @State private var allEvents: [MoneyEvent] = []
     @State private var recentCheckIns: [CheckIn] = []
     @State private var isLoading = false
+    @State private var showMoneyEvent = false
 
     private let service = SupabaseService.shared
     private let borderColor = Color(hex: "4CAF50").opacity(0.15)
+
+    private var hasNoData: Bool {
+        allEvents.isEmpty && recentCheckIns.isEmpty && !isLoading
+    }
 
     var body: some View {
         ZStack {
             Color(hex: "F5F7F5").ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: DS.sectionGap) {
-                    weeklyHeroCard
-                    unplannedBarChartSection
-                    biasFrequencySection
-                    donutChartSection
-                    nudgeInsightCard
+            if hasNoData {
+                insightsEmptyState
+            } else {
+                ScrollView {
+                    VStack(spacing: DS.sectionGap) {
+                        weeklyHeroCard
+                        unplannedBarChartSection
+                        biasFrequencySection
+                        donutChartSection
+                        nudgeInsightCard
+                    }
+                    .padding(.horizontal, DS.hPadding)
+                    .padding(.top, 8)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, DS.hPadding)
-                .padding(.top, 8)
-                .padding(.bottom, 40)
             }
         }
         .navigationTitle("Insights")
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .refreshable { await load() }
+        .sheet(isPresented: $showMoneyEvent, onDismiss: {
+            Task { await load() }
+        }) {
+            NavigationStack { MoneyEventView() }
+        }
+    }
+
+    // MARK: - Full-page empty state
+
+    private var insightsEmptyState: some View {
+        VStack(spacing: 20) {
+            Spacer()
+            NudgeAvatar(size: 64)
+
+            Text("Your insights appear here after you log a few events")
+                .font(.subheadline)
+                .foregroundStyle(DS.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            Text("Nudge tracks patterns, not perfection")
+                .font(.caption)
+                .foregroundStyle(DS.textTertiary)
+
+            Button {
+                showMoneyEvent = true
+            } label: {
+                Text("Log your first event")
+                    .font(.headline)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .padding(.horizontal, DS.hPadding)
+            .padding(.top, 8)
+            Spacer()
+        }
     }
 
     // MARK: - Load

@@ -195,11 +195,16 @@ struct LearnView: View {
                 .padding(12)
 
             VStack(spacing: 0) {
-                // Emoji centred
-                Text(lesson.emoji)
-                    .font(.system(size: 52))
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 18)
+                // Emoji in coloured circle
+                ZStack {
+                    Circle()
+                        .fill(Self.categoryColour(for: lesson.category).bg)
+                        .frame(width: 80, height: 80)
+                    Text(lesson.emoji)
+                        .font(.system(size: 40))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 18)
 
                 // Category pill centred
                 categoryPill(lesson.category)

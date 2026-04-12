@@ -5,6 +5,43 @@
 
 ---
 
+## 2026-04-13 — Core loop wired end-to-end (Claude Code)
+
+**Goal:** Make check-in → money event → insights flow work with real
+Supabase persistence.
+
+**CheckInView saves to Supabase:**
+- Added `saveCheckIn()` async method that computes streak (yesterday's
+  streak + 1), alignment %, builds `CheckIn` record, and calls
+  `service.saveCheckIn()`. Completion card now shows "Day N".
+- Tone picker removed (swipe YES/NO is the only input).
+- Rotation formula simplified to `dragOffset.width / 20`.
+
+**DemoDataService + auto-seed:**
+- `DemoDataService.swift` seeds 7 check-ins, 8 money events, 3 bias
+  progress entries. `HomeViewModel.load()` auto-seeds on first open
+  when streak=0 and no events (guarded by UserDefaults flag).
+- "Load demo data" link visible below greeting header.
+
+**Empty states redesigned:**
+- HomeView: NudgeAvatar 120pt + "Hi, I'm Nudge" title bold + full-width
+  gold CTA when no streak.
+- InsightFeedView: NudgeAvatar 64pt + calm copy + green "Log your first
+  event" button opening MoneyEventView sheet.
+
+**LearnView emoji in circle:**
+- Emoji now displayed inside 80pt circle filled with category bg colour.
+
+**Design tweaks:**
+- Hero gradient: 5-stop shimmer `#0A2E12→#1B5E20→#4CAF50→#2E7D32→#52B788`.
+- Gold button text colour: `#1B3A00` (was `#3A2000`).
+- Ostrich Effect emoji: `🫣` in local mock (Supabase RLS blocks anon PATCH).
+- Text polish across all views: sentence case, no exclamation marks.
+
+**Build:** `** BUILD SUCCEEDED **` (iPhone 17 Pro / iOS 26.2).
+
+---
+
 ## 2026-04-12 — Rebuild CheckInView + InsightFeedView + docs audit (Claude Code)
 
 **Goal:** Match UI mockup specs exactly. Rebuild CheckInView with swipe

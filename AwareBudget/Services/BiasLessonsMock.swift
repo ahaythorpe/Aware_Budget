@@ -15,7 +15,7 @@ enum BiasLessonsMock {
             fullExplanation: "The Ostrich Effect describes our tendency to ignore negative financial information. Research by Galai and Sade (2006) showed that investors check portfolios less frequently when markets fall. The irony is that avoidance increases anxiety over time while exposure reduces it.",
             realWorldExample: "You notice your balance is lower than expected so you stop checking your banking app. Three weeks later you are hit with an overdraft fee you could have avoided.",
             howToCounter: "Start with the smallest possible exposure: just open the app. You do not have to do anything — just look. Regular low-stakes exposure reduces the stress response until checking feels normal.",
-            emoji: "🙈",
+            emoji: "🫣",
             sortOrder: 1
         ),
         BiasLesson(

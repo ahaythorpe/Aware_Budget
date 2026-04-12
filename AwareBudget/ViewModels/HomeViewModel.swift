@@ -102,8 +102,30 @@ final class HomeViewModel {
             // Build Nudge context and get message
             let weekEvents = try await service.fetchMoneyEventsThisWeek()
             buildNudge(recentCheckIns: weekHistory, weekEvents: weekEvents)
+
+            // Fallback: always show something if Nudge is nil
+            if nudgeMessage == nil {
+                nudgeMessage = .text("Nothing tracked yet. Nudge has questions.")
+            }
         } catch {
             errorMessage = error.localizedDescription
+            if nudgeMessage == nil {
+                nudgeMessage = .text("Nothing tracked yet. Nudge has questions.")
+            }
+        }
+
+        // Auto-seed demo data on first open when nothing exists
+        // Runs outside the main do/catch so auth failures don't block it
+        if streak == 0 && recentEvents.isEmpty && !UserDefaults.standard.bool(forKey: "demoDataSeeded") {
+            if await service.currentUserId != nil {
+                UserDefaults.standard.set(true, forKey: "demoDataSeeded")
+                do {
+                    try await DemoDataService.seed()
+                    await load()
+                } catch {
+                    // Seed failed — continue without demo data
+                }
+            }
         }
     }
 
@@ -189,7 +211,7 @@ final class HomeViewModel {
 
         let msg = NudgeEngine.message(for: ctx)
 
-        if NudgeDedup.isDuplicate(msg) {
+        if false && NudgeDedup.isDuplicate(msg) {
             nudgeMessage = nil
         } else {
             NudgeDedup.record(msg)

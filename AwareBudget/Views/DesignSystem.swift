@@ -50,10 +50,11 @@ enum DS {
     // Hero gradient (dark green cards)
     static let heroGradient = LinearGradient(
         stops: [
-            .init(color: Color(hex: "1B5E20"), location: 0.0),
-            .init(color: Color(hex: "2E7D32"), location: 0.35),
-            .init(color: Color(hex: "4CAF50"), location: 0.65),
-            .init(color: Color(hex: "388E3C"), location: 1.0),
+            .init(color: Color(hex: "052010"), location: 0.0),
+            .init(color: Color(hex: "1B5E20"), location: 0.2),
+            .init(color: Color(hex: "4CAF50"), location: 0.5),
+            .init(color: Color(hex: "2E7D32"), location: 0.7),
+            .init(color: Color(hex: "81C784"), location: 1.0),
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -83,7 +84,7 @@ enum DS {
 struct GoldButton: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .foregroundStyle(Color(hex: "3A2000"))
+            .foregroundStyle(Color(hex: "1B3A00"))
             .padding(.horizontal, 20)
             .padding(.vertical, 11)
             .background(

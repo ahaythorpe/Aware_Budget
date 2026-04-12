@@ -3,8 +3,8 @@
 > Single source of truth for where the build currently stands.
 > Update this file whenever you finish a unit of work.
 
-**Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — Supabase LIVE. Text polish pass applied: premium Apple-style copy across HomeView, CheckInView, InsightFeedView, LearnView. No exclamation marks, sentence case, calm empty states, verb+noun buttons. All hero cards use gradient. Build succeeds.
+**Last updated:** 2026-04-13
+**Current phase:** PRD v1.1 — Core loop complete. All gold buttons use nugget gradient (no flat fills). Hero gradient 5-stop dramatic (#052010→#81C784). Yes/No buttons inside check-in card (gold + white opacity). Auto-seed runs outside main catch block with auth guard. Build succeeds.
 
 ---
 
