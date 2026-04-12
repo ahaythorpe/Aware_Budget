@@ -46,11 +46,11 @@ final class HomeViewModel {
     }
 
     var alignmentColor: Color {
-        guard isTargetSet else { return .secondary }
+        guard isTargetSet else { return DS.textSecondary }
         switch alignmentPct {
-        case 80...: return .green
-        case 50..<80: return .orange
-        default: return .red
+        case 80...: return DS.positive
+        case 50..<80: return DS.warning
+        default: return DS.warning
         }
     }
 

@@ -30,14 +30,28 @@ enum DS {
     static let hPadding: CGFloat = 16
     static let sectionGap: CGFloat = 20
 
-    // Brand palette (PRD v1.1)
-    static let bg         = Color(hex: "F7F4EF")
-    static let deepPurple = Color(hex: "2D1B69")
-    static let accent     = Color(hex: "7F77DD")
-    static let coral      = Color(hex: "FF7A6B")
-    static let teal       = Color(hex: "006064")
+    // Money green palette
+    static let primary    = Color(hex: "2E7D32")   // hero cards, nav
+    static let accent     = Color(hex: "4CAF50")   // labels, ring, buttons
+    static let lightGreen = Color(hex: "81C784")   // card backs, tints
+    static let paleGreen  = Color(hex: "E8F5E9")   // pills, tab active bg
+    static let bg         = Color(hex: "FAFAF8")   // app background
+    static let cardBg     = Color.white             // card background
 
-    // MARK: - Nugget Gold System
+    // Text
+    static let textPrimary   = Color(hex: "1A2E1A")
+    static let textSecondary = Color(hex: "6B7A6B")
+    static let textTertiary  = Color(hex: "A0B0A0")
+
+    // Semantic
+    static let positive = Color(hex: "4CAF50")
+    static let warning  = Color(hex: "FF7043")
+
+    // Gold
+    static let goldBase = Color(hex: "C59430")
+    static let goldText = Color(hex: "E8B84B")
+
+    // MARK: - Nugget Gold gradient (5 stops)
 
     static let nuggetGold = LinearGradient(
         stops: [
@@ -50,8 +64,6 @@ enum DS {
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
-
-    static let goldText = Color(hex: "E8B84B")
 }
 
 // MARK: - Gold Button modifier
@@ -128,7 +140,7 @@ struct Card<Content: View>: View {
         content()
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(padding)
-            .background(Color(.secondarySystemBackground))
+            .background(DS.cardBg)
             .clipShape(RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous))
     }
 }
@@ -136,7 +148,7 @@ struct Card<Content: View>: View {
 // MARK: - Button styles
 
 struct PrimaryButtonStyle: ButtonStyle {
-    var tint: Color = .blue
+    var tint: Color = DS.primary
     var foreground: Color = .white
 
     func makeBody(configuration: Configuration) -> some View {
@@ -156,12 +168,12 @@ struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.primary)
+            .foregroundStyle(DS.textPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: DS.buttonRadius, style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
+                    .fill(DS.paleGreen)
             )
             .opacity(configuration.isPressed ? 0.85 : 1.0)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
@@ -178,15 +190,15 @@ struct SectionHeader: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(DS.accent)
                 .textCase(.uppercase)
-                .tracking(0.5)
+                .tracking(0.9)
             Spacer()
             if let trailing, let trailingAction {
                 Button(trailing, action: trailingAction)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(DS.accent)
             }
         }
     }

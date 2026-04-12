@@ -44,7 +44,7 @@ struct RootTabView: View {
             }
             .tag(RootTab.month)
         }
-        .tint(DS.accent)
+        .tint(DS.primary)
     }
 }
 

@@ -2,17 +2,13 @@ import SwiftUI
 
 struct BiasDetailView: View {
     let lesson: BiasLesson
-    // Mock: will come from user_bias_progress once Supabase is wired.
     var timesSeen: Int = 0
 
     @Environment(\.dismiss) private var dismiss
 
-    private let deepPurple = Color(red: 0x2D/255.0, green: 0x1B/255.0, blue: 0x69/255.0)
-    private let teal = Color(red: 0x00/255.0, green: 0x60/255.0, blue: 0x64/255.0)
-
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     header
@@ -42,7 +38,7 @@ struct BiasDetailView: View {
                 .font(.system(size: 72))
             Text(lesson.biasName)
                 .font(.largeTitle.weight(.bold))
-                .foregroundStyle(deepPurple)
+                .foregroundStyle(DS.textPrimary)
             categoryPill
         }
     }
@@ -62,24 +58,25 @@ struct BiasDetailView: View {
     private var shortDescription: some View {
         Text(lesson.shortDescription)
             .font(.title3)
-            .foregroundStyle(.primary)
+            .foregroundStyle(DS.textPrimary)
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    // MARK: - Seen row (mock-gated)
+    // MARK: - Seen row
 
     private var seenRow: some View {
         HStack(spacing: 10) {
             Image(systemName: "eye.fill")
-                .foregroundStyle(deepPurple)
+                .foregroundStyle(DS.accent)
             Text("Seen \(timesSeen) time\(timesSeen == 1 ? "" : "s")")
                 .font(.subheadline.weight(.semibold))
+                .foregroundStyle(DS.textPrimary)
             Spacer()
         }
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(deepPurple.opacity(0.08))
+                .fill(DS.paleGreen)
         )
     }
 
@@ -90,27 +87,24 @@ struct BiasDetailView: View {
             SectionHeader(title: "What it is")
             Text(lesson.fullExplanation)
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DS.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    // MARK: - In real life (tinted card)
+    // MARK: - In real life
 
     private var inRealLifeSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("IN REAL LIFE")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(teal)
-                .tracking(0.8)
+            SectionHeader(title: "In real life")
             Text(lesson.realWorldExample)
                 .font(.callout)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DS.textPrimary)
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(teal.opacity(0.08))
+                        .fill(DS.paleGreen)
                 )
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -123,7 +117,13 @@ struct BiasDetailView: View {
             SectionHeader(title: "How to counter it")
             Text(lesson.howToCounter)
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DS.textPrimary)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(DS.paleGreen)
+                )
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

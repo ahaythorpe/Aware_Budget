@@ -17,12 +17,9 @@ struct LearnView: View {
         "Inertia"
     ]
 
-    // Swipe card backgrounds (PRD v1.1 § LearnView swipe card spec)
-    private let frontBorder = Color(red: 0x2D/255.0, green: 0x1B/255.0, blue: 0x69/255.0).opacity(0.25)
-    private let middleBg = Color(red: 0xF0/255.0, green: 0xEE/255.0, blue: 0xF8/255.0)
-    private let backBg = Color(red: 0xE8/255.0, green: 0xE5/255.0, blue: 0xF5/255.0)
-    private let deepPurple = Color(red: 0x2D/255.0, green: 0x1B/255.0, blue: 0x69/255.0)
-    private let teal = Color(red: 0x00/255.0, green: 0x60/255.0, blue: 0x64/255.0)
+    private let frontBorder = DS.accent.opacity(0.25)
+    private let middleBg = Color(hex: "C8E6C9")
+    private let backBg   = Color(hex: "A5D6A7")
 
     private var filteredLessons: [BiasLesson] {
         guard selectedCategory != "All" else { return allLessons }
@@ -31,7 +28,7 @@ struct LearnView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
             VStack(spacing: 20) {
                 header
                 filterPillRow
@@ -70,9 +67,10 @@ struct LearnView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Understanding your money mind")
                 .font(.title2.weight(.bold))
+                .foregroundStyle(DS.textPrimary)
             Text("Swipe through biases. Learn one. Notice it tomorrow.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DS.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, DS.hPadding)
@@ -93,7 +91,6 @@ struct LearnView: View {
 
     private func filterPill(_ cat: String) -> some View {
         let selected = selectedCategory == cat
-        let colours = Self.categoryColour(for: cat)
         return Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedCategory = cat
@@ -104,11 +101,11 @@ struct LearnView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .background(
-                    Capsule().fill(selected ? colours.bg : Color(.secondarySystemBackground))
+                    Capsule().fill(selected ? DS.primary : DS.cardBg)
                 )
-                .foregroundStyle(selected ? colours.text : .primary)
+                .foregroundStyle(selected ? .white : DS.textPrimary)
                 .overlay(
-                    Capsule().stroke(selected ? colours.text.opacity(0.3) : .clear, lineWidth: 1)
+                    Capsule().stroke(selected ? .clear : DS.accent, lineWidth: 0.5)
                 )
         }
         .buttonStyle(.plain)
@@ -118,29 +115,21 @@ struct LearnView: View {
     static func categoryColour(for category: String) -> (bg: Color, text: Color) {
         switch category {
         case "Avoidance":
-            return (Color(red: 0xE1/255.0, green: 0xF5/255.0, blue: 0xEE/255.0),
-                    Color(red: 0x08/255.0, green: 0x50/255.0, blue: 0x41/255.0))
+            return (Color(hex: "E1F5EE"), Color(hex: "085041"))
         case "Decision Making":
-            return (Color(red: 0xEE/255.0, green: 0xED/255.0, blue: 0xFE/255.0),
-                    Color(red: 0x3C/255.0, green: 0x34/255.0, blue: 0x89/255.0))
+            return (Color(hex: "E8F5E9"), Color(hex: "2E7D32"))
         case "Money Psychology":
-            return (Color(red: 0xFA/255.0, green: 0xEE/255.0, blue: 0xDA/255.0),
-                    Color(red: 0x41/255.0, green: 0x24/255.0, blue: 0x02/255.0))
+            return (Color(hex: "FAEEDA"), Color(hex: "412402"))
         case "Time Perception":
-            return (Color(red: 0xF3/255.0, green: 0xE5/255.0, blue: 0xF5/255.0),
-                    Color(red: 0x4A/255.0, green: 0x14/255.0, blue: 0x8C/255.0))
+            return (Color(hex: "F3E5F5"), Color(hex: "4A148C"))
         case "External Influence":
-            return (Color(red: 0xFA/255.0, green: 0xEC/255.0, blue: 0xE7/255.0),
-                    Color(red: 0x4A/255.0, green: 0x1B/255.0, blue: 0x0C/255.0))
+            return (Color(hex: "FAECE7"), Color(hex: "4A1B0C"))
         case "Self Perception":
-            return (Color(red: 0xE0/255.0, green: 0xF7/255.0, blue: 0xFA/255.0),
-                    Color(red: 0x00/255.0, green: 0x60/255.0, blue: 0x64/255.0))
+            return (Color(hex: "E0F7FA"), Color(hex: "006064"))
         case "Inertia":
-            return (Color(red: 0xFB/255.0, green: 0xE9/255.0, blue: 0xE7/255.0),
-                    Color(red: 0xBF/255.0, green: 0x36/255.0, blue: 0x0C/255.0))
+            return (Color(hex: "FBE9E7"), Color(hex: "BF360C"))
         default:
-            return (Color(red: 0xEE/255.0, green: 0xED/255.0, blue: 0xFE/255.0),
-                    Color(red: 0x3C/255.0, green: 0x34/255.0, blue: 0x89/255.0))
+            return (DS.paleGreen, DS.primary)
         }
     }
 
@@ -198,7 +187,7 @@ struct LearnView: View {
     private func frontCard(_ lesson: BiasLesson) -> some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(Color.white)
+                .fill(DS.cardBg)
                 .overlay(
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
                         .stroke(frontBorder, lineWidth: 0.5)
@@ -215,28 +204,28 @@ struct LearnView: View {
 
                 Text(lesson.biasName)
                     .font(.title2.weight(.bold))
-                    .foregroundStyle(deepPurple)
+                    .foregroundStyle(DS.primary)
 
                 Text(lesson.shortDescription)
                     .font(.body)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Divider().padding(.vertical, 2)
 
                 Text("IN REAL LIFE")
                     .font(.caption2.weight(.bold))
-                    .foregroundStyle(teal)
+                    .foregroundStyle(DS.accent)
                     .tracking(0.8)
 
                 Text(lesson.realWorldExample)
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
                     .padding(14)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(teal.opacity(0.08))
+                            .fill(DS.paleGreen)
                     )
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -253,7 +242,7 @@ struct LearnView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 14)
-                    .background(deepPurple, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(DS.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
@@ -271,14 +260,13 @@ struct LearnView: View {
             .foregroundStyle(colours.text)
     }
 
-    // Seen X times badge — mock 0 for now, will use user_bias_progress later.
     private var seenBadge: some View {
         Text("Seen 0 times")
             .font(.caption.weight(.medium))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Capsule().fill(Color(.tertiarySystemBackground)))
-            .foregroundStyle(.secondary)
+            .background(Capsule().fill(DS.paleGreen))
+            .foregroundStyle(DS.textSecondary)
     }
 
     // MARK: - Dot indicator
@@ -293,7 +281,7 @@ struct LearnView: View {
                     }
                 } label: {
                     Circle()
-                        .fill(i == currentIndex ? deepPurple : Color(.tertiarySystemBackground))
+                        .fill(i == currentIndex ? DS.primary : DS.textTertiary.opacity(0.3))
                         .frame(width: 8, height: 8)
                 }
                 .buttonStyle(.plain)
@@ -307,10 +295,10 @@ struct LearnView: View {
         VStack(spacing: 10) {
             Image(systemName: "sparkles")
                 .font(.largeTitle)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(DS.textTertiary)
             Text("No biases in this category yet")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DS.textSecondary)
         }
         .padding(32)
     }

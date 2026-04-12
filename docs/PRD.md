@@ -546,18 +546,45 @@ Request permission after first completed check-in, not on launch.
 
 ## Design
 
-Colours (semantic only):
-- Background: `Color(.systemBackground)`
-- Cards: `Color(.secondarySystemBackground)`
-- Streak: `.orange`
-- Good alignment: `.green`
-- Warning: `.orange`
-- Low: `.red` always with reassurance copy
-- Accent: `.blue`
+### Money Green + Nugget Gold colour system
+
+Primary green (hero cards, nav): `#2E7D32`
+Accent green (labels, ring, buttons): `#4CAF50`
+Light green (card backs, tints): `#81C784`
+Pale green (pills, tab active bg): `#E8F5E9`
+App background: `#FAFAF8`
+Card background: white
+Text primary: `#1A2E1A`
+Text secondary: `#6B7A6B`
+Text tertiary: `#A0B0A0`
+Positive: `#4CAF50`
+Warning: `#FF7043`
+Gold base: `#C59430`
+Gold text: `#E8B84B`
+
+Nugget gold gradient (5 stops, topLeading → bottomTrailing):
+`#FFF0A0` → `#E8B84B` → `#C59430` → `#8B6010` → `#D4A843`
+
+### Application
+
+- **HomeView**: bg `#FAFAF8`, hero card `#2E7D32`, section labels
+  `#4CAF50` 10pt 700 uppercase, streak ring `#4CAF50` stroke with
+  gold gradient number, stat cards white with `#E8F5E9` border,
+  gold bias pill on hero card, gold "Start check-in" button.
+- **CheckInView**: front card `#2E7D32`, back cards `#81C784` /
+  `#A5D6A7`, gold bias pill, `#E8F5E9` why section bg, gold
+  complete button, `#4CAF50` progress dots.
+- **LearnView**: filter pill active `#2E7D32` bg white text,
+  inactive white with `#4CAF50` border, card backs `#C8E6C9` /
+  `#A5D6A7`, "How to counter it" button `#2E7D32`, category
+  colours keep their own tints.
+- **BiasDetailView**: category pills keep category colours, "How
+  to counter it" and "In real life" sections use `#E8F5E9` bg.
+- **Tab bar**: active `#2E7D32` icon+label, inactive grey.
 
 Typography: SF Pro system sizes only. Never hardcode font names.
-Corner radius: 16pt cards · 12pt buttons · 999pt pills
-No gradients. No shadows. Dark mode mandatory.
+Corner radius: 20pt cards · 14pt buttons · 999pt pills.
+No purple. No violet. No blue accent.
 
 ---
 

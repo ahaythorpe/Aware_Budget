@@ -60,28 +60,27 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(viewModel.greeting)
                     .font(.title2.weight(.bold))
-                    .foregroundStyle(DS.deepPurple)
+                    .foregroundStyle(DS.textPrimary)
                 Text(viewModel.todayLabel)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
             }
             Spacer()
             Image(systemName: "gearshape")
                 .font(.title3)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(DS.textTertiary)
                 .accessibilityHidden(true)
         }
         .padding(.top, 8)
     }
 
-    // MARK: - Hero check-in card (#2D1B69)
+    // MARK: - Hero check-in card (#2E7D32)
 
     private var heroCheckInCard: some View {
         Button {
             selectedTab?.wrappedValue = .checkIn
         } label: {
             VStack(alignment: .leading, spacing: 14) {
-                // Gold bias pill on hero card
                 if !viewModel.isCheckedInToday, let bias = viewModel.nextBiasName {
                     Text(bias.uppercased())
                         .font(.system(size: 10, weight: .bold))
@@ -90,7 +89,7 @@ struct HomeView: View {
                         .padding(.vertical, 4)
                         .background(
                             Capsule()
-                                .fill(Color(hex: "C59430").opacity(0.2))
+                                .fill(DS.goldBase.opacity(0.2))
                                 .overlay(
                                     Capsule()
                                         .stroke(DS.goldText.opacity(0.4), lineWidth: 0.5)
@@ -101,7 +100,7 @@ struct HomeView: View {
                 if viewModel.isCheckedInToday, let tone = viewModel.todaysCheckIn?.emotionalTone {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(DS.paleGreen)
                         Text("Checked in today")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.white.opacity(0.75))
@@ -134,7 +133,7 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(DS.deepPurple)
+                    .fill(DS.primary)
             )
         }
         .buttonStyle(.plain)
@@ -148,16 +147,16 @@ struct HomeView: View {
                 .padding(.vertical, 20)
             Text(viewModel.streakMessage)
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DS.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                .fill(.white)
+                .fill(DS.cardBg)
                 .overlay(
                     RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                        .stroke(DS.paleGreen, lineWidth: 0.5)
                 )
         )
     }
@@ -173,15 +172,7 @@ struct HomeView: View {
         } label: {
             HStack(alignment: .top, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "scope")
-                            .foregroundStyle(DS.accent)
-                        Text("Alignment")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                            .tracking(0.6)
-                    }
+                    SectionHeader(title: "Alignment")
                     if viewModel.isTargetSet {
                         Text("\(Int(viewModel.alignmentPct))%")
                             .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -194,7 +185,7 @@ struct HomeView: View {
                     }
                     Text(viewModel.alignmentReassurance)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DS.textSecondary)
                         .lineLimit(2, reservesSpace: true)
                 }
                 Spacer()
@@ -203,10 +194,10 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(.white)
+                    .fill(DS.cardBg)
                     .overlay(
                         RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                            .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                            .stroke(DS.paleGreen, lineWidth: 0.5)
                     )
             )
         }
@@ -231,23 +222,20 @@ struct HomeView: View {
 
     private var recentActivitySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent activity")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(DS.accent)
-                .textCase(.uppercase)
-                .tracking(0.9)
+            SectionHeader(title: "Recent activity")
 
             if viewModel.recentEvents.isEmpty {
                 HStack(spacing: 12) {
                     Image(systemName: "tray")
                         .font(.title3)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(DS.textTertiary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Nothing logged yet")
                             .font(.subheadline.weight(.medium))
+                            .foregroundStyle(DS.textPrimary)
                         Text("Tap above to log your first event.")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DS.textSecondary)
                     }
                     Spacer()
                 }
@@ -255,10 +243,10 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
                     RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                        .fill(.white)
+                        .fill(DS.cardBg)
                         .overlay(
                             RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                                .stroke(DS.paleGreen, lineWidth: 0.5)
                         )
                 )
             } else {
@@ -276,30 +264,30 @@ struct HomeView: View {
             Text(event.eventType.emoji)
                 .font(.title3)
                 .frame(width: 36, height: 36)
-                .background(DS.bg)
+                .background(DS.paleGreen)
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(event.category ?? event.eventType.label)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(DS.deepPurple)
+                    .foregroundStyle(DS.textPrimary)
                 Text(event.date, style: .date)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
             }
             Spacer()
             Text(event.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                 .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
-                .foregroundStyle(DS.deepPurple)
+                .foregroundStyle(DS.textPrimary)
         }
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                .fill(.white)
+                .fill(DS.cardBg)
                 .overlay(
                     RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                        .stroke(DS.paleGreen, lineWidth: 0.5)
                 )
         )
     }

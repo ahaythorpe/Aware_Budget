@@ -15,7 +15,6 @@ struct CheckInView: View {
     @State private var showWhy: Bool = false
     @State private var selectedTone: CheckIn.EmotionalTone? = nil
 
-    // Flow phases: questions → driverPick → done
     @State private var phase: Phase = .questions
     @State private var selectedDriver: CheckIn.SpendingDriver? = nil
 
@@ -23,12 +22,12 @@ struct CheckInView: View {
         case questions, driverPick, done
     }
 
-    // MARK: - Colours
+    // MARK: - Colours (money green)
 
-    private let frontBg  = Color(red: 45/255,  green: 27/255,  blue: 105/255) // #2D1B69
-    private let middleBg = Color(red: 61/255,  green: 43/255,  blue: 133/255) // #3D2B85
-    private let backBg   = Color(red: 238/255, green: 237/255, blue: 254/255) // #EEEDFE
-    private let gold     = Color(red: 245/255, green: 199/255, blue: 66/255)  // #F5C742
+    private let frontBg  = DS.primary                          // #2E7D32
+    private let middleBg = DS.lightGreen                       // #81C784
+    private let backBg   = Color(hex: "A5D6A7")               // lighter green
+    private let gold     = DS.goldText
 
     private let swipeThreshold: CGFloat = 80
     private let cardCornerRadius: CGFloat = 28
@@ -38,7 +37,7 @@ struct CheckInView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
 
             VStack(spacing: 16) {
                 progressDots
@@ -81,9 +80,9 @@ struct CheckInView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DS.textSecondary)
                             .padding(8)
-                            .background(Color(.secondarySystemBackground))
+                            .background(DS.paleGreen)
                             .clipShape(Circle())
                     }
                 }
@@ -102,14 +101,14 @@ struct CheckInView: View {
         HStack(spacing: 8) {
             ForEach(0..<max(questions.count, 1), id: \.self) { i in
                 Circle()
-                    .fill(i < attemptedCount ? gold : Color(.tertiarySystemBackground))
+                    .fill(i < attemptedCount ? DS.accent : DS.textTertiary.opacity(0.3))
                     .frame(width: 8, height: 8)
                     .animation(.easeOut(duration: 0.2), value: attemptedCount)
             }
         }
     }
 
-    // MARK: - Card stack (back / middle / front)
+    // MARK: - Card stack
 
     private var cardStack: some View {
         ZStack {
@@ -166,6 +165,7 @@ struct CheckInView: View {
 
     private func frontContent(for q: Question) -> some View {
         VStack(alignment: .leading, spacing: 18) {
+            // Gold bias pill on dark green
             Text(q.biasName.uppercased())
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(DS.goldText)
@@ -173,7 +173,7 @@ struct CheckInView: View {
                 .padding(.vertical, 4)
                 .background(
                     Capsule()
-                        .fill(Color(hex: "C59430").opacity(0.2))
+                        .fill(DS.goldBase.opacity(0.2))
                         .overlay(
                             Capsule()
                                 .stroke(DS.goldText.opacity(0.4), lineWidth: 0.5)
@@ -192,6 +192,7 @@ struct CheckInView: View {
                 .padding(12)
                 .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
+            // Why section
             Button {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     showWhy.toggle()
@@ -212,8 +213,10 @@ struct CheckInView: View {
             if showWhy {
                 Text(q.whyExplanation)
                     .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(.white.opacity(0.85))
                     .fixedSize(horizontal: false, vertical: true)
+                    .padding(12)
+                    .background(DS.paleGreen.opacity(0.15), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
@@ -261,28 +264,27 @@ struct CheckInView: View {
         HStack {
             Text("skip \u{2192}")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DS.textSecondary)
             Spacer()
             Text("\u{2191} complete")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DS.textSecondary)
         }
     }
 
-    // MARK: - Driver pick ("What drove this?")
+    // MARK: - Driver pick
 
     private var driverPickView: some View {
         VStack(spacing: 28) {
             VStack(spacing: 8) {
                 Text("What drove this?")
                     .font(.title2.weight(.bold))
-                    .foregroundStyle(DS.deepPurple)
+                    .foregroundStyle(DS.textPrimary)
                 Text("No wrong answers. Just noticing.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
             }
 
-            // 2x3 grid of driver pills
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                 ForEach(CheckIn.SpendingDriver.allCases) { driver in
                     driverPill(driver)
@@ -290,23 +292,18 @@ struct CheckInView: View {
             }
             .padding(.horizontal, DS.hPadding)
 
-            VStack(spacing: 12) {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        phase = .done
-                    }
-                    NotificationService.scheduleDailyReminder()
-                } label: {
-                    Text(selectedDriver != nil ? "Continue" : "Skip")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(DS.deepPurple, in: RoundedRectangle(cornerRadius: DS.buttonRadius, style: .continuous))
+            // Gold complete button
+            Button {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    phase = .done
                 }
-                .buttonStyle(.plain)
-                .padding(.horizontal, DS.hPadding)
+                NotificationService.scheduleDailyReminder()
+            } label: {
+                Text(selectedDriver != nil ? "Continue" : "Skip")
+                    .font(.system(size: 13, weight: .bold))
+                    .goldButtonStyle()
             }
+            .buttonStyle(.plain)
         }
         .padding(.top, 20)
     }
@@ -323,10 +320,10 @@ struct CheckInView: View {
                     .font(.system(size: 28))
                 Text(driver.label)
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(isSelected ? DS.deepPurple : .primary)
+                    .foregroundStyle(isSelected ? DS.primary : DS.textPrimary)
                 Text(driver.shortDescription)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
@@ -334,11 +331,11 @@ struct CheckInView: View {
             .padding(.horizontal, 8)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isSelected ? DS.accent.opacity(0.12) : Color(.secondarySystemBackground))
+                    .fill(isSelected ? DS.paleGreen : DS.cardBg)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(isSelected ? DS.accent : .clear, lineWidth: 1.5)
+                    .stroke(isSelected ? DS.accent : DS.textTertiary.opacity(0.3), lineWidth: isSelected ? 1.5 : 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -350,20 +347,21 @@ struct CheckInView: View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
-                    .fill(Color.green.opacity(0.15))
+                    .fill(DS.paleGreen)
                     .frame(width: 120, height: 120)
                 Image(systemName: "checkmark")
                     .font(.system(size: 56, weight: .bold))
-                    .foregroundStyle(.green)
+                    .foregroundStyle(DS.primary)
             }
             .sensoryFeedback(.success, trigger: phase == .done)
 
             VStack(spacing: 6) {
                 Text("Nice work")
                     .font(.title.weight(.bold))
+                    .foregroundStyle(DS.textPrimary)
                 Text("\(attemptedCount) question\(attemptedCount == 1 ? "" : "s") reflected on today.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
                     .multilineTextAlignment(.center)
 
                 if let driver = selectedDriver {

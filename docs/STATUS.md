@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — 4-tab root live, HomeView rebuilt with StreakRingView + brand palette, CheckInView swipe stack + post-check-in spending driver tags, LearnView + BiasDetailView compile clean. Supabase live wiring blocked on Xcode package add.
+**Current phase:** PRD v1.1 — Money Green + Nugget Gold colour system applied to all screens. 4-tab root, swipe cards, spending driver tags all live. Supabase wiring blocked on Xcode package add.
 
 ---
 
@@ -126,9 +126,18 @@
   now mounts `RootTabView()` (with a `.task { await
   NotificationService.requestPermission() }` on launch) in place of
   the old `NavigationStack { HomeView() }`.
-- `DesignSystem.swift` — extended `DS` with brand palette: `DS.bg`
-  `#F7F4EF`, `DS.deepPurple` `#2D1B69`, `DS.accent` `#7F77DD`,
-  `DS.coral` `#FF7A6B`, `DS.teal` `#006064`.
+- `DesignSystem.swift` — **Money Green + Nugget Gold** colour system.
+  `DS.primary` `#2E7D32`, `DS.accent` `#4CAF50`, `DS.lightGreen`
+  `#81C784`, `DS.paleGreen` `#E8F5E9`, `DS.bg` `#FAFAF8`,
+  `DS.cardBg` white. Text: `DS.textPrimary` `#1A2E1A`,
+  `DS.textSecondary` `#6B7A6B`, `DS.textTertiary` `#A0B0A0`.
+  Semantic: `DS.positive` `#4CAF50`, `DS.warning` `#FF7043`.
+  Gold: `DS.goldBase` `#C59430`, `DS.goldText` `#E8B84B`,
+  `DS.nuggetGold` 5-stop gradient. `GoldButton` + `GoldRingModifier`
+  ViewModifiers. `SectionHeader` updated to 10pt bold `DS.accent`
+  uppercase. `PrimaryButtonStyle` default tint `DS.primary`.
+  `SecondaryButtonStyle` uses `DS.paleGreen` fill. `Card` uses
+  `DS.cardBg`. All purple/violet hex values removed.
 - `MoneyEventView.swift` — form sheet with amount / type / category /
   note / date.
 - `MonthView.swift` — month totals, category breakdown, events by type,

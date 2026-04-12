@@ -5,6 +5,40 @@
 
 ---
 
+## 2026-04-12 — Money Green + Nugget Gold colour system (Claude Code)
+
+**Goal:** Replace all purple/violet with bright money green + nugget
+gold across every screen. Fresh, finance-forward visual identity.
+
+**Colour system (DesignSystem.swift):**
+- Primary `#2E7D32` (hero cards, nav, CTA buttons)
+- Accent `#4CAF50` (section labels, ring stroke, filter pills)
+- Light green `#81C784` (card backs, tints)
+- Pale green `#E8F5E9` (pills, tab active bg, why section bg)
+- Background `#FAFAF8`, cards white
+- Text: `#1A2E1A` / `#6B7A6B` / `#A0B0A0`
+- Gold: base `#C59430`, text `#E8B84B`, gradient 5-stop
+- All purple/violet removed. No `deepPurple`, no `#2D1B69`,
+  no `#7F77DD`.
+
+**Screens updated:**
+- HomeView: `#2E7D32` hero card, pale green card borders, green
+  section labels, green accent throughout
+- CheckInView: `#2E7D32` front card, `#81C784` / `#A5D6A7` backs,
+  gold bias pill, `#E8F5E9` why section, green progress dots
+- LearnView: green active filter pills, `#C8E6C9` / `#A5D6A7`
+  card backs, `#2E7D32` CTA button, green dot indicator
+- BiasDetailView: `#E8F5E9` tinted sections, green seen row,
+  green section headers. Category colours preserved.
+- StreakRingView: `#4CAF50` ring stroke, gold gradient number
+- RootTabView: tint `#2E7D32`
+- HomeViewModel: alignment colours use DS.positive / DS.warning
+- PRD.md design section rewritten
+
+**Build:** `** BUILD SUCCEEDED **` (clean, iPhone 17 / iOS 26.2).
+
+---
+
 ## 2026-04-12 — Spending driver tags: post-check-in behaviour tagging (Claude Code)
 
 **Goal:** Track *why* decisions happen, not just *what*. After each
