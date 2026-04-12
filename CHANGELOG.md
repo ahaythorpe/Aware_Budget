@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-04-13 — App icon set to Nudge mascot (Claude Code)
+
+**App icon:**
+- Resized `nudge.png` to 1024x1024 via `sips`.
+- Xcode 26 single-image format: `Icon-1024.png` assigned to iOS
+  universal slot (light, dark, tinted variants all use same image).
+- Removed legacy per-size/per-idiom entries (Xcode 26 auto-generates
+  all sizes from the single 1024px source).
+
+---
+
 ## 2026-04-13 — Onboarding, Budget Reality Check, sign up/in, real questions (Claude Code)
 
 **Goal:** Rebuild onboarding as 3-screen paged flow with Budget Reality

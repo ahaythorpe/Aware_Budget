@@ -58,7 +58,7 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 
 ### Assets
 - `Assets.xcassets/nudge.imageset/nudge.png` — Gold coin mascot. Source: images/Nudge_Asset.png. Wrapped in green Circle (NudgeAvatar) to hide black PNG background.
-- `Assets.xcassets/AppIcon.appiconset/` — empty (no icon yet)
+- `Assets.xcassets/AppIcon.appiconset/` — Nudge mascot at 1024px (Icon-1024.png), used for iOS light/dark/tinted variants
 - `Assets.xcassets/AccentColor.colorset/` — default
 
 ---

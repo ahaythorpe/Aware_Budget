@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. 3-screen onboarding: Nudge welcome, Budget Reality Check quiz, sign-up form. Sign-in screen added. Real Supabase questions already wired (fetchNextQuestion with 14-day cooldown + last_shown update). Build succeeds (SPM dependency issue in swift-clocks — not our code).
+**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. App icon set to Nudge mascot (1024px, all variants). 3-screen onboarding with Budget Reality Check. Sign-in inline toggle. Real Supabase questions wired. Build succeeds.
 
 ---
 
