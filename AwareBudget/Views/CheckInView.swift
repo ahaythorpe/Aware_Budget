@@ -166,18 +166,19 @@ struct CheckInView: View {
 
     private func frontContent(for q: Question) -> some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 6) {
-                Text(q.biasName)
-                    .font(.footnote.weight(.semibold))
-                Text("·")
-                    .foregroundStyle(gold.opacity(0.6))
-                Text(q.biasCategory)
-                    .font(.footnote)
-            }
-            .foregroundStyle(gold)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(gold.opacity(0.12), in: Capsule())
+            Text(q.biasName.uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(DS.goldText)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(Color(hex: "C59430").opacity(0.2))
+                        .overlay(
+                            Capsule()
+                                .stroke(DS.goldText.opacity(0.4), lineWidth: 0.5)
+                        )
+                )
 
             Text(q.question)
                 .font(.title3.weight(.bold))

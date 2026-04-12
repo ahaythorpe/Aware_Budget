@@ -81,29 +81,40 @@ struct HomeView: View {
             selectedTab?.wrappedValue = .checkIn
         } label: {
             VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 8) {
-                    Image(systemName: viewModel.isCheckedInToday ? "checkmark.seal.fill" : "sparkles")
-                        .foregroundStyle(viewModel.isCheckedInToday ? Color.green : DS.coral)
-                    Text(viewModel.isCheckedInToday ? "Checked in today" : "Today's check-in")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.75))
-                        .textCase(.uppercase)
-                        .tracking(0.8)
-                    Spacer()
-                    if !viewModel.isCheckedInToday {
-                        Image(systemName: "arrow.right")
-                            .foregroundStyle(.white.opacity(0.75))
-                    }
+                // Gold bias pill on hero card
+                if !viewModel.isCheckedInToday, let bias = viewModel.nextBiasName {
+                    Text(bias.uppercased())
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(DS.goldText)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(Color(hex: "C59430").opacity(0.2))
+                                .overlay(
+                                    Capsule()
+                                        .stroke(DS.goldText.opacity(0.4), lineWidth: 0.5)
+                                )
+                        )
                 }
 
                 if viewModel.isCheckedInToday, let tone = viewModel.todaysCheckIn?.emotionalTone {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundStyle(.green)
+                        Text("Checked in today")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.75))
+                            .textCase(.uppercase)
+                            .tracking(0.8)
+                    }
                     Text("You showed up. See you tomorrow.")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                     HStack(spacing: 6) {
                         Text(tone.emoji)
-                        Text("Today's tone · \(tone.label)")
+                        Text("Today's tone \u{00B7} \(tone.label)")
                             .font(.subheadline)
                             .foregroundStyle(.white.opacity(0.7))
                     }
@@ -113,9 +124,10 @@ struct HomeView: View {
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Tap to check in")
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.7))
+
+                    Text("Start check-in \u{2192}")
+                        .font(.system(size: 13, weight: .bold))
+                        .goldButtonStyle()
                 }
             }
             .padding(22)

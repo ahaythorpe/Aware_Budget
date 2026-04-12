@@ -10,6 +10,7 @@ final class HomeViewModel {
     var todaysCheckIn: CheckIn?
     var recentEvents: [MoneyEvent] = []
     var nextQuestionTeaser: String?
+    var nextBiasName: String?
     var weekDots: [Bool] = Array(repeating: false, count: 7)
     var isLoading = false
     var errorMessage: String?
@@ -89,9 +90,12 @@ final class HomeViewModel {
             }
 
             if todaysCheckIn == nil {
-                nextQuestionTeaser = try? await service.fetchNextQuestion().question
+                let next = try? await service.fetchNextQuestion()
+                nextQuestionTeaser = next?.question
+                nextBiasName = next?.biasName
             } else {
                 nextQuestionTeaser = nil
+                nextBiasName = nil
             }
         } catch {
             errorMessage = error.localizedDescription

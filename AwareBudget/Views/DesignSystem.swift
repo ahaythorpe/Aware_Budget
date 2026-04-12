@@ -22,6 +22,8 @@ extension Color {
 
 // MARK: - Design tokens
 
+typealias DesignSystem = DS
+
 enum DS {
     static let cardRadius: CGFloat = 20
     static let buttonRadius: CGFloat = 14
