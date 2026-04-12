@@ -5,6 +5,56 @@
 
 ---
 
+## 2026-04-12 — Rebuild CheckInView + InsightFeedView + docs audit (Claude Code)
+
+**Goal:** Match UI mockup specs exactly. Rebuild CheckInView with swipe
+YES/NO, rebuild InsightFeedView with native Charts, wire Nudge asset,
+audit all files and create HANDOFF.md.
+
+**Nudge asset wired:**
+- `images/Nudge_Asset.png` copied to
+  `Assets.xcassets/nudge.imageset/nudge.png` with Contents.json (2x scale).
+- NudgeAvatar in DesignSystem.swift already references Image("nudge").
+
+**CheckInView full rebuild:**
+- Green gradient card `#1B5E20->#2E7D32->#4CAF50` (was DS.heroGradient).
+- Swipe RIGHT > 80pt = YES (green `#4CAF50` overlay with "YES" text).
+  Swipe LEFT > 80pt = NO (coral `DS.warning` overlay with "NO" text).
+- Card rotates +/-15 degrees during drag (proportional to screen width).
+- 2 back cards visible: middle `#81C784` scaled 0.96, back `#A5D6A7` 0.92.
+- REMOVED text input field from card.
+- Tone picker: white opacity buttons (0.08 bg, 0.20 selected), NOT yellow.
+  Border: white opacity 0.5 when selected, not gold.
+- Swipe hints: "← No" in coral (left), "Yes →" in green (right).
+- Background `#F5F7F5`. Card borders `rgba(76,175,80,0.15)`.
+
+**InsightFeedView rebuild with Charts:**
+- `import Charts` (native SwiftUI iOS 16+).
+- Weekly hero card with DS.heroGradient + decorative circles.
+- Section 2: **Bar chart** (BarMark) — 6-week unplanned spend trend.
+  Green bars improving, coral bars worsening. Y-axis with short amounts.
+- Section 3: **Horizontal bar chart** (BarMark) — bias frequency from
+  all money events + check-in drivers. Gradient green bars. Count
+  annotations trailing.
+- Section 4: **Donut chart** (SectorMark) — planned vs unplanned %.
+  Green planned, coral unplanned. Legend with percentages.
+- Section 5: NudgeCardView at bottom.
+- Removed old SparklineView-based trend cards and horizontal scroll
+  pattern cards. Background `#F5F7F5`. Borders `rgba(76,175,80,0.15)`.
+
+**Documentation:**
+- `docs/HANDOFF.md` — NEW. Complete file listing with descriptions,
+  exact colours, Nudge rules, Supabase state, priority tasks, design
+  rules. Read at start of every session.
+- `MEMORY.md` — rewritten with all design decisions from today:
+  Money Green + Nugget Gold colours, Nudge mascot rules, swipe YES/NO
+  system, Charts framework choice, LearnView card layout.
+- `docs/STATUS.md` — updated with rebuilt screen descriptions.
+
+**Build:** `** BUILD SUCCEEDED **` (iPhone 17 Pro / iOS 26.2).
+
+---
+
 ## 2026-04-12 — Wire Supabase Swift package + replace all stubs with live client (Claude Code)
 
 **Goal:** Remove the in-memory stub in SupabaseService and connect to

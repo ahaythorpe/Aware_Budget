@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — Supabase LIVE. supabase-swift 2.43.1 wired, all in-memory stubs replaced with real client calls. Money Green + Nugget Gold + NudgeEngine + Insights tab. DB schema aligned with Swift models (money_events rebuilt). Ready for end-to-end testing on device.
+**Current phase:** PRD v1.1 — Supabase LIVE. CheckInView rebuilt with swipe YES/NO + ±15° rotation + green/coral overlays + white opacity tone picker. InsightFeedView rebuilt with native Charts: 6-week unplanned bar chart, horizontal bias frequency bars, planned/unplanned donut. Nudge asset wired from images/Nudge_Asset.png. All hero cards use gradient. Build succeeds.
 
 ---
 
@@ -65,33 +65,20 @@
   only (flag in `@AppStorage("hasCompletedOnboarding")`).
 - `HomeView.swift` — streak card, alignment card, tone row, primary
   buttons, recent events, navigation to `MonthView`.
-- `CheckInView.swift` — **rebuilt again as swipe card stack** (2026-04-12).
-  Three stacked cards (front #2D1B69, middle #3D2B85 scaled 0.96,
-  back #EEEDFE scaled 0.92). DragGesture: swipe-up > 80pt = complete,
-  swipe-right > 80pt = skip, release < threshold = spring back. Front
-  card content: gold `#F5C742` bias pill showing `BiasName · Category`,
-  `.title3.weight(.bold)` white question text, optional response
-  TextField, "Why this matters" toggle with rotating chevron collapsed
-  by default, tone picker 😌/😐/😟 (all optional). Progress dots at
-  top (gold, one per attempted question). Swipe hints at edges.
-  After all cards: transitions to **spending driver pick** screen —
-  "What drove this?" with 2x3 grid of pill-style `SpendingDriver`
-  tags (Present Bias / Social / Reward / Convenience / Identity /
-  Friction). Single-select, optional skip. Tone: "curious, not
-  corrective". Continue/Skip button advances to completion view.
-  Completion view: green circle + checkmark + "Nice work" + selected
-  driver chip (if any) + Done button.
-  Mock data from `QuestionPool.seed.shuffled().prefix(5)` —
-  no Supabase yet. Accepts optional `selectedTab: Binding<RootTab>?`
-  to integrate with root tab bar (hides xmark when embedded). On
-  completion, schedules `NotificationService.scheduleDailyReminder()`.
-  `CheckIn.SpendingDriver` enum added to `CheckIn.swift`: 6 cases
-  with rawValue matching the `spending_driver` DB column
-  (`present_bias`, `social`, `emotional`, `convenience`, `identity`,
-  `friction_avoid`). Each case has label, shortDescription, emoji.
-  Migration `20260412150000_add_spending_driver.sql` adds nullable
-  `spending_driver` text column with CHECK constraint to
-  `daily_checkins`.
+- `CheckInView.swift` — **rebuilt with swipe YES/NO** (2026-04-12).
+  Green gradient card `#1B5E20→#2E7D32→#4CAF50`. DragGesture:
+  swipe-right > 80pt = YES (green overlay), swipe-left > 80pt = NO
+  (coral overlay). Card rotates ±15 degrees during drag. 2 back cards
+  visible (middle `#81C784` scaled 0.96, back `#A5D6A7` scaled 0.92).
+  Front card content: gold bias pill on dark green, question text
+  (.title3 bold white), "Why this matters" toggle collapsed by default,
+  tone picker with **white opacity buttons** (NOT yellow squares).
+  **NO text input field on card.** Progress dots at top (green, one per
+  attempted question). Swipe hints: "\u{2190} No" coral left, "Yes \u{2192}"
+  green right. After all cards: spending driver pick screen (2x3 grid
+  with `rgba(76,175,80,0.15)` borders). Completion view: green circle +
+  checkmark + "Nice work" + driver chip + NudgeCardView + Done.
+  Background `#F5F7F5`. Mock data from `QuestionPool.seed`.
 - `LearnView.swift` — **SIMPLIFIED** swipe card deck. Fixed 340pt card
   height, 1 back card (not 2). Front card: centred 52pt emoji, centred
   category pill (10pt), 22pt bold centred bias name with breathing room,
@@ -156,17 +143,15 @@
   tag picker (2x3 grid, only for surprise/impulse) → conditional life
   event picker (only if amount > 200) → note → date → save. All sections
   animate in/out with spring. Uses DS green palette throughout.
-- `InsightFeedView.swift` — **NEW** replaces MonthView. Tab 4 renamed
-  from "Month" to "Insights" (icon: chart.line.uptrend.xyaxis). Layout:
-  (1) Weekly hero card with #1B5E20→#2E7D32→#4CAF50 gradient, gold
-  "THIS WEEK" label, net from future you headline, check-in day count,
-  3 trend pills (unplanned %, top bias, streak). (2) Spending trends
-  section with SparklineView trend cards per behaviour tag ��� 7 bars for
-  last 7 weeks, direction pills (Improving/Watch this), bias link.
-  (3) Your patterns section with horizontal scroll of bias pattern cards
-  (emoji + name + count + strength pill: Emerging/Established/Strong).
-  (4) Weekly Nudge insight card at bottom. No income target, no alignment
-  %, no categories. Pure behaviour-based awareness trends.
+- `InsightFeedView.swift` — **rebuilt with Charts framework** (2026-04-12).
+  `import Charts` (native SwiftUI). Tab 4 "Insights". Layout:
+  (1) Weekly hero card with heroGradient, decorative circles, gold
+  "THIS WEEK", "+/-X from future you", "N of 7 days", 3 trend pills.
+  (2) **Bar chart** (BarMark): unplanned spend 6 weeks, green improving,
+  coral worsening. (3) **Horizontal bar chart** (BarMark): bias frequency
+  with gradient green bars + count annotations. (4) **Donut chart**
+  (SectorMark): planned vs unplanned % with legend. (5) NudgeCardView.
+  Borders `rgba(76,175,80,0.15)`. Background `#F5F7F5`.
 - `SparklineView.swift` — **NEW** reusable 7-bar sparkline component.
   Green bars for improving, orange for worsening. Configurable width,
   height, colour direction.

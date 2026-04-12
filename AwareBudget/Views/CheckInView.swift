@@ -11,34 +11,37 @@ struct CheckInView: View {
     @State private var attemptedCount = 0
 
     @State private var dragOffset: CGSize = .zero
-    @State private var response: String = ""
     @State private var showWhy: Bool = false
     @State private var selectedTone: CheckIn.EmotionalTone? = nil
 
     @State private var phase: Phase = .questions
     @State private var selectedDriver: CheckIn.SpendingDriver? = nil
     @State private var nudgeCompletionMessage: NudgeMessage?
+    @State private var showFollowUp: Bool = false
+    @State private var lastAnswerWasYes: Bool = false
 
     private enum Phase {
         case questions, driverPick, done
     }
 
-    // MARK: - Colours (money green)
+    // MARK: - Design constants
 
-    private let frontGradient = DS.heroGradient
-    private let middleBg = DS.lightGreen                       // #81C784
-    private let backBg   = Color(hex: "A5D6A7")               // lighter green
-    private let gold     = DS.goldText
-
-    private let swipeThreshold: CGFloat = 80
     private let cardCornerRadius: CGFloat = 28
-    private let cardHeight: CGFloat = 560
+    private let cardHeight: CGFloat = 520
+    private let swipeThreshold: CGFloat = 80
+    private let maxRotation: Double = 15
+
+    // Card colours
+    private let frontColors: [Color] = [Color(hex: "1B5E20"), Color(hex: "2E7D32"), Color(hex: "4CAF50")]
+    private let middleBg = Color(hex: "81C784")
+    private let backBg   = Color(hex: "A5D6A7")
+    private let gold     = DS.goldText
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
-            DS.bg.ignoresSafeArea()
+            Color(hex: "F5F7F5").ignoresSafeArea()
 
             VStack(spacing: 16) {
                 progressDots
@@ -109,46 +112,85 @@ struct CheckInView: View {
         }
     }
 
-    // MARK: - Card stack
+    // MARK: - Card stack (2 back cards visible)
 
     private var cardStack: some View {
         ZStack {
+            // Back card (3rd)
             if currentIndex + 2 < questions.count {
                 RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
                     .fill(backBg)
+                    .frame(height: cardHeight)
                     .scaleEffect(0.92)
                     .offset(y: 24)
             }
+            // Middle card (2nd)
             if currentIndex + 1 < questions.count {
                 RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
                     .fill(middleBg)
+                    .frame(height: cardHeight)
                     .scaleEffect(0.96)
                     .offset(y: 12)
             }
-            frontCard
-                .offset(dragOffset)
-                .rotationEffect(.degrees(Double(dragOffset.width / 25)))
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            dragOffset = value.translation
-                        }
-                        .onEnded { value in
-                            if value.translation.height < -swipeThreshold {
-                                completeSwipe()
-                            } else if value.translation.width > swipeThreshold {
-                                skipSwipe()
-                            } else {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                    dragOffset = .zero
-                                }
+            // Front card with YES/NO overlays
+            ZStack {
+                frontCard
+                yesNoOverlays
+            }
+            .offset(dragOffset)
+            .rotationEffect(.degrees(Double(dragOffset.width / (UIScreen.main.bounds.width / 2)) * maxRotation))
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        dragOffset = value.translation
+                    }
+                    .onEnded { value in
+                        let horizontal = value.translation.width
+                        if horizontal > swipeThreshold {
+                            swipeYes()
+                        } else if horizontal < -swipeThreshold {
+                            swipeNo()
+                        } else {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                dragOffset = .zero
                             }
                         }
-                )
+                    }
+            )
         }
         .frame(maxWidth: .infinity)
-        .frame(height: cardHeight)
+        .frame(height: cardHeight + 30)
         .padding(.horizontal, DS.hPadding)
+    }
+
+    // MARK: - YES / NO overlays during drag
+
+    private var yesNoOverlays: some View {
+        ZStack {
+            // YES overlay (right swipe)
+            RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
+                .fill(Color(hex: "4CAF50").opacity(0.85))
+                .overlay(
+                    Text("YES")
+                        .font(.system(size: 48, weight: .black))
+                        .foregroundStyle(.white)
+                        .rotationEffect(.degrees(-15))
+                )
+                .opacity(max(0, Double(dragOffset.width) / 120))
+
+            // NO overlay (left swipe)
+            RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
+                .fill(DS.warning.opacity(0.85))
+                .overlay(
+                    Text("NO")
+                        .font(.system(size: 48, weight: .black))
+                        .foregroundStyle(.white)
+                        .rotationEffect(.degrees(15))
+                )
+                .opacity(max(0, Double(-dragOffset.width) / 120))
+        }
+        .frame(height: cardHeight)
+        .allowsHitTesting(false)
     }
 
     // MARK: - Front card
@@ -156,12 +198,21 @@ struct CheckInView: View {
     private var frontCard: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                .fill(frontGradient)
+                .fill(
+                    LinearGradient(
+                        colors: frontColors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(height: cardHeight)
+
             if currentIndex < questions.count {
                 frontContent(for: questions[currentIndex])
                     .padding(24)
             }
         }
+        .frame(height: cardHeight)
     }
 
     private func frontContent(for q: Question) -> some View {
@@ -181,19 +232,13 @@ struct CheckInView: View {
                         )
                 )
 
+            // Question text — NO text input
             Text(q.question)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
 
-            TextField("", text: $response, prompt: Text("Optional response...").foregroundColor(.white.opacity(0.4)), axis: .vertical)
-                .font(.subheadline)
-                .foregroundStyle(.white)
-                .lineLimit(2, reservesSpace: true)
-                .padding(12)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-
-            // Why section
+            // Why section (collapsed by default)
             Button {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     showWhy.toggle()
@@ -217,12 +262,13 @@ struct CheckInView: View {
                     .foregroundStyle(.white.opacity(0.85))
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(12)
-                    .background(DS.paleGreen.opacity(0.15), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             Spacer(minLength: 0)
 
+            // Tone picker — white opacity buttons, NOT yellow squares
             HStack(spacing: 10) {
                 ForEach(CheckIn.EmotionalTone.allCases) { tone in
                     toneButton(tone)
@@ -243,17 +289,17 @@ struct CheckInView: View {
                     .font(.system(size: 28))
                 Text(tone.label)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(selected ? .white : .white.opacity(0.6))
+                    .foregroundStyle(.white.opacity(selected ? 1.0 : 0.6))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(selected ? Color.white.opacity(0.18) : Color.white.opacity(0.06))
+                    .fill(Color.white.opacity(selected ? 0.20 : 0.08))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(selected ? gold : .clear, lineWidth: 1.5)
+                    .stroke(Color.white.opacity(selected ? 0.5 : 0.0), lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -263,13 +309,43 @@ struct CheckInView: View {
 
     private var swipeHints: some View {
         HStack {
-            Text("skip \u{2192}")
+            Text("\u{2190} No")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(DS.textSecondary)
+                .foregroundStyle(DS.warning)
             Spacer()
-            Text("\u{2191} complete")
+            Text("Yes \u{2192}")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(DS.textSecondary)
+                .foregroundStyle(DS.positive)
+        }
+    }
+
+    // MARK: - Follow-up card (shown when YES + question has follow-up)
+
+    private var followUpCard: some View {
+        VStack(spacing: 24) {
+            VStack(spacing: 8) {
+                Text("Tell me more")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(DS.textPrimary)
+                if currentIndex > 0, currentIndex - 1 < questions.count {
+                    Text("You said yes to: \"\(questions[currentIndex - 1].question)\"")
+                        .font(.subheadline)
+                        .foregroundStyle(DS.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                }
+            }
+
+            Button {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showFollowUp = false
+                }
+            } label: {
+                Text("Continue")
+                    .font(.system(size: 13, weight: .bold))
+                    .goldButtonStyle()
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -293,7 +369,6 @@ struct CheckInView: View {
             }
             .padding(.horizontal, DS.hPadding)
 
-            // Gold complete button
             Button {
                 nudgeCompletionMessage = NudgeEngine.checkInResponse(
                     streakDays: attemptedCount,
@@ -342,7 +417,7 @@ struct CheckInView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(isSelected ? DS.accent : DS.textTertiary.opacity(0.3), lineWidth: isSelected ? 1.5 : 0.5)
+                    .stroke(isSelected ? DS.accent : Color(hex: "4CAF50").opacity(0.15), lineWidth: isSelected ? 1.5 : 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -399,18 +474,20 @@ struct CheckInView: View {
 
     // MARK: - Swipe actions
 
-    private func completeSwipe() {
+    private func swipeYes() {
+        lastAnswerWasYes = true
         withAnimation(.easeOut(duration: 0.3)) {
-            dragOffset = CGSize(width: 0, height: -900)
+            dragOffset = CGSize(width: 600, height: 0)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             advance()
         }
     }
 
-    private func skipSwipe() {
+    private func swipeNo() {
+        lastAnswerWasYes = false
         withAnimation(.easeOut(duration: 0.3)) {
-            dragOffset = CGSize(width: 900, height: 0)
+            dragOffset = CGSize(width: -600, height: 0)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             advance()
@@ -420,7 +497,6 @@ struct CheckInView: View {
     private func advance() {
         attemptedCount += 1
         currentIndex += 1
-        response = ""
         showWhy = false
         selectedTone = nil
         dragOffset = .zero
