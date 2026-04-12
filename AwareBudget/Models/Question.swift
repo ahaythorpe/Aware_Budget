@@ -8,6 +8,7 @@ struct Question: Identifiable, Codable, Hashable {
     var biasCategory: String
     var difficulty: String
     var lastShown: Date?
+    var researchSource: String?
 
     enum CodingKeys: String, CodingKey {
         case id, question, difficulty
@@ -15,5 +16,6 @@ struct Question: Identifiable, Codable, Hashable {
         case biasName = "bias_name"
         case biasCategory = "bias_category"
         case lastShown = "last_shown"
+        case researchSource = "research_source"
     }
 }

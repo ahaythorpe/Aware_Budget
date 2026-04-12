@@ -27,12 +27,13 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `BudgetMonth.swift` — userId, month, incomeTarget
 - `MonthlyDecision.swift` — userId, month, decision, insight
 
-### Services/ (5 files)
+### Services/ (6 files)
 - `SupabaseService.swift` — **LIVE** (supabase-swift 2.43.1). All methods real. Auth, check-ins, money events, questions, budget months, bias lessons, bias progress. BiasProgress model also defined here. ISO8601DateFormatter.dateOnly helper.
 - `NudgeEngine.swift` — Pure Swift decision tree. 12 priority rules. `moneyEventResponse()`, `checkInResponse()`. NudgeContext, NudgeAction, NudgeMessage types.
 - `NotificationService.swift` — UNCalendarNotificationTrigger at hour=20.
 - `QuestionPool.swift` — 15 hard-coded seed questions for offline use.
 - `BiasLessonsMock.swift` — 16 seed BiasLesson objects for offline use.
+- `BiasScoreService.swift` — **NEW** Bias scoring: MasteryStage (unseen/noticed/emerging/active/improving/aware), BiasTrend, scoring weights (+2 yes, -1 no, +3 tagged), computeScore().
 
 ### ViewModels/ (3 files)
 - `HomeViewModel.swift` — @Observable. streak, alignmentPct, weekDots, nudgeMessage, greeting, todayLabel. buildNudge() from live data.
@@ -45,14 +46,14 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `DesignSystem.swift` — DS enum with all colour tokens + Card, PrimaryButtonStyle, SecondaryButtonStyle, SectionHeader, NudgeAvatar, GoldButton, GoldRingModifier.
 - `HomeView.swift` — Greeting header, NudgeCardView, hero gradient check-in card (shows "Done for today" when checked in), StreakRingView, **3 stat cards** (Alignment %, Biases Seen gold, This Week spend), **Daily Missions** (check-in/log event/learn bias with completion state), alignment card, log event button, recent activity. Settings gear icon opens SettingsView sheet.
 - `CheckInView.swift` — **Swipe YES/NO.** Green gradient #1B5E20-#2E7D32-#4CAF50. Right=YES green overlay, Left=NO coral overlay. +/-15 degree rotation. 2 back cards. Gold bias pill. No text input. White opacity tone picker. Progress dots. Driver pick phase. Completion with Nudge. **Daily enforcement**: checks fetchTodaysCheckIn() on appear — shows "You checked in today" + streak + "Come back tomorrow" if done.
-- `InsightFeedView.swift` — **Charts framework.** Hero gradient card with decorative circles. Bar chart: 6-week unplanned spend. Horizontal bar chart: bias frequency. Donut chart: planned vs unplanned %. Nudge card. Background #F5F7F5.
-- `LearnView.swift` — Swipe card deck. 1 back card. 52pt emoji, 22pt bold bias name, 13pt description, IN REAL LIFE teal label. Two side-by-side buttons: "Learn more" (outline, green) + "How to counter it" (filled green, white text). Both → BiasDetailView. Filter pills. "X of 16" counter. Sources BiasLessonsMock.seed.
+- `InsightFeedView.swift` — **Charts framework.** Hero gradient card with decorative circles. Bar chart: 6-week unplanned spend. Horizontal bar chart: bias frequency. Donut chart: planned vs unplanned %. Nudge card. Background #F5F7F5. Info button → "About your score" sheet (scoring weights, mastery stages, disclaimer).
+- `LearnView.swift` — Swipe card deck. 1 back card. 52pt emoji, 22pt bold bias name, 13pt description, IN REAL LIFE teal label. Two side-by-side buttons: "Learn more" + "How to counter it" → BiasDetailView. **Mastery stage badge** top-right (colour-coded: blue noticed, amber emerging, coral active, green improving, gold aware). Filter pills. "X of 16" counter. Sources BiasLessonsMock.seed.
 - `BiasDetailView.swift` — Full bias lesson detail. 72pt emoji, name, category pill, fullExplanation, realWorldExample, howToCounter.
 - `MoneyEventView.swift` — **Rebuilt as quick-log** (2026-04-13). 3-column category grid (16 categories: Coffee, Lunch, Drinks, Shopping, Transport, Takeaway, Pharmacy, Subscriptions, Entertainment, Travel, Clothing, Gift, Home, Fitness, Big purchase, Other). Tap category → AUD range picker (3–4 buttons). Tap range → planned/surprise/impulse. Auto-suggest bias tag (gold pill). Inline Nudge message. "Log it" gold button. No amount input, no note, no date picker. Stores: amount=midpoint, life_area=category, behaviour_tag=bias name.
 - `NudgeCardView.swift` — Green accent bar, NudgeAvatar, message text, gold action button, dismiss X. NudgeDismissStore (24h), NudgeDedup.
 - `StreakRingView.swift` — 140pt ring, DS.accent stroke, gold gradient number, M-S day dots.
 - `SparklineView.swift` — 7-bar sparkline. Green improving, orange worsening.
-- `OnboardingView.swift` — **rebuilt** 3-screen paged onboarding: (1) Nudge 120pt welcome, (2) Budget Reality Check quiz with Nudge response, (3) sign-up form + "Sign in" link.
+- `OnboardingView.swift` — **rebuilt** 4-screen paged onboarding: (1) Nudge 120pt welcome, (2) Budget Reality Check quiz with Nudge response, (3) "How it works" 3-card swipeable explainer (science/method/scoring with citations), (4) sign-up form + "Sign in" link.
 - `SignInView.swift` — **NEW** email/password sign-in sheet with gold button. On success: hasCompletedOnboarding = true.
 - `SettingsView.swift` — **NEW** gear icon sheet from HomeView. Sign out (Supabase + reset onboarding flag), reset demo data (clears user's checkins/events/progress), app version/build.
 - `MonthView.swift` — Legacy, NOT mounted in tab bar.

@@ -7,6 +7,7 @@ struct InsightFeedView: View {
     @State private var recentCheckIns: [CheckIn] = []
     @State private var isLoading = false
     @State private var showMoneyEvent = false
+    @State private var showAboutScore = false
 
     private let service = SupabaseService.shared
     private let borderColor = Color(hex: "4CAF50").opacity(0.15)
@@ -38,6 +39,17 @@ struct InsightFeedView: View {
         }
         .navigationTitle("Insights")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { showAboutScore = true } label: {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(DS.textTertiary)
+                }
+            }
+        }
+        .sheet(isPresented: $showAboutScore) {
+            AboutScoreSheet()
+        }
         .task { await load() }
         .refreshable { await load() }
         .sheet(isPresented: $showMoneyEvent, onDismiss: {
@@ -524,6 +536,111 @@ struct InsightFeedView: View {
         }
 
         return .text("\(weekEvents.count) events logged this week. The picture is forming.")
+    }
+}
+
+// MARK: - About your score sheet
+
+private struct AboutScoreSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // THE SCIENCE
+                    sectionTitle("THE SCIENCE")
+                    Text("Each question surfaces a specific cognitive bias documented in peer-reviewed behavioural economics research.")
+                        .font(.subheadline)
+                        .foregroundStyle(DS.textSecondary)
+
+                    // THE SCORING
+                    sectionTitle("THE SCORING")
+                    VStack(spacing: 12) {
+                        scoreRow(icon: "\u{2726}", label: "Yes answer", detail: "+2 to that bias score")
+                        scoreRow(icon: "○", label: "No answer", detail: "-1 (awareness working)")
+                        scoreRow(icon: "💰", label: "Tagged spend", detail: "+3 (behaviour evidence)")
+                    }
+
+                    // YOUR STAGES
+                    sectionTitle("YOUR STAGES")
+                    VStack(alignment: .leading, spacing: 10) {
+                        stageRow("🔍", "Unseen", "not yet encountered")
+                        stageRow("👁", "Noticed", "seen 1\u{2013}2 times")
+                        stageRow("🔄", "Emerging", "pattern forming (3\u{2013}5\u{00D7})")
+                        stageRow("⚡", "Active", "strong pattern (6\u{00D7}+)")
+                        stageRow("📉", "Improving", "last 3 answers were No")
+                        stageRow("✅", "Aware", "sustained awareness (3 weeks)")
+                    }
+
+                    // IMPORTANT
+                    sectionTitle("IMPORTANT")
+                    Text("This is not a clinical diagnosis. AwareBudget reflects your own patterns back to you \u{2014} nothing more. For financial advice speak to a qualified financial planner.")
+                        .font(.subheadline)
+                        .foregroundStyle(DS.textSecondary)
+
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("Got it")
+                            .font(.system(size: 15, weight: .bold))
+                            .goldButtonStyle()
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 8)
+                }
+                .padding(.horizontal, DS.hPadding)
+                .padding(.top, 16)
+                .padding(.bottom, 32)
+            }
+            .background(DS.bg.ignoresSafeArea())
+            .navigationTitle("How your score works")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(DS.accent)
+                }
+            }
+        }
+    }
+
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 12, weight: .heavy))
+            .foregroundStyle(DS.accent)
+            .tracking(1.5)
+    }
+
+    private func scoreRow(icon: String, label: String, detail: String) -> some View {
+        HStack(spacing: 12) {
+            Text(icon)
+                .font(.title3)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(DS.textPrimary)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(DS.textSecondary)
+            }
+            Spacer()
+        }
+    }
+
+    private func stageRow(_ emoji: String, _ name: String, _ desc: String) -> some View {
+        HStack(spacing: 10) {
+            Text(emoji)
+                .font(.body)
+            Text(name)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(DS.textPrimary)
+            Text("\u{2014} \(desc)")
+                .font(.caption)
+                .foregroundStyle(DS.textSecondary)
+            Spacer()
+        }
     }
 }
 

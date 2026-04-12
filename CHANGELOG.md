@@ -5,6 +5,40 @@
 
 ---
 
+## 2026-04-13 — Trust/transparency layer (Claude Code)
+
+**Onboarding "How it works" screen:**
+- Added 3-card swipeable explainer between quiz and sign-up (page 3 of 4).
+- Card 1: "Built on real research" with Kahneman/Tversky/Cialdini citations.
+- Card 2: "One question. One minute." with BFAS methodology reference.
+- Card 3: "Your patterns. Not a grade." with revealed preference theory.
+- Gold "I'm ready" button on last card.
+
+**Research citations on questions:**
+- Added `researchSource` to Question model.
+- Supabase migration adds `research_source` column + populates all 16 biases.
+- Displayed in CheckInView below "Why this matters" when expanded (italic, 11pt).
+
+**Bias scoring system (BiasScoreService.swift):**
+- MasteryStage: unseen → noticed → emerging → active → improving → aware.
+- BiasTrend: worsening / stable / improving.
+- Scoring weights: +2 yes, -1 no, +3 tagged spend.
+- computeScore() builds full BiasScore from progress + events.
+
+**"About your score" sheet:**
+- Info button in InsightFeedView toolbar opens explanation sheet.
+- Sections: The Science, The Scoring (+2/-1/+3), Your Stages (6 levels),
+  Important (not clinical diagnosis disclaimer).
+- Gold "Got it" dismiss button.
+
+**Mastery stage badges on Learn cards:**
+- Top-right corner badge on each LearnView card.
+- Colour-coded: blue (noticed), amber (emerging), coral (active),
+  green (improving), gold (aware). Hidden when unseen.
+- Driven by BiasScoreService from user_bias_progress data.
+
+---
+
 ## 2026-04-13 — Daily check-in enforcement, home stats, missions (Claude Code)
 
 **CheckInView daily enforcement:**

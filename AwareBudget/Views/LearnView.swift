@@ -5,6 +5,7 @@ struct LearnView: View {
     @State private var selectedCategory: String = "All"
     @State private var currentIndex: Int = 0
     @State private var dragOffset: CGSize = .zero
+    @State private var biasProgress: [BiasProgress] = []
 
     private let categories: [String] = [
         "All",
@@ -52,6 +53,7 @@ struct LearnView: View {
             if allLessons.isEmpty {
                 allLessons = BiasLessonsMock.seed
             }
+            biasProgress = (try? await SupabaseService.shared.fetchBiasProgress()) ?? []
         }
         .onChange(of: selectedCategory) { _, _ in
             currentIndex = 0
@@ -134,6 +136,31 @@ struct LearnView: View {
         }
     }
 
+    // MARK: - Mastery stage helpers
+
+    private func masteryStage(for biasName: String) -> MasteryStage? {
+        guard let progress = biasProgress.first(where: { $0.biasName == biasName }) else {
+            return nil
+        }
+        let score = BiasScoreService.computeScore(
+            biasName: biasName,
+            progress: progress,
+            taggedEvents: 0
+        )
+        return score.masteryStage
+    }
+
+    private func stageColor(_ stage: MasteryStage) -> Color {
+        switch stage {
+        case .unseen:    return DS.textTertiary
+        case .noticed:   return Color(hex: "42A5F5")
+        case .emerging:  return Color(hex: "FFA726")
+        case .active:    return Color(hex: "FF7043")
+        case .improving: return DS.accent
+        case .aware:     return DS.goldBase
+        }
+    }
+
     // MARK: - Card stack (1 back card only)
 
     private var cardStack: some View {
@@ -186,13 +213,18 @@ struct LearnView: View {
                         .stroke(frontBorder, lineWidth: 0.5)
                 )
 
-            // Subtle seen badge in corner
-            Text("0")
-                .font(.system(size: 9, weight: .bold))
-                .foregroundStyle(DS.textTertiary)
-                .padding(6)
-                .background(Circle().fill(DS.paleGreen))
-                .padding(12)
+            // Mastery stage badge
+            if let stage = masteryStage(for: lesson.biasName), stage != .unseen {
+                Text(stage.rawValue)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule().fill(stageColor(stage))
+                    )
+                    .padding(12)
+            }
 
             VStack(spacing: 0) {
                 // Emoji in coloured circle

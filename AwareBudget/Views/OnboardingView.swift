@@ -16,7 +16,8 @@ struct OnboardingView: View {
             TabView(selection: $currentPage) {
                 welcomePage.tag(0)
                 quizPage.tag(1)
-                signUpPage.tag(2)
+                howItWorksPage.tag(2)
+                signUpPage.tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut(duration: 0.3), value: currentPage)
@@ -58,7 +59,7 @@ struct OnboardingView: View {
                 .buttonStyle(.plain)
                 .padding(.horizontal, DS.hPadding)
 
-                progressDots(current: 0, light: true)
+                progressDots(current: 0, total: 4, light: true)
                     .padding(.bottom, 32)
             }
             .padding(.horizontal, DS.hPadding)
@@ -124,7 +125,7 @@ struct OnboardingView: View {
                     .transition(.opacity)
                 }
 
-                progressDots(current: 1)
+                progressDots(current: 1, total: 4)
                     .padding(.bottom, 32)
             }
             .animation(.spring(response: 0.4, dampingFraction: 0.85), value: budgetHistory)
@@ -175,7 +176,96 @@ struct OnboardingView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Screen 3: Sign Up
+    // MARK: - Screen 3: How it works
+
+    @State private var howItWorksCard = 0
+
+    private var howItWorksPage: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            TabView(selection: $howItWorksCard) {
+                scienceCard(
+                    emoji: "🧠",
+                    title: "Built on real research",
+                    body: "16 cognitive biases drive most financial decisions. Not character flaws \u{2014} documented patterns proven by Nobel Prize-winning research.",
+                    citation: "Kahneman & Tversky, 1979 \u{00B7} Thaler, 1985 \u{00B7} Cialdini, 1984"
+                ).tag(0)
+
+                scienceCard(
+                    emoji: "\u{2726}",
+                    title: "One question. One minute.",
+                    body: "Each question is designed to surface a specific bias through your own experience. Yes or no. No right answers. No judgment.",
+                    citation: "Based on BFAS methodology, Grable & Joo 2004"
+                ).tag(1)
+
+                scienceCard(
+                    emoji: "📈",
+                    title: "Your patterns. Not a grade.",
+                    body: "Yes answers show a bias is active. No answers show your awareness working. After 7 days Nudge shows you what's driving your financial decisions.",
+                    citation: "Scoring based on revealed preference theory"
+                ).tag(2)
+            }
+            .tabViewStyle(.page(indexDisplayMode: .always))
+            .frame(height: 340)
+
+            if howItWorksCard == 2 {
+                Button {
+                    withAnimation { currentPage = 3 }
+                } label: {
+                    Text("I'm ready")
+                        .font(.system(size: 15, weight: .bold))
+                        .goldButtonStyle()
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, DS.hPadding)
+                .transition(.opacity)
+            }
+
+            Spacer()
+
+            progressDots(current: 2, total: 4)
+                .padding(.bottom, 32)
+        }
+    }
+
+    private func scienceCard(emoji: String, title: String, body: String, citation: String) -> some View {
+        VStack(spacing: 16) {
+            Text(emoji)
+                .font(.system(size: 52))
+
+            Text(title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(DS.textPrimary)
+                .multilineTextAlignment(.center)
+
+            Text(body)
+                .font(.subheadline)
+                .foregroundStyle(DS.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+
+            Text(citation)
+                .font(.system(size: 11))
+                .foregroundStyle(DS.textTertiary)
+                .italic()
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                .fill(DS.cardBg)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .stroke(DS.paleGreen, lineWidth: 0.5)
+                )
+        )
+        .padding(.horizontal, DS.hPadding)
+    }
+
+    // MARK: - Screen 4: Sign Up
 
     private var signUpPage: some View {
         AuthFormView(hasCompletedOnboarding: $hasCompletedOnboarding)
@@ -183,9 +273,9 @@ struct OnboardingView: View {
 
     // MARK: - Progress dots
 
-    private func progressDots(current: Int, light: Bool = false) -> some View {
+    private func progressDots(current: Int, total: Int = 4, light: Bool = false) -> some View {
         HStack(spacing: 8) {
-            ForEach(0..<3, id: \.self) { i in
+            ForEach(0..<total, id: \.self) { i in
                 Circle()
                     .fill(i == current
                           ? (light ? Color.white : Color(hex: "1A5C38"))

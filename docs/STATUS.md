@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. Daily check-in enforcement (once per day). Real Supabase questions live. HomeView stat cards + daily missions. Quick-log MoneyEventView with AUD ranges. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Current phase:** PRD v1.1 — Core loop complete. Trust/transparency layer: "How it works" onboarding screen, research citations on questions, bias scoring system, "About your score" sheet, mastery stage badges on Learn cards. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -47,6 +47,10 @@
   works offline until Supabase is wired.
 - `NotificationService.swift` — daily 8pm reminder scheduled via
   `UserNotifications`.
+- `BiasScoreService.swift` — **NEW** (2026-04-13). Bias scoring system with
+  MasteryStage (unseen/noticed/emerging/active/improving/aware), BiasTrend,
+  BiasScore struct, scoring weights (+2 yes, -1 no, +3 tagged spend),
+  calculateStage(), calculateTrend(), weeklyNet(), computeScore().
 
 ### ViewModels (`AwareBudget/ViewModels/`)
 - `HomeViewModel.swift` — streak + alignment logic, colour + message
@@ -246,6 +250,7 @@
   - `supabase/migrations/20260412150000_add_spending_driver.sql`
   - `supabase/migrations/20260412160000_rebuild_money_events_columns.sql`
   - `supabase/migrations/20260413120000_add_life_area_to_money_events.sql`
+  - `supabase/migrations/20260413130000_add_research_source_to_questions.sql`
 - Seed source of truth: `supabase/seed.sql` (15 original questions — kept
   for reference; 15 new PRD v1.1 questions + 16 bias_lessons are live via
   the migrations above)

@@ -259,13 +259,22 @@ struct CheckInView: View {
             .buttonStyle(.plain)
 
             if showWhy {
-                Text(q.whyExplanation)
-                    .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.85))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(12)
-                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(q.whyExplanation)
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if let source = q.researchSource, !source.isEmpty {
+                        Text(source)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.white.opacity(0.5))
+                            .italic()
+                    }
+                }
+                .padding(12)
+                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             Spacer(minLength: 0)
