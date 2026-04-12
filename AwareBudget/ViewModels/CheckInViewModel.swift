@@ -24,7 +24,7 @@ final class CheckInViewModel {
     }
 
     func submit() async {
-        guard !isSaving, let uid = service.currentUserId else { return }
+        guard !isSaving, let uid = await service.currentUserId else { return }
         isSaving = true
         defer { isSaving = false }
         do {

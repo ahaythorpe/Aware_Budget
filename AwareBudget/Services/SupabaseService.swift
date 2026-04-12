@@ -1,162 +1,230 @@
 import Foundation
-
-// NOTE: Once the Supabase Swift package is added via
-// File → Add Package Dependencies → https://github.com/supabase/supabase-swift
-// uncomment the `import Supabase` line and the real client wiring below.
-// A local in-memory stub is provided so the app builds and runs before the
-// package is added.
-
-// import Supabase
+import Supabase
 
 @MainActor
 final class SupabaseService {
     static let shared = SupabaseService()
 
-    // Public values — safe to ship in the client.
-    // Project ref: vdnnoezyogbgtiubamze (region: Asia-Pacific)
-    private let supabaseURL = URL(string: "https://vdnnoezyogbgtiubamze.supabase.co")!
-    private let supabaseAnonKey = "sb_publishable_lwuCqoY6jpKRwQRJoqZYFQ_CiavSWwH"
-
-    // let client: SupabaseClient
+    let client: SupabaseClient
 
     private init() {
-        // self.client = SupabaseClient(supabaseURL: supabaseURL, supabaseKey: supabaseAnonKey)
+        client = SupabaseClient(
+            supabaseURL: URL(string: "https://vdnnoezyogbgtiubamze.supabase.co")!,
+            supabaseKey: "sb_publishable_lwuCqoY6jpKRwQRJoqZYFQ_CiavSWwH"
+        )
     }
 
-    // MARK: - Stub user session
+    // MARK: - Current user
 
-    private(set) var currentUserId: UUID? = UUID(uuidString: "00000000-0000-0000-0000-000000000001")
-
-    // MARK: - Stub data stores (replace with real Supabase queries)
-
-    private var checkIns: [CheckIn] = []
-    private var events: [MoneyEvent] = []
-    private var budgetMonths: [BudgetMonth] = []
-    private var questions: [Question] = QuestionPool.seed
+    var currentUserId: UUID? {
+        get async {
+            try? await client.auth.session.user.id
+        }
+    }
 
     // MARK: - Auth
 
     func signUp(email: String, password: String) async throws {
-        // TODO: replace with client.auth.signUp(email:password:)
-        currentUserId = UUID()
+        try await client.auth.signUp(email: email, password: password)
     }
 
     func signIn(email: String, password: String) async throws {
-        // TODO: replace with client.auth.signIn(email:password:)
-        currentUserId = UUID()
+        try await client.auth.signIn(email: email, password: password)
     }
 
     func signOut() async throws {
-        // TODO: replace with client.auth.signOut()
-        currentUserId = nil
+        try await client.auth.signOut()
     }
 
     // MARK: - Check-ins
 
     func saveCheckIn(_ checkIn: CheckIn) async throws {
-        checkIns.removeAll { Calendar.current.isDate($0.date, inSameDayAs: checkIn.date) && $0.userId == checkIn.userId }
-        checkIns.append(checkIn)
+        try await client.from("daily_checkins")
+            .upsert(checkIn, onConflict: "user_id,date")
+            .execute()
     }
 
     func fetchTodaysCheckIn() async throws -> CheckIn? {
-        guard let uid = currentUserId else { return nil }
-        return checkIns.first {
-            $0.userId == uid && Calendar.current.isDateInToday($0.date)
-        }
+        guard let uid = await currentUserId else { return nil }
+        let today = ISO8601DateFormatter.dateOnly.string(from: Date())
+        let response: [CheckIn] = try await client.from("daily_checkins")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .eq("date", value: today)
+            .limit(1)
+            .execute()
+            .value
+        return response.first
     }
 
     func fetchCheckIn(on date: Date) async throws -> CheckIn? {
-        guard let uid = currentUserId else { return nil }
-        return checkIns.first {
-            $0.userId == uid && Calendar.current.isDate($0.date, inSameDayAs: date)
-        }
+        guard let uid = await currentUserId else { return nil }
+        let dateStr = ISO8601DateFormatter.dateOnly.string(from: date)
+        let response: [CheckIn] = try await client.from("daily_checkins")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .eq("date", value: dateStr)
+            .limit(1)
+            .execute()
+            .value
+        return response.first
     }
 
     func fetchRecentCheckIns(limit: Int) async throws -> [CheckIn] {
-        guard let uid = currentUserId else { return [] }
-        return checkIns
-            .filter { $0.userId == uid }
-            .sorted { $0.date > $1.date }
-            .prefix(limit)
-            .map { $0 }
+        guard let uid = await currentUserId else { return [] }
+        let response: [CheckIn] = try await client.from("daily_checkins")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .order("date", ascending: false)
+            .limit(limit)
+            .execute()
+            .value
+        return response
     }
 
     // MARK: - Money events
 
     func saveMoneyEvent(_ event: MoneyEvent) async throws {
-        events.append(event)
+        try await client.from("money_events")
+            .insert(event)
+            .execute()
     }
 
     func fetchMoneyEvents(forMonth month: Date) async throws -> [MoneyEvent] {
-        guard let uid = currentUserId else { return [] }
+        guard let uid = await currentUserId else { return [] }
         let cal = Calendar.current
-        return events
-            .filter { $0.userId == uid && cal.isDate($0.date, equalTo: month, toGranularity: .month) }
-            .sorted { $0.date > $1.date }
+        let start = cal.date(from: cal.dateComponents([.year, .month], from: month))!
+        let end = cal.date(byAdding: .month, value: 1, to: start)!
+        let startStr = ISO8601DateFormatter.dateOnly.string(from: start)
+        let endStr = ISO8601DateFormatter.dateOnly.string(from: end)
+        let response: [MoneyEvent] = try await client.from("money_events")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .gte("date", value: startStr)
+            .lt("date", value: endStr)
+            .order("date", ascending: false)
+            .execute()
+            .value
+        return response
     }
 
     func fetchRecentMoneyEvents(limit: Int) async throws -> [MoneyEvent] {
-        guard let uid = currentUserId else { return [] }
-        return events
-            .filter { $0.userId == uid }
-            .sorted { $0.date > $1.date }
-            .prefix(limit)
-            .map { $0 }
+        guard let uid = await currentUserId else { return [] }
+        let response: [MoneyEvent] = try await client.from("money_events")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .order("date", ascending: false)
+            .limit(limit)
+            .execute()
+            .value
+        return response
     }
 
     func fetchMoneyEventsThisWeek() async throws -> [MoneyEvent] {
-        guard let uid = currentUserId else { return [] }
+        guard let uid = await currentUserId else { return [] }
         var cal = Calendar(identifier: .iso8601)
         cal.firstWeekday = 2
         let now = Date()
         guard let monday = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
             return []
         }
-        return events.filter { $0.userId == uid && $0.date >= monday && $0.date <= now }
+        let mondayStr = ISO8601DateFormatter.dateOnly.string(from: monday)
+        let todayStr = ISO8601DateFormatter.dateOnly.string(from: now)
+        let response: [MoneyEvent] = try await client.from("money_events")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .gte("date", value: mondayStr)
+            .lte("date", value: todayStr)
+            .order("date", ascending: false)
+            .execute()
+            .value
+        return response
     }
 
-    /// Count how many times a behaviour tag has been used across all money events
     func countBehaviourTag(_ tag: String) async throws -> Int {
-        guard let uid = currentUserId else { return 0 }
-        return events.filter { $0.userId == uid && $0.behaviourTag == tag }.count
+        guard let uid = await currentUserId else { return 0 }
+        let response: [MoneyEvent] = try await client.from("money_events")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .eq("behaviour_tag", value: tag)
+            .execute()
+            .value
+        return response.count
     }
 
-    /// Fetch all money events (for insights calculations)
     func fetchAllMoneyEvents() async throws -> [MoneyEvent] {
-        guard let uid = currentUserId else { return [] }
-        return events
-            .filter { $0.userId == uid }
-            .sorted { $0.date > $1.date }
+        guard let uid = await currentUserId else { return [] }
+        let response: [MoneyEvent] = try await client.from("money_events")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .order("date", ascending: false)
+            .execute()
+            .value
+        return response
     }
 
     // MARK: - Questions
 
     func fetchNextQuestion() async throws -> Question {
-        let cal = Calendar.current
-        let fourteenDaysAgo = cal.date(byAdding: .day, value: -14, to: Date()) ?? Date()
-        let candidates = questions.filter { $0.lastShown == nil || $0.lastShown! < fourteenDaysAgo }
-        let pool = candidates.isEmpty ? questions : candidates
-        let picked = pool.min(by: { ($0.lastShown ?? .distantPast) < ($1.lastShown ?? .distantPast) }) ?? pool[0]
+        let fourteenDaysAgo = Calendar.current.date(byAdding: .day, value: -14, to: Date())!
+        let dateStr = ISO8601DateFormatter.dateOnly.string(from: fourteenDaysAgo)
 
-        if let idx = questions.firstIndex(where: { $0.id == picked.id }) {
-            questions[idx].lastShown = Date()
+        // Try questions not shown in the last 14 days first
+        var response: [Question] = try await client.from("question_pool")
+            .select()
+            .or("last_shown.is.null,last_shown.lt.\(dateStr)")
+            .order("last_shown", ascending: true, nullsFirst: true)
+            .limit(1)
+            .execute()
+            .value
+
+        // Fall back to least recently shown
+        if response.isEmpty {
+            response = try await client.from("question_pool")
+                .select()
+                .order("last_shown", ascending: true, nullsFirst: true)
+                .limit(1)
+                .execute()
+                .value
         }
+
+        guard let picked = response.first else {
+            throw NSError(domain: "SupabaseService", code: 404,
+                          userInfo: [NSLocalizedDescriptionKey: "No questions available"])
+        }
+
+        // Update last_shown
+        try await client.from("question_pool")
+            .update(["last_shown": ISO8601DateFormatter.dateOnly.string(from: Date())])
+            .eq("id", value: picked.id.uuidString)
+            .execute()
+
         return picked
     }
 
     // MARK: - Budget months
 
     func fetchOrCreateBudgetMonth(for date: Date) async throws -> BudgetMonth {
-        guard let uid = currentUserId else {
-            throw NSError(domain: "SupabaseService", code: 401, userInfo: [NSLocalizedDescriptionKey: "No signed-in user"])
+        guard let uid = await currentUserId else {
+            throw NSError(domain: "SupabaseService", code: 401,
+                          userInfo: [NSLocalizedDescriptionKey: "No signed-in user"])
         }
         let cal = Calendar.current
-        if let existing = budgetMonths.first(where: {
-            $0.userId == uid && cal.isDate($0.month, equalTo: date, toGranularity: .month)
-        }) {
-            return existing
-        }
-        let startOfMonth = cal.date(from: cal.dateComponents([.year, .month], from: date)) ?? date
+        let startOfMonth = cal.date(from: cal.dateComponents([.year, .month], from: date))!
+        let monthStr = ISO8601DateFormatter.dateOnly.string(from: startOfMonth)
+
+        // Check for existing
+        let existing: [BudgetMonth] = try await client.from("budget_months")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .eq("month", value: monthStr)
+            .limit(1)
+            .execute()
+            .value
+
+        if let found = existing.first { return found }
+
+        // Create new
         let new = BudgetMonth(
             id: UUID(),
             userId: uid,
@@ -164,17 +232,131 @@ final class SupabaseService {
             incomeTarget: 0,
             createdAt: Date()
         )
-        budgetMonths.append(new)
+        try await client.from("budget_months")
+            .insert(new)
+            .execute()
         return new
     }
 
     func updateIncomeTarget(_ amount: Double, for month: Date) async throws {
-        guard let uid = currentUserId else { return }
+        guard let uid = await currentUserId else { return }
         let cal = Calendar.current
-        if let idx = budgetMonths.firstIndex(where: {
-            $0.userId == uid && cal.isDate($0.month, equalTo: month, toGranularity: .month)
-        }) {
-            budgetMonths[idx].incomeTarget = amount
+        let startOfMonth = cal.date(from: cal.dateComponents([.year, .month], from: month))!
+        let monthStr = ISO8601DateFormatter.dateOnly.string(from: startOfMonth)
+
+        try await client.from("budget_months")
+            .update(["income_target": amount])
+            .eq("user_id", value: uid.uuidString)
+            .eq("month", value: monthStr)
+            .execute()
+    }
+
+    // MARK: - Bias lessons (PRD v1.1)
+
+    func fetchAllBiasLessons() async throws -> [BiasLesson] {
+        let response: [BiasLesson] = try await client.from("bias_lessons")
+            .select()
+            .order("sort_order", ascending: true)
+            .execute()
+            .value
+        return response
+    }
+
+    func fetchBiasLesson(biasName: String) async throws -> BiasLesson? {
+        let response: [BiasLesson] = try await client.from("bias_lessons")
+            .select()
+            .eq("bias_name", value: biasName)
+            .limit(1)
+            .execute()
+            .value
+        return response.first
+    }
+
+    // MARK: - Bias progress (PRD v1.1)
+
+    func fetchBiasProgress() async throws -> [BiasProgress] {
+        guard let uid = await currentUserId else { return [] }
+        let response: [BiasProgress] = try await client.from("user_bias_progress")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .execute()
+            .value
+        return response
+    }
+
+    func updateBiasProgress(biasName: String, reflected: Bool) async throws {
+        guard let uid = await currentUserId else { return }
+        let today = ISO8601DateFormatter.dateOnly.string(from: Date())
+
+        // Try to fetch existing progress
+        let existing: [BiasProgress] = try await client.from("user_bias_progress")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .eq("bias_name", value: biasName)
+            .limit(1)
+            .execute()
+            .value
+
+        if let row = existing.first {
+            var updates: [String: AnyJSON] = [
+                "times_encountered": .integer(row.timesEncountered + 1),
+                "last_seen": .string(today),
+            ]
+            if reflected {
+                updates["times_reflected"] = .integer(row.timesReflected + 1)
+            }
+            try await client.from("user_bias_progress")
+                .update(updates)
+                .eq("id", value: row.id.uuidString)
+                .execute()
+        } else {
+            let new = BiasProgress(
+                id: UUID(),
+                userId: uid,
+                biasName: biasName,
+                timesEncountered: 1,
+                timesReflected: reflected ? 1 : 0,
+                firstSeen: Date(),
+                lastSeen: Date(),
+                createdAt: Date()
+            )
+            try await client.from("user_bias_progress")
+                .insert(new)
+                .execute()
         }
     }
+}
+
+// MARK: - BiasProgress model
+
+struct BiasProgress: Identifiable, Codable, Hashable {
+    let id: UUID
+    var userId: UUID
+    var biasName: String
+    var timesEncountered: Int
+    var timesReflected: Int
+    var firstSeen: Date?
+    var lastSeen: Date?
+    var createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case biasName = "bias_name"
+        case timesEncountered = "times_encountered"
+        case timesReflected = "times_reflected"
+        case firstSeen = "first_seen"
+        case lastSeen = "last_seen"
+        case createdAt = "created_at"
+    }
+}
+
+// MARK: - Date helper
+
+extension ISO8601DateFormatter {
+    static let dateOnly: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withFullDate]
+        return f
+    }()
 }

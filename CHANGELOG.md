@@ -5,6 +5,44 @@
 
 ---
 
+## 2026-04-12 — Wire Supabase Swift package + replace all stubs with live client (Claude Code)
+
+**Goal:** Remove the in-memory stub in SupabaseService and connect to
+the real Supabase backend.
+
+**Package added:**
+- supabase-swift 2.43.1 added to AwareBudget.xcodeproj via pbxproj edit
+  (XCRemoteSwiftPackageReference + XCSwiftPackageProductDependency).
+- Resolved via `xcodebuild -resolvePackageDependencies` (also pulled
+  swift-crypto, swift-http-types, swift-concurrency-extras, etc.).
+
+**SupabaseService.swift — full rewrite:**
+- `import Supabase` uncommented, `SupabaseClient` initialised with real
+  URL + anon key.
+- All in-memory arrays removed. Every method now uses `client.from(...)`
+  or `client.auth`.
+- New methods: `fetchAllBiasLessons()`, `fetchBiasLesson(biasName:)`,
+  `fetchBiasProgress()`, `updateBiasProgress(biasName:reflected:)`.
+- `BiasProgress` model added (maps to `user_bias_progress` table).
+- `ISO8601DateFormatter.dateOnly` helper for date-only PostgREST filters.
+- `currentUserId` is now an `async` computed property (reads from
+  `client.auth.session`).
+
+**DB migration:**
+- `20260412160000_rebuild_money_events_columns.sql` — aligns
+  `money_events` table with PRD v1.1 Swift model: added
+  `planned_status`, `behaviour_tag`, `life_event`; dropped old
+  `category` + `event_type`. Existing rows migrated.
+- Both `20260412150000` and `20260412160000` pushed and applied.
+
+**ViewModel fixes:**
+- `CheckInViewModel.submit()` — `await service.currentUserId`
+- `MoneyEventViewModel.save()` — `await service.currentUserId`
+
+**Build:** succeeds on iPhone 17 Pro simulator (Xcode 26, iOS 26.2).
+
+---
+
 ## 2026-04-12 — Replace MonthView with InsightFeedView + SparklineView (Claude Code)
 
 **Goal:** MonthView showed alignment % and income targets — legacy

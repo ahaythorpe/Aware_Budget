@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — Money Green + Nugget Gold + NudgeEngine + Insights tab. Tab 4 renamed from Month to Insights with InsightFeedView: weekly hero card, sparkline trend cards, bias pattern cards, weekly Nudge insight. No categories, no income target, no alignment %. Pure behaviour-based awareness trends. Supabase wiring blocked on Xcode package add.
+**Current phase:** PRD v1.1 — Supabase LIVE. supabase-swift 2.43.1 wired, all in-memory stubs replaced with real client calls. Money Green + Nugget Gold + NudgeEngine + Insights tab. DB schema aligned with Swift models (money_events rebuilt). Ready for end-to-end testing on device.
 
 ---
 
@@ -33,10 +33,16 @@
   the new required `biasCategory` + `difficulty` initialiser args
 
 ### Services (`AwareBudget/Services/`)
-- `SupabaseService.swift` — **in-memory stub** (see "Blocked" below). Full
-  method surface matches PRD: auth, check-ins, money events, questions,
-  budget months. Added `fetchMoneyEventsThisWeek()` and
-  `countBehaviourTag(_:)` for NudgeEngine context.
+- `SupabaseService.swift` — **LIVE Supabase client** (supabase-swift 2.43.1).
+  All methods now hit the real Supabase backend. Auth via `client.auth`,
+  CRUD via `client.from(...)`. Methods: signUp/signIn/signOut, check-ins
+  (save, fetchToday, fetchByDate, fetchRecent), money events (save, fetch
+  by month, fetchRecent, fetchThisWeek, countBehaviourTag, fetchAll),
+  questions (fetchNext with 14-day cooldown + last_shown update),
+  budget months (fetchOrCreate, updateIncomeTarget), bias lessons
+  (fetchAll, fetchByName), bias progress (fetch, update with
+  upsert logic). `BiasProgress` model defined in same file.
+  `ISO8601DateFormatter.dateOnly` helper for date-only queries.
 - `QuestionPool.swift` — the 15 seed questions, used by the stub so the app
   works offline until Supabase is wired.
 - `NotificationService.swift` — daily 8pm reminder scheduled via
@@ -216,24 +222,37 @@
   (Ostrich Effect → Framing Effect, sort_order 1–16). Verified via REST:
   `bias_lessons?order=sort_order.asc` returned all 16 with correct
   emoji + sort_order.
+- `supabase db push` (2026-04-12, spending_driver + money_events rebuild) →
+  applied `20260412150000_add_spending_driver.sql` and
+  `20260412160000_rebuild_money_events_columns.sql`. `daily_checkins` now
+  has `spending_driver` column. `money_events` now has `planned_status`,
+  `behaviour_tag`, `life_event` columns (old `category` + `event_type`
+  columns dropped). Existing rows migrated: event_type mapped to
+  planned_status.
 - Migrations source of truth:
   - `supabase/migrations/20260412000000_initial_schema.sql`
   - `supabase/migrations/20260412120000_add_bias_lessons_and_progress.sql`
   - `supabase/migrations/20260412130000_seed_15_new_questions.sql`
   - `supabase/migrations/20260412140000_seed_bias_lessons.sql`
+  - `supabase/migrations/20260412150000_add_spending_driver.sql`
+  - `supabase/migrations/20260412160000_rebuild_money_events_columns.sql`
 - Seed source of truth: `supabase/seed.sql` (15 original questions — kept
   for reference; 15 new PRD v1.1 questions + 16 bias_lessons are live via
   the migrations above)
 
-## 🚧 Blocked / pending user action
+## ✅ Supabase Swift package — DONE
 
-1. **Add Supabase Swift package** (user must do this in Xcode UI):
-   `File → Add Package Dependencies → https://github.com/supabase/supabase-swift`
-2. **Swap the stub** — once the package is in place, replace the in-memory
-   arrays in `SupabaseService` with real `client.from(...)` calls. All call
-   sites already use the correct `async throws` signatures, so the view
-   models and views do not need to change.
-3. **(Optional) Add the Supabase MCP server** — run in a regular terminal:
+- **supabase-swift 2.43.1** added to `AwareBudget.xcodeproj` as SPM
+  dependency via pbxproj edit + `xcodebuild -resolvePackageDependencies`.
+- `import Supabase` active in `SupabaseService.swift`.
+- `SupabaseClient` initialised with real URL + anon key.
+- All in-memory stub arrays removed; all methods now use real
+  `client.from(...)` / `client.auth` calls.
+- Build succeeds on iPhone 17 Pro simulator (Xcode 26, iOS 26.2).
+
+## 🚧 Remaining / pending
+
+1. **(Optional) Add the Supabase MCP server** — run in a regular terminal:
    ```
    claude mcp add --scope project --transport http supabase \
      "https://mcp.supabase.com/mcp?project_ref=vdnnoezyogbgtiubamze"
@@ -264,14 +283,11 @@ Features" and "Navigation". Specifies:
 
 ## 🔜 Next up (in order)
 
-1. **[BLOCKED on Xcode UI]** Add Supabase Swift package:
-   `File → Add Package Dependencies → https://github.com/supabase/supabase-swift`
-2. Wire real Supabase calls in `SupabaseService.swift` (replace stub)
-   once package is in place. Extend with `fetchAllBiasLessons`,
-   `fetchBiasLesson(biasName:)`,
-   `updateBiasProgress(biasName:reflected:)`, `fetchBiasProgress`.
-3. Swap `LearnView` / `BiasDetailView` / `HomeView` / `CheckInView`
-   off mock data once the service is live.
+1. ~~Add Supabase Swift package~~ — **DONE** (2026-04-12)
+2. ~~Wire real Supabase calls in SupabaseService.swift~~ — **DONE** (2026-04-12)
+3. Swap `LearnView` / `BiasDetailView` off `BiasLessonsMock.seed` →
+   use `service.fetchAllBiasLessons()`. `CheckInView` off
+   `QuestionPool.seed` → use `service.fetchNextQuestion()`.
 4. Backfill `bias_category` on the original 15 `question_pool` rows.
 5. Verify sign-up → first check-in → streak = 1 flow on device/simulator.
 6. Verify notification permission prompt fires after first check-in

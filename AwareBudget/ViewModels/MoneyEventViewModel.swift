@@ -30,7 +30,7 @@ final class MoneyEventViewModel {
     var showLifeEvent: Bool { parsedAmount > 200 }
 
     func save() async {
-        guard !isSaving, let uid = service.currentUserId else { return }
+        guard !isSaving, let uid = await service.currentUserId else { return }
         guard parsedAmount > 0 else {
             errorMessage = "Enter a valid amount."
             return
