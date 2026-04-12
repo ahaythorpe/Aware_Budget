@@ -86,16 +86,14 @@
   Migration `20260412150000_add_spending_driver.sql` adds nullable
   `spending_driver` text column with CHECK constraint to
   `daily_checkins`.
-- `LearnView.swift` — **NEW** PRD v1.1 swipe card deck. Header
-  "Understanding your money mind", horizontal-scroll filter pill row
-  (All + 7 categories with static `categoryColour(for:)` returning
-  the 7 hex pairs from PRD), card stack of 3 (front white with 0.5px
-  purple border, middle #F0EEF8 0.96, back #E8E5F5 0.92). Front
-  card: 48pt emoji, category pill + mock "Seen 0 times" badge,
-  `.title2` bold #2D1B69 bias name, secondary short description,
-  divider, teal "IN REAL LIFE" label, teal-tinted example card, and
-  deep-purple "How to counter it →" NavigationLink button. Horizontal
-  DragGesture cycles cards. Dot indicator at bottom is tappable.
+- `LearnView.swift` — **SIMPLIFIED** swipe card deck. Fixed 340pt card
+  height, 1 back card (not 2). Front card: centred 52pt emoji, centred
+  category pill (10pt), 22pt bold centred bias name with breathing room,
+  13pt centred secondary description (max 2 lines), divider with 12pt
+  padding, 10pt teal "IN REAL LIFE" caps, 11pt example in tinted card
+  (max 3 lines, truncated), gold "How to counter it →" button pinned
+  to bottom. Seen count moved to subtle corner badge. Filter pills
+  compact: 9pt text, less padding. Swipe counter "3 of 16" below card.
   `.navigationDestination(for: BiasLesson.self)` pushes
   `BiasDetailView(lesson:)`. Sources `BiasLessonsMock.seed`.
 - `BiasDetailView.swift` — **NEW** PRD v1.1. Receives `BiasLesson` +

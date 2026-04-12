@@ -18,8 +18,8 @@ struct LearnView: View {
     ]
 
     private let frontBorder = DS.accent.opacity(0.25)
-    private let middleBg = Color(hex: "C8E6C9")
-    private let backBg   = Color(hex: "A5D6A7")
+    private let backBg = Color(hex: "C8E6C9")
+    private let cardHeight: CGFloat = 340
 
     private var filteredLessons: [BiasLesson] {
         guard selectedCategory != "All" else { return allLessons }
@@ -29,7 +29,7 @@ struct LearnView: View {
     var body: some View {
         ZStack {
             DS.bg.ignoresSafeArea()
-            VStack(spacing: 20) {
+            VStack(spacing: 16) {
                 header
                 filterPillRow
                 Spacer(minLength: 0)
@@ -37,11 +37,12 @@ struct LearnView: View {
                     emptyState
                 } else {
                     cardStack
+                    swipeCounter
                 }
                 Spacer(minLength: 0)
                 if filteredLessons.count > 1 {
                     dotIndicator
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 20)
                 }
             }
             .padding(.top, 8)
@@ -64,23 +65,23 @@ struct LearnView: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             Text("Understanding your money mind")
-                .font(.title2.weight(.bold))
+                .font(.title3.weight(.bold))
                 .foregroundStyle(DS.textPrimary)
             Text("Swipe through biases. Learn one. Notice it tomorrow.")
-                .font(.subheadline)
+                .font(.caption)
                 .foregroundStyle(DS.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, DS.hPadding)
     }
 
-    // MARK: - Filter pills
+    // MARK: - Filter pills (compact)
 
     private var filterPillRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 ForEach(categories, id: \.self) { cat in
                     filterPill(cat)
                 }
@@ -97,9 +98,9 @@ struct LearnView: View {
             }
         } label: {
             Text(cat)
-                .font(.footnote.weight(.semibold))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
+                .font(.system(size: 9, weight: .semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
                 .background(
                     Capsule().fill(selected ? DS.primary : DS.cardBg)
                 )
@@ -133,19 +134,14 @@ struct LearnView: View {
         }
     }
 
-    // MARK: - Card stack
+    // MARK: - Card stack (1 back card only)
 
     private var cardStack: some View {
         ZStack {
-            if currentIndex + 2 < filteredLessons.count {
-                cardBase(fill: backBg, border: false)
-                    .scaleEffect(0.92)
-                    .offset(y: 24)
-            }
             if currentIndex + 1 < filteredLessons.count {
-                cardBase(fill: middleBg, border: false)
+                cardBase(fill: backBg)
                     .scaleEffect(0.96)
-                    .offset(y: 12)
+                    .offset(y: 10)
             }
             if currentIndex < filteredLessons.count {
                 frontCard(filteredLessons[currentIndex])
@@ -171,108 +167,126 @@ struct LearnView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 540)
+        .frame(height: cardHeight)
         .padding(.horizontal, DS.hPadding)
     }
 
-    private func cardBase(fill: Color, border: Bool) -> some View {
-        RoundedRectangle(cornerRadius: 28, style: .continuous)
+    private func cardBase(fill: Color) -> some View {
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
             .fill(fill)
-            .overlay(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(border ? frontBorder : .clear, lineWidth: 0.5)
-            )
+            .frame(height: cardHeight)
     }
 
     private func frontCard(_ lesson: BiasLesson) -> some View {
-        ZStack(alignment: .topLeading) {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
+        ZStack(alignment: .topTrailing) {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(DS.cardBg)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .stroke(frontBorder, lineWidth: 0.5)
                 )
 
-            VStack(alignment: .leading, spacing: 14) {
+            // Subtle seen badge in corner
+            Text("0")
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(DS.textTertiary)
+                .padding(6)
+                .background(Circle().fill(DS.paleGreen))
+                .padding(12)
+
+            VStack(spacing: 0) {
+                // Emoji centred
                 Text(lesson.emoji)
-                    .font(.system(size: 48))
+                    .font(.system(size: 52))
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 18)
 
-                HStack(spacing: 8) {
-                    categoryPill(lesson.category)
-                    seenBadge
-                }
+                // Category pill centred
+                categoryPill(lesson.category)
+                    .padding(.top, 10)
 
+                // Bias name
                 Text(lesson.biasName)
-                    .font(.title2.weight(.bold))
+                    .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(DS.primary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 12)
 
+                // Short description
                 Text(lesson.shortDescription)
-                    .font(.body)
+                    .font(.system(size: 13))
                     .foregroundStyle(DS.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
+                    .padding(.horizontal, 8)
 
-                Divider().padding(.vertical, 2)
+                // Divider with breathing room
+                Divider()
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 8)
 
+                // In real life
                 Text("IN REAL LIFE")
-                    .font(.caption2.weight(.bold))
+                    .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(DS.accent)
                     .tracking(0.8)
 
                 Text(lesson.realWorldExample)
-                    .font(.footnote)
+                    .font(.system(size: 11))
                     .foregroundStyle(DS.textSecondary)
-                    .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
                     .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
                             .fill(DS.paleGreen)
                     )
-                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 4)
 
                 Spacer(minLength: 0)
 
+                // Gold CTA pinned to bottom
                 NavigationLink(value: lesson) {
-                    HStack {
-                        Text("How to counter it")
-                            .font(.subheadline.weight(.semibold))
-                        Spacer()
-                        Image(systemName: "arrow.right")
-                            .font(.subheadline.weight(.bold))
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 14)
-                    .background(DS.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    Text("How to counter it \u{2192}")
+                        .font(.system(size: 12, weight: .bold))
+                        .goldButtonStyle()
                 }
                 .buttonStyle(.plain)
+                .padding(.bottom, 16)
             }
-            .padding(22)
+            .padding(.horizontal, 14)
         }
+        .frame(height: cardHeight)
     }
 
     private func categoryPill(_ cat: String) -> some View {
         let colours = Self.categoryColour(for: cat)
         return Text(cat)
-            .font(.caption.weight(.semibold))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .font(.system(size: 10, weight: .semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
             .background(Capsule().fill(colours.bg))
             .foregroundStyle(colours.text)
     }
 
-    private var seenBadge: some View {
-        Text("Seen 0 times")
-            .font(.caption.weight(.medium))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(Capsule().fill(DS.paleGreen))
-            .foregroundStyle(DS.textSecondary)
+    // MARK: - Swipe counter
+
+    private var swipeCounter: some View {
+        Text("\(currentIndex + 1) of \(filteredLessons.count)")
+            .font(.caption)
+            .foregroundStyle(DS.textTertiary)
     }
 
     // MARK: - Dot indicator
 
     private var dotIndicator: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             ForEach(0..<filteredLessons.count, id: \.self) { i in
                 Button {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -282,7 +296,7 @@ struct LearnView: View {
                 } label: {
                     Circle()
                         .fill(i == currentIndex ? DS.primary : DS.textTertiary.opacity(0.3))
-                        .frame(width: 8, height: 8)
+                        .frame(width: 7, height: 7)
                 }
                 .buttonStyle(.plain)
             }
