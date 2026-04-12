@@ -104,6 +104,23 @@ final class SupabaseService {
             .map { $0 }
     }
 
+    func fetchMoneyEventsThisWeek() async throws -> [MoneyEvent] {
+        guard let uid = currentUserId else { return [] }
+        var cal = Calendar(identifier: .iso8601)
+        cal.firstWeekday = 2
+        let now = Date()
+        guard let monday = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return []
+        }
+        return events.filter { $0.userId == uid && $0.date >= monday && $0.date <= now }
+    }
+
+    /// Count how many times a behaviour tag has been used across all money events
+    func countBehaviourTag(_ tag: String) async throws -> Int {
+        guard let uid = currentUserId else { return 0 }
+        return events.filter { $0.userId == uid && $0.behaviourTag == tag }.count
+    }
+
     // MARK: - Questions
 
     func fetchNextQuestion() async throws -> Question {

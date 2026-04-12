@@ -13,6 +13,7 @@ final class MoneyEventViewModel {
     var isSaving = false
     var errorMessage: String?
     var didSave = false
+    var nudgeResponse: NudgeMessage?
 
     private let service = SupabaseService.shared
 
@@ -51,6 +52,22 @@ final class MoneyEventViewModel {
 
         do {
             try await service.saveMoneyEvent(event)
+
+            // Build Nudge response based on pattern
+            let tagCount: Int
+            if let tag = behaviourTag, showBehaviourTag {
+                tagCount = try await service.countBehaviourTag(tag.rawValue)
+            } else {
+                tagCount = 0
+            }
+
+            nudgeResponse = NudgeEngine.moneyEventResponse(
+                behaviourTag: showBehaviourTag ? behaviourTag : nil,
+                tagCount: tagCount,
+                lifeEvent: showLifeEvent ? lifeEvent : nil,
+                plannedStatus: plannedStatus
+            )
+
             didSave = true
         } catch {
             errorMessage = error.localizedDescription

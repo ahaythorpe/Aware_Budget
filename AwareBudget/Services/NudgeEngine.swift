@@ -14,6 +14,8 @@ struct NudgeContext {
     var totalBiasesSeen: Int
     var isFirstOpen: Bool
     var completedCheckInToday: Bool
+    var unplannedSpendPct: Double   // % of this week's spend that is unplanned
+    var weeklyNet: Double           // planned total minus unplanned total this week
 }
 
 enum NudgeAction: Equatable {
@@ -71,12 +73,21 @@ enum NudgeEngine {
             )
         }
 
-        // 4. Streak milestones
+        // 4. High unplanned spend this week
+        if ctx.unplannedSpendPct > 50, ctx.weeklyNet < 0 {
+            return .withAction(
+                "\(Int(ctx.unplannedSpendPct))% of this week's spend was unplanned. Nudge isn't judging, but the pattern is worth seeing.",
+                actionLabel: "View trends",
+                action: .openTrends
+            )
+        }
+
+        // 5. Streak milestones
         if let line = streakMilestone(ctx) {
             return .text(line)
         }
 
-        // 5. Anxious tone + rising spend
+        // 6. Anxious tone + rising spend
         if ctx.emotionalToneToday == "anxious",
            ctx.spendTrend == "up" {
             return .withAction(
@@ -86,14 +97,22 @@ enum NudgeEngine {
             )
         }
 
-        // 6. Strong alignment + active streak
+        // 7. Anxious tone + high unplanned
+        if ctx.emotionalToneToday == "anxious",
+           ctx.unplannedSpendPct > 40 {
+            return .text(
+                "Anxious today and \(Int(ctx.unplannedSpendPct))% unplanned this week. Nudge sees the connection. Awareness is the lever."
+            )
+        }
+
+        // 8. Strong alignment + active streak
         if ctx.alignmentPct >= 85, ctx.streakDays >= 3 {
             return .text(
                 "Alignment at \(Int(ctx.alignmentPct))% and \(ctx.streakDays) days strong. Nudge approves. Quietly."
             )
         }
 
-        // 7. Bias pattern emerging (3 encounters)
+        // 9. Bias pattern emerging (3 encounters)
         if ctx.topBiasCount == 3, let bias = ctx.topBias {
             return .withAction(
                 "\(bias) has appeared 3 times now. That's a pattern, not a coincidence. Worth knowing what to do about it.",
@@ -102,14 +121,14 @@ enum NudgeEngine {
             )
         }
 
-        // 8. Checked in today — daily acknowledgement
+        // 10. Checked in today — daily acknowledgement
         if ctx.completedCheckInToday, ctx.streakDays > 0 {
             return .text(
                 "Day \(ctx.streakDays). Nudge is here. So are you."
             )
         }
 
-        // 9. Has a streak but hasn't checked in yet today
+        // 11. Has a streak but hasn't checked in yet today
         if ctx.streakDays > 0 {
             return .withAction(
                 "Day \(ctx.streakDays + 1) is waiting. Nudge doesn't beg, but the streak does.",
@@ -118,7 +137,7 @@ enum NudgeEngine {
             )
         }
 
-        // 10. Zero streak — cold start
+        // 12. Zero streak — cold start
         return .withAction(
             "Nothing tracked yet. Nudge has questions. Starting with: how aware are you, really?",
             actionLabel: "Find out",
@@ -137,5 +156,84 @@ enum NudgeEngine {
             100: "100 days. Nudge is going to need a moment.",
         ]
         return milestones[ctx.streakDays]
+    }
+
+    // MARK: - Money event response (called after saving an event)
+
+    static func moneyEventResponse(
+        behaviourTag: CheckIn.SpendingDriver?,
+        tagCount: Int,
+        lifeEvent: MoneyEvent.LifeEvent?,
+        plannedStatus: MoneyEvent.PlannedStatus
+    ) -> NudgeMessage {
+        // Life event takes priority
+        if let life = lifeEvent {
+            return .text(
+                "That's significant \u{2014} \(life.label.lowercased()). Trends will adjust. One thing: awareness stays the lever."
+            )
+        }
+
+        // Behaviour tag with pattern
+        if let tag = behaviourTag {
+            if tagCount >= 3 {
+                return .withAction(
+                    "You've tagged \(tag.label) \(tagCount) times now. That's a pattern worth understanding.",
+                    actionLabel: "See your fix",
+                    action: .openLearnBias(tag.label)
+                )
+            }
+            return .text(
+                "Noted: \(tag.label.lowercased()). Nudge is keeping count."
+            )
+        }
+
+        // Planned with no tag
+        if plannedStatus == .planned {
+            return .text(
+                "Planned. Aware. That's the goal."
+            )
+        }
+
+        // Unplanned without tag
+        return .text(
+            "Logged. Awareness is the first step \u{2014} even for the unplanned ones."
+        )
+    }
+
+    // MARK: - Check-in completion response
+
+    static func checkInResponse(
+        streakDays: Int,
+        questionsReflected: Int,
+        driver: CheckIn.SpendingDriver?,
+        emotionalTone: CheckIn.EmotionalTone?
+    ) -> NudgeMessage {
+        if streakDays == 1 {
+            return .text(
+                "First one done. Nudge remembers everyone's day one."
+            )
+        }
+
+        if let driver = driver, let tone = emotionalTone, tone == .anxious {
+            return .text(
+                "Anxious today and driven by \(driver.label.lowercased()). Nudge sees the connection."
+            )
+        }
+
+        if streakDays == 7 {
+            return .text(
+                "Seven days. \(questionsReflected) questions reflected on. Your future self just noticed."
+            )
+        }
+
+        if streakDays > 0 {
+            return .text(
+                "Day \(streakDays). \(questionsReflected) reflected on. Nudge is here. So are you."
+            )
+        }
+
+        return .text(
+            "Done. Nudge is keeping score."
+        )
     }
 }

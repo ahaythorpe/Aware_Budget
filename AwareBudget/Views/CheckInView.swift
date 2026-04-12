@@ -17,6 +17,7 @@ struct CheckInView: View {
 
     @State private var phase: Phase = .questions
     @State private var selectedDriver: CheckIn.SpendingDriver? = nil
+    @State private var nudgeCompletionMessage: NudgeMessage?
 
     private enum Phase {
         case questions, driverPick, done
@@ -294,6 +295,12 @@ struct CheckInView: View {
 
             // Gold complete button
             Button {
+                nudgeCompletionMessage = NudgeEngine.checkInResponse(
+                    streakDays: attemptedCount,
+                    questionsReflected: attemptedCount,
+                    driver: selectedDriver,
+                    emotionalTone: selectedTone
+                )
                 withAnimation(.easeInOut(duration: 0.3)) {
                     phase = .done
                 }
@@ -370,6 +377,10 @@ struct CheckInView: View {
                         .foregroundStyle(DS.accent)
                         .padding(.top, 4)
                 }
+            }
+
+            if let nudge = nudgeCompletionMessage {
+                NudgeCardView(message: nudge)
             }
 
             Button("Done") {

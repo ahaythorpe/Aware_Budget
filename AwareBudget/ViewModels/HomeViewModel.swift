@@ -100,7 +100,8 @@ final class HomeViewModel {
             }
 
             // Build Nudge context and get message
-            buildNudge(recentCheckIns: weekHistory)
+            let weekEvents = try await service.fetchMoneyEventsThisWeek()
+            buildNudge(recentCheckIns: weekHistory, weekEvents: weekEvents)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -123,7 +124,7 @@ final class HomeViewModel {
 
     // MARK: - Nudge
 
-    private func buildNudge(recentCheckIns: [CheckIn]) {
+    private func buildNudge(recentCheckIns: [CheckIn], weekEvents: [MoneyEvent]) {
         guard !NudgeDismissStore.isDismissed else {
             nudgeMessage = nil
             return
@@ -141,23 +142,49 @@ final class HomeViewModel {
             daysSinceLast = 999
         }
 
-        // Top spending driver from recent check-ins
-        let drivers = recentCheckIns.compactMap { $0.spendingDriver }
-        let driverCounts = Dictionary(grouping: drivers, by: { $0 }).mapValues(\.count)
+        // Top behaviour tag from money events (more meaningful than check-in drivers)
+        let eventTags = weekEvents.compactMap(\.behaviourTag)
+        let tagCounts = Dictionary(grouping: eventTags, by: { $0 }).mapValues(\.count)
+        let topTag = tagCounts.max(by: { $0.value < $1.value })
+        let topBiasLabel = topTag.flatMap { CheckIn.SpendingDriver(rawValue: $0.key)?.label }
+
+        // Fallback to check-in drivers if no money event tags
+        let checkInDrivers = recentCheckIns.compactMap { $0.spendingDriver }
+        let driverCounts = Dictionary(grouping: checkInDrivers, by: { $0 }).mapValues(\.count)
         let topDriver = driverCounts.max(by: { $0.value < $1.value })
+
+        let finalTopBias = topBiasLabel ?? topDriver?.key.label
+        let finalTopCount = topTag?.value ?? topDriver?.value ?? 0
+
+        // Unplanned spend % this week
+        let weekTotal = weekEvents.reduce(0.0) { $0 + $1.amount }
+        let weekUnplanned = weekEvents.filter { $0.plannedStatus.isUnplanned }.reduce(0.0) { $0 + $1.amount }
+        let unplannedPct = weekTotal > 0 ? (weekUnplanned / weekTotal) * 100 : 0
+
+        // Weekly net: planned minus unplanned
+        let plannedTotal = weekEvents.filter { $0.plannedStatus == .planned }.reduce(0.0) { $0 + $1.amount }
+        let weeklyNet = plannedTotal - weekUnplanned
+
+        // Spend trend: compare unplanned this week vs total
+        let spendTrend: String? = unplannedPct > 50 ? "up" : (unplannedPct < 20 ? "down" : nil)
+
+        // Total distinct biases seen (from both check-in drivers and event tags)
+        let allBiases = Set(checkInDrivers.map(\.rawValue)).union(Set(eventTags))
 
         let ctx = NudgeContext(
             streakDays: streak,
-            topBias: topDriver?.key.label,
-            topBiasCount: topDriver?.value ?? 0,
+            topBias: finalTopBias,
+            topBiasCount: finalTopCount,
             alignmentPct: alignmentPct,
-            topSpendCategory: recentEvents.compactMap(\.behaviourTag).first,
-            spendTrend: nil,  // requires week-over-week comparison — future
+            topSpendCategory: finalTopBias,
+            spendTrend: spendTrend,
             emotionalToneToday: todaysCheckIn?.emotionalTone.rawValue,
             daysSinceLastCheckin: daysSinceLast,
-            totalBiasesSeen: Set(recentCheckIns.compactMap { $0.spendingDriver }).count,
+            totalBiasesSeen: allBiases.count,
             isFirstOpen: isFirstOpen,
-            completedCheckInToday: todaysCheckIn != nil
+            completedCheckInToday: todaysCheckIn != nil,
+            unplannedSpendPct: unplannedPct,
+            weeklyNet: weeklyNet
         )
 
         let msg = NudgeEngine.message(for: ctx)

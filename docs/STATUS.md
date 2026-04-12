@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — Money Green + Nugget Gold + NudgeEngine + category-free money events. 4-tab root, swipe cards, spending driver tags, Nudge mascot card, awareness-based MoneyEventView (planned/surprise/impulse + behaviour tags, no categories) all live. Supabase wiring blocked on Xcode package add.
+**Current phase:** PRD v1.1 — Money Green + Nugget Gold + NudgeEngine fully wired + category-free money events. NudgeEngine context built from live data (streaks, behaviour tag patterns, unplanned spend %, weekly net, emotional tone, days since last check-in). Nudge responds on HomeView, CheckInView completion, and MoneyEventView post-save. Supabase wiring blocked on Xcode package add.
 
 ---
 
@@ -35,7 +35,8 @@
 ### Services (`AwareBudget/Services/`)
 - `SupabaseService.swift` — **in-memory stub** (see "Blocked" below). Full
   method surface matches PRD: auth, check-ins, money events, questions,
-  budget months.
+  budget months. Added `fetchMoneyEventsThisWeek()` and
+  `countBehaviourTag(_:)` for NudgeEngine context.
 - `QuestionPool.swift` — the 15 seed questions, used by the stub so the app
   works offline until Supabase is wired.
 - `NotificationService.swift` — daily 8pm reminder scheduled via
@@ -43,10 +44,15 @@
 
 ### ViewModels (`AwareBudget/ViewModels/`)
 - `HomeViewModel.swift` — streak + alignment logic, colour + message
-  computed properties, loads recent events.
+  computed properties, loads recent events. `buildNudge()` computes full
+  `NudgeContext` from live data: behaviour tag patterns from money events,
+  unplanned spend % this week, weekly net, spend trend, emotional tone,
+  days since last check-in, total distinct biases seen.
 - `CheckInViewModel.swift` — fetches next question, streak/alignment on
   submit, schedules the daily reminder on first completion.
-- `MoneyEventViewModel.swift` — amount validation, save flow.
+- `MoneyEventViewModel.swift` — amount validation, save flow. Post-save:
+  builds Nudge response via `NudgeEngine.moneyEventResponse()` based on
+  behaviour tag count, life event, and planned status.
 
 ### Views (`AwareBudget/Views/`)
 - `OnboardingView.swift` — 3-step explainer + sign-up form. First-launch

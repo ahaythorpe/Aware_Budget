@@ -8,39 +8,73 @@ struct MoneyEventView: View {
         ZStack {
             DS.bg.ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: DS.sectionGap) {
-                    amountHero
-                    plannedStatusSelector
-                    if viewModel.showBehaviourTag {
-                        behaviourTagSection
+            if viewModel.didSave, let nudge = viewModel.nudgeResponse {
+                savedConfirmation(nudge)
+            } else {
+                ScrollView {
+                    VStack(spacing: DS.sectionGap) {
+                        amountHero
+                        plannedStatusSelector
+                        if viewModel.showBehaviourTag {
+                            behaviourTagSection
+                        }
+                        if viewModel.showLifeEvent {
+                            lifeEventSection
+                        }
+                        noteField
+                        dateField
+                        if let errorMessage = viewModel.errorMessage {
+                            Text(errorMessage)
+                                .font(.footnote)
+                                .foregroundStyle(DS.warning)
+                        }
+                        saveButton
                     }
-                    if viewModel.showLifeEvent {
-                        lifeEventSection
-                    }
-                    noteField
-                    dateField
-                    if let errorMessage = viewModel.errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(DS.warning)
-                    }
-                    saveButton
+                    .padding(.horizontal, DS.hPadding)
+                    .padding(.top, 12)
+                    .padding(.bottom, 32)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.plannedStatus)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.showLifeEvent)
                 }
-                .padding(.horizontal, DS.hPadding)
-                .padding(.top, 12)
-                .padding(.bottom, 32)
-                .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.plannedStatus)
-                .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.showLifeEvent)
             }
         }
-        .navigationTitle("Log money event")
+        .navigationTitle(viewModel.didSave ? "" : "Log money event")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }
+                Button(viewModel.didSave ? "Done" : "Cancel") { dismiss() }
             }
         }
+    }
+
+    // MARK: - Saved confirmation with Nudge
+
+    private func savedConfirmation(_ nudge: NudgeMessage) -> some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            ZStack {
+                Circle()
+                    .fill(DS.paleGreen)
+                    .frame(width: 100, height: 100)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 44, weight: .bold))
+                    .foregroundStyle(DS.primary)
+            }
+
+            Text("Logged")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(DS.textPrimary)
+
+            NudgeCardView(message: nudge)
+
+            Button("Done") { dismiss() }
+                .buttonStyle(PrimaryButtonStyle())
+                .padding(.horizontal, DS.hPadding)
+
+            Spacer()
+        }
+        .transition(.opacity)
     }
 
     // MARK: - Amount
@@ -265,7 +299,6 @@ struct MoneyEventView: View {
         Button {
             Task {
                 await viewModel.save()
-                if viewModel.didSave { dismiss() }
             }
         } label: {
             HStack {

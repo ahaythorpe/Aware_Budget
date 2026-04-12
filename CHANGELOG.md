@@ -5,6 +5,50 @@
 
 ---
 
+## 2026-04-12 — Wire NudgeEngine to live data + Nudge on all screens (Claude Code)
+
+**Goal:** NudgeEngine should build its context from real data, not
+placeholder values. Nudge should respond on every key screen.
+
+**NudgeContext enriched (HomeViewModel.buildNudge):**
+- `topBias` / `topBiasCount`: computed from money events behaviour
+  tags this week (falls back to check-in SpendingDrivers)
+- `unplannedSpendPct`: % of this week's money events that are
+  surprise or impulse
+- `weeklyNet`: planned total minus unplanned total this week
+- `spendTrend`: derived from unplanned %  (>50% = "up", <20% = "down")
+- `totalBiasesSeen`: union of distinct check-in drivers + event tags
+- All other fields already computed from prior session
+
+**NudgeEngine expanded:**
+- New priority #4: high unplanned spend (>50%) + negative weekly net
+  → "X% unplanned... pattern worth seeing" with openTrends action
+- New priority #7: anxious tone + high unplanned (>40%)
+- `moneyEventResponse()`: generates contextual Nudge message after
+  saving a money event — pattern count ≥3 triggers "See your fix",
+  life events get acknowledged, planned events get "That's the goal"
+- `checkInResponse()`: generates completion message based on streak
+  day, questions reflected, driver + tone combo
+
+**MoneyEventView post-save confirmation:**
+- After save, view transitions to a confirmation screen with green
+  checkmark + "Logged" + NudgeCardView with contextual message.
+  Replaces the old instant-dismiss flow.
+- `MoneyEventViewModel.nudgeResponse` built from
+  `NudgeEngine.moneyEventResponse()` with live `countBehaviourTag()`
+
+**CheckInView completion card:**
+- NudgeCardView now appears between driver chip and Done button
+  on the completion screen, showing `NudgeEngine.checkInResponse()`
+
+**SupabaseService:**
+- Added `fetchMoneyEventsThisWeek()` (ISO week filter)
+- Added `countBehaviourTag(_:)` (count all events with a given tag)
+
+**Build:** `** BUILD SUCCEEDED **` (iPhone 17 / iOS 26.2).
+
+---
+
 ## 2026-04-12 — Kill categories: awareness-based money events (Claude Code)
 
 **Goal:** Categories are what made Mint fail. "Shopping: £220" tells you
