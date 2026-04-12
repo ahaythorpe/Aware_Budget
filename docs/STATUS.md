@@ -148,11 +148,14 @@
   `#4CAF50` uppercase, tracking 1.5. `PrimaryButtonStyle` default
   tint `DS.primary`. `SecondaryButtonStyle` uses `DS.paleGreen` fill.
   `Card` uses `DS.cardBg`. All purple/violet hex values removed.
-- `MoneyEventView.swift` — **rebuilt**: no categories. Flow: amount →
-  planned/surprise/impulse (3 full-width buttons) → conditional behaviour
-  tag picker (2x3 grid, only for surprise/impulse) → conditional life
-  event picker (only if amount > 200) → note → date → save. All sections
-  animate in/out with spring. Uses DS green palette throughout.
+- `MoneyEventView.swift` — **rebuilt as quick-log** (2026-04-13). Flow:
+  3-column category grid (16 categories with emoji + label, selected =
+  heroGradient) → AUD range picker (3–4 buttons per category with
+  midpoint stored) → planned/surprise/impulse pills → auto-suggested
+  bias tag (gold pill, based on category + status mapping) with inline
+  Nudge message → "Log it" gold gradient button. No amount text input,
+  no note field, no date picker. `MoneyEvent.lifeArea` added for
+  category storage. Amounts in AUD.
 - `InsightFeedView.swift` — **rebuilt with Charts framework** (2026-04-12).
   `import Charts` (native SwiftUI). Tab 4 "Insights". Layout:
   (1) Weekly hero card with heroGradient, decorative circles, gold
@@ -236,6 +239,7 @@
   - `supabase/migrations/20260412140000_seed_bias_lessons.sql`
   - `supabase/migrations/20260412150000_add_spending_driver.sql`
   - `supabase/migrations/20260412160000_rebuild_money_events_columns.sql`
+  - `supabase/migrations/20260413120000_add_life_area_to_money_events.sql`
 - Seed source of truth: `supabase/seed.sql` (15 original questions — kept
   for reference; 15 new PRD v1.1 questions + 16 bias_lessons are live via
   the migrations above)

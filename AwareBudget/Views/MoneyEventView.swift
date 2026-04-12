@@ -4,6 +4,8 @@ struct MoneyEventView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = MoneyEventViewModel()
 
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+
     var body: some View {
         ZStack {
             DS.bg.ignoresSafeArea()
@@ -13,32 +15,35 @@ struct MoneyEventView: View {
             } else {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
-                        amountHero
-                        plannedStatusSelector
-                        if viewModel.showBehaviourTag {
-                            behaviourTagSection
+                        categoryGrid
+                        if viewModel.selectedCategory != nil {
+                            rangePicker
                         }
-                        if viewModel.showLifeEvent {
-                            lifeEventSection
+                        if viewModel.selectedRange != nil {
+                            plannedStatusPicker
                         }
-                        noteField
-                        dateField
+                        if viewModel.plannedStatus != nil {
+                            biasTagSection
+                        }
                         if let errorMessage = viewModel.errorMessage {
                             Text(errorMessage)
                                 .font(.footnote)
                                 .foregroundStyle(DS.warning)
                         }
-                        saveButton
+                        if viewModel.canSave {
+                            saveButton
+                        }
                     }
                     .padding(.horizontal, DS.hPadding)
                     .padding(.top, 12)
                     .padding(.bottom, 32)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.selectedCategory?.name)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.selectedRange?.label)
                     .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.plannedStatus)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.showLifeEvent)
                 }
             }
         }
-        .navigationTitle(viewModel.didSave ? "" : "Log money event")
+        .navigationTitle(viewModel.didSave ? "" : "Quick log")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -47,7 +52,7 @@ struct MoneyEventView: View {
         }
     }
 
-    // MARK: - Saved confirmation with Nudge
+    // MARK: - Saved confirmation
 
     private func savedConfirmation(_ nudge: NudgeMessage) -> some View {
         VStack(spacing: 24) {
@@ -62,9 +67,16 @@ struct MoneyEventView: View {
                     .foregroundStyle(Color(hex: "1A5C38"))
             }
 
-            Text("Logged")
-                .font(.title2.weight(.bold))
-                .foregroundStyle(DS.textPrimary)
+            if let cat = viewModel.selectedCategory, let range = viewModel.selectedRange {
+                VStack(spacing: 4) {
+                    Text("Logged")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Text("\(cat.emoji) \(cat.name) · \(range.label)")
+                        .font(.subheadline)
+                        .foregroundStyle(DS.textSecondary)
+                }
+            }
 
             NudgeCardView(message: nudge)
 
@@ -77,242 +89,206 @@ struct MoneyEventView: View {
         .transition(.opacity)
     }
 
-    // MARK: - Amount
+    // MARK: - Category grid
 
-    private var amountHero: some View {
-        Card(padding: 24) {
-            VStack(alignment: .center, spacing: 10) {
-                Text("AMOUNT")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(DS.textSecondary)
-                    .tracking(0.8)
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(Locale.current.currencySymbol ?? "$")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(DS.textSecondary)
-                    TextField("0", text: $viewModel.amountText)
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundStyle(DS.textPrimary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize()
-                    #if !os(macOS)
-                        .keyboardType(.decimalPad)
-                    #endif
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
-    // MARK: - Planned / Surprise / Impulse
-
-    private var plannedStatusSelector: some View {
+    private var categoryGrid: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Was this planned?")
-            VStack(spacing: 10) {
-                ForEach(MoneyEvent.PlannedStatus.allCases) { status in
-                    plannedStatusButton(status)
+            SectionHeader(title: "What did you spend on?")
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(spendCategories) { cat in
+                    categoryCell(cat)
                 }
             }
         }
     }
 
-    private func plannedStatusButton(_ status: MoneyEvent.PlannedStatus) -> some View {
-        let selected = viewModel.plannedStatus == status
+    private func categoryCell(_ cat: SpendCategory) -> some View {
+        let selected = viewModel.selectedCategory?.name == cat.name
         return Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                viewModel.plannedStatus = status
-            }
-        } label: {
-            HStack(spacing: 14) {
-                Text(status.emoji)
-                    .font(.system(size: 24))
-                    .frame(width: 40)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(status.label)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(selected ? .white : DS.textPrimary)
-                    Text(statusDescription(status))
-                        .font(.caption)
-                        .foregroundStyle(selected ? .white.opacity(0.8) : DS.textSecondary)
-                }
-                Spacer()
-                if selected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.white)
-                        .font(.title3)
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .stroke(selected ? Color.clear : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
-            )
-        }
-        .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: selected)
-    }
-
-    private func statusDescription(_ status: MoneyEvent.PlannedStatus) -> String {
-        switch status {
-        case .planned:  return "Expected, budgeted for"
-        case .surprise: return "Didn't see this coming"
-        case .impulse:  return "Saw it, wanted it, bought it"
-        }
-    }
-
-    // MARK: - Behaviour tag (only for surprise/impulse)
-
-    private var behaviourTagSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "What drove it?")
-            Text("No wrong answers. Just noticing.")
-                .font(.caption)
-                .foregroundStyle(DS.textSecondary)
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                ForEach(CheckIn.SpendingDriver.allCases) { driver in
-                    behaviourTagButton(driver)
-                }
-            }
-        }
-        .transition(.move(edge: .top).combined(with: .opacity))
-    }
-
-    private func behaviourTagButton(_ driver: CheckIn.SpendingDriver) -> some View {
-        let selected = viewModel.behaviourTag == driver
-        return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                viewModel.behaviourTag = selected ? nil : driver
+                viewModel.selectedCategory = cat
+                viewModel.selectedRange = nil
+                viewModel.plannedStatus = nil
+                viewModel.behaviourTag = nil
             }
         } label: {
             VStack(spacing: 6) {
-                Text(driver.emoji)
-                    .font(.system(size: 22))
-                Text(driver.label)
-                    .font(.footnote.weight(.semibold))
+                Text(cat.emoji)
+                    .font(.system(size: 28))
+                Text(cat.name)
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(selected ? .white : DS.textPrimary)
-                Text(driver.shortDescription)
-                    .font(.system(size: 12))
-                    .foregroundStyle(selected ? .white.opacity(0.8) : DS.textSecondary)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .padding(.horizontal, 8)
             .background(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .stroke(selected ? Color.clear : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
             )
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: selected)
     }
 
-    // MARK: - Life event (only for amount > 200)
+    // MARK: - Range picker
 
-    private var lifeEventSection: some View {
+    private var rangePicker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Anything significant behind this?")
-            Text("Helps Nudge understand the bigger picture.")
-                .font(.caption)
-                .foregroundStyle(DS.textSecondary)
-            VStack(spacing: 8) {
-                ForEach(MoneyEvent.LifeEvent.allCases) { event in
-                    lifeEventButton(event)
+            SectionHeader(title: "How much?")
+            HStack(spacing: 8) {
+                ForEach(viewModel.availableRanges) { range in
+                    rangeButton(range)
                 }
             }
         }
         .transition(.move(edge: .top).combined(with: .opacity))
     }
 
-    private func lifeEventButton(_ event: MoneyEvent.LifeEvent) -> some View {
-        let selected = viewModel.lifeEvent == event
+    private func rangeButton(_ range: AmountRange) -> some View {
+        let selected = viewModel.selectedRange?.label == range.label
         return Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                viewModel.lifeEvent = selected ? nil : event
+                viewModel.selectedRange = range
             }
         } label: {
-            HStack(spacing: 12) {
-                Text(event.label)
-                    .font(.subheadline.weight(.medium))
+            Text(range.label)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(selected ? .white : DS.textPrimary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: selected)
+    }
+
+    // MARK: - Planned / Surprise / Impulse
+
+    private var plannedStatusPicker: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Was this planned?")
+            VStack(spacing: 8) {
+                ForEach(MoneyEvent.PlannedStatus.allCases) { status in
+                    plannedPill(status)
+                }
+            }
+        }
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func plannedPill(_ status: MoneyEvent.PlannedStatus) -> some View {
+        let selected = viewModel.plannedStatus == status
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                viewModel.plannedStatus = status
+                viewModel.onPlannedStatusSet()
+            }
+        } label: {
+            HStack {
+                Text(status.emoji)
+                    .font(.system(size: 20))
+                Text(status.label)
+                    .font(.body.weight(.semibold))
                     .foregroundStyle(selected ? .white : DS.textPrimary)
                 Spacer()
                 if selected {
-                    Image(systemName: "checkmark")
-                        .font(.footnote.weight(.bold))
+                    Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.white)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .stroke(selected ? Color.clear : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
             )
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: selected)
     }
 
-    // MARK: - Note
+    // MARK: - Bias tag section
 
-    private var noteField: some View {
+    private var biasTagSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Note")
-            Card(padding: 14) {
-                TextField("Optional — what was this for?", text: $viewModel.note, axis: .vertical)
-                    .font(.subheadline)
-                    .lineLimit(2, reservesSpace: true)
+            SectionHeader(title: "What's driving this?")
+
+            if let tag = viewModel.behaviourTag {
+                HStack(spacing: 10) {
+                    Text(tag)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(DS.goldText)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(DS.goldBase.opacity(0.15))
+                        )
+                        .overlay(
+                            Capsule()
+                                .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+                        )
+
+                    if viewModel.suggestedTag == tag {
+                        Text("suggested")
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(DS.textTertiary)
+                    }
+                }
+
+                if let inline = viewModel.nudgeInline {
+                    HStack(alignment: .top, spacing: 10) {
+                        NudgeAvatar(size: 28)
+                        Text(inline)
+                            .font(.system(size: 13))
+                            .foregroundStyle(DS.textSecondary)
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(DS.paleGreen)
+                    )
+                }
             }
         }
-    }
-
-    // MARK: - Date
-
-    private var dateField: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Date")
-            Card(padding: 12) {
-                DatePicker("", selection: $viewModel.date, displayedComponents: .date)
-                    .labelsHidden()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 
     // MARK: - Save
 
     private var saveButton: some View {
         Button {
-            Task {
-                await viewModel.save()
-            }
+            Task { await viewModel.save() }
         } label: {
             HStack {
                 if viewModel.isSaving {
-                    ProgressView().tint(.white)
+                    ProgressView().tint(Color(hex: "1B3A00"))
                 } else {
-                    Text("Save event")
-                    Image(systemName: "checkmark")
+                    Text("Log it")
+                        .font(.headline.weight(.bold))
                 }
             }
+            .goldButtonStyle()
         }
-        .buttonStyle(PrimaryButtonStyle())
-        .disabled(!viewModel.canSave || viewModel.isSaving)
-        .opacity(viewModel.canSave ? 1.0 : 0.5)
+        .buttonStyle(.plain)
+        .disabled(viewModel.isSaving)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
 

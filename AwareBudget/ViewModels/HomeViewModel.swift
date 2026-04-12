@@ -168,7 +168,7 @@ final class HomeViewModel {
         let eventTags = weekEvents.compactMap(\.behaviourTag)
         let tagCounts = Dictionary(grouping: eventTags, by: { $0 }).mapValues(\.count)
         let topTag = tagCounts.max(by: { $0.value < $1.value })
-        let topBiasLabel = topTag.flatMap { CheckIn.SpendingDriver(rawValue: $0.key)?.label }
+        let topBiasLabel = topTag?.key
 
         // Fallback to check-in drivers if no money event tags
         let checkInDrivers = recentCheckIns.compactMap { $0.spendingDriver }

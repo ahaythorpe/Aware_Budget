@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-04-13 — Quick-log MoneyEventView with AUD ranges (Claude Code)
+
+**MoneyEventView rebuilt as quick-log:**
+- Replaced amount text input with 3-column category grid (16 categories).
+- Each category has AUD range picker (3–4 buttons with midpoints).
+- Planned/Surprise/Impulse selection after range.
+- Auto-suggest bias tag based on category + status mapping.
+- Inline Nudge message with bias one-liners or pattern alerts.
+- "Log it" gold gradient button. No note/date fields.
+- Added `lifeArea` field to MoneyEvent model + CodingKeys.
+- Supabase migration: `life_area` column added to money_events.
+- NudgeEngine.moneyEventResponse now accepts String bias tag.
+- HomeViewModel topBiasLabel reads tag directly (not via SpendingDriver).
+
+---
+
 ## 2026-04-13 — Learn buttons, settings screen (Claude Code)
 
 **LearnView buttons:**

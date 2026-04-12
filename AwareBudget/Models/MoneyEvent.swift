@@ -8,6 +8,7 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
     var plannedStatus: PlannedStatus
     var behaviourTag: String?
     var lifeEvent: String?
+    var lifeArea: String?
     var note: String?
     var createdAt: Date
 
@@ -88,6 +89,7 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         case plannedStatus = "planned_status"
         case behaviourTag = "behaviour_tag"
         case lifeEvent = "life_event"
+        case lifeArea = "life_area"
         case createdAt = "created_at"
     }
 }

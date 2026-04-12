@@ -48,7 +48,7 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `InsightFeedView.swift` — **Charts framework.** Hero gradient card with decorative circles. Bar chart: 6-week unplanned spend. Horizontal bar chart: bias frequency. Donut chart: planned vs unplanned %. Nudge card. Background #F5F7F5.
 - `LearnView.swift` — Swipe card deck. 1 back card. 52pt emoji, 22pt bold bias name, 13pt description, IN REAL LIFE teal label. Two side-by-side buttons: "Learn more" (outline, green) + "How to counter it" (filled green, white text). Both → BiasDetailView. Filter pills. "X of 16" counter. Sources BiasLessonsMock.seed.
 - `BiasDetailView.swift` — Full bias lesson detail. 72pt emoji, name, category pill, fullExplanation, realWorldExample, howToCounter.
-- `MoneyEventView.swift` — Amount, planned/surprise/impulse, behaviour tag (2x3 grid, unplanned only), life event (>200 only), note, date, save. Post-save NudgeCard.
+- `MoneyEventView.swift` — **Rebuilt as quick-log** (2026-04-13). 3-column category grid (16 categories: Coffee, Lunch, Drinks, Shopping, Transport, Takeaway, Pharmacy, Subscriptions, Entertainment, Travel, Clothing, Gift, Home, Fitness, Big purchase, Other). Tap category → AUD range picker (3–4 buttons). Tap range → planned/surprise/impulse. Auto-suggest bias tag (gold pill). Inline Nudge message. "Log it" gold button. No amount input, no note, no date picker. Stores: amount=midpoint, life_area=category, behaviour_tag=bias name.
 - `NudgeCardView.swift` — Green accent bar, NudgeAvatar, message text, gold action button, dismiss X. NudgeDismissStore (24h), NudgeDedup.
 - `StreakRingView.swift` — 140pt ring, DS.accent stroke, gold gradient number, M-S day dots.
 - `SparklineView.swift` — 7-bar sparkline. Green improving, orange worsening.

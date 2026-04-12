@@ -161,7 +161,7 @@ enum NudgeEngine {
     // MARK: - Money event response (called after saving an event)
 
     static func moneyEventResponse(
-        behaviourTag: CheckIn.SpendingDriver?,
+        behaviourTag: String?,
         tagCount: Int,
         lifeEvent: MoneyEvent.LifeEvent?,
         plannedStatus: MoneyEvent.PlannedStatus
@@ -177,13 +177,13 @@ enum NudgeEngine {
         if let tag = behaviourTag {
             if tagCount >= 3 {
                 return .withAction(
-                    "You've tagged \(tag.label) \(tagCount) times now. That's a pattern worth understanding.",
+                    "You've tagged \(tag) \(tagCount) times now. That's a pattern worth understanding.",
                     actionLabel: "See your fix",
-                    action: .openLearnBias(tag.label)
+                    action: .openLearnBias(tag)
                 )
             }
             return .text(
-                "Noted: \(tag.label.lowercased()). Nudge is keeping count."
+                "Noted: \(tag.lowercased()). Nudge is keeping count."
             )
         }
 
