@@ -14,14 +14,8 @@ struct NudgeCardView: View {
                 .fill(DS.accent)
                 .frame(width: 3)
 
-            // Nudge avatar — gold circle
-            ZStack {
-                Circle()
-                    .fill(DS.nuggetGold)
-                    .frame(width: 44, height: 44)
-                Text("\u{1FA99}")
-                    .font(.system(size: 22))
-            }
+            // Nudge avatar
+            NudgeAvatar(size: 44)
 
             // Content
             VStack(alignment: .leading, spacing: 10) {

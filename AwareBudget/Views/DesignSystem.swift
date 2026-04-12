@@ -47,6 +47,18 @@ enum DS {
     static let positive = Color(hex: "4CAF50")
     static let warning  = Color(hex: "FF7043")
 
+    // Hero gradient (dark green cards)
+    static let heroGradient = LinearGradient(
+        stops: [
+            .init(color: Color(hex: "1B5E20"), location: 0.0),
+            .init(color: Color(hex: "2E7D32"), location: 0.35),
+            .init(color: Color(hex: "4CAF50"), location: 0.65),
+            .init(color: Color(hex: "388E3C"), location: 1.0),
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
     // Gold
     static let goldBase = Color(hex: "C59430")
     static let goldText = Color(hex: "E8B84B")
@@ -130,6 +142,25 @@ extension View {
     }
 }
 
+// MARK: - Nudge avatar (green circle hides black bg in PNG)
+
+struct NudgeAvatar: View {
+    var size: CGFloat = 44
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color(hex: "2E7D32"))
+                .frame(width: size + 4, height: size + 4)
+            Image("nudge")
+                .resizable()
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+        }
+    }
+}
+
 // MARK: - Card container
 
 struct Card<Content: View>: View {
@@ -190,10 +221,10 @@ struct SectionHeader: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(DS.accent)
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(Color(hex: "4CAF50"))
                 .textCase(.uppercase)
-                .tracking(0.9)
+                .tracking(1.5)
             Spacer()
             if let trailing, let trailingAction {
                 Button(trailing, action: trailingAction)

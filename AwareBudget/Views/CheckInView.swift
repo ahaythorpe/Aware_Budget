@@ -25,7 +25,7 @@ struct CheckInView: View {
 
     // MARK: - Colours (money green)
 
-    private let frontBg  = DS.primary                          // #2E7D32
+    private let frontGradient = DS.heroGradient
     private let middleBg = DS.lightGreen                       // #81C784
     private let backBg   = Color(hex: "A5D6A7")               // lighter green
     private let gold     = DS.goldText
@@ -156,7 +156,7 @@ struct CheckInView: View {
     private var frontCard: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                .fill(frontBg)
+                .fill(frontGradient)
             if currentIndex < questions.count {
                 frontContent(for: questions[currentIndex])
                     .padding(24)

@@ -157,7 +157,7 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(DS.primary)
+                    .fill(DS.heroGradient)
             )
         }
         .buttonStyle(.plain)

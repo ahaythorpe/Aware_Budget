@@ -138,11 +138,13 @@
   `DS.textSecondary` `#6B7A6B`, `DS.textTertiary` `#A0B0A0`.
   Semantic: `DS.positive` `#4CAF50`, `DS.warning` `#FF7043`.
   Gold: `DS.goldBase` `#C59430`, `DS.goldText` `#E8B84B`,
-  `DS.nuggetGold` 5-stop gradient. `GoldButton` + `GoldRingModifier`
-  ViewModifiers. `SectionHeader` updated to 10pt bold `DS.accent`
-  uppercase. `PrimaryButtonStyle` default tint `DS.primary`.
-  `SecondaryButtonStyle` uses `DS.paleGreen` fill. `Card` uses
-  `DS.cardBg`. All purple/violet hex values removed.
+  `DS.nuggetGold` 5-stop gradient. `DS.heroGradient` 4-stop
+  `#1B5E20→#2E7D32→#4CAF50→#388E3C` for hero cards. `NudgeAvatar`
+  view: green circle + clipped Image("nudge"). `GoldButton` +
+  `GoldRingModifier` ViewModifiers. `SectionHeader` 11pt heavy
+  `#4CAF50` uppercase, tracking 1.5. `PrimaryButtonStyle` default
+  tint `DS.primary`. `SecondaryButtonStyle` uses `DS.paleGreen` fill.
+  `Card` uses `DS.cardBg`. All purple/violet hex values removed.
 - `MoneyEventView.swift` — **rebuilt**: no categories. Flow: amount →
   planned/surprise/impulse (3 full-width buttons) → conditional behaviour
   tag picker (2x3 grid, only for surprise/impulse) → conditional life

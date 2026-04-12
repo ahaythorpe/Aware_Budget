@@ -10,7 +10,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            DS.heroGradient.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
@@ -27,12 +27,14 @@ struct OnboardingView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
+            NudgeAvatar(size: 56)
+                .padding(.bottom, 4)
             Text("AwareBudget")
                 .font(.largeTitle.bold())
-                .foregroundStyle(.primary)
+                .foregroundStyle(.white)
             Text("Stay aware. Adjust early. No shame.")
                 .font(.title3)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.8))
         }
         .padding(.top, 20)
     }
@@ -44,10 +46,10 @@ struct OnboardingView: View {
                     detail: "One behavioural question. 60 seconds.")
             stepRow(number: "2",
                     title: "Log money events",
-                    detail: "Surprises, wins, and expected costs — all manual.")
+                    detail: "Planned, surprises, and impulse buys — all manual.")
             stepRow(number: "3",
                     title: "Stay aware",
-                    detail: "Build a streak. Watch alignment. No shame.")
+                    detail: "Build a streak. Notice your patterns. No shame.")
         }
     }
 
@@ -55,7 +57,7 @@ struct OnboardingView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Create your account")
                 .font(.headline)
-                .foregroundStyle(.primary)
+                .foregroundStyle(.white)
 
             TextField("Email", text: $email)
                 .textContentType(.emailAddress)
@@ -65,19 +67,21 @@ struct OnboardingView: View {
                 .textInputAutocapitalization(.never)
             #endif
                 .padding(12)
-                .background(Color(.secondarySystemBackground))
+                .background(.white.opacity(0.15))
+                .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             SecureField("Password", text: $password)
                 .textContentType(.newPassword)
                 .padding(12)
-                .background(Color(.secondarySystemBackground))
+                .background(.white.opacity(0.15))
+                .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             if let errorMessage {
                 Text(errorMessage)
                     .font(.footnote)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(DS.warning)
             }
 
             Button {
@@ -87,17 +91,14 @@ struct OnboardingView: View {
                     Spacer()
                     if isSubmitting {
                         ProgressView()
-                            .tint(.white)
+                            .tint(Color(hex: "3A2000"))
                     } else {
                         Text("Get started")
-                            .fontWeight(.semibold)
+                            .fontWeight(.bold)
                     }
                     Spacer()
                 }
-                .padding()
-                .background(Color.blue)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .goldButtonStyle()
             }
             .buttonStyle(.plain)
             .disabled(isSubmitting || email.isEmpty || password.isEmpty)
@@ -110,17 +111,17 @@ struct OnboardingView: View {
         HStack(alignment: .top, spacing: 12) {
             Text(number)
                 .font(.headline)
-                .foregroundStyle(.blue)
+                .foregroundStyle(DS.goldText)
                 .frame(width: 32, height: 32)
-                .background(Color.blue.opacity(0.15))
+                .background(DS.goldBase.opacity(0.25))
                 .clipShape(Circle())
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
                 Text(detail)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
             }
         }
     }
