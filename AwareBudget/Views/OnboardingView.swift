@@ -4,7 +4,6 @@ struct OnboardingView: View {
     @Binding var hasCompletedOnboarding: Bool
 
     @State private var currentPage = 0
-    @State private var showSignIn = false
 
     // Quiz state
     @State private var budgetHistory: String? = nil
@@ -22,49 +21,48 @@ struct OnboardingView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut(duration: 0.3), value: currentPage)
         }
-        .sheet(isPresented: $showSignIn) {
-            NavigationStack {
-                SignInView(hasCompletedOnboarding: $hasCompletedOnboarding)
-            }
-        }
     }
 
     // MARK: - Screen 1: Welcome
 
     private var welcomePage: some View {
-        VStack(spacing: 32) {
-            Spacer()
+        ZStack {
+            DS.heroGradient.ignoresSafeArea()
 
-            NudgeAvatar(size: 120)
+            VStack(spacing: 32) {
+                Spacer()
 
-            VStack(spacing: 12) {
-                Text("Hi, I'm Nudge.")
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(DS.textPrimary)
+                NudgeAvatar(size: 120)
 
-                Text("Most budgeting apps track your spending.\nAwareBudget tracks why you spend.")
-                    .font(.title3)
-                    .foregroundStyle(DS.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
+                VStack(spacing: 12) {
+                    Text("Hi, I'm Nudge.")
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(.white)
+
+                    Text("Most budgeting apps track your spending.\nAwareBudget tracks why you spend.")
+                        .font(.body)
+                        .foregroundStyle(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+
+                Spacer()
+
+                Button {
+                    withAnimation { currentPage = 1 }
+                } label: {
+                    Text("Get started \u{2192}")
+                        .font(.system(size: 15, weight: .bold))
+                        .goldButtonStyle()
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, DS.hPadding)
+
+                progressDots(current: 0, light: true)
+                    .padding(.bottom, 32)
             }
-
-            Spacer()
-
-            Button {
-                withAnimation { currentPage = 1 }
-            } label: {
-                Text("Get started")
-                    .font(.system(size: 15, weight: .bold))
-                    .goldButtonStyle()
-            }
-            .buttonStyle(.plain)
             .padding(.horizontal, DS.hPadding)
-
-            progressDots(current: 0)
-                .padding(.bottom, 32)
         }
-        .padding(.horizontal, DS.hPadding)
     }
 
     // MARK: - Screen 2: Budget Reality Check
@@ -73,11 +71,8 @@ struct OnboardingView: View {
         ScrollView {
             VStack(spacing: 28) {
                 VStack(spacing: 8) {
-                    NudgeAvatar(size: 64)
-                    Text("Quick question before we start.")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(DS.textPrimary)
-                        .multilineTextAlignment(.center)
+                    SectionHeader(title: "Budget Reality Check")
+                    NudgeAvatar(size: 60)
                 }
                 .padding(.top, 40)
 
@@ -88,7 +83,7 @@ struct OnboardingView: View {
                         .foregroundStyle(DS.textPrimary)
 
                     quizPill("Less than a week", selected: budgetHistory == "week", action: { budgetHistory = "week" })
-                    quizPill("A month", selected: budgetHistory == "month", action: { budgetHistory = "month" })
+                    quizPill("About a month", selected: budgetHistory == "month", action: { budgetHistory = "month" })
                     quizPill("Never tried", selected: budgetHistory == "never", action: { budgetHistory = "never" })
                 }
                 .padding(.horizontal, DS.hPadding)
@@ -103,7 +98,7 @@ struct OnboardingView: View {
                         quizPill("Too much work", selected: quitReason == "work", action: { quitReason = "work" })
                         quizPill("Made me feel bad", selected: quitReason == "guilt", action: { quitReason = "guilt" })
                         quizPill("Life got in the way", selected: quitReason == "life", action: { quitReason = "life" })
-                        quizPill("Never stopped \u{2014} it failed", selected: quitReason == "failed", action: { quitReason = "failed" })
+                        quizPill("It just failed", selected: quitReason == "failed", action: { quitReason = "failed" })
                     }
                     .padding(.horizontal, DS.hPadding)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
@@ -120,7 +115,7 @@ struct OnboardingView: View {
                     Button {
                         withAnimation { currentPage = 2 }
                     } label: {
-                        Text("Continue")
+                        Text("That's why AwareBudget exists \u{2192}")
                             .font(.system(size: 15, weight: .bold))
                             .goldButtonStyle()
                     }
@@ -143,12 +138,12 @@ struct OnboardingView: View {
 
             Text("You're not broken. The method is.")
                 .font(.title3.weight(.bold))
-                .foregroundStyle(DS.textPrimary)
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text("70% abandon budgeting apps within 30 days. Not laziness \u{2014} bad design.")
+            Text("70% of people abandon budgeting apps within 30 days. Not from laziness \u{2014} from apps that create shame not awareness.")
                 .font(.subheadline)
-                .foregroundStyle(DS.textSecondary)
+                .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
         }
@@ -156,11 +151,7 @@ struct OnboardingView: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                .fill(DS.cardBg)
-                .overlay(
-                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                        .stroke(DS.paleGreen, lineWidth: 0.5)
-                )
+                .fill(DS.heroGradient)
         )
         .padding(.horizontal, DS.hPadding)
     }
@@ -187,31 +178,30 @@ struct OnboardingView: View {
     // MARK: - Screen 3: Sign Up
 
     private var signUpPage: some View {
-        SignUpFormView(
-            hasCompletedOnboarding: $hasCompletedOnboarding,
-            showSignIn: $showSignIn
-        )
+        AuthFormView(hasCompletedOnboarding: $hasCompletedOnboarding)
     }
 
     // MARK: - Progress dots
 
-    private func progressDots(current: Int) -> some View {
+    private func progressDots(current: Int, light: Bool = false) -> some View {
         HStack(spacing: 8) {
             ForEach(0..<3, id: \.self) { i in
                 Circle()
-                    .fill(i == current ? Color(hex: "1A5C38") : DS.textTertiary.opacity(0.3))
+                    .fill(i == current
+                          ? (light ? Color.white : Color(hex: "1A5C38"))
+                          : (light ? Color.white.opacity(0.3) : DS.textTertiary.opacity(0.3)))
                     .frame(width: 8, height: 8)
             }
         }
     }
 }
 
-// MARK: - Sign Up Form (extracted for reuse)
+// MARK: - Auth Form (sign up / sign in toggle)
 
-private struct SignUpFormView: View {
+private struct AuthFormView: View {
     @Binding var hasCompletedOnboarding: Bool
-    @Binding var showSignIn: Bool
 
+    @State private var isSignIn = false
     @State private var email = ""
     @State private var password = ""
     @State private var isSubmitting = false
@@ -225,10 +215,12 @@ private struct SignUpFormView: View {
                 NudgeAvatar(size: 100)
 
                 VStack(spacing: 8) {
-                    Text("Create your account")
+                    Text(isSignIn ? "Welcome back" : "Create your account")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(DS.textPrimary)
-                    Text("Your data stays on your device and your private Supabase account.")
+                    Text(isSignIn
+                         ? "Sign in to pick up where you left off."
+                         : "Your data stays private. No bank access. Ever.")
                         .font(.subheadline)
                         .foregroundStyle(DS.textSecondary)
                         .multilineTextAlignment(.center)
@@ -250,7 +242,7 @@ private struct SignUpFormView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
                     SecureField("Password", text: $password)
-                        .textContentType(.newPassword)
+                        .textContentType(isSignIn ? .password : .newPassword)
                         .font(.body)
                         .padding(14)
                         .background(DS.paleGreen.opacity(0.5))
@@ -274,7 +266,7 @@ private struct SignUpFormView: View {
                             ProgressView()
                                 .tint(Color(hex: "3A2000"))
                         } else {
-                            Text("Create account")
+                            Text(isSignIn ? "Sign in" : "Create account")
                                 .font(.system(size: 15, weight: .bold))
                         }
                         Spacer()
@@ -287,9 +279,14 @@ private struct SignUpFormView: View {
                 .padding(.horizontal, DS.hPadding)
 
                 Button {
-                    showSignIn = true
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isSignIn.toggle()
+                        errorMessage = nil
+                    }
                 } label: {
-                    Text("Already have an account? Sign in")
+                    Text(isSignIn
+                         ? "Don't have an account? Sign up"
+                         : "Already have an account? Sign in")
                         .font(.subheadline)
                         .foregroundStyle(Color(hex: "4CAF50"))
                 }
@@ -305,8 +302,12 @@ private struct SignUpFormView: View {
         isSubmitting = true
         defer { isSubmitting = false }
         do {
-            try await SupabaseService.shared.signUp(email: email, password: password)
-            _ = try await SupabaseService.shared.fetchOrCreateBudgetMonth(for: Date())
+            if isSignIn {
+                try await SupabaseService.shared.signIn(email: email, password: password)
+            } else {
+                try await SupabaseService.shared.signUp(email: email, password: password)
+                _ = try await SupabaseService.shared.fetchOrCreateBudgetMonth(for: Date())
+            }
             UserDefaults.standard.set(true, forKey: "hasSeenNudge")
             hasCompletedOnboarding = true
         } catch {
