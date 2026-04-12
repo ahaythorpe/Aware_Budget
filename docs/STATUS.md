@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — Money Green + Nugget Gold colour system applied to all screens. 4-tab root, swipe cards, spending driver tags all live. Supabase wiring blocked on Xcode package add.
+**Current phase:** PRD v1.1 — Money Green + Nugget Gold + NudgeEngine + category-free money events. 4-tab root, swipe cards, spending driver tags, Nudge mascot card, awareness-based MoneyEventView (planned/surprise/impulse + behaviour tags, no categories) all live. Supabase wiring blocked on Xcode package add.
 
 ---
 
@@ -20,8 +20,9 @@
 ### Models (`AwareBudget/Models/`)
 - `CheckIn.swift` — `EmotionalTone` enum with emoji updated to PRD v1.1
   set: calm=😌 · neutral=😐 · anxious=😟
-- `MoneyEvent.swift` — with `EventType` (surprise/win/expected) and
-  `MoneyCategory` enum
+- `MoneyEvent.swift` — **rebuilt**: `PlannedStatus` (planned/surprise/impulse),
+  `behaviourTag` (SpendingDriver rawValue), `lifeEvent` (for large amounts),
+  derived `sizeBucket`. No categories. `MoneyCategory` enum removed.
 - `Question.swift` — PRD v1.1: now includes `biasCategory: String` and
   `difficulty: String` with snake_case `CodingKeys` (`bias_category`)
 - `BiasLesson.swift` — **NEW** PRD v1.1 model: id, bias_name, category,
@@ -138,10 +139,15 @@
   uppercase. `PrimaryButtonStyle` default tint `DS.primary`.
   `SecondaryButtonStyle` uses `DS.paleGreen` fill. `Card` uses
   `DS.cardBg`. All purple/violet hex values removed.
-- `MoneyEventView.swift` — form sheet with amount / type / category /
-  note / date.
-- `MonthView.swift` — month totals, category breakdown, events by type,
-  editable income target.
+- `MoneyEventView.swift` — **rebuilt**: no categories. Flow: amount →
+  planned/surprise/impulse (3 full-width buttons) → conditional behaviour
+  tag picker (2x3 grid, only for surprise/impulse) → conditional life
+  event picker (only if amount > 200) → note → date → save. All sections
+  animate in/out with spring. Uses DS green palette throughout.
+- `MonthView.swift` — **rebuilt**: alignment %, income target, unplanned
+  spend ratio card (% + surprise/impulse pill counts), top behaviour card
+  (most-tagged SpendingDriver), events grouped by PlannedStatus with
+  behaviour tag labels. No categories. Uses DS green palette.
 
 ### App entry
 - `AwareBudgetApp.swift` — root switches between `OnboardingView` and

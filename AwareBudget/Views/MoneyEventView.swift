@@ -6,25 +6,32 @@ struct MoneyEventView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: DS.sectionGap) {
                     amountHero
-                    typeSelector
-                    categorySelector
+                    plannedStatusSelector
+                    if viewModel.showBehaviourTag {
+                        behaviourTagSection
+                    }
+                    if viewModel.showLifeEvent {
+                        lifeEventSection
+                    }
                     noteField
                     dateField
                     if let errorMessage = viewModel.errorMessage {
                         Text(errorMessage)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(DS.warning)
                     }
                     saveButton
                 }
                 .padding(.horizontal, DS.hPadding)
                 .padding(.top, 12)
                 .padding(.bottom, 32)
+                .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.plannedStatus)
+                .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.showLifeEvent)
             }
         }
         .navigationTitle("Log money event")
@@ -36,21 +43,22 @@ struct MoneyEventView: View {
         }
     }
 
-    // MARK: - Sections
+    // MARK: - Amount
 
     private var amountHero: some View {
         Card(padding: 24) {
             VStack(alignment: .center, spacing: 10) {
                 Text("AMOUNT")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.textSecondary)
                     .tracking(0.8)
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(Locale.current.currencySymbol ?? "$")
                         .font(.title2.weight(.bold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DS.textSecondary)
                     TextField("0", text: $viewModel.amountText)
                         .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .foregroundStyle(DS.textPrimary)
                         .multilineTextAlignment(.center)
                         .fixedSize()
                     #if !os(macOS)
@@ -62,77 +70,170 @@ struct MoneyEventView: View {
         }
     }
 
-    private var typeSelector: some View {
+    // MARK: - Planned / Surprise / Impulse
+
+    private var plannedStatusSelector: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Type")
-            HStack(spacing: 12) {
-                ForEach(MoneyEvent.EventType.allCases) { type in
-                    typeButton(type)
+            SectionHeader(title: "Was this planned?")
+            VStack(spacing: 10) {
+                ForEach(MoneyEvent.PlannedStatus.allCases) { status in
+                    plannedStatusButton(status)
                 }
             }
         }
     }
 
-    private func typeButton(_ type: MoneyEvent.EventType) -> some View {
-        let selected = viewModel.eventType == type
+    private func plannedStatusButton(_ status: MoneyEvent.PlannedStatus) -> some View {
+        let selected = viewModel.plannedStatus == status
         return Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                viewModel.eventType = type
+                viewModel.plannedStatus = status
             }
         } label: {
-            VStack(spacing: 6) {
-                Text(type.emoji)
-                    .font(.system(size: 28))
-                Text(type.label)
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(selected ? .primary : .secondary)
+            HStack(spacing: 14) {
+                Text(status.emoji)
+                    .font(.system(size: 24))
+                    .frame(width: 40)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(status.label)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(selected ? .white : DS.textPrimary)
+                    Text(statusDescription(status))
+                        .font(.caption)
+                        .foregroundStyle(selected ? .white.opacity(0.8) : DS.textSecondary)
+                }
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.white)
+                        .font(.title3)
+                }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(selected ? Color.blue.opacity(0.12) : Color(.secondarySystemBackground))
+                    .fill(selected ? DS.primary : DS.cardBg)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .stroke(selected ? Color.blue : .clear, lineWidth: 2)
+                    .stroke(selected ? DS.primary : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
             )
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: selected)
     }
 
-    private var categorySelector: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Category")
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(MoneyCategory.allCases) { cat in
-                        let selected = viewModel.category == cat
-                        Button {
-                            viewModel.category = cat
-                        } label: {
-                            Text(cat.rawValue)
-                                .font(.footnote.weight(.semibold))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .background(
-                                    Capsule().fill(
-                                        selected
-                                            ? Color.blue
-                                            : Color(.secondarySystemBackground)
-                                    )
-                                )
-                                .foregroundStyle(selected ? .white : .primary)
-                        }
-                        .buttonStyle(.plain)
-                        .sensoryFeedback(.selection, trigger: selected)
-                    }
-                }
-                .padding(.horizontal, 2)
-            }
+    private func statusDescription(_ status: MoneyEvent.PlannedStatus) -> String {
+        switch status {
+        case .planned:  return "Expected, budgeted for"
+        case .surprise: return "Didn't see this coming"
+        case .impulse:  return "Saw it, wanted it, bought it"
         }
     }
+
+    // MARK: - Behaviour tag (only for surprise/impulse)
+
+    private var behaviourTagSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "What drove it?")
+            Text("No wrong answers. Just noticing.")
+                .font(.caption)
+                .foregroundStyle(DS.textSecondary)
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                ForEach(CheckIn.SpendingDriver.allCases) { driver in
+                    behaviourTagButton(driver)
+                }
+            }
+        }
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func behaviourTagButton(_ driver: CheckIn.SpendingDriver) -> some View {
+        let selected = viewModel.behaviourTag == driver
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                viewModel.behaviourTag = selected ? nil : driver
+            }
+        } label: {
+            VStack(spacing: 6) {
+                Text(driver.emoji)
+                    .font(.system(size: 22))
+                Text(driver.label)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(selected ? .white : DS.textPrimary)
+                Text(driver.shortDescription)
+                    .font(.system(size: 10))
+                    .foregroundStyle(selected ? .white.opacity(0.8) : DS.textSecondary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 8)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(selected ? DS.primary : DS.cardBg)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .stroke(selected ? DS.primary : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: selected)
+    }
+
+    // MARK: - Life event (only for amount > 200)
+
+    private var lifeEventSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Anything significant behind this?")
+            Text("Helps Nudge understand the bigger picture.")
+                .font(.caption)
+                .foregroundStyle(DS.textSecondary)
+            VStack(spacing: 8) {
+                ForEach(MoneyEvent.LifeEvent.allCases) { event in
+                    lifeEventButton(event)
+                }
+            }
+        }
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func lifeEventButton(_ event: MoneyEvent.LifeEvent) -> some View {
+        let selected = viewModel.lifeEvent == event
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                viewModel.lifeEvent = selected ? nil : event
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Text(event.label)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(selected ? .white : DS.textPrimary)
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(selected ? DS.primary : DS.cardBg)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .stroke(selected ? DS.primary : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: selected)
+    }
+
+    // MARK: - Note
 
     private var noteField: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -145,6 +246,8 @@ struct MoneyEventView: View {
         }
     }
 
+    // MARK: - Date
+
     private var dateField: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "Date")
@@ -155,6 +258,8 @@ struct MoneyEventView: View {
             }
         }
     }
+
+    // MARK: - Save
 
     private var saveButton: some View {
         Button {

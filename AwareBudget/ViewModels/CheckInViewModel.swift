@@ -68,7 +68,7 @@ final class CheckInViewModel {
         let month = try await service.fetchOrCreateBudgetMonth(for: now)
         let events = try await service.fetchMoneyEvents(forMonth: now)
         let unplanned = events
-            .filter { $0.eventType == .surprise }
+            .filter { $0.plannedStatus.isUnplanned }
             .reduce(0.0) { $0 + $1.amount }
         guard month.incomeTarget > 0 else { return 0 }
         let pct = (1 - unplanned / month.incomeTarget) * 100

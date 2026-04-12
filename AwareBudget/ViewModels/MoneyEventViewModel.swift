@@ -5,8 +5,9 @@ import SwiftUI
 @Observable
 final class MoneyEventViewModel {
     var amountText: String = ""
-    var eventType: MoneyEvent.EventType = .expected
-    var category: MoneyCategory = .other
+    var plannedStatus: MoneyEvent.PlannedStatus = .planned
+    var behaviourTag: CheckIn.SpendingDriver?
+    var lifeEvent: MoneyEvent.LifeEvent?
     var note: String = ""
     var date: Date = .init()
     var isSaving = false
@@ -15,13 +16,21 @@ final class MoneyEventViewModel {
 
     private let service = SupabaseService.shared
 
-    var canSave: Bool {
-        Double(amountText.replacingOccurrences(of: ",", with: ".")) ?? 0 > 0
+    var parsedAmount: Double {
+        Double(amountText.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
+
+    var canSave: Bool { parsedAmount > 0 }
+
+    /// Show behaviour tag picker only for unplanned spend
+    var showBehaviourTag: Bool { plannedStatus.isUnplanned }
+
+    /// Show life event picker only for large amounts
+    var showLifeEvent: Bool { parsedAmount > 200 }
 
     func save() async {
         guard !isSaving, let uid = service.currentUserId else { return }
-        guard let amount = Double(amountText.replacingOccurrences(of: ",", with: ".")), amount > 0 else {
+        guard parsedAmount > 0 else {
             errorMessage = "Enter a valid amount."
             return
         }
@@ -32,9 +41,10 @@ final class MoneyEventViewModel {
             id: UUID(),
             userId: uid,
             date: date,
-            amount: amount,
-            category: category.rawValue,
-            eventType: eventType,
+            amount: parsedAmount,
+            plannedStatus: plannedStatus,
+            behaviourTag: showBehaviourTag ? behaviourTag?.rawValue : nil,
+            lifeEvent: showLifeEvent ? lifeEvent?.rawValue : nil,
             note: note.isEmpty ? nil : note,
             createdAt: Date()
         )

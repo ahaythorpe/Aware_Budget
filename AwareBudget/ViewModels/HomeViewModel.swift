@@ -12,6 +12,7 @@ final class HomeViewModel {
     var nextQuestionTeaser: String?
     var nextBiasName: String?
     var weekDots: [Bool] = Array(repeating: false, count: 7)
+    var nudgeMessage: NudgeMessage?
     var isLoading = false
     var errorMessage: String?
 
@@ -57,8 +58,8 @@ final class HomeViewModel {
     var alignmentReassurance: String {
         guard isTargetSet else { return "Set a target to start tracking." }
         switch alignmentPct {
-        case 80...: return "Looking aligned — keep it up."
-        case 50..<80: return "Adjust early — awareness is the lever."
+        case 80...: return "Looking aligned \u{2014} keep it up."
+        case 50..<80: return "Adjust early \u{2014} awareness is the lever."
         default: return "Awareness is the first step."
         }
     }
@@ -97,9 +98,17 @@ final class HomeViewModel {
                 nextQuestionTeaser = nil
                 nextBiasName = nil
             }
+
+            // Build Nudge context and get message
+            buildNudge(recentCheckIns: weekHistory)
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func dismissNudge() {
+        NudgeDismissStore.dismiss()
+        nudgeMessage = nil
     }
 
     func saveTarget(_ amount: Double) async {
@@ -112,9 +121,64 @@ final class HomeViewModel {
         }
     }
 
+    // MARK: - Nudge
+
+    private func buildNudge(recentCheckIns: [CheckIn]) {
+        guard !NudgeDismissStore.isDismissed else {
+            nudgeMessage = nil
+            return
+        }
+
+        let isFirstOpen = !UserDefaults.standard.bool(forKey: "hasSeenNudge")
+
+        // Days since last check-in
+        let daysSinceLast: Int
+        if todaysCheckIn != nil {
+            daysSinceLast = 0
+        } else if let latest = recentCheckIns.sorted(by: { $0.date > $1.date }).first {
+            daysSinceLast = max(0, Calendar.current.dateComponents([.day], from: latest.date, to: Date()).day ?? 0)
+        } else {
+            daysSinceLast = 999
+        }
+
+        // Top spending driver from recent check-ins
+        let drivers = recentCheckIns.compactMap { $0.spendingDriver }
+        let driverCounts = Dictionary(grouping: drivers, by: { $0 }).mapValues(\.count)
+        let topDriver = driverCounts.max(by: { $0.value < $1.value })
+
+        let ctx = NudgeContext(
+            streakDays: streak,
+            topBias: topDriver?.key.label,
+            topBiasCount: topDriver?.value ?? 0,
+            alignmentPct: alignmentPct,
+            topSpendCategory: recentEvents.compactMap(\.behaviourTag).first,
+            spendTrend: nil,  // requires week-over-week comparison — future
+            emotionalToneToday: todaysCheckIn?.emotionalTone.rawValue,
+            daysSinceLastCheckin: daysSinceLast,
+            totalBiasesSeen: Set(recentCheckIns.compactMap { $0.spendingDriver }).count,
+            isFirstOpen: isFirstOpen,
+            completedCheckInToday: todaysCheckIn != nil
+        )
+
+        let msg = NudgeEngine.message(for: ctx)
+
+        if NudgeDedup.isDuplicate(msg) {
+            nudgeMessage = nil
+        } else {
+            NudgeDedup.record(msg)
+            nudgeMessage = msg
+        }
+
+        if isFirstOpen {
+            UserDefaults.standard.set(true, forKey: "hasSeenNudge")
+        }
+    }
+
+    // MARK: - Helpers
+
     private static func computeWeekDots(from checkIns: [CheckIn]) -> [Bool] {
         var cal = Calendar(identifier: .iso8601)
-        cal.firstWeekday = 2 // Monday
+        cal.firstWeekday = 2
         let now = Date()
         guard let monday = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
             return Array(repeating: false, count: 7)
@@ -128,7 +192,7 @@ final class HomeViewModel {
     private func computeAlignment(month: BudgetMonth) async throws -> Double {
         let events = try await service.fetchMoneyEvents(forMonth: month.month)
         let unplanned = events
-            .filter { $0.eventType == .surprise }
+            .filter { $0.plannedStatus.isUnplanned }
             .reduce(0.0) { $0 + $1.amount }
         guard month.incomeTarget > 0 else { return 0 }
         let pct = (1 - unplanned / month.incomeTarget) * 100

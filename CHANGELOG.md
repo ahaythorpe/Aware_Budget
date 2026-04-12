@@ -5,6 +5,47 @@
 
 ---
 
+## 2026-04-12 — Kill categories: awareness-based money events (Claude Code)
+
+**Goal:** Categories are what made Mint fail. "Shopping: £220" tells you
+nothing. Replace the entire category system with awareness-based tracking:
+was this planned or a surprise? What behaviour drove it?
+
+**Philosophy shift:** Trends now use planned/surprise ratio + behaviour
+tags + amount size. Never categories. "Anchoring-driven spend" tells you
+WHY money left your account. "Shopping" tells you nothing.
+
+**MoneyEvent model rewrite:**
+- Removed `EventType` (surprise/win/expected) and `MoneyCategory` enum
+- Added `PlannedStatus` (planned/surprise/impulse) with `isUnplanned`
+- Added `behaviourTag: String?` (reuses CheckIn.SpendingDriver rawValues)
+- Added `LifeEvent` enum (job_change/unexpected_bill/medical/windfall/
+  other_big) — shown only when amount > 200
+- Added derived `SizeBucket` (small <50, medium 50-200, large 200+)
+- Removed `category: String?` field entirely
+
+**MoneyEventView rebuilt — 3 taps:**
+1. Amount (numeric hero input)
+2. Was this planned? — 3 full-width buttons with descriptions:
+   [✓ Planned] [⚡ Surprise] [🎯 Impulse]
+3. What drove it? — 2x3 behaviour tag grid (only for surprise/impulse)
+4. Life event — 5 options (only if amount > 200)
+Plus optional note + date. Sections animate in/out with spring.
+
+**MonthView rebuilt:**
+- Killed `categoryBreakdown` entirely
+- New: unplanned spend ratio card (% of total + surprise/impulse counts)
+- New: top behaviour card (most-tagged SpendingDriver this month)
+- Events grouped by PlannedStatus, labelled with behaviour tag
+
+**Alignment calc updated** in HomeViewModel, CheckInViewModel, MonthView:
+uses `plannedStatus.isUnplanned` instead of `eventType == .surprise`.
+HomeView event rows show PlannedStatus label/emoji.
+
+**Build:** `** BUILD SUCCEEDED **` (iPhone 17 / iOS 26.2).
+
+---
+
 ## 2026-04-12 — Money Green + Nugget Gold colour system (Claude Code)
 
 **Goal:** Replace all purple/violet with bright money green + nugget

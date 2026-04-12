@@ -41,6 +41,19 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: DS.sectionGap) {
                 greetingHeader
+                if let msg = viewModel.nudgeMessage {
+                    NudgeCardView(
+                        message: msg,
+                        onAction: { action in
+                            handleNudgeAction(action)
+                        },
+                        onDismiss: {
+                            withAnimation(.easeOut(duration: 0.25)) {
+                                viewModel.dismissNudge()
+                            }
+                        }
+                    )
+                }
                 heroCheckInCard
                 streakSection
                 alignmentCard
@@ -50,6 +63,17 @@ struct HomeView: View {
             .padding(.horizontal, DS.hPadding)
             .padding(.top, 8)
             .padding(.bottom, 40)
+        }
+    }
+
+    private func handleNudgeAction(_ action: NudgeAction) {
+        switch action {
+        case .startCheckIn:
+            selectedTab?.wrappedValue = .checkIn
+        case .openLearnBias, .openBiasDetail:
+            selectedTab?.wrappedValue = .learn
+        case .openTrends:
+            selectedTab?.wrappedValue = .month
         }
     }
 
@@ -261,14 +285,14 @@ struct HomeView: View {
 
     private func eventRow(_ event: MoneyEvent) -> some View {
         HStack(spacing: 12) {
-            Text(event.eventType.emoji)
+            Text(event.plannedStatus.emoji)
                 .font(.title3)
                 .frame(width: 36, height: 36)
                 .background(DS.paleGreen)
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(event.category ?? event.eventType.label)
+                Text(event.plannedStatus.label)
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(DS.textPrimary)
                 Text(event.date, style: .date)

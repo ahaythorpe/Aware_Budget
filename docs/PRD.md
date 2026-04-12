@@ -323,38 +323,43 @@ struct Question: Identifiable, Codable {
 ```swift
 import Foundation
 
-struct MoneyEvent: Identifiable, Codable {
+struct MoneyEvent: Identifiable, Codable, Hashable {
     let id: UUID
     var userId: UUID
     var date: Date
     var amount: Double
-    var category: String?
-    var eventType: EventType
+    var plannedStatus: PlannedStatus
+    var behaviourTag: String?       // CheckIn.SpendingDriver rawValue
+    var lifeEvent: String?          // LifeEvent rawValue
     var note: String?
     var createdAt: Date
 
-    enum EventType: String, Codable, CaseIterable {
-        case surprise, win, expected
-        var label: String {
-            switch self {
-            case .surprise: return "Surprise"
-            case .win: return "Win"
-            case .expected: return "Expected"
-            }
-        }
-        var emoji: String {
-            switch self {
-            case .surprise: return "⚡"
-            case .win: return "🎉"
-            case .expected: return "📅"
-            }
+    enum PlannedStatus: String, Codable, CaseIterable {
+        case planned, surprise, impulse
+        var isUnplanned: Bool { self != .planned }
+    }
+
+    enum LifeEvent: String, Codable, CaseIterable {
+        case jobChange = "job_change"
+        case unexpectedBill = "unexpected_bill"
+        case medical, windfall
+        case otherBig = "other_big"
+    }
+
+    // Derived, not stored
+    enum SizeBucket { case small, medium, large }
+    var sizeBucket: SizeBucket {
+        switch amount {
+        case ..<50: .small; case 50..<200: .medium; default: .large
         }
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, date, amount, category, note
+        case id, date, amount, note
         case userId = "user_id"
-        case eventType = "event_type"
+        case plannedStatus = "planned_status"
+        case behaviourTag = "behaviour_tag"
+        case lifeEvent = "life_event"
         case createdAt = "created_at"
     }
 }
@@ -404,7 +409,28 @@ Logic:
 - Return to HomeView
 
 ### 4. Money Event (MoneyEventView)
-Sheet. Fields: amount (required) · event type (Surprise/Win/Expected) · category pills · note · date
+Sheet. No categories. Three taps:
+
+1. **Amount** (required, numeric input)
+2. **Was this planned?** — three full-width buttons:
+   - [✓ Planned] "Expected, budgeted for"
+   - [⚡ Surprise] "Didn't see this coming"
+   - [🎯 Impulse] "Saw it, wanted it, bought it"
+   Saved as `planned_status` column.
+3. **What drove it?** — only shown for Surprise/Impulse.
+   Same 6 behavioural tags as check-in SpendingDriver.
+   Saved as `behaviour_tag` column.
+4. **Life event** — only shown if amount > 200.
+   [Job/income change] [Unexpected bill] [Medical]
+   [Windfall] [Other big event]. Saved as `life_event` column.
+
+Plus optional note and date picker.
+
+Size bucket is derived (not stored): Small (<50), Medium (50-200), Large (200+).
+
+**Philosophy:** Categories tell you nothing. "Shopping" is not insight.
+Behaviour tags tell you WHY. Planned/surprise ratio tells you awareness.
+Trends use planned_status + behaviour_tag + amount size, never categories.
 
 ### 5. Learn Screen (LearnView) ← NEW
 Tab bar item. Browsable library of all 16 biases.
