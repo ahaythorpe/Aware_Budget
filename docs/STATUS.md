@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. App icon set to Nudge mascot (1024px, all variants). 3-screen onboarding with Budget Reality Check. Sign-in inline toggle. Real Supabase questions wired. Build succeeds.
+**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. App icon set to Nudge mascot (all variants). LearnView dual buttons. SettingsView with sign-out + reset demo data. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -93,7 +93,9 @@
   13pt centred secondary description (max 2 lines), divider with 12pt
   padding, 10pt teal "IN REAL LIFE" caps, 11pt example in tinted card
   (max 3 lines, truncated), gold "How to counter it →" button pinned
-  to bottom. Seen count moved to subtle corner badge. Filter pills
+  to bottom. Two side-by-side buttons: "Learn more" (outline, green text)
+  and "How to counter it" (filled green bg, white text), both navigate to
+  BiasDetailView. Seen count moved to subtle corner badge. Filter pills
   compact: 9pt text, less padding. Swipe counter "3 of 16" below card.
   `.navigationDestination(for: BiasLesson.self)` pushes
   `BiasDetailView(lesson:)`. Sources `BiasLessonsMock.seed`.
@@ -163,6 +165,11 @@
 - `SparklineView.swift` — **NEW** reusable 7-bar sparkline component.
   Green bars for improving, orange for worsening. Configurable width,
   height, colour direction.
+- `SettingsView.swift` — **NEW** (2026-04-13). Opens from gear icon on
+  HomeView as a sheet. Sign out (calls SupabaseService.signOut + resets
+  hasCompletedOnboarding → returns to OnboardingView). Reset demo data
+  (deletes daily_checkins, money_events, user_bias_progress for current
+  user with confirmation dialog). App version + build number from Bundle.
 - `MonthView.swift` — kept in codebase but no longer mounted in tab bar.
 
 ### App entry
@@ -301,7 +308,7 @@ gated as beta-required.
 ## ⚠️ Known gaps
 
 - ~~No sign-in flow~~ — **DONE** (2026-04-13). SignInView added.
-- No settings screen behind the gear icon on `HomeView`.
+- ~~No settings screen behind the gear icon on `HomeView`.~~ **DONE** (2026-04-13). SettingsView added.
 - No streak-history dots calendar on `MonthView` (PRD §MonthView mentions
   it — deferred to v1.1).
 - Currency formatting uses the device locale; no user override.

@@ -256,13 +256,35 @@ struct LearnView: View {
 
                 Spacer(minLength: 0)
 
-                // Gold CTA pinned to bottom
-                NavigationLink(value: lesson) {
-                    Text("See pattern")
-                        .font(.system(size: 13, weight: .bold))
-                        .goldButtonStyle()
+                // Two side-by-side buttons
+                HStack(spacing: 10) {
+                    NavigationLink(value: lesson) {
+                        Text("Learn more")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color(hex: "1A5C38"))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Color(hex: "1A5C38"), lineWidth: 1.5)
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink(value: lesson) {
+                        Text("How to counter it")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(Color(hex: "1A5C38"))
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
+                .padding(.horizontal, 8)
                 .padding(.bottom, 16)
             }
             .padding(.horizontal, 14)

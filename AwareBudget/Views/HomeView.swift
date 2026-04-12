@@ -6,6 +6,8 @@ struct HomeView: View {
     @State private var showTargetEditor = false
     @State private var targetInput = ""
     @State private var isLoadingDemo = false
+    @State private var showSettings = false
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     var selectedTab: Binding<RootTab>? = nil
 
@@ -22,6 +24,9 @@ struct HomeView: View {
             Task { await viewModel.load() }
         }) {
             NavigationStack { MoneyEventView() }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(hasCompletedOnboarding: $hasCompletedOnboarding)
         }
         .alert("Monthly income target", isPresented: $showTargetEditor) {
             TextField("Amount", text: $targetInput)
@@ -92,10 +97,12 @@ struct HomeView: View {
                     .foregroundStyle(DS.textSecondary)
             }
             Spacer()
-            Image(systemName: "gearshape")
-                .font(.title3)
-                .foregroundStyle(DS.textTertiary)
-                .accessibilityHidden(true)
+            Button { showSettings = true } label: {
+                Image(systemName: "gearshape")
+                    .font(.title3)
+                    .foregroundStyle(DS.textTertiary)
+            }
+            .accessibilityLabel("Settings")
         }
         .padding(.top, 8)
     }

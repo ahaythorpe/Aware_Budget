@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-04-13 — Learn buttons, settings screen (Claude Code)
+
+**LearnView buttons:**
+- Replaced single "See pattern" gold button with two side-by-side buttons.
+- "Learn more": outline border, Color(hex: "1A5C38") text, clear bg.
+- "How to counter it": filled Color(hex: "1A5C38") bg, white text.
+- Both navigate to BiasDetailView via NavigationLink(value: lesson).
+
+**SettingsView (NEW):**
+- Gear icon in HomeView now opens SettingsView as a sheet.
+- Sign out: calls SupabaseService.signOut(), resets hasCompletedOnboarding
+  to false → user returns to OnboardingView.
+- Reset demo data: deletes daily_checkins, money_events, user_bias_progress
+  for current user. Confirmation dialog before executing.
+- Shows app version + build number from Bundle.main.
+
+---
+
 ## 2026-04-13 — App icon set to Nudge mascot (Claude Code)
 
 **App icon:**

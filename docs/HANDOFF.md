@@ -39,14 +39,14 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `CheckInViewModel.swift` — @Observable. load question, submit with streak calc, alignment calc. Uses `await service.currentUserId`.
 - `MoneyEventViewModel.swift` — @Observable. Amount validation, save, nudgeResponse. Uses `await service.currentUserId`.
 
-### Views/ (13 files)
+### Views/ (14 files)
 - `AwareBudgetApp.swift` — @main. Onboarding gate. RootTabView after onboarding.
 - `RootTabView.swift` — 4 tabs: Home / Check in / Learn / Insights. Tint DS.primary.
 - `DesignSystem.swift` — DS enum with all colour tokens + Card, PrimaryButtonStyle, SecondaryButtonStyle, SectionHeader, NudgeAvatar, GoldButton, GoldRingModifier.
 - `HomeView.swift` — Greeting header, NudgeCardView, hero gradient check-in card, StreakRingView, alignment card, log event button, recent activity.
 - `CheckInView.swift` — **Swipe YES/NO.** Green gradient #1B5E20-#2E7D32-#4CAF50. Right=YES green overlay, Left=NO coral overlay. +/-15 degree rotation. 2 back cards. Gold bias pill. No text input. White opacity tone picker. Progress dots. Driver pick phase. Completion with Nudge.
 - `InsightFeedView.swift` — **Charts framework.** Hero gradient card with decorative circles. Bar chart: 6-week unplanned spend. Horizontal bar chart: bias frequency. Donut chart: planned vs unplanned %. Nudge card. Background #F5F7F5.
-- `LearnView.swift` — Swipe card deck. 1 back card. 52pt emoji, 22pt bold bias name, 13pt description, IN REAL LIFE teal label, gold "How to counter it" button. Filter pills. "X of 16" counter. Sources BiasLessonsMock.seed.
+- `LearnView.swift` — Swipe card deck. 1 back card. 52pt emoji, 22pt bold bias name, 13pt description, IN REAL LIFE teal label. Two side-by-side buttons: "Learn more" (outline, green) + "How to counter it" (filled green, white text). Both → BiasDetailView. Filter pills. "X of 16" counter. Sources BiasLessonsMock.seed.
 - `BiasDetailView.swift` — Full bias lesson detail. 72pt emoji, name, category pill, fullExplanation, realWorldExample, howToCounter.
 - `MoneyEventView.swift` — Amount, planned/surprise/impulse, behaviour tag (2x3 grid, unplanned only), life event (>200 only), note, date, save. Post-save NudgeCard.
 - `NudgeCardView.swift` — Green accent bar, NudgeAvatar, message text, gold action button, dismiss X. NudgeDismissStore (24h), NudgeDedup.
@@ -54,6 +54,7 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `SparklineView.swift` — 7-bar sparkline. Green improving, orange worsening.
 - `OnboardingView.swift` — **rebuilt** 3-screen paged onboarding: (1) Nudge 120pt welcome, (2) Budget Reality Check quiz with Nudge response, (3) sign-up form + "Sign in" link.
 - `SignInView.swift` — **NEW** email/password sign-in sheet with gold button. On success: hasCompletedOnboarding = true.
+- `SettingsView.swift` — **NEW** gear icon sheet from HomeView. Sign out (Supabase + reset onboarding flag), reset demo data (clears user's checkins/events/progress), app version/build.
 - `MonthView.swift` — Legacy, NOT mounted in tab bar.
 
 ### Assets
@@ -146,4 +147,4 @@ App bg        = #F5F7F5 (used in CheckInView, InsightFeedView)
 
 ---
 
-*Last verified: 2026-04-13 — build succeeds on iPhone 17 Pro / iOS 26.2*
+*Last verified: 2026-04-13 — our source compiles clean on iPhone 17 Pro / iOS 26.2 (upstream swift-clocks SPM dep has Xcode 26 compat issue)*
