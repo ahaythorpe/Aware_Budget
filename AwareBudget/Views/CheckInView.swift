@@ -21,6 +21,7 @@ struct CheckInView: View {
     @State private var lastAnswerWasYes: Bool = false
     @State private var savedStreak: Int = 0
     @State private var isSaving = false
+    @State private var alreadyCheckedIn: CheckIn?
 
     private let service = SupabaseService.shared
 
@@ -48,28 +49,32 @@ struct CheckInView: View {
             Color(hex: "F5F7F5").ignoresSafeArea()
 
             VStack(spacing: 16) {
-                progressDots
-                    .padding(.horizontal, DS.hPadding)
-                    .padding(.top, 8)
+                if let existing = alreadyCheckedIn {
+                    alreadyDoneView(existing)
+                } else {
+                    progressDots
+                        .padding(.horizontal, DS.hPadding)
+                        .padding(.top, 8)
 
-                Spacer(minLength: 0)
+                    Spacer(minLength: 0)
 
-                switch phase {
-                case .questions:
-                    if questions.isEmpty {
-                        ProgressView()
-                    } else {
-                        cardStack
+                    switch phase {
+                    case .questions:
+                        if questions.isEmpty {
+                            ProgressView()
+                        } else {
+                            cardStack
+                        }
+                    case .driverPick:
+                        driverPickView
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    case .done:
+                        completionView
+                            .transition(.opacity)
                     }
-                case .driverPick:
-                    driverPickView
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                case .done:
-                    completionView
-                        .transition(.opacity)
-                }
 
-                Spacer(minLength: 0)
+                    Spacer(minLength: 0)
+                }
             }
         }
         .navigationTitle("Daily check-in")
@@ -91,6 +96,11 @@ struct CheckInView: View {
             }
         }
         .task {
+            // Check if already completed today
+            if let existing = try? await service.fetchTodaysCheckIn() {
+                alreadyCheckedIn = existing
+                return
+            }
             if questions.isEmpty {
                 await loadQuestions()
             }
@@ -457,6 +467,40 @@ struct CheckInView: View {
             .buttonStyle(PrimaryButtonStyle())
             .padding(.horizontal, DS.hPadding)
             .padding(.top, 8)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Already checked in today
+
+    private func alreadyDoneView(_ checkIn: CheckIn) -> some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            NudgeAvatar(size: 72)
+
+            VStack(spacing: 8) {
+                Text("You checked in today.")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(DS.textPrimary)
+
+                Text("Day \(checkIn.streakCount)")
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundStyle(DS.accent)
+
+                if checkIn.questionId != nil {
+                    Text("Bias reflected on today")
+                        .font(.caption)
+                        .foregroundStyle(DS.textTertiary)
+                }
+
+                Text("Come back tomorrow")
+                    .font(.subheadline)
+                    .foregroundStyle(DS.textSecondary)
+                    .padding(.top, 4)
+            }
+
+            Spacer()
         }
         .frame(maxWidth: .infinity)
     }

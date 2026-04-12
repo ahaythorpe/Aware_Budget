@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. App icon set to Nudge mascot (all variants). LearnView dual buttons. SettingsView with sign-out + reset demo data. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. Daily check-in enforcement (once per day). Real Supabase questions live. HomeView stat cards + daily missions. Quick-log MoneyEventView with AUD ranges. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -86,7 +86,10 @@
   green right. After all cards: spending driver pick screen (2x3 grid
   with `rgba(76,175,80,0.15)` borders). Completion view: green circle +
   checkmark + "Nice work" + driver chip + NudgeCardView + Done.
-  Background `#F5F7F5`. Mock data from `QuestionPool.seed`.
+  Background `#F5F7F5`. Real questions from Supabase (fallback to
+  QuestionPool.seed). **Daily enforcement**: checks fetchTodaysCheckIn()
+  on appear — if already completed, shows NudgeAvatar 72pt + "You
+  checked in today." + streak count + "Come back tomorrow".
 - `LearnView.swift` — **SIMPLIFIED** swipe card deck. Fixed 340pt card
   height, 1 back card (not 2). Front card: centred 52pt emoji, centred
   category pill (10pt), 22pt bold centred bias name with breathing room,
@@ -107,7 +110,10 @@
   fullExplanation, teal-tinted "IN REAL LIFE" card with
   realWorldExample, "How to counter it" section with howToCounter
   body.
-- `HomeView.swift` — **rebuilt 2026-04-12** with brand palette.
+- `HomeView.swift` — **rebuilt 2026-04-12, updated 2026-04-13** with brand palette.
+  **New (2026-04-13)**: 3 stat cards row (Alignment %, Biases Seen in gold,
+  This Week spend). Daily Missions section with 3 rows (check-in, log event,
+  learn a bias) that show completion state based on today's data.
   Background `#F7F4EF` (`DS.bg`). Hero check-in card is a full-width
   `#2D1B69` (`DS.deepPurple`) rounded rectangle with white text,
   coral accent icon, and teaser question. Tapping it switches the

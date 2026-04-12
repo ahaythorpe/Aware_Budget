@@ -63,6 +63,8 @@ struct HomeView: View {
                 }
                 heroCheckInCard
                 streakSection
+                statCardsRow
+                dailyMissions
                 alignmentCard
                 logEventButton
                 recentActivitySection
@@ -240,6 +242,109 @@ struct HomeView: View {
                         .stroke(DS.paleGreen, lineWidth: 0.5)
                 )
         )
+    }
+
+    // MARK: - Stat cards row
+
+    private var statCardsRow: some View {
+        HStack(spacing: 10) {
+            statCard(
+                label: "ALIGNMENT",
+                value: viewModel.isTargetSet ? "\(Int(viewModel.alignmentPct))%" : "—",
+                color: viewModel.alignmentColor
+            )
+            statCard(
+                label: "BIASES SEEN",
+                value: "\(viewModel.biasesSeenCount)",
+                color: DS.goldText,
+                useGold: true
+            )
+            statCard(
+                label: "THIS WEEK",
+                value: viewModel.weekSpendTrend,
+                color: DS.textPrimary
+            )
+        }
+    }
+
+    private func statCard(label: String, value: String, color: Color, useGold: Bool = false) -> some View {
+        VStack(spacing: 6) {
+            Text(label)
+                .font(.system(size: 9, weight: .heavy))
+                .foregroundStyle(DS.textTertiary)
+                .tracking(0.8)
+            if useGold {
+                Text(value)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundStyle(DS.goldText)
+            } else {
+                Text(value)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundStyle(color)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(DS.cardBg)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(DS.paleGreen, lineWidth: 0.5)
+                )
+        )
+    }
+
+    // MARK: - Daily missions
+
+    private var dailyMissions: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Daily missions")
+            VStack(spacing: 6) {
+                missionRow(
+                    done: viewModel.isCheckedInToday,
+                    label: "Daily check-in",
+                    hint: "Keep the streak"
+                )
+                missionRow(
+                    done: viewModel.hasLoggedEventToday,
+                    label: "Log a money event",
+                    hint: "Track what happened"
+                )
+                missionRow(
+                    done: viewModel.hasViewedLearnToday,
+                    label: "Learn a bias",
+                    hint: "Swipe through Learn"
+                )
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(DS.cardBg)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                            .stroke(DS.paleGreen, lineWidth: 0.5)
+                    )
+            )
+        }
+    }
+
+    private func missionRow(done: Bool, label: String, hint: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: done ? "checkmark.circle.fill" : "circle")
+                .font(.title3)
+                .foregroundStyle(done ? DS.accent : DS.textTertiary)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(label)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(done ? DS.textSecondary : DS.textPrimary)
+                    .strikethrough(done)
+                Text(hint)
+                    .font(.caption)
+                    .foregroundStyle(DS.textTertiary)
+            }
+            Spacer()
+        }
     }
 
     // MARK: - Alignment card

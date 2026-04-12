@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-04-13 — Daily check-in enforcement, home stats, missions (Claude Code)
+
+**CheckInView daily enforcement:**
+- On appear, checks fetchTodaysCheckIn(). If already completed, shows
+  NudgeAvatar 72pt + "You checked in today." + streak count + "Come
+  back tomorrow" instead of questions.
+
+**HomeView stat cards + daily missions:**
+- 3 stat cards row: Alignment %, Biases Seen (gold), This Week spend.
+- Daily Missions section: 3 rows with checkmark/circle state:
+  - Daily check-in — "Keep the streak"
+  - Log a money event — "Track what happened"
+  - Learn a bias — "Swipe through Learn"
+- Completion state driven by today's data from ViewModel.
+
+**Real questions from Supabase (already wired):**
+- fetchNextQuestion() was already hitting live Supabase with 14-day
+  cooldown + last_shown update. Confirmed working.
+
+---
+
 ## 2026-04-13 — Quick-log MoneyEventView with AUD ranges (Claude Code)
 
 **MoneyEventView rebuilt as quick-log:**

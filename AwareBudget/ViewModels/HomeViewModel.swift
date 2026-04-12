@@ -13,6 +13,11 @@ final class HomeViewModel {
     var nextBiasName: String?
     var weekDots: [Bool] = Array(repeating: false, count: 7)
     var nudgeMessage: NudgeMessage?
+    var biasesSeenCount: Int = 0
+    var weekSpendTrend: String = "—"
+    var weekSpendTrendUp: Bool? = nil
+    var hasLoggedEventToday: Bool = false
+    var hasViewedLearnToday: Bool = false
     var isLoading = false
     var errorMessage: String?
 
@@ -99,8 +104,28 @@ final class HomeViewModel {
                 nextBiasName = nil
             }
 
-            // Build Nudge context and get message
+            // Biases seen count
+            let biasProgress = try await service.fetchBiasProgress()
+            biasesSeenCount = biasProgress.filter { $0.timesEncountered > 0 }.count
+
+            // Week spend trend
             let weekEvents = try await service.fetchMoneyEventsThisWeek()
+            let weekTotal = weekEvents.reduce(0.0) { $0 + $1.amount }
+            if weekTotal > 0 {
+                weekSpendTrend = "$\(Int(weekTotal))"
+                weekSpendTrendUp = true
+            } else {
+                weekSpendTrend = "$0"
+                weekSpendTrendUp = nil
+            }
+
+            // Today's events
+            let todayStr = ISO8601DateFormatter.dateOnly.string(from: Date())
+            hasLoggedEventToday = recentEvents.contains { event in
+                ISO8601DateFormatter.dateOnly.string(from: event.date) == todayStr
+            }
+
+            // Build Nudge context and get message
             buildNudge(recentCheckIns: weekHistory, weekEvents: weekEvents)
 
             // Fallback: always show something if Nudge is nil
