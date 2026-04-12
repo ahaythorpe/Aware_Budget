@@ -52,7 +52,8 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `NudgeCardView.swift` — Green accent bar, NudgeAvatar, message text, gold action button, dismiss X. NudgeDismissStore (24h), NudgeDedup.
 - `StreakRingView.swift` — 140pt ring, DS.accent stroke, gold gradient number, M-S day dots.
 - `SparklineView.swift` — 7-bar sparkline. Green improving, orange worsening.
-- `OnboardingView.swift` — 3-step explainer + sign-up form.
+- `OnboardingView.swift` — **rebuilt** 3-screen paged onboarding: (1) Nudge 120pt welcome, (2) Budget Reality Check quiz with Nudge response, (3) sign-up form + "Sign in" link.
+- `SignInView.swift` — **NEW** email/password sign-in sheet with gold button. On success: hasCompletedOnboarding = true.
 - `MonthView.swift` — Legacy, NOT mounted in tab bar.
 
 ### Assets
@@ -120,12 +121,12 @@ App bg        = #F5F7F5 (used in CheckInView, InsightFeedView)
 ## What still needs building (priority order)
 
 1. Swap LearnView off BiasLessonsMock.seed -> service.fetchAllBiasLessons()
-2. Swap CheckInView off QuestionPool.seed -> service.fetchNextQuestion()
+2. ~~Swap CheckInView off QuestionPool.seed -> service.fetchNextQuestion()~~ **DONE**
 3. Backfill bias_category on original 15 question_pool rows
 4. Verify sign-up -> first check-in -> streak = 1 flow on device
 5. Verify notification permission fires after first check-in
 6. HomeView: add three stat cards (not two), daily missions section
-7. OnboardingView with Nudge welcome screen
+7. ~~OnboardingView with Nudge welcome screen~~ **DONE** (3-screen + sign in)
 8. TestFlight build
 
 ---
@@ -141,8 +142,8 @@ App bg        = #F5F7F5 (used in CheckInView, InsightFeedView)
 - NO bank sync. All manual.
 - NO "great job" from Nudge. Dry wit only.
 - Background #F5F7F5, borders rgba(76,175,80,0.15)
-- Section labels: 11pt 800 weight #4CAF50 uppercase tracking 1.5
+- Section labels: 12pt 800 weight #4CAF50 uppercase tracking 1.5
 
 ---
 
-*Last verified: 2026-04-12 — build succeeds on iPhone 17 Pro / iOS 26.2*
+*Last verified: 2026-04-13 — build succeeds on iPhone 17 Pro / iOS 26.2*

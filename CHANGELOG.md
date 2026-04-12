@@ -5,6 +5,43 @@
 
 ---
 
+## 2026-04-13 — Onboarding, Budget Reality Check, sign up/in, real questions (Claude Code)
+
+**Goal:** Rebuild onboarding as 3-screen paged flow with Budget Reality
+Check quiz. Add sign-in screen. Verify real Supabase questions are wired.
+
+**OnboardingView rebuilt (3 screens):**
+- Screen 1: NudgeAvatar 120pt + "Hi, I'm Nudge." + value prop + gold
+  "Get started" button. Progress dots at bottom.
+- Screen 2: Budget Reality Check quiz. Q1: "How long did your last
+  budget last?" (3 options). Q2: "Why did you stop?" (4 options,
+  conditional on Q1). Nudge responds: "You're not broken. The method
+  is." + 70% abandonment stat. Selected pills use heroGradient.
+  Animated transitions with spring.
+- Screen 3: Sign-up form. Email + password fields (paleGreen bg).
+  Gold "Create account" button. "Already have an account? Sign in"
+  link opens SignInView as sheet. On success: fetchOrCreateBudgetMonth,
+  set hasCompletedOnboarding = true.
+
+**SignInView (NEW):**
+- Email + password + gold "Sign in" button.
+- Presented as sheet from onboarding screen 3.
+- NudgeAvatar 80pt + "Welcome back" header.
+- On success: Supabase signIn(), hasCompletedOnboarding = true, dismiss.
+- Cancel toolbar button to return to sign-up.
+
+**Real Supabase questions (already wired):**
+- `SupabaseService.fetchNextQuestion()` already queries `question_pool`
+  ordered by `last_shown` ascending (nulls first), updates `last_shown`
+  after fetch. 14-day cooldown filter. Falls back to least-recently-shown.
+- `CheckInView.loadQuestions()` already calls `service.fetchNextQuestion()`
+  in a loop (up to 5 questions), with `QuestionPool.seed` as fallback.
+- No changes needed — TASK 2 was already complete.
+
+**Build:** No errors in source files.
+
+---
+
 ## 2026-04-13 — Gradients everywhere, typography scale, green consistency (Claude Code)
 
 **Goal:** Enforce heroGradient on all selected cards/sheets, bump

@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Core loop complete. All selected cards use heroGradient (no flat fills). GoldButtonStyle with bold + full-width. Yes/No buttons: coral #FF6B6B + 3-stop gold gradient. Typography scaled up across all views (12pt section headers, 15pt body, 13pt descriptions). Two-green system enforced: heading #1A5C38, lime #4CAF50. Build succeeds (SPM dependency issue in swift-clocks — not our code).
+**Current phase:** PRD v1.1 — Core loop complete + onboarding rebuilt. 3-screen onboarding: Nudge welcome, Budget Reality Check quiz, sign-up form. Sign-in screen added. Real Supabase questions already wired (fetchNextQuestion with 14-day cooldown + last_shown update). Build succeeds (SPM dependency issue in swift-clocks — not our code).
 
 ---
 
@@ -61,8 +61,16 @@
   behaviour tag count, life event, and planned status.
 
 ### Views (`AwareBudget/Views/`)
-- `OnboardingView.swift` — 3-step explainer + sign-up form. First-launch
-  only (flag in `@AppStorage("hasCompletedOnboarding")`).
+- `OnboardingView.swift` — **rebuilt** 3-screen paged onboarding:
+  (1) Nudge 120pt + welcome + "Get started" gold button,
+  (2) Budget Reality Check quiz (2 questions, Nudge responds with
+  "You're not broken. The method is." + 70% stat),
+  (3) Sign-up form with email/password + "Create account" gold button
+  + "Already have an account? Sign in" link.
+  Quiz answers stored in local state. Selected pills use heroGradient.
+- `SignInView.swift` — **NEW** sign-in screen. Email + password +
+  gold "Sign in" button. Presented as sheet from onboarding.
+  On success: sets hasCompletedOnboarding = true, navigates to HomeView.
 - `HomeView.swift` — streak card, alignment card, tone row, primary
   buttons, recent events, navigation to `MonthView`.
 - `CheckInView.swift` — **rebuilt with swipe YES/NO** (2026-04-12).
@@ -292,8 +300,7 @@ gated as beta-required.
 
 ## ⚠️ Known gaps
 
-- No sign-in flow yet (PRD says "no sign in for beta"). Returning users
-  currently re-enter the stub path.
+- ~~No sign-in flow~~ — **DONE** (2026-04-13). SignInView added.
 - No settings screen behind the gear icon on `HomeView`.
 - No streak-history dots calendar on `MonthView` (PRD §MonthView mentions
   it — deferred to v1.1).
