@@ -73,7 +73,7 @@ struct HomeView: View {
         case .openLearnBias, .openBiasDetail:
             selectedTab?.wrappedValue = .learn
         case .openTrends:
-            selectedTab?.wrappedValue = .month
+            selectedTab?.wrappedValue = .insights
         }
     }
 

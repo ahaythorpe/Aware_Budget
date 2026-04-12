@@ -4,7 +4,7 @@ enum RootTab: Int, Hashable {
     case home = 0
     case checkIn = 1
     case learn = 2
-    case month = 3
+    case insights = 3
 }
 
 struct RootTabView: View {
@@ -37,12 +37,12 @@ struct RootTabView: View {
             .tag(RootTab.learn)
 
             NavigationStack {
-                MonthView()
+                InsightFeedView()
             }
             .tabItem {
-                Label("Month", systemImage: "calendar")
+                Label("Insights", systemImage: "chart.line.uptrend.xyaxis")
             }
-            .tag(RootTab.month)
+            .tag(RootTab.insights)
         }
         .tint(DS.primary)
     }

@@ -5,6 +5,45 @@
 
 ---
 
+## 2026-04-12 — Replace MonthView with InsightFeedView + SparklineView (Claude Code)
+
+**Goal:** MonthView showed alignment % and income targets — legacy
+budgeting concepts that don't belong. Replace with behaviour-based
+awareness trends that show patterns, not budgets.
+
+**Tab renamed:** "Month" → "Insights" (icon: chart.line.uptrend.xyaxis).
+`RootTab.month` → `RootTab.insights`. All references updated (HomeView
+nudge action handler).
+
+**InsightFeedView (replaces MonthView):**
+1. Weekly hero card: #1B5E20→#2E7D32→#4CAF50 gradient, gold "THIS
+   WEEK" label, "This week: +/-£X from future you" (planned minus
+   unplanned net), "N of 7 days you chose future you" sub, 3 trend
+   pills (unplanned %, top bias, streak count)
+2. Spending trends section: one SparklineView card per behaviour tag,
+   showing 7 bars for last 7 weeks. Direction pill: "Improving" (green)
+   or "Watch this" (orange). "Linked to [bias] bias" subtext.
+3. Your patterns section: horizontal scroll of bias pattern cards.
+   Each: emoji + name + count + strength pill (Emerging <3,
+   Established 3-6, Strong 7+).
+4. Weekly Nudge insight card at bottom with contextual message.
+
+**SparklineView (new component):**
+- 7-bar chart, configurable width/height.
+- Green bars for improving trends, orange for worsening.
+- Latest bar highlighted with full colour.
+
+**SupabaseService:**
+- Added `fetchAllMoneyEvents()` for insights calculations.
+
+**Removed from tab bar:**
+- MonthView still in codebase (not deleted) but no longer mounted.
+- No income target, no alignment %, no categories anywhere in Insights.
+
+**Build:** `** BUILD SUCCEEDED **` (iPhone 17 / iOS 26.2).
+
+---
+
 ## 2026-04-12 — Wire NudgeEngine to live data + Nudge on all screens (Claude Code)
 
 **Goal:** NudgeEngine should build its context from real data, not

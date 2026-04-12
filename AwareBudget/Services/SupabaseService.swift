@@ -121,6 +121,14 @@ final class SupabaseService {
         return events.filter { $0.userId == uid && $0.behaviourTag == tag }.count
     }
 
+    /// Fetch all money events (for insights calculations)
+    func fetchAllMoneyEvents() async throws -> [MoneyEvent] {
+        guard let uid = currentUserId else { return [] }
+        return events
+            .filter { $0.userId == uid }
+            .sorted { $0.date > $1.date }
+    }
+
     // MARK: - Questions
 
     func fetchNextQuestion() async throws -> Question {

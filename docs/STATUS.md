@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-12
-**Current phase:** PRD v1.1 — Money Green + Nugget Gold + NudgeEngine fully wired + category-free money events. NudgeEngine context built from live data (streaks, behaviour tag patterns, unplanned spend %, weekly net, emotional tone, days since last check-in). Nudge responds on HomeView, CheckInView completion, and MoneyEventView post-save. Supabase wiring blocked on Xcode package add.
+**Current phase:** PRD v1.1 — Money Green + Nugget Gold + NudgeEngine + Insights tab. Tab 4 renamed from Month to Insights with InsightFeedView: weekly hero card, sparkline trend cards, bias pattern cards, weekly Nudge insight. No categories, no income target, no alignment %. Pure behaviour-based awareness trends. Supabase wiring blocked on Xcode package add.
 
 ---
 
@@ -127,7 +127,7 @@
   of 7 labelled dots (M T W T F S S) filled coral when that day has
   a check-in, otherwise grey.
 - `RootTabView.swift` — **NEW** 4-tab root. Tabs: Home / Check in /
-  Learn / Month. `@State selection: RootTab` binding passed down to
+  Learn / Insights. `@State selection: RootTab` binding passed down to
   `HomeView` and `CheckInView` so they can switch tabs. Uses
   `.tint(DS.accent)` for active tab color. `AwareBudgetApp.swift`
   now mounts `RootTabView()` (with a `.task { await
@@ -150,10 +150,21 @@
   tag picker (2x3 grid, only for surprise/impulse) → conditional life
   event picker (only if amount > 200) → note → date → save. All sections
   animate in/out with spring. Uses DS green palette throughout.
-- `MonthView.swift` — **rebuilt**: alignment %, income target, unplanned
-  spend ratio card (% + surprise/impulse pill counts), top behaviour card
-  (most-tagged SpendingDriver), events grouped by PlannedStatus with
-  behaviour tag labels. No categories. Uses DS green palette.
+- `InsightFeedView.swift` — **NEW** replaces MonthView. Tab 4 renamed
+  from "Month" to "Insights" (icon: chart.line.uptrend.xyaxis). Layout:
+  (1) Weekly hero card with #1B5E20→#2E7D32→#4CAF50 gradient, gold
+  "THIS WEEK" label, net from future you headline, check-in day count,
+  3 trend pills (unplanned %, top bias, streak). (2) Spending trends
+  section with SparklineView trend cards per behaviour tag ��� 7 bars for
+  last 7 weeks, direction pills (Improving/Watch this), bias link.
+  (3) Your patterns section with horizontal scroll of bias pattern cards
+  (emoji + name + count + strength pill: Emerging/Established/Strong).
+  (4) Weekly Nudge insight card at bottom. No income target, no alignment
+  %, no categories. Pure behaviour-based awareness trends.
+- `SparklineView.swift` — **NEW** reusable 7-bar sparkline component.
+  Green bars for improving, orange for worsening. Configurable width,
+  height, colour direction.
+- `MonthView.swift` — kept in codebase but no longer mounted in tab bar.
 
 ### App entry
 - `AwareBudgetApp.swift` — root switches between `OnboardingView` and
