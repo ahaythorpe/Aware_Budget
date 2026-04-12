@@ -196,13 +196,7 @@ struct CheckInView: View {
     private var frontCard: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: frontColors,
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(DS.heroGradient)
                 .frame(height: cardHeight)
 
             if currentIndex < questions.count {
@@ -297,8 +291,10 @@ struct CheckInView: View {
                         LinearGradient(
                             stops: [
                                 .init(color: Color(hex: "FFF0A0"), location: 0.0),
-                                .init(color: Color(hex: "E8B84B"), location: 0.5),
-                                .init(color: Color(hex: "C59430"), location: 1.0),
+                                .init(color: Color(hex: "E8B84B"), location: 0.25),
+                                .init(color: Color(hex: "C59430"), location: 0.5),
+                                .init(color: Color(hex: "8B6010"), location: 0.75),
+                                .init(color: Color(hex: "D4A843"), location: 1.0),
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing

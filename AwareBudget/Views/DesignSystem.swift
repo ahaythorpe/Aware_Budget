@@ -52,8 +52,8 @@ enum DS {
         stops: [
             .init(color: Color(hex: "052010"), location: 0.0),
             .init(color: Color(hex: "1B5E20"), location: 0.2),
-            .init(color: Color(hex: "4CAF50"), location: 0.5),
-            .init(color: Color(hex: "2E7D32"), location: 0.75),
+            .init(color: Color(hex: "2E7D32"), location: 0.5),
+            .init(color: Color(hex: "4CAF50"), location: 0.8),
             .init(color: Color(hex: "81C784"), location: 1.0),
         ],
         startPoint: .topLeading,
@@ -94,9 +94,9 @@ struct GoldButtonStyle: ViewModifier {
                     .fill(LinearGradient(
                         stops: [
                             .init(color: Color(hex: "FFF0A0"), location: 0.0),
-                            .init(color: Color(hex: "E8B84B"), location: 0.3),
-                            .init(color: Color(hex: "C59430"), location: 0.6),
-                            .init(color: Color(hex: "8B6010"), location: 0.85),
+                            .init(color: Color(hex: "E8B84B"), location: 0.25),
+                            .init(color: Color(hex: "C59430"), location: 0.5),
+                            .init(color: Color(hex: "8B6010"), location: 0.75),
                             .init(color: Color(hex: "D4A843"), location: 1.0),
                         ],
                         startPoint: .topLeading,
