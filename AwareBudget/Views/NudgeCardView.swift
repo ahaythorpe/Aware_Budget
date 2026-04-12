@@ -20,7 +20,7 @@ struct NudgeCardView: View {
             // Content
             VStack(alignment: .leading, spacing: 10) {
                 Text(message.body)
-                    .font(.system(size: 13, weight: .regular))
+                    .font(.system(size: 15, weight: .regular))
                     .foregroundStyle(DS.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -29,7 +29,7 @@ struct NudgeCardView: View {
                         onAction?(action)
                     } label: {
                         Text(label)
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 13, weight: .bold))
                             .goldButtonStyle()
                     }
                     .buttonStyle(.plain)

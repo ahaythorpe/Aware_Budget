@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Core loop complete. All gold buttons use nugget gradient (no flat fills). Hero gradient 5-stop dramatic (#052010→#81C784). Yes/No buttons inside check-in card (gold + white opacity). Auto-seed runs outside main catch block with auth guard. Build succeeds.
+**Current phase:** PRD v1.1 — Core loop complete. All selected cards use heroGradient (no flat fills). GoldButtonStyle with bold + full-width. Yes/No buttons: coral #FF6B6B + 3-stop gold gradient. Typography scaled up across all views (12pt section headers, 15pt body, 13pt descriptions). Two-green system enforced: heading #1A5C38, lime #4CAF50. Build succeeds (SPM dependency issue in swift-clocks — not our code).
 
 ---
 

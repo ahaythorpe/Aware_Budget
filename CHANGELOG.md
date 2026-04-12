@@ -5,6 +5,55 @@
 
 ---
 
+## 2026-04-13 — Gradients everywhere, typography scale, green consistency (Claude Code)
+
+**Goal:** Enforce heroGradient on all selected cards/sheets, bump
+typography scale for readability, enforce two-green colour system.
+
+**GoldButtonStyle renamed + improved (DesignSystem.swift):**
+- `GoldButton` → `GoldButtonStyle`: added `.fontWeight(.bold)`,
+  `.frame(maxWidth: .infinity)`, padding 11→12. Extension updated.
+
+**Hero gradient on all selected cards:**
+- MoneyEventView: all 3 selection card types (planned status,
+  behaviour tag, life event) now use `DS.heroGradient` when selected
+  instead of flat `DS.primary`. Uses `AnyShapeStyle` for type erasure.
+- Hero gradient location 0.7→0.75 for #2E7D32.
+
+**Yes/No buttons restyled (CheckInView):**
+- No button: coral `#FF6B6B` fill, white text, `Image(systemName: "xmark")`.
+- Yes button: 3-stop gold gradient (#FFF0A0→#E8B84B→#C59430),
+  dark green text, `Image(systemName: "checkmark")`.
+- Both use `clipShape(RoundedRectangle(cornerRadius: 12))`.
+- `.padding(.top, 16)` added.
+
+**InsightFeedView "Log your first event" button:**
+- Changed from `PrimaryButtonStyle()` to heroGradient fill + white bold text.
+
+**Typography scale (all views):**
+- SectionHeader: 11pt→12pt heavy.
+- LearnView: header title3→largeTitle, description caption→subheadline,
+  short description 13→15pt, "IN REAL LIFE" 10→12pt, example 11→13pt,
+  category pill 10→11pt, "See pattern" 12→13pt.
+- NudgeCardView: body 13→15pt, action label 12→13pt.
+- InsightFeedView: "THIS WEEK" 10→12pt, hero pills 11→13pt.
+- MoneyEventView: driver shortDescription 10→12pt.
+
+**Green colour consistency (two greens only):**
+- Heading green `#1A5C38`: bias names (LearnView), filter pills,
+  dot indicators, completion checkmarks (CheckInView, MoneyEventView),
+  default categoryColour.
+- Lime green `#4CAF50`: "IN REAL LIFE" label, "Set target" text,
+  demo data link, seen row icon, driver labels.
+- Replaced all `DS.primary` text usage → `Color(hex: "1A5C38")`.
+- Replaced all `DS.accent` label usage → `Color(hex: "4CAF50")`.
+
+**Build:** No errors in source files. SPM dependency chain
+(swift-clocks/ConcurrencyExtras) has Xcode 26 compatibility issue —
+not our code, tracked upstream.
+
+---
+
 ## 2026-04-13 — Core loop wired end-to-end (Claude Code)
 
 **Goal:** Make check-in → money event → insights flow work with real

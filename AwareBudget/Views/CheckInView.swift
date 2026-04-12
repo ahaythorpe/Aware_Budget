@@ -268,42 +268,47 @@ struct CheckInView: View {
 
             // YES / NO buttons inside card
             HStack(spacing: 12) {
-                Button {
-                    swipeNo()
-                } label: {
+                Button { swipeNo() } label: {
                     HStack(spacing: 6) {
-                        Text("\u{2715}")
+                        Image(systemName: "xmark")
+                            .font(.subheadline.weight(.bold))
                         Text("No")
                     }
                     .font(.subheadline.weight(.bold))
-                    .foregroundStyle(DS.warning)
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color.white.opacity(0.15))
-                    )
+                    .background(Color(hex: "FF6B6B"))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)
 
-                Button {
-                    swipeYes()
-                } label: {
+                Button { swipeYes() } label: {
                     HStack(spacing: 6) {
                         Text("Yes")
-                        Text("\u{2713}")
+                        Image(systemName: "checkmark")
+                            .font(.subheadline.weight(.bold))
                     }
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(Color(hex: "1B3A00"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(DS.nuggetGold)
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color(hex: "FFF0A0"), location: 0.0),
+                                .init(color: Color(hex: "E8B84B"), location: 0.5),
+                                .init(color: Color(hex: "C59430"), location: 1.0),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
+            .padding(.top, 16)
         }
     }
 
@@ -390,7 +395,7 @@ struct CheckInView: View {
                     .font(.system(size: 28))
                 Text(driver.label)
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(isSelected ? DS.primary : DS.textPrimary)
+                    .foregroundStyle(isSelected ? Color(hex: "1A5C38") : DS.textPrimary)
                 Text(driver.shortDescription)
                     .font(.caption2)
                     .foregroundStyle(DS.textSecondary)
@@ -421,7 +426,7 @@ struct CheckInView: View {
                     .frame(width: 120, height: 120)
                 Image(systemName: "checkmark")
                     .font(.system(size: 56, weight: .bold))
-                    .foregroundStyle(DS.primary)
+                    .foregroundStyle(Color(hex: "1A5C38"))
             }
             .sensoryFeedback(.success, trigger: phase == .done)
 
@@ -437,7 +442,7 @@ struct CheckInView: View {
                 if let driver = selectedDriver {
                     Text("Driver: \(driver.emoji) \(driver.label)")
                         .font(.footnote.weight(.medium))
-                        .foregroundStyle(DS.accent)
+                        .foregroundStyle(Color(hex: "4CAF50"))
                         .padding(.top, 4)
                 }
             }

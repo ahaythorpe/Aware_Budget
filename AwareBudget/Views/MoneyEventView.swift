@@ -59,7 +59,7 @@ struct MoneyEventView: View {
                     .frame(width: 100, height: 100)
                 Image(systemName: "checkmark")
                     .font(.system(size: 44, weight: .bold))
-                    .foregroundStyle(DS.primary)
+                    .foregroundStyle(Color(hex: "1A5C38"))
             }
 
             Text("Logged")
@@ -147,11 +147,11 @@ struct MoneyEventView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(selected ? DS.primary : DS.cardBg)
+                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .stroke(selected ? DS.primary : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
+                    .stroke(selected ? Color.clear : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -197,7 +197,7 @@ struct MoneyEventView: View {
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(selected ? .white : DS.textPrimary)
                 Text(driver.shortDescription)
-                    .font(.system(size: 10))
+                    .font(.system(size: 12))
                     .foregroundStyle(selected ? .white.opacity(0.8) : DS.textSecondary)
                     .lineLimit(1)
             }
@@ -206,11 +206,11 @@ struct MoneyEventView: View {
             .padding(.horizontal, 8)
             .background(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(selected ? DS.primary : DS.cardBg)
+                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .stroke(selected ? DS.primary : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
+                    .stroke(selected ? Color.clear : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -256,11 +256,11 @@ struct MoneyEventView: View {
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(selected ? DS.primary : DS.cardBg)
+                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .stroke(selected ? DS.primary : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
+                    .stroke(selected ? Color.clear : DS.paleGreen, lineWidth: selected ? 0 : 0.5)
             )
         }
         .buttonStyle(.plain)

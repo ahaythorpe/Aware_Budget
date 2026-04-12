@@ -68,9 +68,13 @@ struct InsightFeedView: View {
                 showMoneyEvent = true
             } label: {
                 Text("Log your first event")
-                    .font(.headline)
+                    .font(.headline.bold())
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.buttonRadius, style: .continuous))
             }
-            .buttonStyle(PrimaryButtonStyle())
+            .buttonStyle(.plain)
             .padding(.horizontal, DS.hPadding)
             .padding(.top, 8)
             Spacer()
@@ -112,7 +116,7 @@ struct InsightFeedView: View {
 
             VStack(alignment: .leading, spacing: 14) {
                 Text("THIS WEEK")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(DS.goldText)
                     .tracking(1.2)
 
@@ -166,7 +170,7 @@ struct InsightFeedView: View {
 
     private func heroPill(text: String) -> some View {
         Text(text)
-            .font(.system(size: 11, weight: .semibold))
+            .font(.system(size: 13, weight: .semibold))
             .foregroundStyle(.white)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)

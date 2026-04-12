@@ -255,7 +255,7 @@ struct HomeView: View {
                     } else {
                         Text("Set target")
                             .font(.system(size: 22, weight: .semibold, design: .rounded))
-                            .foregroundStyle(DS.accent)
+                            .foregroundStyle(Color(hex: "4CAF50"))
                     }
                     Text(viewModel.alignmentReassurance)
                         .font(.caption)
@@ -355,7 +355,7 @@ struct HomeView: View {
             } else {
                 Text("Load demo data \u{2192}")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(DS.accent)
+                    .foregroundStyle(Color(hex: "4CAF50"))
             }
         }
         .buttonStyle(.plain)

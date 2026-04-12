@@ -53,7 +53,7 @@ enum DS {
             .init(color: Color(hex: "052010"), location: 0.0),
             .init(color: Color(hex: "1B5E20"), location: 0.2),
             .init(color: Color(hex: "4CAF50"), location: 0.5),
-            .init(color: Color(hex: "2E7D32"), location: 0.7),
+            .init(color: Color(hex: "2E7D32"), location: 0.75),
             .init(color: Color(hex: "81C784"), location: 1.0),
         ],
         startPoint: .topLeading,
@@ -81,12 +81,14 @@ enum DS {
 
 // MARK: - Gold Button modifier
 
-struct GoldButton: ViewModifier {
+struct GoldButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
+            .fontWeight(.bold)
             .foregroundStyle(Color(hex: "1B3A00"))
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
-            .padding(.vertical, 11)
+            .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 999)
                     .fill(LinearGradient(
@@ -136,7 +138,7 @@ struct GoldRingModifier: ViewModifier {
 
 extension View {
     func goldButtonStyle() -> some View {
-        modifier(GoldButton())
+        modifier(GoldButtonStyle())
     }
     func goldRing() -> some View {
         modifier(GoldRingModifier())
@@ -222,7 +224,7 @@ struct SectionHeader: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.system(size: 11, weight: .heavy))
+                .font(.system(size: 12, weight: .heavy))
                 .foregroundStyle(Color(hex: "4CAF50"))
                 .textCase(.uppercase)
                 .tracking(1.5)

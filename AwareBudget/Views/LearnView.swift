@@ -67,10 +67,10 @@ struct LearnView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Your money mind")
-                .font(.title3.weight(.bold))
+                .font(.largeTitle.weight(.bold))
                 .foregroundStyle(DS.textPrimary)
             Text("Swipe to explore. Learn one, notice it tomorrow.")
-                .font(.caption)
+                .font(.subheadline)
                 .foregroundStyle(DS.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -102,7 +102,7 @@ struct LearnView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(
-                    Capsule().fill(selected ? DS.primary : DS.cardBg)
+                    Capsule().fill(selected ? Color(hex: "1A5C38") : DS.cardBg)
                 )
                 .foregroundStyle(selected ? .white : DS.textPrimary)
                 .overlay(
@@ -130,7 +130,7 @@ struct LearnView: View {
         case "Inertia":
             return (Color(hex: "FBE9E7"), Color(hex: "BF360C"))
         default:
-            return (DS.paleGreen, DS.primary)
+            return (DS.paleGreen, Color(hex: "1A5C38"))
         }
     }
 
@@ -213,14 +213,14 @@ struct LearnView: View {
                 // Bias name
                 Text(lesson.biasName)
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(DS.primary)
+                    .foregroundStyle(Color(hex: "1A5C38"))
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 12)
 
                 // Short description
                 Text(lesson.shortDescription)
-                    .font(.system(size: 13))
+                    .font(.system(size: 15))
                     .foregroundStyle(DS.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
@@ -235,12 +235,12 @@ struct LearnView: View {
 
                 // In real life
                 Text("IN REAL LIFE")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(DS.accent)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color(hex: "4CAF50"))
                     .tracking(0.8)
 
                 Text(lesson.realWorldExample)
-                    .font(.system(size: 11))
+                    .font(.system(size: 13))
                     .foregroundStyle(DS.textSecondary)
                     .lineLimit(3)
                     .multilineTextAlignment(.center)
@@ -259,7 +259,7 @@ struct LearnView: View {
                 // Gold CTA pinned to bottom
                 NavigationLink(value: lesson) {
                     Text("See pattern")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 13, weight: .bold))
                         .goldButtonStyle()
                 }
                 .buttonStyle(.plain)
@@ -273,7 +273,7 @@ struct LearnView: View {
     private func categoryPill(_ cat: String) -> some View {
         let colours = Self.categoryColour(for: cat)
         return Text(cat)
-            .font(.system(size: 10, weight: .semibold))
+            .font(.system(size: 11, weight: .semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .background(Capsule().fill(colours.bg))
@@ -300,7 +300,7 @@ struct LearnView: View {
                     }
                 } label: {
                     Circle()
-                        .fill(i == currentIndex ? DS.primary : DS.textTertiary.opacity(0.3))
+                        .fill(i == currentIndex ? Color(hex: "1A5C38") : DS.textTertiary.opacity(0.3))
                         .frame(width: 7, height: 7)
                 }
                 .buttonStyle(.plain)
