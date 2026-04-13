@@ -11,7 +11,7 @@ struct SignInView: View {
 
     var body: some View {
         ZStack {
-            DS.bg.ignoresSafeArea()
+            DS.heroGradient.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 28) {
@@ -22,14 +22,14 @@ struct SignInView: View {
                     VStack(spacing: 8) {
                         Text("Welcome back")
                             .font(.title2.weight(.bold))
-                            .foregroundStyle(DS.textPrimary)
+                            .foregroundStyle(.white)
                         Text("Sign in to pick up where you left off.")
                             .font(.subheadline)
-                            .foregroundStyle(DS.textSecondary)
+                            .foregroundStyle(.white.opacity(0.7))
                     }
 
                     VStack(spacing: 12) {
-                        TextField("Email", text: $email)
+                        TextField("Email", text: $email, prompt: Text("Email").foregroundStyle(.white.opacity(0.5)))
                             .textContentType(.emailAddress)
                             .autocorrectionDisabled(true)
                         #if !os(macOS)
@@ -37,18 +37,26 @@ struct SignInView: View {
                             .textInputAutocapitalization(.never)
                         #endif
                             .font(.body)
+                            .foregroundStyle(.white)
                             .padding(14)
-                            .background(DS.paleGreen.opacity(0.5))
-                            .foregroundStyle(DS.textPrimary)
+                            .background(Color.white.opacity(0.15))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
 
-                        SecureField("Password", text: $password)
+                        SecureField("Password", text: $password, prompt: Text("Password").foregroundStyle(.white.opacity(0.5)))
                             .textContentType(.password)
                             .font(.body)
+                            .foregroundStyle(.white)
                             .padding(14)
-                            .background(DS.paleGreen.opacity(0.5))
-                            .foregroundStyle(DS.textPrimary)
+                            .background(Color.white.opacity(0.15))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
 
                         if let errorMessage {
                             Text(errorMessage)
@@ -68,11 +76,13 @@ struct SignInView: View {
                                     .tint(Color(hex: "3A2000"))
                             } else {
                                 Text("Sign in")
-                                    .font(.system(size: 15, weight: .bold))
+                                    .font(.system(size: 17, weight: .bold))
                             }
                             Spacer()
                         }
-                        .goldButtonStyle()
+                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .padding(.vertical, 16)
+                        .background(DS.nuggetGold, in: Capsule())
                     }
                     .buttonStyle(.plain)
                     .disabled(isSubmitting || email.isEmpty || password.isEmpty)
@@ -88,6 +98,7 @@ struct SignInView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
+                    .foregroundStyle(.white)
             }
         }
     }

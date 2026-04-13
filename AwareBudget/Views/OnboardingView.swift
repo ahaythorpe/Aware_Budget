@@ -312,91 +312,105 @@ private struct AuthFormView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                Spacer(minLength: 40)
+        ZStack {
+            DS.heroGradient.ignoresSafeArea()
 
-                NudgeAvatar(size: 100)
+            ScrollView {
+                VStack(spacing: 28) {
+                    Spacer(minLength: 40)
 
-                VStack(spacing: 8) {
-                    Text(isSignIn ? "Welcome back" : "Create your account")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(DS.textPrimary)
-                    Text(isSignIn
-                         ? "Sign in to pick up where you left off."
-                         : "No bank access. Your data stays private.")
-                        .font(.subheadline)
-                        .foregroundStyle(DS.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                }
+                    NudgeAvatar(size: 100)
 
-                VStack(spacing: 12) {
-                    TextField("Email", text: $email)
-                        .textContentType(.emailAddress)
-                        .autocorrectionDisabled(true)
-                    #if !os(macOS)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                    #endif
-                        .font(.body)
-                        .padding(14)
-                        .background(DS.paleGreen.opacity(0.5))
-                        .foregroundStyle(DS.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                    SecureField("Password", text: $password)
-                        .textContentType(isSignIn ? .password : .newPassword)
-                        .font(.body)
-                        .padding(14)
-                        .background(DS.paleGreen.opacity(0.5))
-                        .foregroundStyle(DS.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(DS.warning)
+                    VStack(spacing: 8) {
+                        Text(isSignIn ? "Welcome back" : "Create your account")
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(.white)
+                        Text(isSignIn
+                             ? "Sign in to pick up where you left off."
+                             : "No bank access. Your data stays private.")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
                     }
-                }
-                .padding(.horizontal, DS.hPadding)
 
-                Button {
-                    Task { await submit() }
-                } label: {
-                    HStack {
-                        Spacer()
-                        if isSubmitting {
-                            ProgressView()
-                                .tint(Color(hex: "3A2000"))
-                        } else {
-                            Text(isSignIn ? "Sign in" : "Create account")
-                                .font(.system(size: 15, weight: .bold))
+                    VStack(spacing: 12) {
+                        TextField("Email", text: $email, prompt: Text("Email").foregroundStyle(.white.opacity(0.5)))
+                            .textContentType(.emailAddress)
+                            .autocorrectionDisabled(true)
+                        #if !os(macOS)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                        #endif
+                            .font(.body)
+                            .foregroundStyle(.white)
+                            .padding(14)
+                            .background(Color.white.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+
+                        SecureField("Password", text: $password, prompt: Text("Password").foregroundStyle(.white.opacity(0.5)))
+                            .textContentType(isSignIn ? .password : .newPassword)
+                            .font(.body)
+                            .foregroundStyle(.white)
+                            .padding(14)
+                            .background(Color.white.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+
+                        if let errorMessage {
+                            Text(errorMessage)
+                                .font(.footnote)
+                                .foregroundStyle(DS.warning)
                         }
-                        Spacer()
                     }
-                    .goldButtonStyle()
-                }
-                .buttonStyle(.plain)
-                .disabled(isSubmitting || email.isEmpty || password.isEmpty)
-                .opacity((email.isEmpty || password.isEmpty) ? 0.5 : 1.0)
-                .padding(.horizontal, DS.hPadding)
+                    .padding(.horizontal, DS.hPadding)
 
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isSignIn.toggle()
-                        errorMessage = nil
+                    Button {
+                        Task { await submit() }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if isSubmitting {
+                                ProgressView()
+                                    .tint(Color(hex: "3A2000"))
+                            } else {
+                                Text(isSignIn ? "Sign in" : "Create account")
+                                    .font(.system(size: 17, weight: .bold))
+                            }
+                            Spacer()
+                        }
+                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .padding(.vertical, 16)
+                        .background(DS.nuggetGold, in: Capsule())
                     }
-                } label: {
-                    Text(isSignIn
-                         ? "Don't have an account? Sign up"
-                         : "Already have an account? Sign in")
-                        .font(.caption)
-                        .foregroundStyle(DS.accent)
-                }
-                .buttonStyle(.plain)
+                    .buttonStyle(.plain)
+                    .disabled(isSubmitting || email.isEmpty || password.isEmpty)
+                    .opacity((email.isEmpty || password.isEmpty) ? 0.5 : 1.0)
+                    .padding(.horizontal, DS.hPadding)
 
-                Spacer(minLength: 32)
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isSignIn.toggle()
+                            errorMessage = nil
+                        }
+                    } label: {
+                        Text(isSignIn
+                             ? "Don't have an account? Sign up"
+                             : "Already have an account? Sign in")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer(minLength: 32)
+                }
             }
         }
     }
