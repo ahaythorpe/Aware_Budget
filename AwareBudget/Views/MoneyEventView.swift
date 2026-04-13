@@ -212,9 +212,10 @@ struct MoneyEventView: View {
                let avg = absMonthlyAverage[cat.name] {
                 Text("Avg: $\(avg)/mo \u{00B7} ABS 2022\u{2013}23")
                     .font(.caption)
+                    .italic()
                     .foregroundStyle(DS.textTertiary)
             }
-            HStack(spacing: 8) {
+            VStack(spacing: 10) {
                 ForEach(viewModel.availableRanges) { range in
                     rangeButton(range)
                 }
@@ -231,17 +232,15 @@ struct MoneyEventView: View {
             }
         } label: {
             Text(range.label)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(selected ? .white : DS.textPrimary)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(selected ? Color(hex: "1B3A00") : Color(hex: "2E7D32"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
-                )
+                .background(selected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
+                .clipShape(Capsule())
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
+                    Capsule()
+                        .stroke(Color(hex: "2E7D32").opacity(selected ? 0 : 0.4), lineWidth: 1.5)
                 )
         }
         .buttonStyle(.plain)
@@ -253,7 +252,7 @@ struct MoneyEventView: View {
     private var plannedStatusPicker: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "Was this planned?")
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 ForEach(MoneyEvent.PlannedStatus.allCases) { status in
                     plannedPill(status)
                 }
@@ -270,27 +269,26 @@ struct MoneyEventView: View {
                 viewModel.onPlannedStatusSet()
             }
         } label: {
-            HStack {
+            HStack(spacing: 10) {
                 Text(status.emoji)
                     .font(.system(size: 20))
                 Text(status.label)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(selected ? .white : DS.textPrimary)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(selected ? Color(hex: "1B3A00") : Color(hex: "2E7D32"))
                 Spacer()
                 if selected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(hex: "1B3A00"))
                 }
             }
-            .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
-            )
+            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .background(selected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
+            .clipShape(Capsule())
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
+                Capsule()
+                    .stroke(Color(hex: "2E7D32").opacity(selected ? 0 : 0.4), lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)

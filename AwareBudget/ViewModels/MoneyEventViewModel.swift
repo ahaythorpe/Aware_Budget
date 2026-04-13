@@ -23,7 +23,7 @@ let spendCategories: [SpendCategory] = [
     .init(emoji: "🍺", name: "Drinks"),
     .init(emoji: "🛍️", name: "Shopping"),
     .init(emoji: "🚗", name: "Transport"),
-    .init(emoji: "🍕", name: "Takeaway"),
+    .init(emoji: "🍕", name: "Eating out"),
     .init(emoji: "💊", name: "Pharmacy"),
     .init(emoji: "📱", name: "Subscriptions"),
     .init(emoji: "🎬", name: "Entertainment"),
@@ -67,7 +67,7 @@ let categoryRanges: [String: [AmountRange]] = [
         .init(label: "$40–100", midpoint: 70),
         .init(label: "$100+", midpoint: 130),
     ],
-    "Takeaway": [
+    "Eating out": [
         .init(label: "$15–25", midpoint: 20),
         .init(label: "$25–40", midpoint: 32),
         .init(label: "$40–60", midpoint: 50),
@@ -140,7 +140,7 @@ let absMonthlyAverage: [String: Int] = [
     "Drinks": 128,
     "Shopping": 200,
     "Transport": 140,
-    "Takeaway": 150,
+    "Eating out": 150,
     "Entertainment": 168,
     "Clothing": 152,
     "Fitness": 80,
@@ -160,7 +160,7 @@ func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> Str
     case ("Shopping", .impulse):      return "Anchoring"
     case ("Drinks", .impulse):        return "Ego Depletion"
     case ("Big purchase", _):         return "Social Proof"
-    case ("Takeaway", .impulse):      return "Ego Depletion"
+    case ("Eating out", .impulse):      return "Ego Depletion"
     case ("Subscriptions", _):        return "Status Quo Bias"
     default:                          return "Present Bias"
     }
