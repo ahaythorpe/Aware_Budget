@@ -7,14 +7,18 @@ struct MoneyEventView: View {
     var selectedTab: Binding<RootTab>? = nil
 
     @State private var showAllCategories = false
-    private let topColumns = [
+    @State private var expandedQuickCategory: String?
+    private let fullGridColumns = [
+        GridItem(.flexible(), spacing: 8),
         GridItem(.flexible(), spacing: 8),
         GridItem(.flexible(), spacing: 8),
     ]
-    private let moreColumns = [
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8),
+
+    private let quickCategories: [(emoji: String, name: String, ranges: [(label: String, midpoint: Double)])] = [
+        ("☕", "Coffee", [("$4–6", 5), ("$6–8", 7), ("$8–12", 10)]),
+        ("🥗", "Lunch", [("$12–18", 15), ("$18–25", 21), ("$25–40", 32)]),
+        ("🍺", "Drinks", [("$10–20", 15), ("$20–50", 35), ("$50+", 75)]),
+        ("🍕", "Eating out", [("$15–25", 20), ("$25–40", 32), ("$40+", 55)]),
     ]
 
     var body: some View {
@@ -27,7 +31,7 @@ struct MoneyEventView: View {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
                         categoryGrid
-                        if viewModel.selectedCategory != nil {
+                        if viewModel.selectedCategory != nil && !isQuickCategory(viewModel.selectedCategory?.name) {
                             rangePicker
                         }
                         if viewModel.selectedRange != nil {
@@ -110,20 +114,37 @@ struct MoneyEventView: View {
 
     // MARK: - Category grid
 
-    private let topSix = Array(spendCategories.prefix(6))
-    private let remaining = Array(spendCategories.dropFirst(6))
-
     private var categoryGrid: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "What did you spend on?")
-            LazyVGrid(columns: topColumns, spacing: 8) {
-                ForEach(topSix) { cat in
-                    categoryCell(cat)
+
+            // Quick categories with expandable ranges
+            VStack(spacing: 0) {
+                ForEach(quickCategories, id: \.name) { qc in
+                    quickCategoryRow(qc)
+                    if qc.name != quickCategories.last?.name {
+                        Divider().padding(.horizontal, 14)
+                    }
                 }
             }
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(DS.cardBg)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                            .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                    )
+            )
+
+            Text("Ranges based on ABS household data")
+                .font(.system(size: 9))
+                .italic()
+                .foregroundStyle(DS.textTertiary)
+
+            // More categories link
             if showAllCategories {
-                LazyVGrid(columns: moreColumns, spacing: 8) {
-                    ForEach(remaining) { cat in
+                LazyVGrid(columns: fullGridColumns, spacing: 8) {
+                    ForEach(spendCategories) { cat in
                         categoryCell(cat)
                     }
                 }
@@ -134,7 +155,7 @@ struct MoneyEventView: View {
                         showAllCategories = true
                     }
                 } label: {
-                    Text("More categories \u{2193}")
+                    Text("More categories \u{2192}")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(DS.accent)
                         .frame(maxWidth: .infinity)
@@ -143,6 +164,79 @@ struct MoneyEventView: View {
                 .buttonStyle(.plain)
             }
         }
+    }
+
+    private func quickCategoryRow(_ qc: (emoji: String, name: String, ranges: [(label: String, midpoint: Double)])) -> some View {
+        let isExpanded = expandedQuickCategory == qc.name
+        let isSelected = viewModel.selectedCategory?.name == qc.name
+
+        return VStack(spacing: 0) {
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    if isExpanded {
+                        expandedQuickCategory = nil
+                    } else {
+                        expandedQuickCategory = qc.name
+                    }
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    Text(qc.emoji)
+                        .font(.title2)
+                    Text(qc.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(isSelected ? DS.primary : DS.textPrimary)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(DS.textTertiary)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                HStack(spacing: 8) {
+                    ForEach(qc.ranges, id: \.label) { range in
+                        let rangeSelected = viewModel.selectedCategory?.name == qc.name
+                            && viewModel.selectedRange?.label == range.label
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                viewModel.selectedCategory = SpendCategory(emoji: qc.emoji, name: qc.name)
+                                viewModel.selectedRange = AmountRange(label: range.label, midpoint: range.midpoint)
+                                viewModel.plannedStatus = nil
+                                viewModel.behaviourTag = nil
+                            }
+                        } label: {
+                            Text(range.label)
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(rangeSelected ? Color(hex: "1B3A00") : Color(hex: "2E7D32"))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(rangeSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color(hex: "2E7D32").opacity(rangeSelected ? 0 : 0.4), lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .sensoryFeedback(.selection, trigger: rangeSelected)
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.bottom, 12)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
+    private let quickCategoryNames: Set<String> = ["Coffee", "Lunch", "Drinks", "Eating out"]
+
+    private func isQuickCategory(_ name: String?) -> Bool {
+        guard let name else { return false }
+        return quickCategoryNames.contains(name)
     }
 
     private func selectCategory(_ cat: SpendCategory) {
