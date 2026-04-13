@@ -45,21 +45,32 @@ struct OnboardingView: View {
                 }
 
                 Spacer()
-
+            }
+            .padding(.horizontal, DS.hPadding)
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 16) {
                 Button {
                     withAnimation { currentPage = 1 }
                 } label: {
-                    Text("Get started \u{2192}")
-                        .font(.system(size: 15, weight: .bold))
-                        .goldButtonStyle()
+                    Text("Next \u{2192}")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(DS.nuggetGold, in: Capsule())
                 }
                 .buttonStyle(.plain)
-                .padding(.horizontal, DS.hPadding)
+                .padding(.horizontal, 24)
 
                 progressDots(current: 0, total: 4, light: true)
-                    .padding(.bottom, 32)
             }
-            .padding(.horizontal, DS.hPadding)
+            .padding(.bottom, 16)
+            .background(
+                Rectangle()
+                    .fill(Color(hex: "1B5E20"))
+                    .ignoresSafeArea()
+            )
         }
     }
 
@@ -123,21 +134,33 @@ struct OnboardingView: View {
                         .foregroundStyle(.white.opacity(0.5))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
-
-                    Button {
-                        withAnimation { currentPage = 2 }
-                    } label: {
-                        Text("I recognise these \u{2192}")
-                            .font(.system(size: 15, weight: .bold))
-                            .goldButtonStyle()
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, DS.hPadding)
-
-                    progressDots(current: 1, total: 4, light: true)
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 16)
                 }
             }
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 16) {
+                Button {
+                    withAnimation { currentPage = 2 }
+                } label: {
+                    Text("Next \u{2192}")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(DS.nuggetGold, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 24)
+
+                progressDots(current: 1, total: 4, light: true)
+            }
+            .padding(.bottom, 16)
+            .background(
+                Rectangle()
+                    .fill(Color(hex: "1B5E20"))
+                    .ignoresSafeArea()
+            )
         }
     }
 

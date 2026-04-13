@@ -50,12 +50,13 @@ enum DS {
     // Hero gradient (dark green cards)
     static let heroGradient = LinearGradient(
         stops: [
-            .init(color: Color(hex: "011A08"), location: 0.0),
-            .init(color: Color(hex: "0A3D1A"), location: 0.2),
-            .init(color: Color(hex: "1B5E20"), location: 0.4),
-            .init(color: Color(hex: "4CAF50"), location: 0.6),
+            .init(color: Color(hex: "1B5E20"), location: 0.0),
+            .init(color: Color(hex: "2E7D32"), location: 0.15),
+            .init(color: Color(hex: "66BB6A"), location: 0.35),
+            .init(color: Color(hex: "4CAF50"), location: 0.5),
+            .init(color: Color(hex: "81C784"), location: 0.65),
             .init(color: Color(hex: "2E7D32"), location: 0.8),
-            .init(color: Color(hex: "52B788"), location: 1.0),
+            .init(color: Color(hex: "1B5E20"), location: 1.0),
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -154,7 +155,7 @@ struct NudgeAvatar: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color(hex: "2E7D32"))
+                .fill(Color.white.opacity(0.15))
                 .frame(width: size + 4, height: size + 4)
             Image("nudge")
                 .resizable()
