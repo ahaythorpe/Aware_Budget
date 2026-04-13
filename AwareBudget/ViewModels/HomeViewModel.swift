@@ -18,6 +18,7 @@ final class HomeViewModel {
     var weekSpendTrendUp: Bool? = nil
     var hasLoggedEventToday: Bool = false
     var hasViewedLearnToday: Bool = false
+    var eventLoggingStreak: Int = 0
     var isLoading = false
     var errorMessage: String?
 
@@ -119,14 +120,35 @@ final class HomeViewModel {
                 weekSpendTrendUp = nil
             }
 
-            // Today's events
+            // Today's events + days since last event
             let todayStr = ISO8601DateFormatter.dateOnly.string(from: Date())
             hasLoggedEventToday = recentEvents.contains { event in
                 ISO8601DateFormatter.dateOnly.string(from: event.date) == todayStr
             }
 
+            // Days since last event
+            let daysSinceLastEvent: Int
+            if hasLoggedEventToday {
+                daysSinceLastEvent = 0
+            } else if let latestEvent = recentEvents.sorted(by: { $0.date > $1.date }).first {
+                daysSinceLastEvent = max(0, Calendar.current.dateComponents([.day], from: latestEvent.date, to: Date()).day ?? 0)
+            } else {
+                daysSinceLastEvent = 999
+            }
+
+            // Event logging streak (consecutive days with events)
+            let allEvents = try await service.fetchMoneyEvents(forMonth: Date())
+            let eventDates = Set(allEvents.map { ISO8601DateFormatter.dateOnly.string(from: $0.date) })
+            var eStreak = 0
+            var checkDate = Date()
+            while eventDates.contains(ISO8601DateFormatter.dateOnly.string(from: checkDate)) {
+                eStreak += 1
+                checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
+            }
+            eventLoggingStreak = eStreak
+
             // Build Nudge context and get message
-            buildNudge(recentCheckIns: weekHistory, weekEvents: weekEvents)
+            buildNudge(recentCheckIns: weekHistory, weekEvents: weekEvents, daysSinceLastEvent: daysSinceLastEvent)
 
             // Fallback: always show something if Nudge is nil
             if nudgeMessage == nil {
@@ -171,7 +193,7 @@ final class HomeViewModel {
 
     // MARK: - Nudge
 
-    private func buildNudge(recentCheckIns: [CheckIn], weekEvents: [MoneyEvent]) {
+    private func buildNudge(recentCheckIns: [CheckIn], weekEvents: [MoneyEvent], daysSinceLastEvent: Int = 999) {
         guard !NudgeDismissStore.isDismissed else {
             nudgeMessage = nil
             return
@@ -227,11 +249,13 @@ final class HomeViewModel {
             spendTrend: spendTrend,
             emotionalToneToday: todaysCheckIn?.emotionalTone.rawValue,
             daysSinceLastCheckin: daysSinceLast,
+            daysSinceLastEvent: daysSinceLastEvent,
             totalBiasesSeen: allBiases.count,
             isFirstOpen: isFirstOpen,
             completedCheckInToday: todaysCheckIn != nil,
             unplannedSpendPct: unplannedPct,
-            weeklyNet: weeklyNet
+            weeklyNet: weeklyNet,
+            eventLoggingStreak: eventLoggingStreak
         )
 
         let msg = NudgeEngine.message(for: ctx)

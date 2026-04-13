@@ -11,11 +11,13 @@ struct NudgeContext {
     var spendTrend: String?        // "up" "down" "stable"
     var emotionalToneToday: String?
     var daysSinceLastCheckin: Int
+    var daysSinceLastEvent: Int
     var totalBiasesSeen: Int
     var isFirstOpen: Bool
     var completedCheckInToday: Bool
     var unplannedSpendPct: Double   // % of this week's spend that is unplanned
     var weeklyNet: Double           // planned total minus unplanned total this week
+    var eventLoggingStreak: Int     // consecutive days with at least one event
 }
 
 enum NudgeAction: Equatable {
@@ -61,7 +63,14 @@ enum NudgeEngine {
             )
         }
 
-        // 3. Strong bias pattern linked to spend trend
+        // 3. No events logged in 2+ days
+        if ctx.daysSinceLastEvent >= 2, ctx.completedCheckInToday {
+            return .text(
+                "Nudge has no data on your week. That's also data."
+            )
+        }
+
+        // 4. Strong bias pattern linked to spend trend
         if ctx.topBiasCount >= 5,
            let bias = ctx.topBias,
            let category = ctx.topSpendCategory,
@@ -175,15 +184,22 @@ enum NudgeEngine {
 
         // Behaviour tag with pattern
         if let tag = behaviourTag {
-            if tagCount >= 3 {
+            if tagCount >= 5 {
                 return .withAction(
-                    "You've tagged \(tag) \(tagCount) times now. That's a pattern worth understanding.",
+                    "That's \(tag). \(tagCount)th time. Nudge sees a strong pattern.",
                     actionLabel: "See your fix",
                     action: .openLearnBias(tag)
                 )
             }
+            if tagCount >= 3 {
+                return .withAction(
+                    "That's \(tag). \(tagCount)\(ordinalSuffix(tagCount)) time this week.",
+                    actionLabel: "Learn more",
+                    action: .openLearnBias(tag)
+                )
+            }
             return .text(
-                "Noted: \(tag.lowercased()). Nudge is keeping count."
+                "That's \(tag). Nudge is keeping count."
             )
         }
 
@@ -235,5 +251,19 @@ enum NudgeEngine {
         return .text(
             "Done. Nudge is keeping score."
         )
+    }
+
+    // MARK: - Helpers
+
+    private static func ordinalSuffix(_ n: Int) -> String {
+        let ones = n % 10
+        let tens = (n / 10) % 10
+        if tens == 1 { return "th" }
+        switch ones {
+        case 1: return "st"
+        case 2: return "nd"
+        case 3: return "rd"
+        default: return "th"
+        }
     }
 }

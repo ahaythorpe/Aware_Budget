@@ -6,6 +6,7 @@ struct LearnView: View {
     @State private var currentIndex: Int = 0
     @State private var dragOffset: CGSize = .zero
     @State private var biasProgress: [BiasProgress] = []
+    @State private var showGlossary = false
 
     private let categories: [String] = [
         "All",
@@ -49,6 +50,17 @@ struct LearnView: View {
             .padding(.top, 8)
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { showGlossary = true } label: {
+                    Image(systemName: "list.bullet")
+                        .foregroundStyle(DS.textTertiary)
+                }
+            }
+        }
+        .sheet(isPresented: $showGlossary) {
+            biasGlossarySheet
+        }
         .task {
             if allLessons.isEmpty {
                 allLessons = BiasLessonsMock.seed
@@ -133,6 +145,64 @@ struct LearnView: View {
             return (Color(hex: "FBE9E7"), Color(hex: "BF360C"))
         default:
             return (DS.paleGreen, Color(hex: "1A5C38"))
+        }
+    }
+
+    // MARK: - Bias glossary sheet
+
+    private var biasGlossarySheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    ForEach(allLessons) { lesson in
+                        NavigationLink(value: lesson) {
+                            HStack(spacing: 12) {
+                                Text(lesson.emoji)
+                                    .font(.title3)
+                                    .frame(width: 32)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(lesson.biasName)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(DS.textPrimary)
+                                    Text(lesson.shortDescription)
+                                        .font(.caption)
+                                        .foregroundStyle(DS.textSecondary)
+                                        .lineLimit(1)
+                                }
+                                Spacer()
+                                if let stage = masteryStage(for: lesson.biasName), stage != .unseen {
+                                    Text(stage.rawValue)
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 3)
+                                        .background(Capsule().fill(stageColor(stage)))
+                                }
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(DS.textTertiary)
+                            }
+                            .padding(.horizontal, DS.hPadding)
+                            .padding(.vertical, 10)
+                        }
+                        .buttonStyle(.plain)
+                        Divider().padding(.leading, 60)
+                    }
+                }
+                .padding(.top, 8)
+            }
+            .background(DS.bg.ignoresSafeArea())
+            .navigationTitle("All 16 biases")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { showGlossary = false }
+                        .foregroundStyle(DS.accent)
+                }
+            }
+            .navigationDestination(for: BiasLesson.self) { lesson in
+                BiasDetailView(lesson: lesson)
+            }
         }
     }
 

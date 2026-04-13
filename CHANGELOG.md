@@ -5,6 +5,32 @@
 
 ---
 
+## 2026-04-13 — Event motivation, glossary, softer questions (Claude Code)
+
+**Event logging motivation:**
+- NudgeContext gains `daysSinceLastEvent` + `eventLoggingStreak`.
+- NudgeEngine rule: "Nudge has no data on your week. That's also data."
+  fires when 2+ days since last event and user has checked in today.
+- Post-log feedback improved: "That's Anchoring. 3rd time this week."
+  with ordinal suffix and action button for 3+ counts.
+- HomeViewModel computes event logging streak (consecutive days with events).
+
+**Bias glossary:**
+- List button in LearnView toolbar opens glossary sheet.
+- "All 16 biases" list: emoji + name + one-line description + mastery
+  stage badge + chevron. Each row navigates to BiasDetailView.
+
+**Softer question framing:**
+- Supabase migration updates 10 intermediate/advanced questions to add
+  "even just a little?", "even slightly?", "even a small one?" suffixes.
+- Lowers threshold for honest answers per behavioural UX rules.
+
+**Nudge image verified:**
+- Image("nudge") loads correctly in all 10 locations via NudgeAvatar.
+- All wrapped in green circle (#2E7D32) which masks the black PNG bg.
+
+---
+
 ## 2026-04-13 — Trust/transparency layer (Claude Code)
 
 **Onboarding "How it works" screen:**
