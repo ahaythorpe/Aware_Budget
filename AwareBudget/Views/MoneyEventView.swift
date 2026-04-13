@@ -279,8 +279,8 @@ struct MoneyEventView: View {
     private var biasTagSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "What's driving this?")
-            Text("Used in professional financial planning assessments")
-                .font(.caption2)
+            Text("Used in professional financial planning assessments \u{00B7} BFAS framework (Grable & Joo, 2004)")
+                .font(.system(size: 9))
                 .italic()
                 .foregroundStyle(DS.textTertiary)
 
@@ -324,6 +324,13 @@ struct MoneyEventView: View {
                 if let insight = driverInsights[tag] {
                     driverInsightCard(tag: tag, insight: insight)
                         .transition(.move(edge: .top).combined(with: .opacity))
+
+                    Text(biasCitation(for: tag))
+                        .font(.system(size: 9))
+                        .italic()
+                        .foregroundStyle(DS.textTertiary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
                 }
             }
         }
@@ -402,6 +409,30 @@ struct MoneyEventView: View {
         .buttonStyle(.plain)
         .disabled(viewModel.isSaving)
         .transition(.move(edge: .bottom).combined(with: .opacity))
+    }
+
+    // MARK: - Bias citations
+
+    private func biasCitation(for bias: String) -> String {
+        switch bias {
+        case "Loss Aversion": return "Kahneman & Tversky, 1979"
+        case "Present Bias": return "O'Donoghue & Rabin, 1999"
+        case "Anchoring": return "Tversky & Kahneman, 1974"
+        case "Overconfidence Bias": return "Barber & Odean, 2001"
+        case "Mental Accounting": return "Thaler, 1985"
+        case "Status Quo Bias": return "Samuelson & Zeckhauser, 1988"
+        case "Ostrich Effect": return "Karlsson et al., 2009"
+        case "Sunk Cost Fallacy": return "Arkes & Blumer, 1985"
+        case "Ego Depletion": return "Baumeister et al., 1998"
+        case "Availability Heuristic": return "Tversky & Kahneman, 1973"
+        case "Denomination Effect": return "Raghubir & Srivastava, 2009"
+        case "Framing Effect": return "Tversky & Kahneman, 1981"
+        case "Planning Fallacy": return "Kahneman & Tversky, 1979"
+        case "Scarcity Heuristic": return "Cialdini, 1984"
+        case "Moral Licensing": return "Merritt et al., 2010"
+        case "Herd Behaviour": return "Banerjee, 1992"
+        default: return "Pompian, 2012"
+        }
     }
 }
 

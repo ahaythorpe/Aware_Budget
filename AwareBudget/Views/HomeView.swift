@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var showCheckIn = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("uvpDismissed") private var uvpDismissed = false
 
     var selectedTab: Binding<RootTab>? = nil
 
@@ -61,6 +62,7 @@ struct HomeView: View {
                         }
                     )
                 }
+                if !uvpDismissed { uvpCard }
                 patternAlerts
                 heroCheckInCard
                 streakSection
@@ -107,6 +109,52 @@ struct HomeView: View {
             .accessibilityLabel("Settings")
         }
         .padding(.top, 8)
+    }
+
+    // MARK: - UVP card
+
+    private var uvpCard: some View {
+        HStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color(hex: "4CAF50"))
+                .frame(width: 3)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Most apps track what you spent.")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Color(hex: "0A1A0A"))
+                Text("AwareBudget tracks why.")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color(hex: "1A5C38"))
+                Text("Budgets fail from shame not data \u{00B7} Kahneman, 1979")
+                    .font(.system(size: 9))
+                    .italic()
+                    .foregroundStyle(Color(hex: "7A8C7A"))
+            }
+            .padding(14)
+
+            Spacer()
+
+            Button {
+                withAnimation { uvpDismissed = true }
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(DS.textTertiary)
+                    .padding(8)
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                .fill(DS.cardBg)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                )
+        )
     }
 
     // MARK: - Pattern alerts

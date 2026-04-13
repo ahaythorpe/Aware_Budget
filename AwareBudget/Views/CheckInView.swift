@@ -63,7 +63,14 @@ struct CheckInView: View {
                         if questions.isEmpty {
                             ProgressView()
                         } else {
-                            cardStack
+                            VStack(spacing: 12) {
+                                cardStack
+                                Text("70% abandon budgeting apps within 30 days. Awareness drives change.")
+                                    .font(.caption2)
+                                    .foregroundStyle(DS.textTertiary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, DS.hPadding)
+                            }
                         }
                     case .driverPick:
                         driverPickView
@@ -272,12 +279,10 @@ struct CheckInView: View {
                         .foregroundStyle(.white.opacity(0.85))
                         .fixedSize(horizontal: false, vertical: true)
 
-                    if let source = q.researchSource, !source.isEmpty {
-                        Text(source)
-                            .font(.system(size: 11))
-                            .foregroundStyle(.white.opacity(0.5))
-                            .italic()
-                    }
+                    Text(q.researchSource ?? "Used in professional financial planning assessments \u{00B7} BFAS framework")
+                        .font(.system(size: 9))
+                        .italic()
+                        .foregroundStyle(.white.opacity(0.4))
                 }
                 .padding(12)
                 .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
