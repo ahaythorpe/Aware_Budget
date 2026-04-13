@@ -21,7 +21,7 @@ struct RootTabView: View {
             .tag(RootTab.home)
 
             NavigationStack {
-                MoneyEventView()
+                MoneyEventView(selectedTab: $selection)
             }
             .tabItem {
                 Label("Log", systemImage: "plus.circle.fill")

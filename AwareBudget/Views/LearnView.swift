@@ -31,23 +31,24 @@ struct LearnView: View {
     var body: some View {
         ZStack {
             DS.bg.ignoresSafeArea()
-            VStack(spacing: 16) {
-                header
-                filterPillRow
-                Spacer(minLength: 0)
-                if filteredLessons.isEmpty {
-                    emptyState
-                } else {
-                    cardStack
-                    swipeCounter
+            ScrollView {
+                VStack(spacing: 16) {
+                    header
+                    glossaryCard
+                    filterPillRow
+                    if filteredLessons.isEmpty {
+                        emptyState
+                    } else {
+                        cardStack
+                        swipeCounter
+                    }
+                    if filteredLessons.count > 1 {
+                        dotIndicator
+                            .padding(.bottom, 20)
+                    }
                 }
-                Spacer(minLength: 0)
-                if filteredLessons.count > 1 {
-                    dotIndicator
-                        .padding(.bottom, 20)
-                }
+                .padding(.top, 8)
             }
-            .padding(.top, 8)
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -73,6 +74,54 @@ struct LearnView: View {
         }
         .navigationDestination(for: BiasLesson.self) { lesson in
             BiasDetailView(lesson: lesson)
+        }
+    }
+
+    // MARK: - Glossary card
+
+    private var glossaryCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("16 patterns. One line each.")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(DS.textPrimary)
+                .padding(.horizontal, DS.hPadding)
+
+            VStack(spacing: 0) {
+                ForEach(allLessons) { lesson in
+                    NavigationLink(value: lesson) {
+                        HStack(spacing: 10) {
+                            Text(lesson.emoji)
+                                .font(.title3)
+                                .frame(width: 28)
+                            Text(lesson.biasName)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(DS.textPrimary)
+                            Spacer()
+                            Text(lesson.shortDescription)
+                                .font(.caption)
+                                .foregroundStyle(DS.textSecondary)
+                                .lineLimit(1)
+                                .frame(maxWidth: 140, alignment: .trailing)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
+                    if lesson.id != allLessons.last?.id {
+                        Divider().padding(.leading, 52)
+                    }
+                }
+            }
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(DS.cardBg)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                            .stroke(DS.paleGreen, lineWidth: 0.5)
+                    )
+            )
+            .padding(.horizontal, DS.hPadding)
         }
     }
 

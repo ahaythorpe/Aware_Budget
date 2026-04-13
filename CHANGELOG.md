@@ -5,6 +5,33 @@
 
 ---
 
+## 2026-04-13 — Quick log redesign, driver insights, BFAS, library glossary (Claude Code)
+
+**Quick log redesign (MoneyEventView):**
+- 2-column grid with top 6 categories (bigger cards), "More categories ↓" expander
+- ABS monthly average shown above range picker ("Avg: $180/mo · ABS 2022–23")
+- 14 categories have ABS Household Expenditure Survey 2022–23 averages
+- Cancel/Done toolbar hidden when view is a tab (not sheet)
+- Reset flow added for tab-based usage
+
+**Driver insight card:**
+- White card with 3pt green left border slides in with spring animation
+- "WHAT THIS MEANS" (lime 10pt caps) + "HOW TO BREAK IT" (gold 10pt caps)
+- "See your [bias] pattern →" pill navigates to Insights tab
+- 16 drivers with custom means/fix copy
+- BFAS credibility line below driver grid title
+
+**BFAS credibility (CheckInView):**
+- "Used in professional financial planning assessments · BFAS framework"
+- caption2, italic, white 0.5 opacity, centred below each question card
+
+**Library glossary card (LearnView):**
+- "16 patterns. One line each." card at top of Library tab
+- All 16 biases listed with emoji + name + one-line description
+- Each row tappable → BiasDetailView
+
+---
+
 ## 2026-04-13 — Tab restructure + HomeView patterns (Claude Code)
 
 **Tab bar restructure:**

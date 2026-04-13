@@ -2,9 +2,13 @@ import SwiftUI
 
 struct MoneyEventView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.isPresented) private var isPresented
     @State private var viewModel = MoneyEventViewModel()
+    var selectedTab: Binding<RootTab>? = nil
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+    @State private var showAllCategories = false
+    private let topColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 2)
+    private let moreColumns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
 
     var body: some View {
         ZStack {
@@ -46,8 +50,10 @@ struct MoneyEventView: View {
         .navigationTitle(viewModel.didSave ? "" : "Quick log")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button(viewModel.didSave ? "Done" : "Cancel") { dismiss() }
+            if isPresented {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(viewModel.didSave ? "Done" : "Cancel") { dismiss() }
+                }
             }
         }
     }
@@ -80,7 +86,13 @@ struct MoneyEventView: View {
 
             NudgeCardView(message: nudge)
 
-            Button("Done") { dismiss() }
+            Button("Done") {
+                    if isPresented {
+                        dismiss()
+                    } else {
+                        viewModel.reset()
+                    }
+                }
                 .buttonStyle(PrimaryButtonStyle())
                 .padding(.horizontal, DS.hPadding)
 
@@ -91,26 +103,82 @@ struct MoneyEventView: View {
 
     // MARK: - Category grid
 
+    private let topSix = Array(spendCategories.prefix(6))
+    private let remaining = Array(spendCategories.dropFirst(6))
+
     private var categoryGrid: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "What did you spend on?")
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(spendCategories) { cat in
-                    categoryCell(cat)
+            LazyVGrid(columns: topColumns, spacing: 12) {
+                ForEach(topSix) { cat in
+                    topCategoryCell(cat)
                 }
+            }
+            if showAllCategories {
+                LazyVGrid(columns: moreColumns, spacing: 10) {
+                    ForEach(remaining) { cat in
+                        smallCategoryCell(cat)
+                    }
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+            } else {
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        showAllCategories = true
+                    }
+                } label: {
+                    Text("More categories \u{2193}")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(DS.accent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
             }
         }
     }
 
-    private func categoryCell(_ cat: SpendCategory) -> some View {
+    private func selectCategory(_ cat: SpendCategory) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            viewModel.selectedCategory = cat
+            viewModel.selectedRange = nil
+            viewModel.plannedStatus = nil
+            viewModel.behaviourTag = nil
+        }
+    }
+
+    private func topCategoryCell(_ cat: SpendCategory) -> some View {
         let selected = viewModel.selectedCategory?.name == cat.name
         return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                viewModel.selectedCategory = cat
-                viewModel.selectedRange = nil
-                viewModel.plannedStatus = nil
-                viewModel.behaviourTag = nil
+            selectCategory(cat)
+        } label: {
+            VStack(spacing: 8) {
+                Text(cat.emoji)
+                    .font(.system(size: 36))
+                Text(cat.name)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(selected ? .white : DS.textPrimary)
+                    .lineLimit(1)
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: selected)
+    }
+
+    private func smallCategoryCell(_ cat: SpendCategory) -> some View {
+        let selected = viewModel.selectedCategory?.name == cat.name
+        return Button {
+            selectCategory(cat)
         } label: {
             VStack(spacing: 6) {
                 Text(cat.emoji)
@@ -140,6 +208,12 @@ struct MoneyEventView: View {
     private var rangePicker: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "How much?")
+            if let cat = viewModel.selectedCategory,
+               let avg = absMonthlyAverage[cat.name] {
+                Text("Avg: $\(avg)/mo \u{00B7} ABS 2022\u{2013}23")
+                    .font(.caption)
+                    .foregroundStyle(DS.textTertiary)
+            }
             HStack(spacing: 8) {
                 ForEach(viewModel.availableRanges) { range in
                     rangeButton(range)
@@ -228,6 +302,10 @@ struct MoneyEventView: View {
     private var biasTagSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "What's driving this?")
+            Text("Used in professional financial planning assessments")
+                .font(.caption2)
+                .italic()
+                .foregroundStyle(DS.textTertiary)
 
             if let tag = viewModel.behaviourTag {
                 HStack(spacing: 10) {
@@ -265,9 +343,67 @@ struct MoneyEventView: View {
                             .fill(DS.paleGreen)
                     )
                 }
+
+                if let insight = driverInsights[tag] {
+                    driverInsightCard(tag: tag, insight: insight)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
             }
         }
         .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func driverInsightCard(tag: String, insight: DriverInsight) -> some View {
+        HStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(DS.accent)
+                .frame(width: 3)
+
+            VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("WHAT THIS MEANS")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(DS.accent)
+                        .tracking(1)
+                    Text(insight.means)
+                        .font(.subheadline)
+                        .foregroundStyle(DS.textPrimary)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("HOW TO BREAK IT")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(DS.goldText)
+                        .tracking(1)
+                    Text(insight.fix)
+                        .font(.subheadline)
+                        .foregroundStyle(DS.textPrimary)
+                }
+
+                Button {
+                    selectedTab?.wrappedValue = .insights
+                } label: {
+                    Text("See your \(tag) pattern \u{2192}")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(DS.primary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule().fill(DS.paleGreen)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(14)
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(DS.cardBg)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                )
+        )
     }
 
     // MARK: - Save

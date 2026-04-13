@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Tab restructure (Home/Log/Insights/Library). HomeView pattern alerts. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Current phase:** PRD v1.1 — Quick log redesign (2-col grid, ABS averages, driver insights), BFAS credibility lines, Library glossary card. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -106,6 +106,9 @@
   compact: 9pt text, less padding. Swipe counter "3 of 16" below card.
   `.navigationDestination(for: BiasLesson.self)` pushes
   `BiasDetailView(lesson:)`. Sources `BiasLessonsMock.seed`.
+  **Glossary card** (2026-04-13): "16 patterns. One line each." at top
+  of Library tab, scrollable list of all biases with emoji + name +
+  one-line description, tappable → BiasDetailView.
 - `BiasDetailView.swift` — **NEW** PRD v1.1. Receives `BiasLesson` +
   mock `timesSeen: Int = 0`. Layout: 72pt emoji, `.largeTitle` bold
   #2D1B69 name, category pill via `LearnView.categoryColour(for:)`,
@@ -160,14 +163,13 @@
   `#4CAF50` uppercase, tracking 1.5. `PrimaryButtonStyle` default
   tint `DS.primary`. `SecondaryButtonStyle` uses `DS.paleGreen` fill.
   `Card` uses `DS.cardBg`. All purple/violet hex values removed.
-- `MoneyEventView.swift` — **rebuilt as quick-log** (2026-04-13). Flow:
-  3-column category grid (16 categories with emoji + label, selected =
-  heroGradient) → AUD range picker (3–4 buttons per category with
-  midpoint stored) → planned/surprise/impulse pills → auto-suggested
-  bias tag (gold pill, based on category + status mapping) with inline
-  Nudge message → "Log it" gold gradient button. No amount text input,
-  no note field, no date picker. `MoneyEvent.lifeArea` added for
-  category storage. Amounts in AUD.
+- `MoneyEventView.swift` — **rebuilt as quick-log** (2026-04-13, redesigned
+  2026-04-13). 2-column grid showing top 6 categories (bigger cards) with
+  "More categories" expander for remaining 10. ABS monthly average shown
+  above range picker ("Avg: $180/mo · ABS 2022–23"). Driver insight card
+  slides in after bias tag with "WHAT THIS MEANS" / "HOW TO BREAK IT"
+  sections + "See your [bias] pattern →" pill to Insights. BFAS line
+  below driver grid. No amount text input, no note, no date picker.
 - `InsightFeedView.swift` — **rebuilt with Charts framework** (2026-04-12).
   `import Charts` (native SwiftUI). Tab 4 "Insights". Layout:
   (1) Weekly hero card with heroGradient, decorative circles, gold

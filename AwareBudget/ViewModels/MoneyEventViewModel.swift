@@ -132,6 +132,25 @@ let categoryRanges: [String: [AmountRange]] = [
     ],
 ]
 
+// MARK: - ABS monthly averages (ABS Household Expenditure Survey 2022–23)
+
+let absMonthlyAverage: [String: Int] = [
+    "Coffee": 180,
+    "Lunch": 380,
+    "Drinks": 128,
+    "Shopping": 200,
+    "Transport": 140,
+    "Takeaway": 150,
+    "Entertainment": 168,
+    "Clothing": 152,
+    "Fitness": 80,
+    "Travel": 200,
+    "Home": 300,
+    "Pharmacy": 60,
+    "Subscriptions": 85,
+    "Gift": 80,
+]
+
 // MARK: - Auto-suggest bias tag
 
 func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> String {
@@ -176,6 +195,17 @@ final class MoneyEventViewModel {
 
     var canSave: Bool {
         selectedCategory != nil && selectedRange != nil && plannedStatus != nil
+    }
+
+    func reset() {
+        selectedCategory = nil
+        selectedRange = nil
+        plannedStatus = nil
+        behaviourTag = nil
+        didSave = false
+        nudgeResponse = nil
+        errorMessage = nil
+        biasTimesSeen = 0
     }
 
     func onPlannedStatusSet() {
@@ -247,6 +277,80 @@ final class MoneyEventViewModel {
         }
     }
 }
+
+// MARK: - Driver insights
+
+struct DriverInsight {
+    let means: String
+    let fix: String
+}
+
+let driverInsights: [String: DriverInsight] = [
+    "Present Bias": DriverInsight(
+        means: "Your brain chose now over future you.",
+        fix: "Wait 24hrs on unplanned purchases over $30."
+    ),
+    "Social Proof": DriverInsight(
+        means: "Spending influenced by what others do.",
+        fix: "Ask: would I want this if nobody else had it?"
+    ),
+    "Moral Licensing": DriverInsight(
+        means: "Past good behaviour licensed this spend.",
+        fix: "Decouple rewards from spending entirely."
+    ),
+    "Status Quo Bias": DriverInsight(
+        means: "The easier path won over the better choice.",
+        fix: "Make the better option one tap easier."
+    ),
+    "Sunk Cost Fallacy": DriverInsight(
+        means: "Changing felt harder than continuing.",
+        fix: "Ask: would I choose this starting fresh today?"
+    ),
+    "Anchoring": DriverInsight(
+        means: "The original price made this feel like a win.",
+        fix: "Decide your price before seeing theirs."
+    ),
+    "Scarcity Heuristic": DriverInsight(
+        means: "Limited availability inflated perceived value.",
+        fix: "Wait 24hrs. Real scarcity rarely expires in an hour."
+    ),
+    "Ego Depletion": DriverInsight(
+        means: "Tired brains make expensive decisions.",
+        fix: "Sleep on it. Literally."
+    ),
+    "Loss Aversion": DriverInsight(
+        means: "The fear of losing felt twice as heavy.",
+        fix: "Reframe: what would you choose starting from zero?"
+    ),
+    "Mental Accounting": DriverInsight(
+        means: "You treated this money differently because of its label.",
+        fix: "All dollars are equal. Check the total."
+    ),
+    "Overconfidence Bias": DriverInsight(
+        means: "Confidence outstripped the evidence.",
+        fix: "Write down your prediction. Check it later."
+    ),
+    "Framing Effect": DriverInsight(
+        means: "The way it was framed changed your choice.",
+        fix: "Restate the deal in absolute dollars, not percentages."
+    ),
+    "Availability Heuristic": DriverInsight(
+        means: "A vivid memory drove this more than data.",
+        fix: "Check the base rate before deciding."
+    ),
+    "Ostrich Effect": DriverInsight(
+        means: "You avoided information that might be bad news.",
+        fix: "Just open the app. Looking is enough."
+    ),
+    "Planning Fallacy": DriverInsight(
+        means: "It cost more than you expected. As usual.",
+        fix: "Add 30% to your first estimate."
+    ),
+    "Denomination Effect": DriverInsight(
+        means: "Small digital payments add up invisibly.",
+        fix: "Check your weekly total, not individual taps."
+    ),
+]
 
 // MARK: - Bias one-liners
 

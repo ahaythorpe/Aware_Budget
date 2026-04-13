@@ -240,6 +240,13 @@ struct CheckInView: View {
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
 
+            Text("Used in professional financial\nplanning assessments \u{00B7} BFAS framework")
+                .font(.caption2)
+                .italic()
+                .foregroundStyle(.white.opacity(0.5))
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+
             // Why section (collapsed by default)
             Button {
                 withAnimation(.easeInOut(duration: 0.25)) {
