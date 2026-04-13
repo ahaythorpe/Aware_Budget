@@ -7,6 +7,15 @@ struct AwareBudgetApp: App {
 
     var body: some Scene {
         WindowGroup {
+            #if DEBUG
+            RootTabView()
+                .task {
+                    await NotificationService.requestPermission()
+                    NotificationService.scheduleMorningReminder()
+                    NotificationService.scheduleEveningNudge()
+                    NotificationService.scheduleNoEventsReminder()
+                }
+            #else
             Group {
                 if checkingSession {
                     ZStack {
@@ -26,7 +35,6 @@ struct AwareBudgetApp: App {
                 }
             }
             .task {
-                // Check for existing Supabase session
                 if !hasCompletedOnboarding {
                     if await SupabaseService.shared.currentUserId != nil {
                         hasCompletedOnboarding = true
@@ -34,6 +42,7 @@ struct AwareBudgetApp: App {
                 }
                 checkingSession = false
             }
+            #endif
         }
     }
 }
