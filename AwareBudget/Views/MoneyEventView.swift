@@ -7,8 +7,15 @@ struct MoneyEventView: View {
     var selectedTab: Binding<RootTab>? = nil
 
     @State private var showAllCategories = false
-    private let topColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 2)
-    private let moreColumns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+    private let topColumns = [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+    ]
+    private let moreColumns = [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+    ]
 
     var body: some View {
         ZStack {
@@ -109,15 +116,15 @@ struct MoneyEventView: View {
     private var categoryGrid: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "What did you spend on?")
-            LazyVGrid(columns: topColumns, spacing: 12) {
+            LazyVGrid(columns: topColumns, spacing: 8) {
                 ForEach(topSix) { cat in
-                    topCategoryCell(cat)
+                    categoryCell(cat)
                 }
             }
             if showAllCategories {
-                LazyVGrid(columns: moreColumns, spacing: 10) {
+                LazyVGrid(columns: moreColumns, spacing: 8) {
                     ForEach(remaining) { cat in
-                        smallCategoryCell(cat)
+                        categoryCell(cat)
                     }
                 }
                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -147,35 +154,7 @@ struct MoneyEventView: View {
         }
     }
 
-    private func topCategoryCell(_ cat: SpendCategory) -> some View {
-        let selected = viewModel.selectedCategory?.name == cat.name
-        return Button {
-            selectCategory(cat)
-        } label: {
-            VStack(spacing: 8) {
-                Text(cat.emoji)
-                    .font(.system(size: 36))
-                Text(cat.name)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(selected ? .white : DS.textPrimary)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: selected)
-    }
-
-    private func smallCategoryCell(_ cat: SpendCategory) -> some View {
+    private func categoryCell(_ cat: SpendCategory) -> some View {
         let selected = viewModel.selectedCategory?.name == cat.name
         return Button {
             selectCategory(cat)
@@ -184,19 +163,19 @@ struct MoneyEventView: View {
                 Text(cat.emoji)
                     .font(.system(size: 28))
                 Text(cat.name)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(selected ? .white : DS.textPrimary)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .frame(height: 80)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
+                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(Color.white))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: selected ? 0 : 1)
+                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: 0.5)
             )
         }
         .buttonStyle(.plain)
