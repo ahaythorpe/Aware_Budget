@@ -37,16 +37,16 @@ struct CheckInView: View {
     private let maxRotation: Double = 15
 
     // Card colours
-    private let frontColors: [Color] = [Color(hex: "1B5E20"), Color(hex: "2E7D32"), Color(hex: "4CAF50")]
-    private let middleBg = Color(hex: "81C784")
-    private let backBg   = Color(hex: "A5D6A7")
+    private let frontColors: [Color] = [DS.deepGreen, DS.primary, DS.accent]
+    private let middleBg = DS.lightGreen
+    private let backBg   = DS.mintLight
     private let gold     = DS.goldText
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
-            Color(hex: "F5F7F5").ignoresSafeArea()
+            DS.altBg.ignoresSafeArea()
 
             VStack(spacing: 16) {
                 if let existing = alreadyCheckedIn {
@@ -184,7 +184,7 @@ struct CheckInView: View {
         ZStack {
             // YES overlay (right swipe)
             RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                .fill(Color(hex: "4CAF50").opacity(0.85))
+                .fill(DS.accent.opacity(0.85))
                 .overlay(
                     Text("YES")
                         .font(.system(size: 48, weight: .black))
@@ -303,7 +303,7 @@ struct CheckInView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color(hex: "FF6B6B"))
+                    .background(DS.danger)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)
@@ -315,22 +315,10 @@ struct CheckInView: View {
                             .font(.subheadline.weight(.bold))
                     }
                     .font(.subheadline.weight(.bold))
-                    .foregroundStyle(Color(hex: "1B3A00"))
+                    .foregroundStyle(DS.goldForeground)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                .init(color: Color(hex: "FFF0A0"), location: 0.0),
-                                .init(color: Color(hex: "E8B84B"), location: 0.25),
-                                .init(color: Color(hex: "C59430"), location: 0.5),
-                                .init(color: Color(hex: "8B6010"), location: 0.75),
-                                .init(color: Color(hex: "D4A843"), location: 1.0),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .background(DS.nuggetGold)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)
@@ -396,7 +384,7 @@ struct CheckInView: View {
                 if isSaving {
                     ProgressView()
                         .controlSize(.small)
-                        .tint(Color(hex: "3A2000"))
+                        .tint(DS.goldTint)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 11)
                 } else {
@@ -422,7 +410,7 @@ struct CheckInView: View {
                     .font(.system(size: 28))
                 Text(driver.label)
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(isSelected ? Color(hex: "1A5C38") : DS.textPrimary)
+                    .foregroundStyle(isSelected ? DS.darkGreen : DS.textPrimary)
                 Text(driver.shortDescription)
                     .font(.caption2)
                     .foregroundStyle(DS.textSecondary)
@@ -437,7 +425,7 @@ struct CheckInView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(isSelected ? DS.accent : Color(hex: "4CAF50").opacity(0.15), lineWidth: isSelected ? 1.5 : 0.5)
+                    .stroke(isSelected ? DS.accent : DS.accent.opacity(0.15), lineWidth: isSelected ? 1.5 : 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -453,7 +441,7 @@ struct CheckInView: View {
                     .frame(width: 120, height: 120)
                 Image(systemName: "checkmark")
                     .font(.system(size: 56, weight: .bold))
-                    .foregroundStyle(Color(hex: "1A5C38"))
+                    .foregroundStyle(DS.darkGreen)
             }
             .sensoryFeedback(.success, trigger: phase == .done)
 
@@ -469,7 +457,7 @@ struct CheckInView: View {
                 if let driver = selectedDriver {
                     Text("Driver: \(driver.emoji) \(driver.label)")
                         .font(.footnote.weight(.medium))
-                        .foregroundStyle(Color(hex: "4CAF50"))
+                        .foregroundStyle(DS.accent)
                         .padding(.top, 4)
                 }
             }

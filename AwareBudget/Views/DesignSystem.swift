@@ -36,7 +36,12 @@ enum DS {
     static let lightGreen = Color(hex: "81C784")   // card backs, tints
     static let paleGreen  = Color(hex: "E8F5E9")   // pills, tab active bg
     static let bg         = Color(hex: "FAFAF8")   // app background
+    static let altBg      = Color(hex: "F5F7F5")   // alternate background
     static let cardBg     = Color.white             // card background
+    static let darkGreen  = Color(hex: "1A5C38")   // dark green text/buttons
+    static let deepGreen  = Color(hex: "1B5E20")   // deepest green
+    static let mintBg     = Color(hex: "C8E6C9")   // mint card backs
+    static let mintLight  = Color(hex: "A5D6A7")   // lighter mint
 
     // Text
     static let textPrimary   = Color(hex: "1A2E1A")
@@ -46,6 +51,16 @@ enum DS {
     // Semantic
     static let positive = Color(hex: "4CAF50")
     static let warning  = Color(hex: "FF7043")
+    static let danger   = Color(hex: "FF6B6B")
+
+    // Gold on-element foregrounds
+    static let goldForeground = Color(hex: "1B3A00")  // text on gold buttons
+    static let goldTint       = Color(hex: "3A2000")   // progress tint on gold
+
+    // Stage badge colours
+    static let stageActive   = Color(hex: "C62828")
+    static let stageEmerging = Color(hex: "E65100")
+    static let stageNoticed  = Color(hex: "42A5F5")
 
     // Hero gradient (dark green cards)
     static let heroGradient = LinearGradient(

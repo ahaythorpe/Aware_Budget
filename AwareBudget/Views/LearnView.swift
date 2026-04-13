@@ -20,7 +20,7 @@ struct LearnView: View {
     ]
 
     private let frontBorder = DS.accent.opacity(0.25)
-    private let backBg = Color(hex: "C8E6C9")
+    private let backBg = DS.mintBg
     private let cardHeight: CGFloat = 340
 
     private var filteredLessons: [BiasLesson] {
@@ -241,8 +241,8 @@ struct LearnView: View {
 
     private func trendColor(_ trend: BiasTrend) -> Color {
         switch trend {
-        case .improving: return Color(hex: "2E7D32")
-        case .worsening: return Color(hex: "C62828")
+        case .improving: return DS.primary
+        case .worsening: return DS.stageActive
         case .stable: return DS.textSecondary
         }
     }
@@ -309,7 +309,7 @@ struct LearnView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(
-                    Capsule().fill(selected ? Color(hex: "1A5C38") : DS.cardBg)
+                    Capsule().fill(selected ? DS.darkGreen : DS.cardBg)
                 )
                 .foregroundStyle(selected ? .white : DS.textPrimary)
                 .overlay(
@@ -325,7 +325,7 @@ struct LearnView: View {
         case "Avoidance":
             return (Color(hex: "E1F5EE"), Color(hex: "085041"))
         case "Decision Making":
-            return (Color(hex: "E8F5E9"), Color(hex: "2E7D32"))
+            return (DS.paleGreen, DS.primary)
         case "Money Psychology":
             return (Color(hex: "FAEEDA"), Color(hex: "412402"))
         case "Time Perception":
@@ -337,7 +337,7 @@ struct LearnView: View {
         case "Inertia":
             return (Color(hex: "FBE9E7"), Color(hex: "BF360C"))
         default:
-            return (DS.paleGreen, Color(hex: "1A5C38"))
+            return (DS.paleGreen, DS.darkGreen)
         }
     }
 
@@ -416,9 +416,9 @@ struct LearnView: View {
     private func stageColor(_ stage: MasteryStage) -> Color {
         switch stage {
         case .unseen:    return DS.textTertiary
-        case .noticed:   return Color(hex: "42A5F5")
-        case .emerging:  return Color(hex: "FFA726")
-        case .active:    return Color(hex: "FF7043")
+        case .noticed:   return DS.stageNoticed
+        case .emerging:  return DS.stageEmerging
+        case .active:    return DS.warning
         case .improving: return DS.accent
         case .aware:     return DS.goldBase
         }
@@ -508,7 +508,7 @@ struct LearnView: View {
                 // Bias name
                 Text(lesson.biasName)
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(Color(hex: "1A5C38"))
+                    .foregroundStyle(DS.darkGreen)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 12)
@@ -531,7 +531,7 @@ struct LearnView: View {
                 // In real life
                 Text("IN REAL LIFE")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color(hex: "4CAF50"))
+                    .foregroundStyle(DS.accent)
                     .tracking(0.8)
 
                 Text(lesson.realWorldExample)
@@ -556,12 +556,12 @@ struct LearnView: View {
                     NavigationLink(value: lesson) {
                         Text("Learn more")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color(hex: "1A5C38"))
+                            .foregroundStyle(DS.darkGreen)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .background(
                                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .stroke(Color(hex: "1A5C38"), lineWidth: 1.5)
+                                    .stroke(DS.darkGreen, lineWidth: 1.5)
                             )
                     }
                     .buttonStyle(.plain)
@@ -574,7 +574,7 @@ struct LearnView: View {
                             .padding(.vertical, 10)
                             .background(
                                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(Color(hex: "1A5C38"))
+                                    .fill(DS.darkGreen)
                             )
                     }
                     .buttonStyle(.plain)
@@ -617,7 +617,7 @@ struct LearnView: View {
                     }
                 } label: {
                     Circle()
-                        .fill(i == currentIndex ? Color(hex: "1A5C38") : DS.textTertiary.opacity(0.3))
+                        .fill(i == currentIndex ? DS.darkGreen : DS.textTertiary.opacity(0.3))
                         .frame(width: 7, height: 7)
                 }
                 .buttonStyle(.plain)

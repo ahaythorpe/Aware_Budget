@@ -10,7 +10,7 @@ struct InsightFeedView: View {
     @State private var showAboutScore = false
 
     private let service = SupabaseService.shared
-    private let borderColor = Color(hex: "4CAF50").opacity(0.15)
+    private let borderColor = DS.accent.opacity(0.15)
 
     private var hasNoData: Bool {
         allEvents.isEmpty && recentCheckIns.isEmpty && !isLoading
@@ -18,7 +18,7 @@ struct InsightFeedView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "F5F7F5").ignoresSafeArea()
+            DS.altBg.ignoresSafeArea()
 
             if hasNoData {
                 insightsEmptyState
@@ -258,7 +258,7 @@ struct InsightFeedView: View {
                     )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [Color(hex: "1B5E20"), Color(hex: "4CAF50")],
+                            colors: [DS.deepGreen, DS.accent],
                             startPoint: .leading,
                             endPoint: .trailing
                         )

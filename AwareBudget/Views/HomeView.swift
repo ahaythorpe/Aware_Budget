@@ -117,20 +117,20 @@ struct HomeView: View {
     private var uvpCard: some View {
         HStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(Color(hex: "4CAF50"))
+                .fill(DS.accent)
                 .frame(width: 3)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Most apps track what you spent.")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color(hex: "0A1A0A"))
+                    .foregroundStyle(DS.textPrimary)
                 Text("AwareBudget tracks why.")
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(Color(hex: "1A5C38"))
+                    .foregroundStyle(DS.darkGreen)
                 Text("Budgets fail from shame not data \u{00B7} Kahneman, 1979")
                     .font(.system(size: 9))
                     .italic()
-                    .foregroundStyle(Color(hex: "7A8C7A"))
+                    .foregroundStyle(DS.textTertiary)
             }
             .padding(14)
 
@@ -320,18 +320,18 @@ struct HomeView: View {
 
     private func stageForeground(_ stage: MasteryStage) -> Color {
         switch stage {
-        case .active: return Color(hex: "C62828")
-        case .emerging: return Color(hex: "E65100")
-        case .improving: return Color(hex: "2E7D32")
+        case .active: return DS.stageActive
+        case .emerging: return DS.stageEmerging
+        case .improving: return DS.primary
         default: return DS.textSecondary
         }
     }
 
     private func stageBackground(_ stage: MasteryStage) -> Color {
         switch stage {
-        case .active: return Color(hex: "C62828").opacity(0.1)
-        case .emerging: return Color(hex: "E65100").opacity(0.1)
-        case .improving: return Color(hex: "2E7D32").opacity(0.1)
+        case .active: return DS.stageActive.opacity(0.1)
+        case .emerging: return DS.stageEmerging.opacity(0.1)
+        case .improving: return DS.primary.opacity(0.1)
         default: return DS.paleGreen
         }
     }
@@ -524,7 +524,7 @@ struct HomeView: View {
                     } else {
                         Text("Set target")
                             .font(.system(size: 22, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color(hex: "4CAF50"))
+                            .foregroundStyle(DS.accent)
                     }
                     Text(viewModel.alignmentReassurance)
                         .font(.caption)
@@ -610,7 +610,7 @@ struct HomeView: View {
             } else {
                 Text("Load demo data \u{2192}")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color(hex: "4CAF50"))
+                    .foregroundStyle(DS.accent)
             }
         }
         .buttonStyle(.plain)

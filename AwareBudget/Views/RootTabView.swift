@@ -46,7 +46,7 @@ struct RootTabView: View {
         }
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarBackground(Color.white, for: .tabBar)
-        .tint(Color(hex: "2E7D32"))
+        .tint(DS.primary)
     }
 }
 

@@ -11,7 +11,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "F5F7F5").ignoresSafeArea()
+                DS.altBg.ignoresSafeArea()
 
                 List {
                     Section {

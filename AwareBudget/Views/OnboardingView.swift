@@ -55,7 +55,7 @@ struct OnboardingView: View {
                 } label: {
                     Text("Next \u{2192}")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .foregroundStyle(DS.goldForeground)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(DS.nuggetGold, in: Capsule())
@@ -68,7 +68,7 @@ struct OnboardingView: View {
             .padding(.bottom, 16)
             .background(
                 Rectangle()
-                    .fill(Color(hex: "1B5E20"))
+                    .fill(DS.deepGreen)
                     .ignoresSafeArea()
             )
         }
@@ -145,7 +145,7 @@ struct OnboardingView: View {
                 } label: {
                     Text("Next \u{2192}")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .foregroundStyle(DS.goldForeground)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(DS.nuggetGold, in: Capsule())
@@ -158,7 +158,7 @@ struct OnboardingView: View {
             .padding(.bottom, 16)
             .background(
                 Rectangle()
-                    .fill(Color(hex: "1B5E20"))
+                    .fill(DS.deepGreen)
                     .ignoresSafeArea()
             )
         }
@@ -292,7 +292,7 @@ struct OnboardingView: View {
             ForEach(0..<total, id: \.self) { i in
                 Circle()
                     .fill(i == current
-                          ? (light ? Color.white : Color(hex: "1A5C38"))
+                          ? (light ? Color.white : DS.darkGreen)
                           : (light ? Color.white.opacity(0.3) : DS.textTertiary.opacity(0.3)))
                     .frame(width: 8, height: 8)
             }
@@ -379,14 +379,14 @@ private struct AuthFormView: View {
                             Spacer()
                             if isSubmitting {
                                 ProgressView()
-                                    .tint(Color(hex: "3A2000"))
+                                    .tint(DS.goldTint)
                             } else {
                                 Text(isSignIn ? "Sign in" : "Create account")
                                     .font(.system(size: 17, weight: .bold))
                             }
                             Spacer()
                         }
-                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .foregroundStyle(DS.goldForeground)
                         .padding(.vertical, 16)
                         .background(DS.nuggetGold, in: Capsule())
                     }

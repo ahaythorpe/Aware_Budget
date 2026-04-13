@@ -81,7 +81,7 @@ struct MoneyEventView: View {
                     .frame(width: 100, height: 100)
                 Image(systemName: "checkmark")
                     .font(.system(size: 44, weight: .bold))
-                    .foregroundStyle(Color(hex: "1A5C38"))
+                    .foregroundStyle(DS.darkGreen)
             }
 
             if let cat = viewModel.selectedCategory, let range = viewModel.selectedRange {
@@ -211,14 +211,14 @@ struct MoneyEventView: View {
                         } label: {
                             Text(range.label)
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(rangeSelected ? Color(hex: "1B3A00") : Color(hex: "2E7D32"))
+                                .foregroundStyle(rangeSelected ? DS.goldForeground : DS.primary)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 8)
                                 .background(rangeSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
                                 .clipShape(Capsule())
                                 .overlay(
                                     Capsule()
-                                        .stroke(Color(hex: "2E7D32").opacity(rangeSelected ? 0 : 0.4), lineWidth: 1)
+                                        .stroke(DS.primary.opacity(rangeSelected ? 0 : 0.4), lineWidth: 1)
                                 )
                         }
                         .buttonStyle(.plain)
@@ -306,14 +306,14 @@ struct MoneyEventView: View {
         } label: {
             Text(range.label)
                 .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(selected ? Color(hex: "1B3A00") : Color(hex: "2E7D32"))
+                .foregroundStyle(selected ? DS.goldForeground : DS.primary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(selected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
-                        .stroke(Color(hex: "2E7D32").opacity(selected ? 0 : 0.4), lineWidth: 1.5)
+                        .stroke(DS.primary.opacity(selected ? 0 : 0.4), lineWidth: 1.5)
                 )
         }
         .buttonStyle(.plain)
@@ -347,11 +347,11 @@ struct MoneyEventView: View {
                     .font(.system(size: 20))
                 Text(status.label)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(selected ? Color(hex: "1B3A00") : Color(hex: "2E7D32"))
+                    .foregroundStyle(selected ? DS.goldForeground : DS.primary)
                 Spacer()
                 if selected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(Color(hex: "1B3A00"))
+                        .foregroundStyle(DS.goldForeground)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -361,7 +361,7 @@ struct MoneyEventView: View {
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(Color(hex: "2E7D32").opacity(selected ? 0 : 0.4), lineWidth: 1.5)
+                    .stroke(DS.primary.opacity(selected ? 0 : 0.4), lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -492,7 +492,7 @@ struct MoneyEventView: View {
         } label: {
             HStack {
                 if viewModel.isSaving {
-                    ProgressView().tint(Color(hex: "1B3A00"))
+                    ProgressView().tint(DS.goldForeground)
                 } else {
                     Text("Log it")
                         .font(.headline.weight(.bold))

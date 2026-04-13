@@ -107,14 +107,14 @@ struct SignInView: View {
                     Spacer()
                     if isSubmitting {
                         ProgressView()
-                            .tint(Color(hex: "3A2000"))
+                            .tint(DS.goldTint)
                     } else {
                         Text("Sign in")
                             .font(.system(size: 17, weight: .bold))
                     }
                     Spacer()
                 }
-                .foregroundStyle(Color(hex: "1B3A00"))
+                .foregroundStyle(DS.goldForeground)
                 .padding(.vertical, 16)
                 .background(DS.nuggetGold, in: Capsule())
             }
@@ -215,14 +215,14 @@ struct SignInView: View {
                         Spacer()
                         if otpSubmitting {
                             ProgressView()
-                                .tint(Color(hex: "3A2000"))
+                                .tint(DS.goldTint)
                         } else {
                             Text("Send code")
                                 .font(.system(size: 17, weight: .bold))
                         }
                         Spacer()
                     }
-                    .foregroundStyle(Color(hex: "1B3A00"))
+                    .foregroundStyle(DS.goldForeground)
                     .padding(.vertical, 16)
                     .background(DS.nuggetGold, in: Capsule())
                 }
@@ -238,14 +238,14 @@ struct SignInView: View {
                         Spacer()
                         if otpSubmitting {
                             ProgressView()
-                                .tint(Color(hex: "3A2000"))
+                                .tint(DS.goldTint)
                         } else {
                             Text("Verify and sign in")
                                 .font(.system(size: 17, weight: .bold))
                         }
                         Spacer()
                     }
-                    .foregroundStyle(Color(hex: "1B3A00"))
+                    .foregroundStyle(DS.goldForeground)
                     .padding(.vertical, 16)
                     .background(DS.nuggetGold, in: Capsule())
                 }

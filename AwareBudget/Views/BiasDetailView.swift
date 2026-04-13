@@ -67,7 +67,7 @@ struct BiasDetailView: View {
     private var seenRow: some View {
         HStack(spacing: 10) {
             Image(systemName: "eye.fill")
-                .foregroundStyle(Color(hex: "4CAF50"))
+                .foregroundStyle(DS.accent)
             Text("Seen \(timesSeen) time\(timesSeen == 1 ? "" : "s")")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(DS.textPrimary)
