@@ -30,7 +30,7 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 ### Services/ (6 files)
 - `SupabaseService.swift` — **LIVE** (supabase-swift 2.43.1). All methods real. Auth, check-ins, money events, questions, budget months, bias lessons, bias progress. BiasProgress model also defined here. ISO8601DateFormatter.dateOnly helper.
 - `NudgeEngine.swift` — Pure Swift decision tree. 13 priority rules (added "no events in 2 days" nudge). `moneyEventResponse()` with instant bias feedback ("That's Anchoring. 3rd time."), `checkInResponse()`. NudgeContext gains `daysSinceLastEvent`, `eventLoggingStreak`.
-- `NotificationService.swift` — UNCalendarNotificationTrigger at hour=20.
+- `NotificationService.swift` — **rebuilt** 4 notification types: (1) 8am morning "One question. 60 seconds. Nudge is waiting.", (2) 7pm evening if no check-in "Nudge noticed.", (3) 48h no events "Nudge has no data. That's also information.", (4) Bias hits 5x "[Bias] appeared 5 times. Nudge has something." All scheduled on app launch. Evening nudge cancelled on check-in. No-events timer reset on money event save. Bias alert fired when `countBehaviourTag == 5`.
 - `QuestionPool.swift` — 15 hard-coded seed questions for offline use.
 - `BiasLessonsMock.swift` — 16 seed BiasLesson objects for offline use. Grouped into 6 categories (Avoidance, Decision Making, Money Psychology, Time Perception, External Influence, Self Perception). `categoryOrder` array for display ordering.
 - `BiasScoreService.swift` — **NEW** Bias scoring: MasteryStage (unseen/noticed/emerging/active/improving/aware), BiasTrend, scoring weights (+2 yes, -1 no, +3 tagged), computeScore().

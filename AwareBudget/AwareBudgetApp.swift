@@ -15,7 +15,12 @@ struct AwareBudgetApp: App {
                     }
                 } else if hasCompletedOnboarding {
                     RootTabView()
-                        .task { await NotificationService.requestPermission() }
+                        .task {
+                            await NotificationService.requestPermission()
+                            NotificationService.scheduleMorningReminder()
+                            NotificationService.scheduleEveningNudge()
+                            NotificationService.scheduleNoEventsReminder()
+                        }
                 } else {
                     OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
                 }

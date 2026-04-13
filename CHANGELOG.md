@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-04-13 — Real Supabase questions, Nudge app icon, notifications (Claude Code)
+
+**Real Supabase questions:**
+- CheckInView already wired to `service.fetchNextQuestion()` which queries
+  `question_pool` ordered by `last_shown asc nulls first`, updates `last_shown`
+  to today after fetch. 30 questions verified via REST API.
+- Falls back to `QuestionPool.seed` only on network error.
+
+**Nudge app icon:**
+- Generated all icon sizes (20, 40, 60, 76, 120, 152, 180, 1024px) from
+  `nudge.imageset/nudge.png` via `sips -z`. Contents.json already correct.
+
+**4 notification types:**
+- 8am morning: "One question. 60 seconds. Nudge is waiting."
+- 7pm evening (no check-in): "Nudge noticed."
+- 48h no events: "Nudge has no data. That's also information."
+- Bias hits 5x: "[Bias] appeared 5 times. Nudge has something."
+- All scheduled on app launch in AwareBudgetApp
+- Evening nudge cancelled on check-in, no-events timer reset on money event
+- Bias alert triggered in MoneyEventViewModel when tagCount == 5
+
+---
+
 ## 2026-04-13 — Onboarding 4-screen swipeable TabView (Claude Code)
 
 **Complete onboarding rewrite:**

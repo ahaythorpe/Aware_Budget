@@ -271,6 +271,14 @@ final class MoneyEventViewModel {
                 plannedStatus: status
             )
 
+            // Reset 48h no-events timer
+            NotificationService.resetNoEventsTimer()
+
+            // Bias alert at 5x threshold
+            if let tag = behaviourTag, tagCount == 5 {
+                NotificationService.scheduleBiasAlert(biasName: tag, count: tagCount)
+            }
+
             didSave = true
         } catch {
             errorMessage = error.localizedDescription

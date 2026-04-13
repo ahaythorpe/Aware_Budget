@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — 4-screen swipeable onboarding with 7 bias patterns + sequential quiz. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Current phase:** PRD v1.1 — Real Supabase questions, Nudge app icon, 4 notification types. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -45,8 +45,13 @@
   `ISO8601DateFormatter.dateOnly` helper for date-only queries.
 - `QuestionPool.swift` — the 15 seed questions, used by the stub so the app
   works offline until Supabase is wired.
-- `NotificationService.swift` — daily 8pm reminder scheduled via
-  `UserNotifications`.
+- `NotificationService.swift` — **rebuilt** with 4 notification types:
+  (1) 8am morning: "One question. 60 seconds. Nudge is waiting."
+  (2) 7pm evening if no check-in: "Nudge noticed."
+  (3) 48h no events: "Nudge has no data. That's also information."
+  (4) Bias hits 5x: "[Bias] appeared 5 times. Nudge has something."
+  Legacy wrappers `scheduleDailyReminder()` / `cancelIfCheckedIn()` kept
+  for existing callers. All scheduled on app launch via AwareBudgetApp.
 - `BiasScoreService.swift` — **NEW** (2026-04-13). Bias scoring system with
   MasteryStage (unseen/noticed/emerging/active/improving/aware), BiasTrend,
   BiasScore struct, scoring weights (+2 yes, -1 no, +3 tagged spend),
