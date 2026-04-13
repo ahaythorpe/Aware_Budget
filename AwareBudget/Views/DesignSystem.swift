@@ -66,15 +66,16 @@ enum DS {
     static let goldBase = Color(hex: "C59430")
     static let goldText = Color(hex: "E8B84B")
 
-    // MARK: - Nugget Gold gradient (5 stops)
+    // MARK: - Nugget Gold gradient (metallic shiny)
 
     static let nuggetGold = LinearGradient(
         stops: [
-            .init(color: Color(hex: "FFF0A0"), location: 0.0),
-            .init(color: Color(hex: "E8B84B"), location: 0.25),
-            .init(color: Color(hex: "C59430"), location: 0.5),
-            .init(color: Color(hex: "8B6010"), location: 0.75),
-            .init(color: Color(hex: "D4A843"), location: 1.0),
+            .init(color: Color(hex: "FFF8C0"), location: 0.0),
+            .init(color: Color(hex: "F5C842"), location: 0.2),
+            .init(color: Color(hex: "D4A843"), location: 0.4),
+            .init(color: Color(hex: "8B6010"), location: 0.65),
+            .init(color: Color(hex: "C59430"), location: 0.82),
+            .init(color: Color(hex: "FFF0A0"), location: 1.0),
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -93,17 +94,7 @@ struct GoldButtonStyle: ViewModifier {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 999)
-                    .fill(LinearGradient(
-                        stops: [
-                            .init(color: Color(hex: "FFF0A0"), location: 0.0),
-                            .init(color: Color(hex: "E8B84B"), location: 0.25),
-                            .init(color: Color(hex: "C59430"), location: 0.5),
-                            .init(color: Color(hex: "8B6010"), location: 0.75),
-                            .init(color: Color(hex: "D4A843"), location: 1.0),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
+                    .fill(DS.nuggetGold)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 999)
