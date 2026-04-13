@@ -40,7 +40,7 @@ struct RootTabView: View {
                 LearnView()
             }
             .tabItem {
-                Label("Library", systemImage: "books.vertical")
+                Label("Bias Tracker", systemImage: "brain")
             }
             .tag(RootTab.library)
         }

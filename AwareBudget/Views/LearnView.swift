@@ -6,6 +6,7 @@ struct LearnView: View {
     @State private var currentIndex: Int = 0
     @State private var dragOffset: CGSize = .zero
     @State private var biasProgress: [BiasProgress] = []
+    @State private var allEvents: [MoneyEvent] = []
     @State private var showGlossary = false
 
     private let categories: [String] = [
@@ -33,6 +34,7 @@ struct LearnView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     header
+                    topFiveSection
                     glossaryCard
                     filterPillRow
                     if filteredLessons.isEmpty {
@@ -66,6 +68,7 @@ struct LearnView: View {
                 allLessons = BiasLessonsMock.seed
             }
             biasProgress = (try? await SupabaseService.shared.fetchBiasProgress()) ?? []
+            allEvents = (try? await SupabaseService.shared.fetchAllMoneyEvents()) ?? []
         }
         .onChange(of: selectedCategory) { _, _ in
             currentIndex = 0
@@ -134,14 +137,146 @@ struct LearnView: View {
         }
     }
 
+    // MARK: - Top 5 ranked section
+
+    private var topFiveRanked: [(rank: Int, lesson: BiasLesson, progress: BiasProgress, score: BiasScore, linkedAmount: Double)] {
+        let emojiLookup = Dictionary(uniqueKeysWithValues: allLessons.map { ($0.biasName, $0) })
+        let eventsByTag = Dictionary(grouping: allEvents.filter { $0.behaviourTag != nil }, by: { $0.behaviourTag! })
+
+        return biasProgress
+            .filter { $0.timesEncountered > 0 }
+            .sorted { $0.timesEncountered > $1.timesEncountered }
+            .prefix(5)
+            .enumerated()
+            .compactMap { index, bp in
+                guard let lesson = emojiLookup[bp.biasName] else { return nil }
+                let score = BiasScoreService.computeScore(biasName: bp.biasName, progress: bp, taggedEvents: 0)
+                let linked = eventsByTag[bp.biasName]?.reduce(0.0) { $0 + $1.amount } ?? 0
+                return (rank: index + 1, lesson: lesson, progress: bp, score: score, linkedAmount: linked)
+            }
+    }
+
+    private var topFiveSection: some View {
+        Group {
+            if !topFiveRanked.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    VStack(spacing: 10) {
+                        ForEach(topFiveRanked, id: \.lesson.id) { item in
+                            NavigationLink(value: item.lesson) {
+                                rankedBiasCard(item)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, DS.hPadding)
+                }
+            }
+        }
+    }
+
+    private func rankedBiasCard(_ item: (rank: Int, lesson: BiasLesson, progress: BiasProgress, score: BiasScore, linkedAmount: Double)) -> some View {
+        HStack(spacing: 12) {
+            // Rank number
+            Text("\(item.rank)")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundStyle(DS.goldText)
+                .frame(width: 28)
+
+            // Emoji
+            Text(item.lesson.emoji)
+                .font(.title2)
+
+            // Name + details
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.lesson.biasName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(DS.textPrimary)
+
+                HStack(spacing: 8) {
+                    Text("\(item.progress.timesEncountered)× triggered")
+                        .font(.caption)
+                        .foregroundStyle(DS.textSecondary)
+
+                    if item.linkedAmount > 0 {
+                        Text("$\(Int(item.linkedAmount)) linked")
+                            .font(.caption)
+                            .foregroundStyle(DS.textSecondary)
+                    }
+                }
+
+                Text(biasResearchCitation(for: item.lesson.biasName))
+                    .font(.system(size: 9))
+                    .italic()
+                    .foregroundStyle(DS.textTertiary)
+            }
+
+            Spacer()
+
+            // Trend badge
+            VStack(spacing: 4) {
+                Text(item.score.trend == .improving ? "↓" : (item.score.trend == .worsening ? "↑" : "→"))
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(trendColor(item.score.trend))
+                Text(item.score.trend == .improving ? "Improving" : (item.score.trend == .worsening ? "Worsening" : "Stable"))
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(trendColor(item.score.trend))
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(trendColor(item.score.trend).opacity(0.1))
+            )
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                .fill(DS.cardBg)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .stroke(DS.paleGreen, lineWidth: 0.5)
+                )
+        )
+    }
+
+    private func trendColor(_ trend: BiasTrend) -> Color {
+        switch trend {
+        case .improving: return Color(hex: "2E7D32")
+        case .worsening: return Color(hex: "C62828")
+        case .stable: return DS.textSecondary
+        }
+    }
+
+    private func biasResearchCitation(for bias: String) -> String {
+        switch bias {
+        case "Loss Aversion": return "Kahneman & Tversky, 1979"
+        case "Present Bias": return "O'Donoghue & Rabin, 1999"
+        case "Anchoring": return "Tversky & Kahneman, 1974"
+        case "Overconfidence Bias": return "Barber & Odean, 2001"
+        case "Mental Accounting": return "Thaler, 1985"
+        case "Status Quo Bias": return "Samuelson & Zeckhauser, 1988"
+        case "Ostrich Effect": return "Karlsson et al., 2009"
+        case "Sunk Cost Fallacy": return "Arkes & Blumer, 1985"
+        case "Ego Depletion": return "Baumeister et al., 1998"
+        case "Availability Heuristic": return "Tversky & Kahneman, 1973"
+        case "Denomination Effect": return "Raghubir & Srivastava, 2009"
+        case "Framing Effect": return "Tversky & Kahneman, 1981"
+        case "Planning Fallacy": return "Kahneman & Tversky, 1979"
+        case "Scarcity Heuristic": return "Cialdini, 1984"
+        case "Moral Licensing": return "Merritt et al., 2010"
+        case "Social Proof": return "Cialdini, 1984"
+        default: return "Pompian, 2012"
+        }
+    }
+
     // MARK: - Header
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Your money mind")
+            Text("Understanding your money mind")
                 .font(.largeTitle.weight(.bold))
                 .foregroundStyle(DS.textPrimary)
-            Text("Swipe to explore. Learn one, notice it tomorrow.")
+            Text("Your top 5 patterns ranked by impact")
                 .font(.subheadline)
                 .foregroundStyle(DS.textSecondary)
         }
