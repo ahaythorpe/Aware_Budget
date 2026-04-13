@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-04-14 — How it works 5th tab (Claude Code)
+
+- Added `HowItWorksView` as 5th tab in `RootTabView.swift` (label "How it works", icon `info.circle`). Build green, 5 tabs verified via screenshot.
+
+---
+
 ## 2026-04-13 — Real Supabase questions, Nudge app icon, notifications (Claude Code)
 
 **Real Supabase questions:**

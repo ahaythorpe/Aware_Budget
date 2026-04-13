@@ -5,6 +5,7 @@ enum RootTab: Int, Hashable {
     case log = 1
     case insights = 2
     case library = 3
+    case howItWorks = 4
 }
 
 struct RootTabView: View {
@@ -43,6 +44,14 @@ struct RootTabView: View {
                 Label("Bias Tracker", systemImage: "brain")
             }
             .tag(RootTab.library)
+
+            NavigationStack {
+                HowItWorksView()
+            }
+            .tabItem {
+                Label("How it works", systemImage: "info.circle")
+            }
+            .tag(RootTab.howItWorks)
         }
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarBackground(Color.white, for: .tabBar)

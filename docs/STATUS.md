@@ -3,8 +3,8 @@
 > Single source of truth for where the build currently stands.
 > Update this file whenever you finish a unit of work.
 
-**Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Real Supabase questions, Nudge app icon, 4 notification types. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Last updated:** 2026-04-14
+**Current phase:** PRD v1.1 — "How it works" added as 5th tab. Real Supabase questions, Nudge app icon, 4 notification types. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
