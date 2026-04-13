@@ -16,7 +16,6 @@ struct LearnView: View {
         "Time Perception",
         "External Influence",
         "Self Perception",
-        "Inertia"
     ]
 
     private let frontBorder = DS.accent.opacity(0.25)
@@ -77,7 +76,7 @@ struct LearnView: View {
         }
     }
 
-    // MARK: - Glossary card
+    // MARK: - Glossary card (grouped by category)
 
     private var glossaryCard: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -86,29 +85,39 @@ struct LearnView: View {
                 .foregroundStyle(DS.textPrimary)
                 .padding(.horizontal, DS.hPadding)
 
-            VStack(spacing: 0) {
-                ForEach(allLessons) { lesson in
-                    NavigationLink(value: lesson) {
-                        HStack(spacing: 10) {
-                            Text(lesson.emoji)
-                                .font(.title3)
-                                .frame(width: 28)
-                            Text(lesson.biasName)
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(DS.textPrimary)
-                            Spacer()
-                            Text(lesson.shortDescription)
-                                .font(.caption)
-                                .foregroundStyle(DS.textSecondary)
-                                .lineLimit(1)
-                                .frame(maxWidth: 140, alignment: .trailing)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(BiasLessonsMock.categoryOrder, id: \.self) { category in
+                    let lessons = allLessons.filter { $0.category == category }
+                    if !lessons.isEmpty {
+                        Text(category.uppercased())
+                            .font(.system(size: 11, weight: .heavy))
+                            .foregroundStyle(DS.accent)
+                            .tracking(1.5)
+                            .padding(.horizontal, 14)
+                            .padding(.top, 12)
+                            .padding(.bottom, 4)
+
+                        ForEach(lessons) { lesson in
+                            NavigationLink(value: lesson) {
+                                HStack(spacing: 10) {
+                                    Text(lesson.emoji)
+                                        .font(.title3)
+                                        .frame(width: 28)
+                                    Text(lesson.biasName)
+                                        .font(.subheadline.weight(.medium))
+                                        .foregroundStyle(DS.textPrimary)
+                                    Spacer()
+                                    Text(lesson.shortDescription)
+                                        .font(.caption)
+                                        .foregroundStyle(DS.textSecondary)
+                                        .lineLimit(1)
+                                        .frame(maxWidth: 120, alignment: .trailing)
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 6)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                    }
-                    .buttonStyle(.plain)
-                    if lesson.id != allLessons.last?.id {
-                        Divider().padding(.leading, 52)
                     }
                 }
             }

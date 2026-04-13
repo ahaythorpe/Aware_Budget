@@ -60,6 +60,27 @@ struct SettingsView: View {
                                 .foregroundStyle(DS.textSecondary)
                         }
                     }
+
+                    #if DEBUG
+                    Section {
+                        Button {
+                            Task {
+                                try? await service.signOut()
+                                hasCompletedOnboarding = false
+                                dismiss()
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "arrow.trianglehead.2.counterclockwise")
+                                Text("Reset onboarding (debug)")
+                            }
+                            .foregroundStyle(DS.warning)
+                        }
+                    } footer: {
+                        Text("Signs out and returns to onboarding. Debug builds only.")
+                            .font(.caption)
+                    }
+                    #endif
                 }
                 .scrollContentBackground(.hidden)
             }

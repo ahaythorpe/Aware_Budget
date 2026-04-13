@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Quick log redesign (2-col grid, ABS averages, driver insights), BFAS credibility lines, Library glossary card. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Current phase:** PRD v1.1 — All 16 biases in glossary grouped by category, debug onboarding reset. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -107,8 +107,11 @@
   `.navigationDestination(for: BiasLesson.self)` pushes
   `BiasDetailView(lesson:)`. Sources `BiasLessonsMock.seed`.
   **Glossary card** (2026-04-13): "16 patterns. One line each." at top
-  of Library tab, scrollable list of all biases with emoji + name +
-  one-line description, tappable → BiasDetailView.
+  of Library tab, grouped by category (Avoidance, Decision Making, Money
+  Psychology, Time Perception, External Influence, Self Perception) with
+  section headers (11pt 800 weight #4CAF50 uppercase tracking 1.5). All
+  16 biases with emoji + name + one-line description, tappable →
+  BiasDetailView.
 - `BiasDetailView.swift` — **NEW** PRD v1.1. Receives `BiasLesson` +
   mock `timesSeen: Int = 0`. Layout: 72pt emoji, `.largeTitle` bold
   #2D1B69 name, category pill via `LearnView.categoryColour(for:)`,
@@ -187,6 +190,8 @@
   hasCompletedOnboarding → returns to OnboardingView). Reset demo data
   (deletes daily_checkins, money_events, user_bias_progress for current
   user with confirmation dialog). App version + build number from Bundle.
+  **Debug**: "Reset onboarding (debug)" button (DEBUG builds only) —
+  signs out + resets hasCompletedOnboarding to test onboarding flow.
 - `MonthView.swift` — kept in codebase but no longer mounted in tab bar.
 
 ### App entry

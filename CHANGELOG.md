@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-04-13 — All 16 biases grouped, debug onboarding reset (Claude Code)
+
+**BiasLessonsMock expanded to 16:**
+- Added 9 missing biases: Anchoring, Sunk Cost Fallacy, Ego Depletion,
+  Availability Heuristic, Denomination Effect, Framing Effect, Planning
+  Fallacy, Scarcity Heuristic, Moral Licensing
+- Recategorized: Overconfidence Bias → Decision Making, Status Quo Bias
+  → Self Perception. Removed "Inertia" category.
+- Added `categoryOrder` array for display ordering
+
+**Glossary card grouped by category:**
+- 6 category section headers: Avoidance, Decision Making, Money Psychology,
+  Time Perception, External Influence, Self Perception
+- Headers: 11pt 800 weight #4CAF50 uppercase tracking 1.5
+- All 16 biases visible and tappable → BiasDetailView
+
+**Debug onboarding reset:**
+- "Reset onboarding (debug)" button in SettingsView (#if DEBUG)
+- Signs out + resets hasCompletedOnboarding → returns to onboarding
+- Verified: onboarding screen 1 renders correctly
+
+---
+
 ## 2026-04-13 — Quick log redesign, driver insights, BFAS, library glossary (Claude Code)
 
 **Quick log redesign (MoneyEventView):**
