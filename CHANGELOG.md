@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-04-13 — Tab restructure + HomeView patterns (Claude Code)
+
+**Tab bar restructure:**
+- Changed from Home/Check in/Learn/Insights → Home/Log/Insights/Library
+- MoneyEventView is now the Log tab (direct navigation, not a sheet)
+- LearnView is now the Library tab
+- CheckInView removed from tab bar — opens as sheet from HomeView hero card
+- Icons: house.fill / plus.circle.fill / chart.line.uptrend.xyaxis / books.vertical
+
+**HomeView restructure:**
+- Hero check-in card: shows "Checked in · Day [streak]" with gold checkmark when done
+- Removed "Learn a bias" from daily missions (2 missions: check-in, log event)
+- Added pattern alert cards: biases seen 3+ times shown with emoji, count, trend
+- Pattern cards tappable → navigates to Insights tab
+- Removed log event button (now a tab)
+
+**Fix:** SettingsView moved Supabase calls to service layer (`resetUserData()`)
+to fix PostgREST import errors.
+
+---
+
 ## 2026-04-13 — Event motivation, glossary, softer questions (Claude Code)
 
 **Event logging motivation:**

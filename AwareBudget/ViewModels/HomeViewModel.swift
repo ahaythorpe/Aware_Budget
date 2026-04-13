@@ -19,8 +19,17 @@ final class HomeViewModel {
     var hasLoggedEventToday: Bool = false
     var hasViewedLearnToday: Bool = false
     var eventLoggingStreak: Int = 0
+    var patternAlerts: [PatternAlert] = []
     var isLoading = false
     var errorMessage: String?
+
+    struct PatternAlert: Identifiable {
+        let id = UUID()
+        let emoji: String
+        let biasName: String
+        let count: Int
+        let trend: String
+    }
 
     private let service = SupabaseService.shared
 
@@ -105,9 +114,34 @@ final class HomeViewModel {
                 nextBiasName = nil
             }
 
-            // Biases seen count
+            // Biases seen count + pattern alerts
             let biasProgress = try await service.fetchBiasProgress()
             biasesSeenCount = biasProgress.filter { $0.timesEncountered > 0 }.count
+
+            let emojiLookup = Dictionary(
+                uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) }
+            )
+            patternAlerts = biasProgress
+                .filter { $0.timesEncountered >= 3 }
+                .sorted { $0.timesEncountered > $1.timesEncountered }
+                .prefix(3)
+                .map { bp in
+                    let score = BiasScoreService.computeScore(
+                        biasName: bp.biasName, progress: bp, taggedEvents: 0
+                    )
+                    let trendLabel: String
+                    switch score.trend {
+                    case .improving: trendLabel = "improving"
+                    case .worsening: trendLabel = "watch this"
+                    case .stable: trendLabel = "stable"
+                    }
+                    return PatternAlert(
+                        emoji: emojiLookup[bp.biasName] ?? "🧠",
+                        biasName: bp.biasName,
+                        count: bp.timesEncountered,
+                        trend: trendLabel
+                    )
+                }
 
             // Week spend trend
             let weekEvents = try await service.fetchMoneyEventsThisWeek()

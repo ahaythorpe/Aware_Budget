@@ -2,9 +2,9 @@ import SwiftUI
 
 enum RootTab: Int, Hashable {
     case home = 0
-    case checkIn = 1
-    case learn = 2
-    case insights = 3
+    case log = 1
+    case insights = 2
+    case library = 3
 }
 
 struct RootTabView: View {
@@ -21,20 +21,12 @@ struct RootTabView: View {
             .tag(RootTab.home)
 
             NavigationStack {
-                CheckInView(selectedTab: $selection)
+                MoneyEventView()
             }
             .tabItem {
-                Label("Check in", systemImage: "sparkles")
+                Label("Log", systemImage: "plus.circle.fill")
             }
-            .tag(RootTab.checkIn)
-
-            NavigationStack {
-                LearnView()
-            }
-            .tabItem {
-                Label("Learn", systemImage: "book.fill")
-            }
-            .tag(RootTab.learn)
+            .tag(RootTab.log)
 
             NavigationStack {
                 InsightFeedView()
@@ -43,6 +35,14 @@ struct RootTabView: View {
                 Label("Insights", systemImage: "chart.line.uptrend.xyaxis")
             }
             .tag(RootTab.insights)
+
+            NavigationStack {
+                LearnView()
+            }
+            .tabItem {
+                Label("Library", systemImage: "books.vertical")
+            }
+            .tag(RootTab.library)
         }
         .tint(DS.primary)
     }

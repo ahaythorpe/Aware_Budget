@@ -2,11 +2,11 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
-    @State private var showMoneyEvent = false
     @State private var showTargetEditor = false
     @State private var targetInput = ""
     @State private var isLoadingDemo = false
     @State private var showSettings = false
+    @State private var showCheckIn = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     var selectedTab: Binding<RootTab>? = nil
@@ -20,10 +20,10 @@ struct HomeView: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
-        .sheet(isPresented: $showMoneyEvent, onDismiss: {
+        .sheet(isPresented: $showCheckIn, onDismiss: {
             Task { await viewModel.load() }
         }) {
-            NavigationStack { MoneyEventView() }
+            NavigationStack { CheckInView() }
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(hasCompletedOnboarding: $hasCompletedOnboarding)
@@ -61,12 +61,12 @@ struct HomeView: View {
                         }
                     )
                 }
+                patternAlerts
                 heroCheckInCard
                 streakSection
                 statCardsRow
                 dailyMissions
                 alignmentCard
-                logEventButton
                 recentActivitySection
             }
             .padding(.horizontal, DS.hPadding)
@@ -78,9 +78,9 @@ struct HomeView: View {
     private func handleNudgeAction(_ action: NudgeAction) {
         switch action {
         case .startCheckIn:
-            selectedTab?.wrappedValue = .checkIn
+            showCheckIn = true
         case .openLearnBias, .openBiasDetail:
-            selectedTab?.wrappedValue = .learn
+            selectedTab?.wrappedValue = .library
         case .openTrends:
             selectedTab?.wrappedValue = .insights
         }
@@ -109,11 +109,48 @@ struct HomeView: View {
         .padding(.top, 8)
     }
 
+    // MARK: - Pattern alerts
+
+    private var patternAlerts: some View {
+        ForEach(viewModel.patternAlerts) { alert in
+            Button {
+                selectedTab?.wrappedValue = .insights
+            } label: {
+                HStack(spacing: 12) {
+                    Text(alert.emoji)
+                        .font(.title2)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(alert.biasName) — \(alert.count) times")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(DS.textPrimary)
+                        Text(alert.trend)
+                            .font(.caption)
+                            .foregroundStyle(DS.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(DS.textTertiary)
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                        .fill(DS.cardBg)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                                .stroke(DS.accent.opacity(0.3), lineWidth: 1)
+                        )
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     // MARK: - Hero check-in card (#2E7D32)
 
     private var heroCheckInCard: some View {
         Button {
-            selectedTab?.wrappedValue = .checkIn
+            showCheckIn = true
         } label: {
             VStack(alignment: .leading, spacing: 14) {
                 if !viewModel.isCheckedInToday, let bias = viewModel.nextBiasName {
@@ -132,25 +169,21 @@ struct HomeView: View {
                         )
                 }
 
-                if viewModel.isCheckedInToday, let tone = viewModel.todaysCheckIn?.emotionalTone {
+                if viewModel.isCheckedInToday {
                     HStack(spacing: 8) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundStyle(DS.paleGreen)
-                        Text("Done for today")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.75))
-                            .textCase(.uppercase)
-                            .tracking(0.8)
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(DS.goldText)
+                        Text("Checked in \u{00B7} Day \(viewModel.streak)")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.white)
                     }
-                    Text("You showed up. Back tomorrow.")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.leading)
-                    HStack(spacing: 6) {
-                        Text(tone.emoji)
-                        Text("Tone \u{00B7} \(tone.label)")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.7))
+                    if let tone = viewModel.todaysCheckIn?.emotionalTone {
+                        HStack(spacing: 6) {
+                            Text(tone.emoji)
+                            Text("Tone \u{00B7} \(tone.label)")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
                     }
                 } else {
                     Text(viewModel.nextQuestionTeaser ?? "Today's check-in")
@@ -219,7 +252,7 @@ struct HomeView: View {
             }
 
             Button {
-                selectedTab?.wrappedValue = .checkIn
+                showCheckIn = true
             } label: {
                 HStack {
                     Spacer()
@@ -311,11 +344,6 @@ struct HomeView: View {
                     label: "Log a money event",
                     hint: "Track what happened"
                 )
-                missionRow(
-                    done: viewModel.hasViewedLearnToday,
-                    label: "Learn a bias",
-                    hint: "Swipe through Learn"
-                )
             }
             .padding(14)
             .background(
@@ -388,20 +416,6 @@ struct HomeView: View {
             )
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - Log event
-
-    private var logEventButton: some View {
-        Button {
-            showMoneyEvent = true
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "plus.circle.fill")
-                Text("Log event")
-            }
-        }
-        .buttonStyle(SecondaryButtonStyle())
     }
 
     // MARK: - Recent activity

@@ -36,6 +36,14 @@ final class SupabaseService {
         try await client.auth.signOut()
     }
 
+    func resetUserData() async throws {
+        guard let uid = await currentUserId else { return }
+        let id = uid.uuidString
+        try await client.from("daily_checkins").delete().eq("user_id", value: id).execute()
+        try await client.from("money_events").delete().eq("user_id", value: id).execute()
+        try await client.from("user_bias_progress").delete().eq("user_id", value: id).execute()
+    }
+
     // MARK: - Check-ins
 
     func saveCheckIn(_ checkIn: CheckIn) async throws {

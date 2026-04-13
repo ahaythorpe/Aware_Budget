@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — Core loop complete. Event logging motivation (2-day nudge, event streak, instant bias feedback). Bias glossary in Learn. Softer question framing. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Current phase:** PRD v1.1 — Tab restructure (Home/Log/Insights/Library). HomeView pattern alerts. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -115,9 +115,12 @@
   realWorldExample, "How to counter it" section with howToCounter
   body.
 - `HomeView.swift` — **rebuilt 2026-04-12, updated 2026-04-13** with brand palette.
-  **New (2026-04-13)**: 3 stat cards row (Alignment %, Biases Seen in gold,
-  This Week spend). Daily Missions section with 3 rows (check-in, log event,
-  learn a bias) that show completion state based on today's data.
+  3 stat cards row (Alignment %, Biases Seen in gold, This Week spend).
+  Daily Missions section with 2 rows (check-in, log event) showing
+  completion state. **Pattern alert cards** (2026-04-13): biases seen 3+
+  times shown as tappable cards with emoji, count, trend — tap navigates
+  to Insights. Hero check-in card shows "Checked in · Day [streak]" with
+  gold checkmark when done. Check-in opens as sheet (not tab switch).
   Background `#F7F4EF` (`DS.bg`). Hero check-in card is a full-width
   `#2D1B69` (`DS.deepPurple`) rounded rectangle with white text,
   coral accent icon, and teaser question. Tapping it switches the
@@ -137,13 +140,12 @@
   streak count inside, "DAY STREAK" caption. Below the ring: a row
   of 7 labelled dots (M T W T F S S) filled coral when that day has
   a check-in, otherwise grey.
-- `RootTabView.swift` — **NEW** 4-tab root. Tabs: Home / Check in /
-  Learn / Insights. `@State selection: RootTab` binding passed down to
-  `HomeView` and `CheckInView` so they can switch tabs. Uses
-  `.tint(DS.accent)` for active tab color. `AwareBudgetApp.swift`
-  now mounts `RootTabView()` (with a `.task { await
-  NotificationService.requestPermission() }` on launch) in place of
-  the old `NavigationStack { HomeView() }`.
+- `RootTabView.swift` — **RESTRUCTURED** (2026-04-13). 4-tab root:
+  Home (house.fill) / Log (plus.circle.fill) / Insights
+  (chart.line.uptrend.xyaxis) / Library (books.vertical). MoneyEventView
+  is now the Log tab (direct navigation, not a sheet). LearnView is
+  now the Library tab. CheckInView removed from tab bar — opens as
+  sheet from HomeView hero card.
 - `DesignSystem.swift` — **Money Green + Nugget Gold** colour system.
   `DS.primary` `#2E7D32`, `DS.accent` `#4CAF50`, `DS.lightGreen`
   `#81C784`, `DS.paleGreen` `#E8F5E9`, `DS.bg` `#FAFAF8`,

@@ -74,19 +74,7 @@ struct SettingsView: View {
             .confirmationDialog("Reset demo data?", isPresented: $showResetConfirm, titleVisibility: .visible) {
                 Button("Reset", role: .destructive) {
                     Task {
-                        guard let userId = await service.currentUserId else { return }
-                        try? await service.client.from("daily_checkins")
-                            .delete()
-                            .eq("user_id", value: userId.uuidString)
-                            .execute()
-                        try? await service.client.from("money_events")
-                            .delete()
-                            .eq("user_id", value: userId.uuidString)
-                            .execute()
-                        try? await service.client.from("user_bias_progress")
-                            .delete()
-                            .eq("user_id", value: userId.uuidString)
-                            .execute()
+                        try? await service.resetUserData()
                         dismiss()
                     }
                 }
