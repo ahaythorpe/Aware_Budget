@@ -65,6 +65,7 @@ struct HomeView: View {
                 if !uvpDismissed { uvpCard }
                 patternAlerts
                 heroCheckInCard
+                patternsToWatchSection
                 streakSection
                 statCardsRow
                 dailyMissions
@@ -253,6 +254,86 @@ struct HomeView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Patterns to watch today
+
+    private var patternsToWatchSection: some View {
+        Group {
+            if !viewModel.dailyPatterns.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(title: "Patterns to watch today")
+                    Text("Rotates daily based on your data")
+                        .font(.caption)
+                        .foregroundStyle(DS.textSecondary)
+
+                    VStack(spacing: 8) {
+                        ForEach(viewModel.dailyPatterns) { pattern in
+                            Button {
+                                selectedTab?.wrappedValue = .library
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Text(pattern.emoji)
+                                        .font(.title2)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(pattern.biasName)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(DS.textPrimary)
+                                        Text(pattern.oneLiner)
+                                            .font(.caption)
+                                            .foregroundStyle(DS.textSecondary)
+                                            .lineLimit(1)
+                                    }
+                                    Spacer()
+                                    Text(pattern.stage.rawValue)
+                                        .font(.system(size: 10, weight: .semibold))
+                                        .foregroundStyle(stageForeground(pattern.stage))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(
+                                            Capsule()
+                                                .fill(stageBackground(pattern.stage))
+                                        )
+                                }
+                                .padding(14)
+                                .background(
+                                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                                        .fill(DS.cardBg)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                                                .stroke(DS.paleGreen, lineWidth: 0.5)
+                                        )
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    Text("New patterns tested daily to build your awareness")
+                        .font(.system(size: 9))
+                        .italic()
+                        .foregroundStyle(DS.textTertiary)
+                }
+            }
+        }
+    }
+
+    private func stageForeground(_ stage: MasteryStage) -> Color {
+        switch stage {
+        case .active: return Color(hex: "C62828")
+        case .emerging: return Color(hex: "E65100")
+        case .improving: return Color(hex: "2E7D32")
+        default: return DS.textSecondary
+        }
+    }
+
+    private func stageBackground(_ stage: MasteryStage) -> Color {
+        switch stage {
+        case .active: return Color(hex: "C62828").opacity(0.1)
+        case .emerging: return Color(hex: "E65100").opacity(0.1)
+        case .improving: return Color(hex: "2E7D32").opacity(0.1)
+        default: return DS.paleGreen
+        }
     }
 
     // MARK: - Streak ring (or welcome empty state)

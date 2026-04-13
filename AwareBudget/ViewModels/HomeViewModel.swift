@@ -20,6 +20,7 @@ final class HomeViewModel {
     var hasViewedLearnToday: Bool = false
     var eventLoggingStreak: Int = 0
     var patternAlerts: [PatternAlert] = []
+    var dailyPatterns: [DailyPattern] = []
     var isLoading = false
     var errorMessage: String?
 
@@ -29,6 +30,15 @@ final class HomeViewModel {
         let biasName: String
         let count: Int
         let trend: String
+    }
+
+    struct DailyPattern: Identifiable {
+        let id = UUID()
+        let emoji: String
+        let biasName: String
+        let oneLiner: String
+        let stage: MasteryStage
+        let score: Int
     }
 
     private let service = SupabaseService.shared
@@ -142,6 +152,29 @@ final class HomeViewModel {
                         trend: trendLabel
                     )
                 }
+
+            // Daily patterns to watch (top 5 by score DESC)
+            let descLookup = Dictionary(
+                uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.shortDescription) }
+            )
+            dailyPatterns = biasProgress
+                .filter { $0.timesEncountered > 0 }
+                .compactMap { bp -> (DailyPattern, Int)? in
+                    let score = BiasScoreService.computeScore(
+                        biasName: bp.biasName, progress: bp, taggedEvents: 0
+                    )
+                    let oneLiner = descLookup[bp.biasName] ?? ""
+                    return (DailyPattern(
+                        emoji: emojiLookup[bp.biasName] ?? "🧠",
+                        biasName: bp.biasName,
+                        oneLiner: oneLiner,
+                        stage: score.masteryStage,
+                        score: score.score
+                    ), score.score)
+                }
+                .sorted { $0.1 > $1.1 }
+                .prefix(5)
+                .map(\.0)
 
             // Week spend trend
             let weekEvents = try await service.fetchMoneyEventsThisWeek()
