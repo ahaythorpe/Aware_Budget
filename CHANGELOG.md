@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-04-13 — Onboarding 4-screen swipeable TabView (Claude Code)
+
+**Complete onboarding rewrite:**
+- Screen 1: Nudge welcome — heroGradient background, NudgeAvatar 120pt,
+  "Hi, I'm Nudge." white largeTitle, gold "Get started →" button
+- Screen 2: The 7 Patterns — heroGradient background, 7 white rounded
+  cards with emoji + bias name + one-liner (Loss Aversion, Present Bias,
+  Overconfidence, Mental Accounting, Status Quo Bias, Anchoring, Ostrich
+  Effect), Pompian 2012 citation, gold "I recognise these →" button
+- Screen 3: Budget Reality Check — white background, lime caps label,
+  NudgeAvatar 52pt, sequential quiz (Q1: budget duration, Q2: why stopped),
+  capsule pills, Nudge response card (heroGradient, "You're not broken.
+  The method is.", 70% stat), gold "That's why AwareBudget exists →"
+- Screen 4: Sign up — NudgeAvatar 100pt, email/password fields, gold
+  "Create account" button, "Already have an account? Sign in" toggle
+- Removed old "How it works" 3-card explainer screen
+- TabView paged with .ignoresSafeArea(), custom progress dots
+
+---
+
 ## 2026-04-13 — All 16 biases grouped, debug onboarding reset (Claude Code)
 
 **BiasLessonsMock expanded to 16:**

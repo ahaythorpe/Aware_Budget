@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-13
-**Current phase:** PRD v1.1 — All 16 biases in glossary grouped by category, debug onboarding reset. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
+**Current phase:** PRD v1.1 — 4-screen swipeable onboarding with 7 bias patterns + sequential quiz. Build succeeds (our source — upstream SPM dep has Xcode 26 compat warnings).
 
 ---
 
@@ -65,13 +65,17 @@
   behaviour tag count, life event, and planned status.
 
 ### Views (`AwareBudget/Views/`)
-- `OnboardingView.swift` — **rebuilt** 3-screen paged onboarding:
-  (1) Nudge 120pt + welcome + "Get started" gold button,
-  (2) Budget Reality Check quiz (2 questions, Nudge responds with
-  "You're not broken. The method is." + 70% stat),
-  (3) Sign-up form with email/password + "Create account" gold button
-  + "Already have an account? Sign in" link.
+- `OnboardingView.swift` — **rebuilt** 4-screen swipeable TabView onboarding:
+  (1) Nudge 120pt welcome on heroGradient + gold "Get started →",
+  (2) "The 7 patterns that cost people most" — 7 white cards on
+  heroGradient with emoji + bias name + one-liner + Pompian 2012 citation,
+  (3) Budget Reality Check — sequential quiz (Q1 budget duration, Q2 why
+  stopped), capsule pills, Nudge response card (heroGradient, "You're not
+  broken. The method is.", 70% stat),
+  (4) Sign-up form with email/password + "Create account" gold button
+  + "Already have an account? Sign in" toggle.
   Quiz answers stored in local state. Selected pills use heroGradient.
+  TabView paged with .ignoresSafeArea(), custom progress dots (4 total).
 - `SignInView.swift` — **NEW** sign-in screen. Email + password +
   gold "Sign in" button. Presented as sheet from onboarding.
   On success: sets hasCompletedOnboarding = true, navigates to HomeView.

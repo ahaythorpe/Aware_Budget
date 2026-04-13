@@ -10,18 +10,15 @@ struct OnboardingView: View {
     @State private var quitReason: String? = nil
 
     var body: some View {
-        ZStack {
-            DS.bg.ignoresSafeArea()
-
-            TabView(selection: $currentPage) {
-                welcomePage.tag(0)
-                quizPage.tag(1)
-                howItWorksPage.tag(2)
-                signUpPage.tag(3)
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.easeInOut(duration: 0.3), value: currentPage)
+        TabView(selection: $currentPage) {
+            welcomePage.tag(0)
+            patternsPage.tag(1)
+            quizPage.tag(2)
+            signUpPage.tag(3)
         }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .ignoresSafeArea()
+        .animation(.easeInOut(duration: 0.3), value: currentPage)
     }
 
     // MARK: - Screen 1: Welcome
@@ -66,34 +63,118 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Screen 2: Budget Reality Check
+    // MARK: - Screen 2: The 7 Patterns
+
+    private let patterns: [(emoji: String, name: String, line: String)] = [
+        ("😰", "Loss Aversion", "Holding losers too long"),
+        ("⏰", "Present Bias", "Robbing future you"),
+        ("🎯", "Overconfidence", "Overtrading, underperforming"),
+        ("🧮", "Mental Accounting", "Saving while in debt"),
+        ("🛑", "Status Quo Bias", "Never reviewing super"),
+        ("⚓", "Anchoring", "Stuck on a purchase price"),
+        ("🫣", "Ostrich Effect", "Avoiding the statements"),
+    ]
+
+    private var patternsPage: some View {
+        ZStack {
+            DS.heroGradient.ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 24) {
+                    Spacer(minLength: 48)
+
+                    NudgeAvatar(size: 60)
+
+                    Text("The 7 patterns that cost\npeople most")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+
+                    VStack(spacing: 10) {
+                        ForEach(patterns, id: \.name) { p in
+                            HStack(spacing: 14) {
+                                Text(p.emoji)
+                                    .font(.system(size: 28))
+                                    .frame(width: 40)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(p.name)
+                                        .font(.subheadline.weight(.bold))
+                                        .foregroundStyle(DS.textPrimary)
+                                    Text(p.line)
+                                        .font(.caption)
+                                        .foregroundStyle(DS.textSecondary)
+                                }
+
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(Color.white)
+                            )
+                        }
+                    }
+                    .padding(.horizontal, DS.hPadding)
+
+                    Text("Source: Pompian, 2012 \u{00B7} Behavioural Finance and Wealth Management")
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.5))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+
+                    Button {
+                        withAnimation { currentPage = 2 }
+                    } label: {
+                        Text("I recognise these \u{2192}")
+                            .font(.system(size: 15, weight: .bold))
+                            .goldButtonStyle()
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, DS.hPadding)
+
+                    progressDots(current: 1, total: 4, light: true)
+                        .padding(.bottom, 32)
+                }
+            }
+        }
+    }
+
+    // MARK: - Screen 3: Budget Reality Check
 
     private var quizPage: some View {
         ScrollView {
             VStack(spacing: 28) {
                 VStack(spacing: 8) {
-                    SectionHeader(title: "Budget Reality Check")
-                    NudgeAvatar(size: 60)
+                    Text("BUDGET REALITY CHECK")
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(DS.accent)
+                        .textCase(.uppercase)
+                        .tracking(1.5)
+
+                    NudgeAvatar(size: 52)
                 }
-                .padding(.top, 40)
+                .padding(.top, 48)
 
                 // Q1
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 12) {
                     Text("How long did your last budget last?")
-                        .font(.headline)
+                        .font(.title3.weight(.bold))
                         .foregroundStyle(DS.textPrimary)
 
                     quizPill("Less than a week", selected: budgetHistory == "week", action: { budgetHistory = "week" })
                     quizPill("About a month", selected: budgetHistory == "month", action: { budgetHistory = "month" })
-                    quizPill("Never tried", selected: budgetHistory == "never", action: { budgetHistory = "never" })
+                    quizPill("Never tried", selected: budgetHistory == "never_tried", action: { budgetHistory = "never_tried" })
+                    quizPill("Never budgeted", selected: budgetHistory == "never_budgeted", action: { budgetHistory = "never_budgeted" })
                 }
                 .padding(.horizontal, DS.hPadding)
 
                 // Q2
-                if budgetHistory != nil && budgetHistory != "never" {
-                    VStack(alignment: .leading, spacing: 10) {
+                if budgetHistory != nil && budgetHistory != "never_tried" && budgetHistory != "never_budgeted" {
+                    VStack(alignment: .leading, spacing: 12) {
                         Text("Why did you stop?")
-                            .font(.headline)
+                            .font(.title3.weight(.bold))
                             .foregroundStyle(DS.textPrimary)
 
                         quizPill("Too much work", selected: quitReason == "work", action: { quitReason = "work" })
@@ -105,27 +186,13 @@ struct OnboardingView: View {
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
 
-                // Nudge response
-                if budgetHistory != nil && (budgetHistory == "never" || quitReason != nil) {
+                // Nudge response + continue
+                if budgetHistory != nil && (budgetHistory == "never_tried" || budgetHistory == "never_budgeted" || quitReason != nil) {
                     nudgeResponse
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
-                // Continue button
-                if budgetHistory != nil && (budgetHistory == "never" || quitReason != nil) {
-                    Button {
-                        withAnimation { currentPage = 2 }
-                    } label: {
-                        Text("That's why AwareBudget exists \u{2192}")
-                            .font(.system(size: 15, weight: .bold))
-                            .goldButtonStyle()
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, DS.hPadding)
-                    .transition(.opacity)
-                }
-
-                progressDots(current: 1, total: 4)
+                progressDots(current: 2, total: 4)
                     .padding(.bottom, 32)
             }
             .animation(.spring(response: 0.4, dampingFraction: 0.85), value: budgetHistory)
@@ -134,135 +201,59 @@ struct OnboardingView: View {
     }
 
     private var nudgeResponse: some View {
-        VStack(spacing: 16) {
-            NudgeAvatar(size: 56)
+        VStack(spacing: 20) {
+            VStack(spacing: 0) {
+                HStack(alignment: .top, spacing: 14) {
+                    NudgeAvatar(size: 44)
 
-            Text("You're not broken. The method is.")
-                .font(.title3.weight(.bold))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("You're not broken. The method is.")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(.white)
 
-            Text("70% of people abandon budgeting apps within 30 days. Not from laziness \u{2014} from apps that create shame not awareness.")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.85))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
+                        Text("70% abandon budgeting apps within 30 days.\nNot laziness \u{2014} shame-based design.")
+                            .font(.body)
+                            .foregroundStyle(.white.opacity(0.75))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(20)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .fill(DS.heroGradient)
+            )
+
+            Button {
+                withAnimation { currentPage = 3 }
+            } label: {
+                Text("That's why AwareBudget exists \u{2192}")
+                    .font(.system(size: 15, weight: .bold))
+                    .goldButtonStyle()
+            }
+            .buttonStyle(.plain)
         }
-        .padding(24)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                .fill(DS.heroGradient)
-        )
         .padding(.horizontal, DS.hPadding)
     }
 
     private func quizPill(_ text: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(text)
-                .font(.subheadline.weight(.medium))
+                .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(selected ? .white : DS.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
                 .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
+                    Capsule()
+                        .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(Color.white))
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(selected ? Color.clear : DS.paleGreen, lineWidth: 0.5)
+                    Capsule()
+                        .stroke(selected ? Color.clear : DS.primary, lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - Screen 3: How it works
-
-    @State private var howItWorksCard = 0
-
-    private var howItWorksPage: some View {
-        VStack(spacing: 24) {
-            Spacer()
-
-            TabView(selection: $howItWorksCard) {
-                scienceCard(
-                    emoji: "🧠",
-                    title: "Built on real research",
-                    body: "16 cognitive biases drive most financial decisions. Not character flaws \u{2014} documented patterns proven by Nobel Prize-winning research.",
-                    citation: "Kahneman & Tversky, 1979 \u{00B7} Thaler, 1985 \u{00B7} Cialdini, 1984"
-                ).tag(0)
-
-                scienceCard(
-                    emoji: "\u{2726}",
-                    title: "One question. One minute.",
-                    body: "Each question is designed to surface a specific bias through your own experience. Yes or no. No right answers. No judgment.",
-                    citation: "Based on BFAS methodology, Grable & Joo 2004"
-                ).tag(1)
-
-                scienceCard(
-                    emoji: "📈",
-                    title: "Your patterns. Not a grade.",
-                    body: "Yes answers show a bias is active. No answers show your awareness working. After 7 days Nudge shows you what's driving your financial decisions.",
-                    citation: "Scoring based on revealed preference theory"
-                ).tag(2)
-            }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .frame(height: 340)
-
-            if howItWorksCard == 2 {
-                Button {
-                    withAnimation { currentPage = 3 }
-                } label: {
-                    Text("I'm ready")
-                        .font(.system(size: 15, weight: .bold))
-                        .goldButtonStyle()
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, DS.hPadding)
-                .transition(.opacity)
-            }
-
-            Spacer()
-
-            progressDots(current: 2, total: 4)
-                .padding(.bottom, 32)
-        }
-    }
-
-    private func scienceCard(emoji: String, title: String, body: String, citation: String) -> some View {
-        VStack(spacing: 16) {
-            Text(emoji)
-                .font(.system(size: 52))
-
-            Text(title)
-                .font(.title3.weight(.bold))
-                .foregroundStyle(DS.textPrimary)
-                .multilineTextAlignment(.center)
-
-            Text(body)
-                .font(.subheadline)
-                .foregroundStyle(DS.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-
-            Text(citation)
-                .font(.system(size: 11))
-                .foregroundStyle(DS.textTertiary)
-                .italic()
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                .fill(DS.cardBg)
-                .overlay(
-                    RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                        .stroke(DS.paleGreen, lineWidth: 0.5)
-                )
-        )
-        .padding(.horizontal, DS.hPadding)
     }
 
     // MARK: - Screen 4: Sign Up
@@ -310,7 +301,7 @@ private struct AuthFormView: View {
                         .foregroundStyle(DS.textPrimary)
                     Text(isSignIn
                          ? "Sign in to pick up where you left off."
-                         : "Your data stays private. No bank access. Ever.")
+                         : "No bank access. Your data stays private.")
                         .font(.subheadline)
                         .foregroundStyle(DS.textSecondary)
                         .multilineTextAlignment(.center)
@@ -377,8 +368,8 @@ private struct AuthFormView: View {
                     Text(isSignIn
                          ? "Don't have an account? Sign up"
                          : "Already have an account? Sign in")
-                        .font(.subheadline)
-                        .foregroundStyle(Color(hex: "4CAF50"))
+                        .font(.caption)
+                        .foregroundStyle(DS.accent)
                 }
                 .buttonStyle(.plain)
 

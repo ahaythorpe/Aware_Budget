@@ -53,7 +53,7 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `NudgeCardView.swift` — Green accent bar, NudgeAvatar, message text, gold action button, dismiss X. NudgeDismissStore (24h), NudgeDedup.
 - `StreakRingView.swift` — 140pt ring, DS.accent stroke, gold gradient number, M-S day dots.
 - `SparklineView.swift` — 7-bar sparkline. Green improving, orange worsening.
-- `OnboardingView.swift` — **rebuilt** 4-screen paged onboarding: (1) Nudge 120pt welcome, (2) Budget Reality Check quiz with Nudge response, (3) "How it works" 3-card swipeable explainer (science/method/scoring with citations), (4) sign-up form + "Sign in" link.
+- `OnboardingView.swift` — **rebuilt** 4-screen swipeable TabView onboarding: (1) Nudge 120pt welcome on heroGradient + gold "Get started →", (2) "The 7 patterns that cost people most" — 7 white cards on heroGradient (Loss Aversion, Present Bias, Overconfidence, Mental Accounting, Status Quo Bias, Anchoring, Ostrich Effect) + Pompian 2012 citation, (3) Budget Reality Check — sequential quiz (Q1 budget duration 4 options, Q2 why stopped 4 options), capsule pills, Nudge response card (heroGradient, "You're not broken. The method is.", 70% stat), (4) sign-up form + "Sign in" toggle.
 - `SignInView.swift` — **NEW** email/password sign-in sheet with gold button. On success: hasCompletedOnboarding = true.
 - `SettingsView.swift` — **NEW** gear icon sheet from HomeView. Sign out (Supabase + reset onboarding flag), reset demo data (clears user's checkins/events/progress), app version/build. **Debug**: "Reset onboarding (debug)" button (DEBUG only) — signs out + resets to onboarding.
 - `MonthView.swift` — Legacy, NOT mounted in tab bar.
