@@ -181,6 +181,18 @@ final class MoneyEventViewModel {
     var nudgeResponse: NudgeMessage?
     var biasTimesSeen: Int = 0
 
+    // Empty-state (pre-selection) blocks — all backend-driven
+    var weekDots: [Bool] = Array(repeating: false, count: 7)
+    var topBiases: [TopBias] = []
+
+    struct TopBias: Identifiable {
+        let id = UUID()
+        let emoji: String
+        let biasName: String
+        let timesSeen: Int
+        let trend: BiasTrend
+    }
+
     private let service = SupabaseService.shared
 
     var availableRanges: [AmountRange] {
@@ -195,6 +207,39 @@ final class MoneyEventViewModel {
 
     var canSave: Bool {
         selectedCategory != nil && selectedRange != nil && plannedStatus != nil
+    }
+
+    /// Load the two backend-driven blocks for the pre-selection empty state.
+    /// See DESIGN_HANDBOOK.md §7.1.
+    func loadEmptyState() async {
+        do {
+            let recentCheckIns = try await service.fetchRecentCheckIns(limit: 14)
+            weekDots = HomeViewModel.computeWeekDots(from: recentCheckIns)
+
+            let progress = try await service.fetchBiasProgress()
+            let emojiLookup = Dictionary(
+                uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) }
+            )
+            topBiases = progress
+                .filter { $0.timesEncountered > 0 }
+                .compactMap { bp -> (TopBias, Int)? in
+                    let score = BiasScoreService.computeScore(
+                        biasName: bp.biasName, progress: bp, taggedEvents: 0
+                    )
+                    return (TopBias(
+                        emoji: emojiLookup[bp.biasName] ?? "🧠",
+                        biasName: bp.biasName,
+                        timesSeen: bp.timesEncountered,
+                        trend: score.trend
+                    ), score.score)
+                }
+                .sorted { $0.1 > $1.1 }
+                .prefix(3)
+                .map(\.0)
+        } catch {
+            weekDots = Array(repeating: false, count: 7)
+            topBiases = []
+        }
     }
 
     func reset() {

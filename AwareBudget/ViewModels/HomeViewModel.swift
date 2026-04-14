@@ -341,7 +341,7 @@ final class HomeViewModel {
 
     // MARK: - Helpers
 
-    private static func computeWeekDots(from checkIns: [CheckIn]) -> [Bool] {
+    static func computeWeekDots(from checkIns: [CheckIn]) -> [Bool] {
         var cal = Calendar(identifier: .iso8601)
         cal.firstWeekday = 2
         let now = Date()

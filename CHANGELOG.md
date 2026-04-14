@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-04-15 — Log pre-selection empty state (Claude Code)
+
+Implements `DESIGN_HANDBOOK.md` §7.1 — fills the space on `MoneyEventView` before the user picks a category. Two backend-driven blocks, no hardcoding.
+
+- **This week** card: 7-day Mon→Sun dot row. Filled = `CheckIn` logged that day (from `SupabaseService.fetchRecentCheckIns`). Today = larger dot with gold ring. Empty-state copy: "No check-ins yet this week".
+- **Your patterns to watch** card: top 3 biases ranked by `BiasScoreService.computeScore().score` from `bias_progress` table. Row = emoji · bias name · seen-count · trend arrow (improving/worsening/stable). Empty-state copy: "Log 3 events to see your top patterns".
+- `HomeViewModel.computeWeekDots` made non-private for reuse (per handbook "no duplication" rule).
+- `MoneyEventViewModel.loadEmptyState()` wired via `.task` on view.
+- Build verified on iPhone 17 Pro simulator (iOS 26.2), BUILD SUCCEEDED.
+
+---
+
 ## 2026-04-15 — Design handbook + metallic palette lock (Claude Code)
 
 - Added `docs/DESIGN_HANDBOOK.md` — master visual language doc. Locks `heroGradient` (7-stop metallic green), `nuggetGold` (6-stop foil), Apple-style polish (rim highlight + bottom rim shadow + dual drop shadow), element usage rules, tab-by-tab application spec.
