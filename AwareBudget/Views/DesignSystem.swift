@@ -84,14 +84,19 @@ enum DS {
 
     // MARK: - Nugget Gold gradient (metallic shiny)
 
+    // Matches "Gold Gradient buttons.png" reference — symmetric bronze edges,
+    // sharp diagonal specular stripe.
     static let nuggetGold = LinearGradient(
         stops: [
-            .init(color: Color(hex: "FFF8C0"), location: 0.0),
-            .init(color: Color(hex: "F5C842"), location: 0.2),
-            .init(color: Color(hex: "D4A843"), location: 0.4),
-            .init(color: Color(hex: "8B6010"), location: 0.65),
-            .init(color: Color(hex: "C59430"), location: 0.82),
-            .init(color: Color(hex: "FFF0A0"), location: 1.0),
+            .init(color: Color(hex: "8B6010"), location: 0.0),
+            .init(color: Color(hex: "B07820"), location: 0.18),
+            .init(color: Color(hex: "D4A843"), location: 0.34),
+            .init(color: Color(hex: "F5E07A"), location: 0.44),
+            .init(color: Color(hex: "FFF8D0"), location: 0.5),
+            .init(color: Color(hex: "F5E07A"), location: 0.56),
+            .init(color: Color(hex: "D4A843"), location: 0.66),
+            .init(color: Color(hex: "B07820"), location: 0.82),
+            .init(color: Color(hex: "8B6010"), location: 1.0),
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -104,7 +109,7 @@ struct GoldButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .fontWeight(.bold)
-            .foregroundStyle(Color(hex: "1B3A00"))
+            .foregroundStyle(DS.goldForeground)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -114,8 +119,10 @@ struct GoldButtonStyle: ViewModifier {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 999)
-                    .stroke(Color(hex: "FFF0A0").opacity(0.4), lineWidth: 0.5)
+                    .stroke(Color(hex: "FFF8D0").opacity(0.5), lineWidth: 0.5)
             )
+            .shadow(color: Color(hex: "5C3A0A").opacity(0.25), radius: 1, x: 0, y: 1)
+            .shadow(color: Color(hex: "5C3A0A").opacity(0.20), radius: 8, x: 0, y: 4)
     }
 }
 
