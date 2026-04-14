@@ -279,10 +279,10 @@ struct CheckInView: View {
                         .foregroundStyle(.white.opacity(0.85))
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text(q.researchSource ?? "Used in professional financial planning assessments \u{00B7} BFAS framework")
+                    Text(q.researchSource ?? "BFAS framework \u{00B7} Grable & Joo, 2004")
                         .font(.system(size: 9))
-                        .italic()
                         .foregroundStyle(.white.opacity(0.4))
+                        .italic()
                 }
                 .padding(12)
                 .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
