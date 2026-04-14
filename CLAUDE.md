@@ -97,6 +97,55 @@ Arabella is sole dev on `main`. Agents commit + push directly to `main`.
 **Start:** Read `CLAUDE.md` → `docs/HANDOFF.md` → `docs/STATUS.md`
 **End:** Update `docs/STATUS.md`, `CHANGELOG.md`, `docs/HANDOFF.md` if structure changed
 
+### How to start every session
+
+To update files use terminal `cp` command:
+```
+cp ~/Downloads/[filename] "/Users/bella/Aware Budget/AwareBudget/AwareBudget/Views/[filename]"
+```
+Never use Finder drag to replace Swift files.
+Always use `cp` from terminal after downloading from Claude.
+
+---
+
+## IMPLEMENTATION GUIDE WORKFLOW
+
+When implementing from an implementation guide (e.g. `Implementation_Guide/awarebudget_implementation.md`):
+
+```
+# Start session
+cd "/Users/bella/Aware Budget/AwareBudget"
+claude
+
+# Agent auto-reads CLAUDE.md, then you say:
+"Read awarebudget_implementation.md and implement File 3"
+
+# After Xcode build passes:
+"build passed"
+
+# Agent re-reads the guide and does File 4
+# Never from memory — always from the file
+```
+
+**Rules for guide-driven sessions:**
+1. One file at a time only
+2. Do not refactor anything not mentioned
+3. Do not rename existing variables or functions
+4. After each file, say only "Done ↵" and immediately continue to the next file unless user types "stop"
+5. If build fails, fix only the error, nothing else
+6. Always re-read the guide file for each new File N — never implement from memory
+
+**Response protocol (guide-driven sessions only):**
+
+After completing a file say only:
+```
+Done ↵
+```
+
+Immediately continue to the next file unless user types "stop". Do not wait for any input.
+
+No other commentary. No suggestions. No explanations.
+
 ---
 
 ## DESIGN TOKENS (from DesignSystem.swift)
