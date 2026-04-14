@@ -125,35 +125,44 @@ sectionGap    20pt
 
 ## 7. Empty-state patterns
 
-### 7.1 Log tab — pre-selection empty state
+### 7.1 Home — monthly calendar card
 
-Before the user picks a category on `MoneyEventView`, fill the space with two backend-driven blocks. No hardcoded content, no mock fallback — if backend is empty, show an empty-state line.
+Inserted between the check-in hero and the Nudge card on `HomeView`. Shows the current month; days with logged money events are filled; tap any event-day → popover with top biases.
 
-**Block 1 — Check-in calendar strip**
-- 7-day dot row, Monday→Sunday of current ISO week
-- Source: `SupabaseService.fetchRecentCheckIns(limit: 14)` + `HomeViewModel.computeWeekDots()` logic (reuse, do not duplicate)
-- Today = larger dot, gold outline ring
-- Sunday badge when weekly review due
-- Tap → opens `CheckInView`
-- Empty state copy: *"No check-ins yet this week"*
+- Header: `MMMM yyyy` + total event count this month
+- Week labels: M T W T F S S (ISO weekday, Monday-first)
+- Day cells:
+  - Empty day → small grey number, disabled
+  - Day with events → filled `DS.accent` rounded pill, bold white number, tappable
+  - Today → additional `DS.goldBase` 1.5px outline ring
+- Popover: date header · event count · total $ · top 3 biases (tag × count) · empty-state "No bias tags that day"
+- Source: `HomeViewModel.monthEventsByDay: [String: [MoneyEvent]]`, populated in `load()` from `SupabaseService.fetchMoneyEvents(forMonth:)`
+- Component: `Views/MonthCalendarView.swift`
+- No hardcoded events, no mock fallback — empty months render empty cells
 
-**Block 2 — Top biases panel (ranked)**
-- Top 3 biases from `bias_progress` table, ranked by `BiasScoreService.computeScore().score` — same logic as `HomeViewModel.dailyPatterns`
-- Row: `emoji` · bias name · `timesEncountered` count · trend arrow (`↑` worsening / `↓` improving / `–` stable)
-- Section heading: *"Your patterns to watch"*
-- Empty state copy: *"Log 3 events to see your top patterns"*
-- Gets richer as backend ranking matures (trend, mastery stage, score)
+### 7.2 Home — Nudge welcome message (top greeting)
 
-**Data dependencies (all already wired):**
-- `SupabaseService.fetchRecentCheckIns`
-- `SupabaseService.fetchBiasProgress`
-- `BiasScoreService.computeScore`
-- `BiasLessonsMock.seed` (emoji + name lookup only)
+The top-left greeting on `HomeView` is produced by `NudgeEngine.welcomeMessage(...)`. Never hardcode greeting copy in the view.
 
-**Do NOT:**
-- Hardcode bias names, counts, or check-in dates
-- Fall back to mock data when backend returns empty — show the empty-state copy
-- Duplicate `computeWeekDots` logic — reuse from `HomeViewModel`
+**Inputs (from `HomeViewModel`):**
+- `hour` — `Calendar.current.component(.hour, from: Date())`
+- `isFirstOpen` — `!UserDefaults.standard.bool(forKey: "hasSeenNudge")`
+- `streak`, `checkedInToday` (`todaysCheckIn != nil`), `loggedEventToday` (`hasLoggedEventToday`)
+
+**Copy matrix:**
+
+| State | Copy |
+|---|---|
+| First open | "Hi, I'm Nudge. Ready to understand your money mind?" |
+| Morning + streak 0 | "Good morning. Let's start seeing your patterns." |
+| Morning + streak 1–6 | "Good morning. Day {N} of noticing." |
+| Morning + streak 7+ | "Good morning. Habit is forming." |
+| Afternoon + no check-in | "Good afternoon. Quick check-in?" |
+| Afternoon + checked in | "Good afternoon. Nice momentum." |
+| Evening + no events today | "Good evening. Any money moments today?" |
+| Evening + events today | "Good evening. Patterns noticed today." |
+
+**Voice rules:** dry wit, short lines, never "great job", no shame language. New states added to this spec must follow the same tone.
 
 ---
 

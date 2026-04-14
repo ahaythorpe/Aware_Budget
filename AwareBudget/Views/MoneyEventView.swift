@@ -31,9 +31,6 @@ struct MoneyEventView: View {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
                         categoryGrid
-                        if viewModel.selectedCategory == nil {
-                            logEmptyState
-                        }
                         if viewModel.selectedCategory != nil && !isQuickCategory(viewModel.selectedCategory?.name) {
                             rangePicker
                         }
@@ -63,7 +60,6 @@ struct MoneyEventView: View {
         }
         .navigationTitle(viewModel.didSave ? "" : "Quick log")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await viewModel.loadEmptyState() }
         .toolbar {
             if isPresented {
                 ToolbarItem(placement: .cancellationAction) {
@@ -533,117 +529,6 @@ struct MoneyEventView: View {
         }
     }
 
-    // MARK: - Pre-selection empty state (DESIGN_HANDBOOK §7.1)
-
-    private var logEmptyState: some View {
-        VStack(spacing: DS.sectionGap) {
-            weekStrip
-            topBiasesPanel
-        }
-    }
-
-    private var weekStrip: some View {
-        let labels = ["M", "T", "W", "T", "F", "S", "S"]
-        let cal = Calendar(identifier: .iso8601)
-        let todayWeekday = (cal.component(.weekday, from: Date()) + 5) % 7
-        let hasAny = viewModel.weekDots.contains(true)
-
-        return VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "This week")
-            HStack(spacing: 8) {
-                ForEach(0..<7, id: \.self) { i in
-                    let filled = viewModel.weekDots.indices.contains(i) && viewModel.weekDots[i]
-                    let isToday = i == todayWeekday
-                    VStack(spacing: 4) {
-                        ZStack {
-                            Circle()
-                                .fill(filled ? DS.accent : DS.textTertiary.opacity(0.25))
-                                .frame(width: isToday ? 14 : 10, height: isToday ? 14 : 10)
-                            if isToday {
-                                Circle()
-                                    .stroke(DS.goldBase, lineWidth: 1.5)
-                                    .frame(width: 20, height: 20)
-                            }
-                        }
-                        .frame(height: 22)
-                        Text(labels[i])
-                            .font(.system(size: 10, weight: isToday ? .bold : .medium))
-                            .foregroundStyle(isToday ? DS.textPrimary : DS.textTertiary)
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            if !hasAny {
-                Text("No check-ins yet this week")
-                    .font(.system(size: 11))
-                    .foregroundStyle(DS.textTertiary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
-        }
-        .padding(16)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
-        )
-    }
-
-    private var topBiasesPanel: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Your patterns to watch")
-            if viewModel.topBiases.isEmpty {
-                Text("Log 3 events to see your top patterns")
-                    .font(.system(size: 12))
-                    .foregroundStyle(DS.textTertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 8)
-            } else {
-                VStack(spacing: 8) {
-                    ForEach(viewModel.topBiases) { bias in
-                        HStack(spacing: 10) {
-                            Text(bias.emoji)
-                                .font(.system(size: 18))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(bias.biasName)
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(DS.textPrimary)
-                                Text("Seen \(bias.timesSeen)×")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(DS.textSecondary)
-                            }
-                            Spacer()
-                            trendArrow(bias.trend)
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-            }
-        }
-        .padding(16)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
-        )
-    }
-
-    @ViewBuilder
-    private func trendArrow(_ trend: BiasTrend) -> some View {
-        switch trend {
-        case .improving:
-            Image(systemName: "arrow.down.right")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(DS.positive)
-        case .worsening:
-            Image(systemName: "arrow.up.right")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(DS.warning)
-        case .stable:
-            Image(systemName: "minus")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(DS.textTertiary)
-        }
-    }
 }
 
 #Preview {

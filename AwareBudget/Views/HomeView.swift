@@ -15,9 +15,11 @@ struct HomeView: View {
                 // ── GREETING ──
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(viewModel.greeting)
-                            .font(.system(size: 26, weight: .black, design: .serif))
+                        Text(viewModel.welcomeMessage)
+                            .font(.system(size: 22, weight: .black, design: .serif))
                             .foregroundColor(DS.textPrimary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
                         Text(viewModel.todayLabel)
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
@@ -103,6 +105,11 @@ struct HomeView: View {
                 .cornerRadius(16)
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
+
+                // ── MONTH CALENDAR ──
+                MonthCalendarView(eventsByDay: viewModel.monthEventsByDay)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 12)
 
                 // ── NUDGE ──
                 NudgeSaysCard(

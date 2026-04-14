@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-15
-**Current phase:** Design handbook locked. `docs/DESIGN_HANDBOOK.md` master visual spec — `heroGradient` (7-stop metallic green), `nuggetGold` (6-stop foil), Apple-style polish rules, tab-by-tab usage, empty-state patterns. **Log tab §7.1 implemented**: pre-selection empty state shows weekly check-in calendar + top 3 ranked biases, both backend-driven. Build succeeds on iPhone 17 Pro / iOS 26.2.
+**Current phase:** Home improvements rolling feature-by-feature. Implemented: monthly calendar card (§7.1) with tap-to-popover showing top biases per day, and Nudge welcome message (§7.2) replacing hardcoded greeting with contextual time/streak/activity-aware copy. Misplaced Log empty-state blocks reverted. Next queued: button formatting sweep. Build succeeds on iPhone 17 Pro / iOS 26.2.
 
 ---
 

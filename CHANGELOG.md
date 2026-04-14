@@ -5,15 +5,26 @@
 
 ---
 
-## 2026-04-15 — Log pre-selection empty state (Claude Code)
+## 2026-04-15 — Home monthly calendar + Nudge welcome message (Claude Code)
 
-Implements `DESIGN_HANDBOOK.md` §7.1 — fills the space on `MoneyEventView` before the user picks a category. Two backend-driven blocks, no hardcoding.
+Reverts the misplaced Log empty-state feature and delivers two Home features in its place, per `DESIGN_HANDBOOK.md` §7.1 and §7.2.
 
-- **This week** card: 7-day Mon→Sun dot row. Filled = `CheckIn` logged that day (from `SupabaseService.fetchRecentCheckIns`). Today = larger dot with gold ring. Empty-state copy: "No check-ins yet this week".
-- **Your patterns to watch** card: top 3 biases ranked by `BiasScoreService.computeScore().score` from `bias_progress` table. Row = emoji · bias name · seen-count · trend arrow (improving/worsening/stable). Empty-state copy: "Log 3 events to see your top patterns".
-- `HomeViewModel.computeWeekDots` made non-private for reuse (per handbook "no duplication" rule).
-- `MoneyEventViewModel.loadEmptyState()` wired via `.task` on view.
-- Build verified on iPhone 17 Pro simulator (iOS 26.2), BUILD SUCCEEDED.
+**Home — monthly calendar card** (§7.1)
+- New `Views/MonthCalendarView.swift` component. Inserted between check-in hero and Nudge card.
+- Shows current month. Days with logged money events = filled `DS.accent` pill + bold white number. Today = gold outline ring. Empty days = disabled small grey number.
+- Tap an event-day → popover: date header · event count · total $ · top 3 biases (tag × count). No-tag days fall back to "No bias tags that day".
+- `HomeViewModel.monthEventsByDay: [String: [MoneyEvent]]` populated in `load()` from `SupabaseService.fetchMoneyEvents(forMonth:)`. No hardcoded fallback.
+
+**Home — Nudge welcome message** (§7.2)
+- `NudgeEngine.welcomeMessage(hour, isFirstOpen, streak, checkedInToday, loggedEventToday) -> String` added.
+- Replaces the hardcoded `greeting` displayed at top-left of `HomeView` with a contextual Nudge line. First-open users see "Hi, I'm Nudge. Ready to understand your money mind?"; returning users see time-aware + streak/activity-aware copy.
+- Voice rules preserved: dry wit, short, no shame language.
+
+**Reverted (misplaced):**
+- Removed `loadEmptyState`, `weekDots`, `topBiases`, `TopBias` from `MoneyEventViewModel` and the matching `logEmptyState` / `weekStrip` / `topBiasesPanel` / `trendArrow` from `MoneyEventView`.
+- `HomeViewModel.computeWeekDots` kept non-private (harmless; may be reused).
+
+Build verified on iPhone 17 Pro / iOS 26.2 — BUILD SUCCEEDED.
 
 ---
 

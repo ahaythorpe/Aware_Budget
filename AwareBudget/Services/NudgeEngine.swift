@@ -41,6 +41,45 @@ enum NudgeMessage: Equatable {
 
 enum NudgeEngine {
 
+    // MARK: - Welcome message (top of Home)
+
+    /// Short greeting shown at the top of HomeView. Varies by time of day,
+    /// first-open state, streak, and today's activity. No hardcoded fallback —
+    /// always returns a brand-safe line.
+    static func welcomeMessage(
+        hour: Int,
+        isFirstOpen: Bool,
+        streak: Int,
+        checkedInToday: Bool,
+        loggedEventToday: Bool
+    ) -> String {
+        if isFirstOpen {
+            return "Hi, I'm Nudge. Ready to understand your money mind?"
+        }
+
+        let timeGreeting: String
+        switch hour {
+        case 0..<12:  timeGreeting = "Good morning"
+        case 12..<18: timeGreeting = "Good afternoon"
+        default:      timeGreeting = "Good evening"
+        }
+
+        switch hour {
+        case 0..<12:
+            if streak == 0 { return "\(timeGreeting). Let's start seeing your patterns." }
+            if streak < 7  { return "\(timeGreeting). Day \(streak) of noticing." }
+            return "\(timeGreeting). Habit is forming."
+
+        case 12..<18:
+            if !checkedInToday { return "\(timeGreeting). Quick check-in?" }
+            return "\(timeGreeting). Nice momentum."
+
+        default:
+            if !loggedEventToday { return "\(timeGreeting). Any money moments today?" }
+            return "\(timeGreeting). Patterns noticed today."
+        }
+    }
+
     // MARK: - Main decision tree (priority ordered)
 
     static func message(for ctx: NudgeContext) -> NudgeMessage {

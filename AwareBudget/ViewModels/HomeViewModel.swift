@@ -41,6 +41,9 @@ final class HomeViewModel {
         let score: Int
     }
 
+    // Monthly calendar — events grouped by day-of-month string (ISO date-only)
+    var monthEventsByDay: [String: [MoneyEvent]] = [:]
+
     private let service = SupabaseService.shared
 
     var isCheckedInToday: Bool { todaysCheckIn != nil }
@@ -53,6 +56,20 @@ final class HomeViewModel {
         case 12..<18: return "Good afternoon"
         default: return "Good evening"
         }
+    }
+
+    /// Nudge's contextual welcome line for the top of Home.
+    /// Varies by time of day, first-open, streak, today's activity.
+    var welcomeMessage: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let isFirstOpen = !UserDefaults.standard.bool(forKey: "hasSeenNudge")
+        return NudgeEngine.welcomeMessage(
+            hour: hour,
+            isFirstOpen: isFirstOpen,
+            streak: streak,
+            checkedInToday: todaysCheckIn != nil,
+            loggedEventToday: hasLoggedEventToday
+        )
     }
 
     var todayLabel: String {
@@ -205,6 +222,9 @@ final class HomeViewModel {
 
             // Event logging streak (consecutive days with events)
             let allEvents = try await service.fetchMoneyEvents(forMonth: Date())
+            monthEventsByDay = Dictionary(grouping: allEvents, by: {
+                ISO8601DateFormatter.dateOnly.string(from: $0.date)
+            })
             let eventDates = Set(allEvents.map { ISO8601DateFormatter.dateOnly.string(from: $0.date) })
             var eStreak = 0
             var checkDate = Date()
