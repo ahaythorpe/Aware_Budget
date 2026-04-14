@@ -88,15 +88,17 @@ enum DS {
     // sharp diagonal specular stripe.
     static let nuggetGold = LinearGradient(
         stops: [
-            .init(color: Color(hex: "8B6010"), location: 0.0),
-            .init(color: Color(hex: "B07820"), location: 0.18),
-            .init(color: Color(hex: "D4A843"), location: 0.34),
-            .init(color: Color(hex: "F5E07A"), location: 0.44),
-            .init(color: Color(hex: "FFF8D0"), location: 0.5),
-            .init(color: Color(hex: "F5E07A"), location: 0.56),
-            .init(color: Color(hex: "D4A843"), location: 0.66),
-            .init(color: Color(hex: "B07820"), location: 0.82),
-            .init(color: Color(hex: "8B6010"), location: 1.0),
+            .init(color: Color(hex: "5C3A0A"), location: 0.0),
+            .init(color: Color(hex: "8B6010"), location: 0.14),
+            .init(color: Color(hex: "B07820"), location: 0.28),
+            .init(color: Color(hex: "E0C050"), location: 0.40),
+            .init(color: Color(hex: "FFF0A0"), location: 0.47),
+            .init(color: Color(hex: "FFFDF0"), location: 0.5),
+            .init(color: Color(hex: "FFF0A0"), location: 0.53),
+            .init(color: Color(hex: "E0C050"), location: 0.60),
+            .init(color: Color(hex: "B07820"), location: 0.72),
+            .init(color: Color(hex: "8B6010"), location: 0.86),
+            .init(color: Color(hex: "5C3A0A"), location: 1.0),
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
