@@ -63,6 +63,7 @@ enum DS {
     static let stageNoticed  = Color(hex: "42A5F5")
 
     // Hero gradient (dark green cards)
+    // Peak metallic green — 7-stop shimmer (restored from 344bb9b, Tue 04-14)
     static let heroGradient = LinearGradient(
         stops: [
             .init(color: Color(hex: "1B5E20"), location: 0.0),

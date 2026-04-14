@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-04-15 — Design handbook + metallic palette lock (Claude Code)
+
+- Added `docs/DESIGN_HANDBOOK.md` — master visual language doc. Locks `heroGradient` (7-stop metallic green), `nuggetGold` (6-stop foil), Apple-style polish (rim highlight + bottom rim shadow + dual drop shadow), element usage rules, tab-by-tab application spec.
+- Restored 7-stop `heroGradient` in `DesignSystem.swift` to the Tue 04-14 peak (commit `344bb9b`) after brief drift.
+- `HomeView.swift` + `WhyView.swift`: 4 hero call sites now use `DS.heroGradient` consistently (replaced inline 2–3 stop flat gradients).
+- Added `preview_palette.html` at repo root — static browser preview kept in sync with `DesignSystem.swift` for palette review.
+
+---
+
 ## 2026-04-14 — How it works 5th tab (Claude Code)
 
 - Added `HowItWorksView` as 5th tab in `RootTabView.swift` (label "How it works", icon `info.circle`). Build green, 5 tabs verified via screenshot.

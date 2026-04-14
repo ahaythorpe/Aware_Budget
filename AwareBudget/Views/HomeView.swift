@@ -15,10 +15,10 @@ struct HomeView: View {
                 // ── GREETING ──
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(greetingText())
+                        Text(viewModel.greeting)
                             .font(.system(size: 26, weight: .black, design: .serif))
                             .foregroundColor(DS.textPrimary)
-                        Text(Date().formatted(date: .complete, time: .omitted))
+                        Text(viewModel.todayLabel)
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
                     }
@@ -46,12 +46,8 @@ struct HomeView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
-                    .background(
-                        LinearGradient(
-                            colors: [DS.deepGreen, DS.primary],
-                            startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
-                    .cornerRadius(16)
+                    .background(DS.heroGradient)
+                    .cornerRadius(DS.cardRadius)
 
                     // Awareness circle
                     HStack(spacing: 12) {
@@ -99,43 +95,28 @@ struct HomeView: View {
                         .foregroundColor(.white)
                     Button(action: {}) {
                         Text("Start check-in →")
-                            .font(.system(size: 13, weight: .black))
-                            .foregroundColor(Color(hex: "#1B3A00"))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(DS.nuggetGold)
-                            .cornerRadius(10)
                     }
+                    .goldButtonStyle()
                 }
                 .padding(14)
-                .background(
-                    LinearGradient(
-                        colors: [DS.deepGreen, DS.primary, Color(hex: "#388E3C")],
-                        startPoint: .topLeading, endPoint: .bottomTrailing))
+                .background(DS.heroGradient)
                 .cornerRadius(16)
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
 
                 // ── NUDGE ──
                 NudgeSaysCard(
-                    message: "You've shown Loss Aversion 3× this week. Most people never notice this pattern in themselves. You're already ahead.",
+                    message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame.",
                     citation: "Kahneman & Tversky, 1979 · Prospect Theory"
                 )
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
             }
         }
-        .background(Color(hex: "#FAFAF8"))
+        .background(DS.bg)
         .navigationBarHidden(true)
         .task {
             await viewModel.load()
         }
-    }
-
-    func greetingText() -> String {
-        let h = Calendar.current.component(.hour, from: Date())
-        if h < 12 { return "Good morning" }
-        if h < 17 { return "Good afternoon" }
-        return "Good evening"
     }
 }

@@ -26,11 +26,7 @@ struct WhyView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 32)
                 .padding(.bottom, 24)
-                .background(
-                    LinearGradient(
-                        colors: [Color(hex: "#0A1A0A"), Color(hex: "#1B5E20")],
-                        startPoint: .top, endPoint: .bottom)
-                )
+                .background(DS.heroGradient)
 
                 // ── COMPARISON TABLE ──
                 VStack(spacing: 0) {
@@ -104,24 +100,13 @@ struct WhyView: View {
                         .lineSpacing(3)
 
                     // CTA
-                    Text("That's why AwareBudget exists →")
-                        .font(.system(size: 13, weight: .black))
-                        .foregroundColor(Color(hex: "#1B3A00"))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(
-                            LinearGradient(
-                                colors: [Color(hex: "#FFF0A0"), Color(hex: "#E8B84B"), Color(hex: "#C59430")],
-                                startPoint: .leading, endPoint: .trailing)
-                        )
-                        .cornerRadius(12)
+                    Button(action: {}) {
+                        Text("That's why AwareBudget exists →")
+                    }
+                    .goldButtonStyle()
                 }
                 .padding(18)
-                .background(
-                    LinearGradient(
-                        colors: [Color(hex: "#1B5E20"), Color(hex: "#0D2E10")],
-                        startPoint: .top, endPoint: .bottom)
-                )
+                .background(DS.heroGradient)
                 .cornerRadius(16)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
