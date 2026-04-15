@@ -28,8 +28,7 @@ struct HomeView: View {
                         Text(viewModel.welcomeMessage)
                             .font(.system(.headline, design: .default, weight: .semibold))
                             .foregroundStyle(DS.textPrimary)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.85)
+                            .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
                         Text(viewModel.todayLabel)
                             .font(.system(.caption, weight: .semibold))
@@ -138,7 +137,11 @@ struct HomeView: View {
                     onInfoTap: { showCredibility = true }
                 )
                 .padding(.horizontal, 18)
-                .padding(.bottom, 12)
+                .padding(.bottom, 4)
+
+                ResearchFootnote(text: "BFAS · Behavioural Finance Assessment Score")
+                    .padding(.horizontal, 22)
+                    .padding(.bottom, 12)
 
                 // ── NUDGE ──
                 NudgeSaysCard(

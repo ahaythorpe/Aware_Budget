@@ -116,6 +116,8 @@ struct MoneyEventView: View {
 
     private var categoryGrid: some View {
         VStack(alignment: .leading, spacing: 10) {
+            ResearchFootnote(text: "Powered by the BFAS framework · Pompian, 2012", style: .pill)
+                .padding(.bottom, 2)
             SectionHeader(title: "What did you spend on?")
 
             // Quick categories with expandable ranges
@@ -136,10 +138,11 @@ struct MoneyEventView: View {
                     )
             )
 
-            Text("Ranges based on ABS household data")
-                .font(.system(size: 9))
-                .italic()
-                .foregroundStyle(DS.textTertiary)
+            ResearchFootnote(
+                text: "Ranges based on ABS Household Expenditure Survey 2022–23",
+                icon: "chart.bar.doc.horizontal"
+            )
+            .padding(.top, 2)
 
             // More categories link
             if showAllCategories {

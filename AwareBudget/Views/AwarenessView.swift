@@ -18,13 +18,13 @@ struct AwarenessView: View {
                 // ── HERO ──
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 3) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text("Your money mind")
-                                .font(.system(size: 22, weight: .black, design: .serif))
-                                .foregroundColor(Color(hex: "#0A1A0A"))
+                                .font(.system(.largeTitle, weight: .bold))
+                                .foregroundStyle(DS.textPrimary)
                             Text("Tap any triggered pattern to hear from Nudge.")
-                                .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .font(.system(.subheadline, weight: .medium))
+                                .foregroundStyle(DS.textSecondary)
                         }
                         Spacer()
                     }
@@ -54,9 +54,8 @@ struct AwarenessView: View {
                             }
                         }
                         .frame(height: 7)
-                        Text("Based on the BFAS framework · used in professional financial planning assessments")
-                            .font(.system(size: 8.5, weight: .semibold))
-                            .foregroundColor(.gray)
+                        ResearchFootnote(text: "Based on the BFAS framework · used in professional financial planning assessments")
+                            .padding(.top, 2)
                     }
                     .padding(12)
                     .background(Color.white)

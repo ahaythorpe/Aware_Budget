@@ -67,20 +67,22 @@ struct InsightFeedView: View {
             NudgeAvatar(size: 64)
 
             Text("Your insights appear here after you log a few events")
-                .font(.subheadline)
+                .font(.system(.subheadline, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
 
             Text("Nudge tracks patterns, not perfection")
-                .font(.caption)
-                .foregroundStyle(DS.textTertiary)
+                .font(.system(.footnote, weight: .semibold))
+                .foregroundStyle(DS.textSecondary)
+
+            ResearchFootnote(text: "Patterns assessed via BFAS · Pompian, 2012", style: .pill)
 
             Button {
                 showMoneyEvent = true
             } label: {
                 Text("Log your first event")
-                    .font(.headline.bold())
+                    .font(.system(.headline, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
