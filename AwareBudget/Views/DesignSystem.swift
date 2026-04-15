@@ -74,17 +74,15 @@ enum DS {
     static let stageNoticed  = Color(hex: "42A5F5")
 
     // Hero gradient (dark green cards)
-    // Shinier metallic green — 9-stop with brighter specular highlight
+    // Shinier metallic green — peak shifted off-center so it doesn't bleach white text
     static let heroGradient = LinearGradient(
         stops: [
             .init(color: Color(hex: "0F4E15"), location: 0.0),
-            .init(color: Color(hex: "2E7D32"), location: 0.12),
-            .init(color: Color(hex: "66BB6A"), location: 0.28),
-            .init(color: Color(hex: "A5E8AC"), location: 0.45),
-            .init(color: Color(hex: "D8F5DC"), location: 0.5),
-            .init(color: Color(hex: "A5E8AC"), location: 0.55),
-            .init(color: Color(hex: "66BB6A"), location: 0.72),
-            .init(color: Color(hex: "2E7D32"), location: 0.88),
+            .init(color: Color(hex: "1B5E20"), location: 0.18),
+            .init(color: Color(hex: "2E7D32"), location: 0.35),
+            .init(color: Color(hex: "66BB6A"), location: 0.55),
+            .init(color: Color(hex: "81C784"), location: 0.75),
+            .init(color: Color(hex: "A5E8AC"), location: 0.88),
             .init(color: Color(hex: "0F4E15"), location: 1.0),
         ],
         startPoint: .topLeading,

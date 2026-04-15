@@ -60,7 +60,8 @@ struct HomeView: View {
                         Text("🔥 DAY STREAK")
                             .font(.system(size: 10, weight: .heavy, design: .rounded))
                             .tracking(1.0)
-                            .foregroundStyle(.white.opacity(0.8))
+                            .foregroundStyle(.white.opacity(0.9))
+                            .shadow(color: DS.deepGreen.opacity(0.7), radius: 2, x: 0, y: 1)
                             .minimumScaleFactor(0.85)
                             .lineLimit(1)
                             .padding(.horizontal, 4)
@@ -111,6 +112,7 @@ struct HomeView: View {
                     Text("Today's check-in")
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(.white)
+                        .shadow(color: DS.deepGreen.opacity(0.7), radius: 3, x: 0, y: 1)
                     Button(action: {}) {
                         Text("Start check-in →")
                     }
