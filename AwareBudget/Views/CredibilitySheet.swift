@@ -1,29 +1,47 @@
 import SwiftUI
 
-/// Handbook §8.1. Absorbs all content formerly on the Why tab.
-/// Presented from TopBiasesCard ⓘ tap. 10 sections top-to-bottom.
+/// Handbook §8.1 + §1.3. Metallic-green-first credibility sheet.
+/// Green hero + green body with layered gold/frosted/deep cards.
 struct CredibilitySheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: 24) {
                 hero
+                    .padding(.horizontal, 22)
+                    .padding(.top, 24)
+
                 theIdea
+                    .padding(.horizontal, 22)
+
                 theDifference
+                    .padding(.horizontal, 22)
+
                 howItWorks
+                    .padding(.horizontal, 22)
+
                 stageLegend
+                    .padding(.horizontal, 22)
+
                 theFramework
+                    .padding(.horizontal, 22)
+
                 citations
+                    .padding(.horizontal, 22)
+
                 youreNotBroken
+                    .padding(.horizontal, 22)
+
                 nudgeSays
+                    .padding(.horizontal, 22)
+
                 cta
+                    .padding(.horizontal, 22)
+                    .padding(.bottom, 40)
             }
-            .padding(.horizontal, 22)
-            .padding(.top, 12)
-            .padding(.bottom, 32)
         }
-        .background(DS.bg)
+        .background(DS.heroGradient.ignoresSafeArea())
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
@@ -35,23 +53,23 @@ struct CredibilitySheet: View {
             Image("nudge")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 64, height: 64)
+                .frame(width: 72, height: 72)
 
             Text("Backed by research")
-                .font(.system(.largeTitle, design: .default, weight: .bold))
-                .foregroundStyle(DS.textPrimary)
+                .font(.system(.largeTitle, weight: .bold))
+                .foregroundStyle(DS.onDarkPrimary)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text("How AwareBudget ranks your patterns")
                 .font(.system(.subheadline, weight: .medium))
-                .foregroundStyle(DS.textSecondary)
+                .foregroundStyle(DS.onDarkSecondary)
         }
     }
 
-    // MARK: - 2. The Idea
+    // MARK: - 2. The Idea (gold card)
 
     private var theIdea: some View {
-        section(label: "THE IDEA") {
+        goldCard(label: "THE IDEA") {
             Text("Most budgets track the wrong thing. AwareBudget tracks how you decide, not what you bought.")
                 .font(.system(.body, weight: .semibold))
                 .foregroundStyle(DS.textPrimary)
@@ -60,10 +78,12 @@ struct CredibilitySheet: View {
         }
     }
 
-    // MARK: - 3. The Difference (comparison table, absorbed from Why)
+    // MARK: - 3. The Difference (frosted dark table)
 
     private var theDifference: some View {
-        section(label: "THE DIFFERENCE") {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("THE DIFFERENCE")
+
             VStack(spacing: 0) {
                 // Header row
                 HStack {
@@ -72,37 +92,37 @@ struct CredibilitySheet: View {
                     Text("Traditional")
                         .font(.system(.caption2, weight: .heavy))
                         .tracking(0.8)
-                        .foregroundStyle(DS.textTertiary)
-                        .frame(width: 92, alignment: .center)
+                        .foregroundStyle(DS.onDarkSecondary)
+                        .frame(width: 96, alignment: .center)
                     Text("AwareBudget")
                         .font(.system(.caption2, weight: .heavy))
                         .tracking(0.8)
-                        .foregroundStyle(DS.accent)
-                        .frame(width: 108, alignment: .center)
+                        .foregroundStyle(DS.goldText)
+                        .frame(width: 112, alignment: .center)
                 }
                 .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(DS.paleGreen.opacity(0.6))
+                .padding(.vertical, 12)
+                .background(Color.white.opacity(0.12))
 
-                compareRow("Focuses on", "Categories", "Behaviour")
-                compareRow("Feels like", "Shame", "Awareness")
-                compareRow("Based on", "Rules", "Research")
-                compareRow("When wrong", "You hide it", "You adjust")
-                compareRow("Result", "You quit", "You keep going")
+                compareRow("Focuses on", "Categories", "Behaviour", 0)
+                compareRow("Feels like", "Shame", "Awareness", 1)
+                compareRow("Based on", "Rules", "Research", 0)
+                compareRow("When wrong", "You hide it", "You adjust", 1)
+                compareRow("Result", "You quit", "You keep going", 0)
             }
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
+            .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(DS.accent.opacity(0.18), lineWidth: 0.5)
+                    .stroke(DS.frostedCardStroke, lineWidth: 0.5)
             )
         }
     }
 
-    private func compareRow(_ label: String, _ bad: String, _ good: String) -> some View {
+    private func compareRow(_ label: String, _ bad: String, _ good: String, _ tint: Int) -> some View {
         HStack {
             Text(label)
                 .font(.system(.footnote, weight: .bold))
-                .foregroundStyle(DS.textPrimary)
+                .foregroundStyle(DS.onDarkPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 4) {
@@ -111,62 +131,75 @@ struct CredibilitySheet: View {
                     .foregroundStyle(DS.warning)
                 Text(bad)
                     .font(.system(.caption, weight: .regular))
-                    .foregroundStyle(DS.textSecondary)
+                    .foregroundStyle(DS.onDarkSecondary)
             }
-            .frame(width: 92, alignment: .center)
+            .frame(width: 96, alignment: .center)
 
             HStack(spacing: 4) {
                 Image(systemName: "checkmark")
                     .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(DS.positive)
+                    .foregroundStyle(DS.goldText)
                 Text(good)
                     .font(.system(.caption, weight: .bold))
-                    .foregroundStyle(DS.deepGreen)
+                    .foregroundStyle(DS.goldText)
             }
-            .frame(width: 108, alignment: .center)
+            .frame(width: 112, alignment: .center)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 11)
-        .overlay(Rectangle().frame(height: 0.5).foregroundStyle(DS.accent.opacity(0.1)), alignment: .bottom)
+        .padding(.vertical, 12)
+        .background(tint == 1 ? Color.white.opacity(0.05) : Color.clear)
     }
 
-    // MARK: - 4. How ranking works
+    // MARK: - 4. How ranking works (gold card, numbered circles ①②③)
 
     private var howItWorks: some View {
-        section(label: "HOW THE RANKING WORKS") {
-            VStack(alignment: .leading, spacing: 10) {
-                bullet("Each check-in answer and tagged spend feeds your bias profile.")
-                bullet("The algorithm ranks biases by how often they show up in your decisions.")
-                bullet("As you notice them, they move from Active → Aware.")
+        goldCard(label: "HOW THE RANKING WORKS") {
+            VStack(alignment: .leading, spacing: 12) {
+                numberedBullet(1, "Each check-in answer and tagged spend feeds your bias profile.")
+                numberedBullet(2, "The algorithm ranks biases by how often they show up in your decisions.")
+                numberedBullet(3, "As you notice them, they move from Active → Aware.")
             }
         }
     }
 
-    private func bullet(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Circle()
-                .fill(DS.accent)
-                .frame(width: 5, height: 5)
-                .padding(.top, 8)
+    private func numberedBullet(_ n: Int, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(DS.nuggetGold)
+                    .frame(width: 24, height: 24)
+                Text("\(n)")
+                    .font(.system(.footnote, weight: .heavy))
+                    .foregroundStyle(DS.goldForeground)
+            }
             Text(text)
                 .font(.system(.subheadline, weight: .regular))
                 .foregroundStyle(DS.textPrimary)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
         }
     }
 
-    // MARK: - 5. Stage legend
+    // MARK: - 5. Stage legend (frosted dark)
 
     private var stageLegend: some View {
-        section(label: "WHAT THE STAGES MEAN") {
-            VStack(alignment: .leading, spacing: 10) {
-                stageRow("Unseen", DS.textTertiary, "Not yet encountered in your data")
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("WHAT THE STAGES MEAN")
+
+            VStack(spacing: 10) {
+                stageRow("Unseen", DS.onDarkSecondary, "Not yet encountered in your data")
                 stageRow("Noticed", DS.stageNoticed, "Showing up occasionally")
                 stageRow("Emerging", DS.stageEmerging, "Becoming a clear pattern")
                 stageRow("Active", DS.stageActive, "Frequently driving decisions")
                 stageRow("Aware", DS.positive, "You recognise it — breaking the grip")
             }
+            .padding(14)
+            .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(DS.frostedCardStroke, lineWidth: 0.5)
+            )
         }
     }
 
@@ -178,51 +211,47 @@ struct CredibilitySheet: View {
                 .foregroundStyle(color)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
-                .background(color.opacity(0.15), in: Capsule())
+                .background(color.opacity(0.18), in: Capsule())
                 .frame(width: 82, alignment: .leading)
             Text(desc)
                 .font(.system(.footnote, weight: .medium))
-                .foregroundStyle(DS.textSecondary)
+                .foregroundStyle(DS.onDarkSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    // MARK: - 6. The Framework (absorbed from Why BFAS card)
+    // MARK: - 6. The Framework (gold card — BFAS)
 
     private var theFramework: some View {
-        section(label: "THE FRAMEWORK") {
+        goldCard(label: "THE FRAMEWORK") {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 10) {
                     ZStack {
-                        Circle().fill(DS.paleGreen).frame(width: 36, height: 36)
+                        Circle().fill(DS.nuggetGold).frame(width: 40, height: 40)
                         Image(systemName: "chart.bar.doc.horizontal")
-                            .font(.system(size: 16))
-                            .foregroundStyle(DS.deepGreen)
+                            .font(.system(size: 17))
+                            .foregroundStyle(DS.goldForeground)
                     }
                     Text("Built on BFAS")
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(DS.textPrimary)
                 }
 
-                Text("The Behavioural Finance Assessment Score is used by professional financial planners before giving advice. AwareBudget brings that same framework to everyday spending — the same 16 patterns, adapted for daily life.")
+                Text("The Behavioural Finance Assessment Score is used by professional financial planners before giving advice. AwareBudget brings the same framework to everyday spending — the same 16 patterns, adapted for daily life.")
                     .font(.system(.subheadline, weight: .regular))
-                    .foregroundStyle(DS.textSecondary)
+                    .foregroundStyle(DS.textPrimary)
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(16)
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(DS.accent.opacity(0.18), lineWidth: 0.5)
-            )
         }
     }
 
-    // MARK: - 7. Citations
+    // MARK: - 7. Citations (2×2 gold grid)
 
     private var citations: some View {
-        section(label: "THE RESEARCH") {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("THE RESEARCH")
+
             LazyVGrid(
                 columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                 spacing: 8
@@ -251,14 +280,14 @@ struct CredibilitySheet: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(hex: "FFF8E1"), in: RoundedRectangle(cornerRadius: 12))
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(DS.goldBase.opacity(0.25), lineWidth: 0.5)
+                .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
         )
     }
 
-    // MARK: - 8. You're not broken
+    // MARK: - 8. You're not broken (solid deep panel)
 
     private var youreNotBroken: some View {
         VStack(spacing: 10) {
@@ -269,32 +298,33 @@ struct CredibilitySheet: View {
 
             Text("You're not broken.\nThe method is.")
                 .font(.system(.title2, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(DS.onDarkPrimary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
 
             Text("70% of people abandon budgeting apps within 30 days. Not from laziness — from apps that create shame, not awareness.")
                 .font(.system(.footnote, weight: .regular))
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(DS.onDarkSecondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)
         .padding(22)
-        .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .background(DS.deepGreen, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.deepGreen, lineWidth: 1)
+                .stroke(DS.goldBase, lineWidth: 1)
         )
     }
 
-    // MARK: - 9. Nudge says (in-context)
+    // MARK: - 9. Nudge says (gold surface variant)
 
     private var nudgeSays: some View {
         NudgeSaysCard(
-            message: "This is not a generic quiz. It's the same framework professional planners use — so when you share your profile, they know exactly which biases to watch for in your decisions.",
-            citation: "BFAS · Pompian, 2012"
+            message: "This is not a generic quiz. It's the same framework professional planners use — so when you share your profile, they know exactly which biases to watch for.",
+            citation: "BFAS · Pompian, 2012",
+            surface: .gold
         )
     }
 
@@ -305,19 +335,31 @@ struct CredibilitySheet: View {
             Text("Got it")
         }
         .goldButtonStyle()
-        .padding(.top, 4)
+        .padding(.top, 6)
     }
 
     // MARK: - Helpers
 
+    /// Gold surface card with a section label + content.
     @ViewBuilder
-    private func section<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
+    private func goldCard<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(label)
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .tracking(1.5)
-                .foregroundStyle(DS.accent)
+            sectionLabel(label)
             content()
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
+                )
         }
+    }
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11, weight: .heavy, design: .rounded))
+            .tracking(1.5)
+            .foregroundStyle(DS.goldText)
     }
 }

@@ -5,6 +5,55 @@
 
 ---
 
+## 2026-04-15 — Autonomous Phase B rollout + S1 Credibility rebuild (Claude Code)
+
+Executed while user was at lunch/interview prep. Full autonomy granted
+for the post-screenshot design plan. Safe revert point: tag
+`phase-b1-stable` (commit d5d4b61). Each phase = one atomic commit.
+
+B2-home (e9da626):
+- Bg off-white -> heroGradient. Greeting card gold. Awareness circle
+  frosted dark with gold progress ring. BFAS footnote .inline -> .pill.
+  Nudge Says .paleGreen -> .gold. MonthCalendar + TopBiasesCard
+  repainted internally for dark bg.
+
+B3-log (56c5ad7):
+- Removed dropdown + "More categories" entirely. 16 square gold tiles
+  in LazyVGrid. Tap tile -> bottom sheet (.height 340) with gold
+  range pill buttons + ABS avg footnote. Custom header "Quick log"
+  .largeTitle + motivation copy "Log at your own pace — patterns
+  show up over time." planned/surprise/impulse pills gold-surface
+  (was white).
+
+B4-insights (3f68f68):
+- Bg -> heroGradient. Empty state: 64pt -> 96pt Nudge, plain text
+  -> NudgeSaysCard .gold, grammar fix "an event" + "Start logging
+  now.", "Nudge tracks patterns, not perfection" -> gold statement
+  block (italic .headline, non-button shape), CTA swapped to
+  .goldButtonStyle().
+
+S1-credibility (this commit):
+- Full rebuild per §8.4. Sticky green hero with 72pt Nudge + bold
+  white .largeTitle. Body on green. Each section now a layered
+  card (not floating text). THE IDEA/HOW THE RANKING WORKS/FRAMEWORK
+  -> gold surface cards. THE DIFFERENCE table + WHAT THE STAGES
+  MEAN -> frosted dark cards. Bullets replaced with numbered
+  circles ①②③. YOU'RE NOT BROKEN stays deep-green panel with gold
+  border. Citations stay gold 2×2. Nudge Says variant = .gold.
+  Section labels recolored to DS.goldText (visible on green).
+
+Build verified iPhone 17 Pro iOS 26.2 after each commit.
+
+Revert options:
+- Undo S1 only: `git revert <S1-hash>`
+- Undo B4 only: `git revert <B4-hash>`
+- Undo B3 only: `git revert <B3-hash>`
+- Undo B2 only: `git revert <B2-hash>`
+- Undo everything back to B1: `git reset --hard phase-b1-stable`
+  (then `git push --force origin main` — destructive, use carefully)
+
+---
+
 ## 2026-04-15 — Phase A tokens + Phase B1 Awareness repaint (Claude Code)
 
 Phase A (already committed 7b9b044): added DS.onDarkPrimary/Secondary/

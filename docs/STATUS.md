@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-15
-**Current phase:** Phase B metallic-green theme rollout in flight. Phase A tokens + handbook §1.3 locked. Phase B1 Awareness repainted (green bg, frosted score card, gold Nudge Says, gold category pills with per-category emojis, gold bias rows with bigger readable text). NudgeSaysCard gained `.gold` surface variant. Open backlog documented in `memory/project_open_backlog.md`: B2 Home, B3 Log redesign (square tiles), B4 Insights redesign, S1 CredibilitySheet rebuild, F1–F9 formatting rhythm sweep, N1 smart time-of-day notifications. Build succeeds iPhone 17 Pro / iOS 26.2.
+**Current phase:** Phase B metallic-green theme fully rolled out on all 4 tabs (Home B2, Log B3, Insights B4, Awareness B1 already done) + CredibilitySheet rebuilt per §8.4 (S1). App is now green-first throughout. Safe revert tag `phase-b1-stable`. Remaining backlog: F1–F9 formatting rhythm sweep (spacing/radius/shadows), N1+N2 smart time-of-day notifications, chart cards on Insights non-empty state still need gold/frosted refit (only bg changed in B4). Build succeeds iPhone 17 Pro / iOS 26.2 after every commit.
 
 ---
 
