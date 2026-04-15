@@ -240,12 +240,12 @@ struct MoneyEventView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .fill(DS.goldSurfaceBg)
-                .shimmerOverlay(duration: 5.0, intensity: 0.18)
+                .fill(DS.nuggetGold)
+                .shimmerOverlay(duration: 4.0, intensity: 0.28)
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.goldBase.opacity(0.5), lineWidth: 1)
+                .stroke(DS.goldBase, lineWidth: 1.5)
         )
         .premiumCardShadow()
     }

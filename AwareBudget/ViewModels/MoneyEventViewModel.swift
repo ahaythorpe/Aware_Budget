@@ -154,14 +154,79 @@ let absMonthlyAverage: [String: Int] = [
 // MARK: - Auto-suggest bias tag
 
 func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> String {
+    // Expanded mapping across all 16 categories × 3 statuses. Each combo
+    // points at the behavioural pattern most often driving that decision.
     switch (category, status) {
+    // Habitual / low-friction daily spends
     case ("Coffee", .impulse):        return "Status Quo Bias"
-    case ("Shopping", .surprise):     return "Scarcity Heuristic"
-    case ("Shopping", .impulse):      return "Anchoring"
+    case ("Coffee", .surprise):       return "Availability Heuristic"
+    case ("Coffee", .planned):        return "Mental Accounting"
+
+    case ("Lunch", .impulse):         return "Ego Depletion"
+    case ("Lunch", .surprise):        return "Availability Heuristic"
+    case ("Lunch", .planned):         return "Status Quo Bias"
+
     case ("Drinks", .impulse):        return "Ego Depletion"
-    case ("Big purchase", _):         return "Social Proof"
-    case ("Eating out", .impulse):      return "Ego Depletion"
-    case ("Subscriptions", _):        return "Status Quo Bias"
+    case ("Drinks", .surprise):       return "Social Proof"
+    case ("Drinks", .planned):        return "Mental Accounting"
+
+    case ("Eating out", .impulse):    return "Ego Depletion"
+    case ("Eating out", .surprise):   return "Social Proof"
+    case ("Eating out", .planned):    return "Moral Licensing"
+
+    // Discretionary shopping
+    case ("Shopping", .impulse):      return "Anchoring"
+    case ("Shopping", .surprise):     return "Scarcity Heuristic"
+    case ("Shopping", .planned):      return "Overconfidence Bias"
+
+    case ("Clothing", .impulse):      return "Social Proof"
+    case ("Clothing", .surprise):     return "Scarcity Heuristic"
+    case ("Clothing", .planned):      return "Anchoring"
+
+    case ("Gift", .impulse):          return "Moral Licensing"
+    case ("Gift", .surprise):         return "Social Proof"
+    case ("Gift", .planned):          return "Mental Accounting"
+
+    // Transport / utility
+    case ("Transport", .impulse):     return "Present Bias"
+    case ("Transport", .surprise):    return "Planning Fallacy"
+    case ("Transport", .planned):     return "Mental Accounting"
+
+    case ("Pharmacy", .impulse):      return "Loss Aversion"
+    case ("Pharmacy", .surprise):     return "Availability Heuristic"
+    case ("Pharmacy", .planned):      return "Present Bias"
+
+    // Subscriptions / defaults
+    case ("Subscriptions", .impulse): return "Framing Effect"
+    case ("Subscriptions", .surprise):return "Status Quo Bias"
+    case ("Subscriptions", .planned): return "Status Quo Bias"
+
+    // Experiential
+    case ("Entertainment", .impulse): return "Present Bias"
+    case ("Entertainment", .surprise):return "Social Proof"
+    case ("Entertainment", .planned): return "Moral Licensing"
+
+    case ("Travel", .impulse):        return "Present Bias"
+    case ("Travel", .surprise):       return "Scarcity Heuristic"
+    case ("Travel", .planned):        return "Planning Fallacy"
+
+    case ("Fitness", .impulse):       return "Moral Licensing"
+    case ("Fitness", .surprise):      return "Social Proof"
+    case ("Fitness", .planned):       return "Overconfidence Bias"
+
+    // Home / major
+    case ("Home", .impulse):          return "Anchoring"
+    case ("Home", .surprise):         return "Planning Fallacy"
+    case ("Home", .planned):          return "Sunk Cost Fallacy"
+
+    case ("Big purchase", .impulse):  return "Social Proof"
+    case ("Big purchase", .surprise): return "Scarcity Heuristic"
+    case ("Big purchase", .planned):  return "Planning Fallacy"
+
+    case ("Other", .impulse):         return "Present Bias"
+    case ("Other", .surprise):        return "Availability Heuristic"
+    case ("Other", .planned):         return "Mental Accounting"
+
     default:                          return "Present Bias"
     }
 }
