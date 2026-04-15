@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-04-15 — Backlog: multi-log session + Research tab + status sync (Claude Code)
+
+Documentation-only commit while user reviews the rebuilt UI.
+
+- Backlog L1 expanded: "Multi-category logging session + summary" —
+  MyFitnessPal-style. User logs back-to-back without leaving Log tab,
+  banner shows "N logged · $X", end-of-session SUMMARY screen lists
+  all events + top biases triggered + Nudge commentary + back to Home
+  CTA. Each event saves to Supabase as added (not batched).
+- Backlog T1 added: "5th tab — Research / Library". iOS allows 5 tabs
+  before "More" collapse. Tab order proposal: Home · Log · Insights ·
+  Awareness · Research. Promotes credibility content currently behind
+  CredibilitySheet ⓘ into a permanent surface for users who want the
+  deep-dive (4 papers, BFAS framework, 16 biases with citations,
+  plain-English algorithm transparency). CredibilitySheet stays as
+  the contextual popup.
+- STATUS updated to reflect current state (white-gallery rolled out
+  across every visible screen, shimmer dialled, white-text-on-green
+  legibility fixed).
+
+---
+
 ## 2026-04-15 — White-gallery pivot + ShimmeringGoldBorder (Claude Code)
 
 Direction change after seeing green-flood theme in context. Pivot to
