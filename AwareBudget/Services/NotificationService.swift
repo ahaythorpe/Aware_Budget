@@ -12,6 +12,10 @@ enum NotificationService {
     private static let smartAfternoonID = "awarebudget.smart.afternoon"
     private static let smartEveningID   = "awarebudget.smart.evening"
 
+    // Weekly + monthly review pushes
+    private static let weeklyReviewID  = "awarebudget.weekly"
+    private static let monthlyCheckpointID = "awarebudget.monthly"
+
     private static let morningBodies = [
         "Coffee run?", "Any spends before work?", "Nudge is listening.",
     ]
@@ -146,6 +150,54 @@ enum NotificationService {
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        center.add(request)
+    }
+
+    // MARK: - Weekly review push (Sunday 10am)
+
+    static func scheduleWeeklyReview() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [weeklyReviewID])
+
+        let content = UNMutableNotificationContent()
+        content.title = "AwareBudget"
+        content.body = ["Your week, without the story.",
+                        "A week richer in insights.",
+                        "Seven days, laid bare.",
+                        "Sunday review is ready."].randomElement() ?? "Weekly review ready."
+        content.sound = .default
+
+        var components = DateComponents()
+        components.weekday = 1  // Sunday
+        components.hour = 10
+        components.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: weeklyReviewID, content: content, trigger: trigger)
+        center.add(request)
+    }
+
+    // MARK: - Monthly checkpoint push (1st of each month 10am)
+
+    static func scheduleMonthlyCheckpoint() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [monthlyCheckpointID])
+
+        let content = UNMutableNotificationContent()
+        content.title = "AwareBudget"
+        content.body = ["A month in. Let's see what moved.",
+                        "Thirty days of small truths.",
+                        "Still yes? Still no?",
+                        "Monthly checkpoint — not a grade."].randomElement() ?? "Monthly checkpoint."
+        content.sound = .default
+
+        var components = DateComponents()
+        components.day = 1      // 1st of month
+        components.hour = 10
+        components.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: monthlyCheckpointID, content: content, trigger: trigger)
         center.add(request)
     }
 

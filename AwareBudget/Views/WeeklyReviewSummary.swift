@@ -118,11 +118,11 @@ struct WeeklyReviewSummary: View {
 
     private var nudgeCommentary: String {
         if topBiases.isEmpty {
-            return "A quiet week. Next week is where the real pattern shows up."
+            return "\(NudgeVoice.random(NudgeVoice.weeklyReview)) Four questions coming up."
         } else if let top = topBiases.first {
-            return "\(top.biasName) showed up most this week. 4 questions coming up to check in on that."
+            return "\(top.biasName) showed up most this week. \(NudgeVoice.mottoFor(bias: top.biasName)) Four questions coming up."
         } else {
-            return "Here's your week. 4 questions coming up."
+            return "\(NudgeVoice.random(NudgeVoice.weeklyReview)) Four questions coming up."
         }
     }
 

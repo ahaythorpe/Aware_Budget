@@ -24,6 +24,8 @@ struct AwareBudgetApp: App {
                     NotificationService.scheduleMorningReminder()
                     NotificationService.scheduleEveningNudge()
                     NotificationService.scheduleNoEventsReminder()
+                    NotificationService.scheduleWeeklyReview()
+                    NotificationService.scheduleMonthlyCheckpoint()
                     await scheduleSmartNudgesFromHistory()
                 }
             #else
@@ -49,6 +51,8 @@ struct AwareBudgetApp: App {
                             NotificationService.scheduleMorningReminder()
                             NotificationService.scheduleEveningNudge()
                             NotificationService.scheduleNoEventsReminder()
+                            NotificationService.scheduleWeeklyReview()
+                            NotificationService.scheduleMonthlyCheckpoint()
                             await scheduleSmartNudgesFromHistory()
                         }
                 }

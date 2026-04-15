@@ -27,16 +27,8 @@ struct MoneyEventView: View {
     @State private var showSkipAlert: Bool = false
     @State private var lastReviewOutcome: BiasReviewView.ReviewOutcome? = nil
 
-    /// Rotating dry-wit chastise shown when the user tries to skip review.
-    private var skipChastise: String {
-        [
-            "Nudge was just getting warm. Patterns you don't look at keep running the show.",
-            "Skipping is logging without learning. Up to you — but we'd notice more together.",
-            "Awareness builds by looking, not logging. Two minutes now saves twenty later.",
-            "Nudge will still be here. But your blind spots won't flag themselves.",
-            "Skip is fine. Next week's 'why did I do that?' is also fine.",
-        ].randomElement() ?? "Nudge will remember you skipped."
-    }
+    /// Rotating dry-wit chastise when user tries to skip review — see NudgeVoice.
+    private var skipChastise: String { NudgeVoice.random(NudgeVoice.skipChastise) }
 
     private var sessionTotal: Double { sessionLog.reduce(0.0) { $0 + $1.amount } }
 
@@ -346,11 +338,12 @@ struct MoneyEventView: View {
 
     private var sessionNudgeMessage: String {
         if let top = topSessionBiases.first {
-            return "Most logged pattern: \(top.0). Worth a look in your bias profile."
+            // Pair bias-specific observation with a matched motto.
+            return "\(top.0) showed up most this session. \(NudgeVoice.mottoFor(bias: top.0))"
         } else if sessionLog.count >= 3 {
-            return "Three or more events in one session — that's the noticing muscle building."
+            return "\(NudgeVoice.random(NudgeVoice.sessionSummary))"
         } else {
-            return "Logged. Patterns show up over time."
+            return "\(NudgeVoice.random(NudgeVoice.postSave))"
         }
     }
 
