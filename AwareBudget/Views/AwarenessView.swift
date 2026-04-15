@@ -77,13 +77,13 @@ struct AwarenessView: View {
                 // ── CATEGORIES ──
                 ForEach(biasCategories, id: \.name) { category in
                     VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 5) {
+                        HStack(spacing: 6) {
                             Text(category.emoji)
-                                .font(.system(size: 13))
+                                .font(.system(size: 14))
                             Text(category.name.uppercased())
-                                .font(.system(size: 9.5, weight: .black))
-                                .tracking(1.3)
-                                .foregroundColor(Color(hex: "#4CAF50"))
+                                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                .tracking(1.5)
+                                .foregroundStyle(DS.accent)
                         }
                         .padding(.horizontal, 16)
 

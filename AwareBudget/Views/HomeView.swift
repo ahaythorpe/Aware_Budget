@@ -59,11 +59,10 @@ struct HomeView: View {
                         Text("\(viewModel.streak)")
                             .font(.system(size: 40, weight: .black, design: .serif))
                             .foregroundColor(DS.goldText)
-                        Text("🔥 day streak")
-                            .font(.system(size: 10, weight: .bold))
-                            .tracking(0.8)
-                            .foregroundColor(.white.opacity(0.65))
-                            .textCase(.uppercase)
+                        Text("🔥 DAY STREAK")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(.white.opacity(0.75))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
@@ -95,8 +94,8 @@ struct HomeView: View {
                                 .font(.system(size: 22, weight: .black, design: .serif))
                                 .foregroundColor(DS.deepGreen)
                             Text("Patterns\nidentified")
-                                .font(.system(size: 9, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .font(.system(.caption, weight: .medium))
+                                .foregroundStyle(DS.textSecondary)
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -112,8 +111,8 @@ struct HomeView: View {
                 // ── CHECK IN ──
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Today's check-in")
-                        .font(.system(size: 14, weight: .black))
-                        .foregroundColor(.white)
+                        .font(.system(.headline, weight: .bold))
+                        .foregroundStyle(.white)
                     Button(action: {}) {
                         Text("Start check-in →")
                     }
