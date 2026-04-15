@@ -55,7 +55,8 @@ struct HomeView: View {
                     VStack(spacing: 5) {
                         Text("\(viewModel.streak)")
                             .font(.system(size: 40, weight: .black, design: .serif))
-                            .foregroundColor(DS.goldText)
+                            .foregroundStyle(DS.nuggetGold)
+                            .shimmerOverlay(duration: 2.2, intensity: 0.55)
                         Text("🔥 DAY STREAK")
                             .font(.system(size: 11, weight: .heavy, design: .rounded))
                             .tracking(1.5)
@@ -78,14 +79,16 @@ struct HomeView: View {
                                 .animation(.easeInOut(duration: 1.2), value: awarenessPercent)
                             Text("\(viewModel.biasesSeenCount)/\(totalPatterns)")
                                 .font(.system(size: 10, weight: .black, design: .serif))
-                                .foregroundStyle(DS.deepGreen)
+                                .foregroundStyle(DS.nuggetGold)
+                                .shimmerOverlay(duration: 2.4, intensity: 0.5)
                         }
                         .frame(width: 54, height: 54)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text("\(Int(awarenessPercent * 100))%")
                                 .font(.system(size: 22, weight: .black, design: .serif))
-                                .foregroundStyle(DS.goldBase)
+                                .foregroundStyle(DS.nuggetGold)
+                                .shimmerOverlay(duration: 2.2, intensity: 0.55)
                             Text("Patterns\nidentified")
                                 .font(.system(.caption, weight: .medium))
                                 .foregroundStyle(DS.textSecondary)

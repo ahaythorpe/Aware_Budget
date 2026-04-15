@@ -44,7 +44,8 @@ struct TopBiasesCard: View {
             Text("YOUR TOP BIASES")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(DS.goldBase)
+                .foregroundStyle(DS.nuggetGold)
+                .shimmerOverlay(duration: 3.0, intensity: 0.45)
             if onInfoTap != nil {
                 Button { onInfoTap?() } label: {
                     Image(systemName: "info.circle.fill")
