@@ -150,7 +150,7 @@ struct HomeView: View {
 
                 // ── NUDGE (white card with shimmering gold border — signature) ──
                 NudgeSaysCard(
-                    message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame.",
+                    message: homeNudgeMessage,
                     surface: .whiteShimmer
                 )
                 .padding(.horizontal, 18)
@@ -201,6 +201,20 @@ struct HomeView: View {
         DebugAuthBanner()
     }
     #endif
+
+    /// Nudge Says body for Home bottom. Combines the engine-generated
+    /// contextual message (if any) with a bias-matched motto when a top
+    /// pattern is known. Falls back to a rotating motto otherwise.
+    private var homeNudgeMessage: String {
+        if let engineMsg = viewModel.nudgeMessage?.body {
+            // Engine is already context-aware (streak / time / first-open).
+            return engineMsg
+        }
+        if let topBias = viewModel.dailyPatterns.first?.biasName {
+            return "\(topBias) is showing up. \(NudgeVoice.mottoFor(bias: topBias))"
+        }
+        return NudgeVoice.random(NudgeVoice.motto)
+    }
 
     private var devMenu: some View {
         NavigationStack {
