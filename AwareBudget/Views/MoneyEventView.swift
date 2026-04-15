@@ -142,32 +142,33 @@ struct MoneyEventView: View {
     }
 
     private func categoryTile(_ cat: SpendCategory) -> some View {
-        let isLocked = viewModel.selectedCategory?.name == cat.name && viewModel.selectedRange != nil
+        let isSelected = viewModel.selectedCategory?.name == cat.name
         return Button {
             rangeSheetCategory = cat
         } label: {
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 Text(cat.emoji)
-                    .font(.system(size: 36))
+                    .font(.system(size: 30))
                 Text(cat.name)
                     .font(.system(.caption, weight: .heavy))
-                    .foregroundStyle(DS.goldForeground)
+                    .foregroundStyle(isSelected ? DS.goldForeground : DS.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 96)
+            .frame(height: 104)
+            .padding(.vertical, 4)
             .background(
-                isLocked ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg),
+                isSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.cardBg),
                 in: RoundedRectangle(cornerRadius: 16)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(isLocked ? DS.goldBase : DS.goldSurfaceStroke, lineWidth: isLocked ? 1 : 0.5)
+                    .stroke(isSelected ? DS.goldBase.opacity(0.5) : DS.accent.opacity(0.15), lineWidth: isSelected ? 1 : 0.5)
             )
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: isLocked)
+        .sensoryFeedback(.selection, trigger: isSelected)
     }
 
     // MARK: - Range sheet (popup)

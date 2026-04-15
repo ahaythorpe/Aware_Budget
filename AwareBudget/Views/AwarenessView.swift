@@ -11,18 +11,8 @@ struct AwarenessView: View {
     var triggered: [BiasPattern] { patterns.filter { triggerCount(for: $0) > 0 } }
     var awarenessScore: Int { triggered.count }
 
-    /// Per-category emoji override (overrides `biasCategories[].emoji` fallback trophies).
-    private func emoji(for category: String) -> String {
-        switch category.uppercased() {
-        case "AVOIDANCE":       return "🙈"
-        case "DECISION MAKING": return "🔀"
-        case "EMOTION":         return "💚"
-        case "MEMORY":          return "🧠"
-        case "HEURISTIC":       return "⚡"
-        case "SOCIAL", "NORMS": return "👥"
-        default:                return "🧠"
-        }
-    }
+    // Category label icon (single consistent brand icon, not per-category emoji).
+    private let categoryIcon = "sparkle"
 
     var body: some View {
         ScrollView {
@@ -108,18 +98,18 @@ struct AwarenessView: View {
     private var scoreCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("🏅 Awareness score")
+                Text("Awareness score")
                     .font(.system(.headline, weight: .bold))
-                    .foregroundStyle(DS.onDarkPrimary)
+                    .foregroundStyle(DS.textPrimary)
                 Spacer()
                 Text("\(awarenessScore) / \(patterns.count)")
                     .font(.system(size: 18, weight: .black, design: .serif))
-                    .foregroundStyle(DS.goldText)
+                    .foregroundStyle(DS.goldBase)
             }
 
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.12)).frame(height: 8)
+                    Capsule().fill(DS.mintBg).frame(height: 8)
                     Capsule()
                         .fill(DS.nuggetGold)
                         .frame(
@@ -134,10 +124,10 @@ struct AwarenessView: View {
                 .padding(.top, 4)
         }
         .padding(16)
-        .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.frostedCardStroke, lineWidth: 0.5)
+                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
         )
     }
 
@@ -145,17 +135,18 @@ struct AwarenessView: View {
 
     private func categoryHeader(_ name: String) -> some View {
         HStack(spacing: 8) {
-            Text(emoji(for: name))
-                .font(.system(size: 16))
+            Image(systemName: categoryIcon)
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(DS.goldBase)
             Text(name.uppercased())
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(Color(hex: "8B6010"))
+                .foregroundStyle(DS.goldBase)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(DS.goldSurfaceBg, in: Capsule())
-        .overlay(Capsule().stroke(DS.goldSurfaceStroke, lineWidth: 0.5))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(DS.cardBg, in: Capsule())
+        .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
     }
 }
 
@@ -175,15 +166,12 @@ struct BiasAwarenessCard: View {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(isTriggered
-                              ? Color(hex: pattern.iconBg)
-                              : DS.goldBase.opacity(0.08))
+                        .fill(isTriggered ? DS.goldSurfaceBg : DS.goldBase.opacity(0.08))
                         .frame(width: 44, height: 44)
+                        .overlay(Circle().stroke(DS.goldBase.opacity(isTriggered ? 0.4 : 0.2), lineWidth: 0.5))
                     Image(systemName: pattern.sfSymbol)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(isTriggered
-                                         ? Color(hex: pattern.iconColor)
-                                         : DS.goldBase.opacity(0.4))
+                        .foregroundStyle(isTriggered ? DS.goldBase : DS.goldBase.opacity(0.45))
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -258,15 +246,13 @@ struct BiasAwarenessCard: View {
             }
         }
         .background(
-            isTriggered
-                ? DS.goldSurfaceBg
-                : DS.goldSurfaceBg.opacity(0.55),
+            DS.cardBg.opacity(isTriggered ? 1.0 : 0.88),
             in: RoundedRectangle(cornerRadius: 14)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(
-                    isTriggered ? DS.goldBase.opacity(0.5) : DS.goldSurfaceStroke,
+                    isTriggered ? DS.goldBase.opacity(0.4) : DS.accent.opacity(0.15),
                     lineWidth: isTriggered ? 1 : 0.5
                 )
         )

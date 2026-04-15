@@ -20,7 +20,7 @@ struct TopBiasesCard: View {
             if topFour.isEmpty {
                 Text("Complete your first check-in to start tracking")
                     .font(.system(.footnote, weight: .medium))
-                    .foregroundStyle(DS.onDarkSecondary)
+                    .foregroundStyle(DS.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 4)
             } else {
@@ -35,10 +35,10 @@ struct TopBiasesCard: View {
             }
         }
         .padding(18)
-        .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.frostedCardStroke, lineWidth: 0.5)
+                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
         )
     }
 
@@ -47,19 +47,19 @@ struct TopBiasesCard: View {
             Text("YOUR TOP BIASES")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(DS.goldText)
+                .foregroundStyle(DS.goldBase)
             if onInfoTap != nil {
                 Button { onInfoTap?() } label: {
                     Image(systemName: "info.circle.fill")
                         .font(.system(size: 14))
-                        .foregroundStyle(DS.goldText)
+                        .foregroundStyle(DS.goldBase)
                 }
                 .buttonStyle(.plain)
             }
             Spacer()
             Text("\(totalSeen)/16")
                 .font(.system(.caption2, weight: .semibold))
-                .foregroundStyle(DS.onDarkSecondary)
+                .foregroundStyle(DS.textTertiary)
         }
     }
 
@@ -70,7 +70,7 @@ struct TopBiasesCard: View {
                 .frame(width: 26)
             Text(p.biasName)
                 .font(.system(.subheadline, weight: .semibold))
-                .foregroundStyle(DS.onDarkPrimary)
+                .foregroundStyle(DS.textPrimary)
             Spacer()
             trendLabel(for: p)
             stagePill(p.stage)

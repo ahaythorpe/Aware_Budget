@@ -74,16 +74,18 @@ enum DS {
     static let stageNoticed  = Color(hex: "42A5F5")
 
     // Hero gradient (dark green cards)
-    // Peak metallic green — 7-stop shimmer (restored from 344bb9b, Tue 04-14)
+    // Shinier metallic green — 9-stop with brighter specular highlight
     static let heroGradient = LinearGradient(
         stops: [
-            .init(color: Color(hex: "1B5E20"), location: 0.0),
-            .init(color: Color(hex: "2E7D32"), location: 0.15),
-            .init(color: Color(hex: "66BB6A"), location: 0.35),
-            .init(color: Color(hex: "4CAF50"), location: 0.5),
-            .init(color: Color(hex: "81C784"), location: 0.65),
-            .init(color: Color(hex: "2E7D32"), location: 0.8),
-            .init(color: Color(hex: "1B5E20"), location: 1.0),
+            .init(color: Color(hex: "0F4E15"), location: 0.0),
+            .init(color: Color(hex: "2E7D32"), location: 0.12),
+            .init(color: Color(hex: "66BB6A"), location: 0.28),
+            .init(color: Color(hex: "A5E8AC"), location: 0.45),
+            .init(color: Color(hex: "D8F5DC"), location: 0.5),
+            .init(color: Color(hex: "A5E8AC"), location: 0.55),
+            .init(color: Color(hex: "66BB6A"), location: 0.72),
+            .init(color: Color(hex: "2E7D32"), location: 0.88),
+            .init(color: Color(hex: "0F4E15"), location: 1.0),
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -127,8 +129,10 @@ struct GoldButtonStyle: ViewModifier {
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
             .background(
-                RoundedRectangle(cornerRadius: 999)
+                Capsule()
                     .fill(DS.nuggetGold)
+                    .shimmerOverlay()
+                    .clipShape(Capsule())
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 999)
