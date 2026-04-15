@@ -45,7 +45,7 @@ struct NudgeSaysCard: View {
         .background(DS.paleGreen, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                .stroke(DS.deepGreen, lineWidth: 1)
         )
     }
 }

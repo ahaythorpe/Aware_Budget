@@ -19,7 +19,8 @@ struct MonthCalendarView: View {
             HStack(spacing: 6) {
                 ForEach(Array(dayLabels.enumerated()), id: \.offset) { _, label in
                     Text(label)
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(.caption2, design: .rounded, weight: .heavy))
+                        .tracking(0.8)
                         .foregroundStyle(DS.textTertiary)
                         .frame(maxWidth: .infinity)
                 }
@@ -76,7 +77,7 @@ struct MonthCalendarView: View {
             if hasEvents { selectedDay = DayKey(date: date) }
         } label: {
             Text("\(day)")
-                .font(.system(size: 12, weight: hasEvents ? .bold : .regular))
+                .font(.system(.footnote, weight: hasEvents ? .bold : .medium))
                 .foregroundStyle(
                     hasEvents ? Color.white :
                     isToday ? DS.textPrimary : DS.textSecondary

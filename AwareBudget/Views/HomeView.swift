@@ -12,13 +12,13 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
 
-                // ── GREETING (Nudge-branded, centered) ──
-                HStack(alignment: .center, spacing: 12) {
+                // ── GREETING (Nudge-branded notification) ──
+                HStack(alignment: .center, spacing: 14) {
                     Image("nudge")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 40, height: 40)
-                    VStack(alignment: .leading, spacing: 2) {
+                        .frame(width: 44, height: 44)
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(viewModel.welcomeMessage)
                             .font(.system(.headline, design: .default, weight: .semibold))
                             .foregroundStyle(DS.textPrimary)
@@ -29,13 +29,19 @@ struct HomeView: View {
                             .font(.system(.caption2, weight: .medium))
                             .foregroundStyle(DS.textTertiary)
                     }
-                    Spacer()
+                    Spacer(minLength: 8)
                     Image(systemName: "gearshape")
                         .font(.system(size: 18))
-                        .foregroundStyle(DS.accent)
+                        .foregroundStyle(DS.deepGreen)
                 }
+                .padding(16)
+                .background(DS.paleGreen, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.deepGreen, lineWidth: 1)
+                )
                 .padding(.horizontal, 18)
-                .padding(.top, 12)
+                .padding(.top, 14)
                 .padding(.bottom, 14)
 
                 // ── STREAK + CIRCLE ──
