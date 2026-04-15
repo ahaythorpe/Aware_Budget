@@ -65,30 +65,43 @@ struct BiasReviewView: View {
         return entries[index]
     }
 
-    // MARK: - Header
+    // MARK: - Header (green hero matching Research / CredibilitySheet pattern)
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Review your patterns")
                 .font(.system(.largeTitle, weight: .bold))
-                .foregroundStyle(DS.textPrimary)
-                .shadow(color: .clear, radius: 0)
+                .foregroundStyle(.white)
+                .shadow(color: DS.deepGreen.opacity(0.7), radius: 4, x: 0, y: 1)
+                .fixedSize(horizontal: false, vertical: true)
+
             Text(index < entries.count
                  ? "\(index + 1) of \(entries.count) · Did we get this right?"
-                 : "Done")
+                 : "All done")
                 .font(.system(.subheadline, weight: .semibold))
-                .foregroundStyle(DS.textSecondary)
+                .foregroundStyle(.white.opacity(0.85))
+                .shadow(color: DS.deepGreen.opacity(0.6), radius: 3, x: 0, y: 1)
 
-            // progress dots
             HStack(spacing: 6) {
                 ForEach(0..<entries.count, id: \.self) { i in
                     Capsule()
-                        .fill(i <= index ? DS.goldBase : DS.accent.opacity(0.2))
+                        .fill(i <= index ? DS.goldBase : Color.white.opacity(0.25))
                         .frame(height: 4)
                 }
             }
             .padding(.top, 4)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .fill(DS.heroGradient)
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase, lineWidth: 1)
+        )
     }
 
     // MARK: - Event recap (top card)
@@ -110,8 +123,9 @@ struct BiasReviewView: View {
                 .foregroundStyle(DS.goldBase)
         }
         .padding(16)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.accent.opacity(0.15), lineWidth: 0.5))
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .premiumCardShadow()
     }
 
     // MARK: - Bias explanation (gold card)
@@ -160,6 +174,7 @@ struct BiasReviewView: View {
             RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(DS.goldBase.opacity(0.5), lineWidth: 1)
         )
+        .premiumCardShadow()
     }
 
     // MARK: - Choice buttons
@@ -212,8 +227,9 @@ struct BiasReviewView: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.accent.opacity(0.2), lineWidth: 0.5))
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+            .premiumCardShadow()
         }
         .buttonStyle(.plain)
     }
@@ -276,8 +292,9 @@ struct BiasReviewView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.accent.opacity(0.15), lineWidth: 0.5))
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .premiumCardShadow()
     }
 
     // MARK: - Record choice + write to Supabase
