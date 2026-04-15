@@ -88,6 +88,52 @@ All tokens live in `DesignSystem.swift`. **Never hardcode `Color(hex:)` in views
 
 ---
 
+## 3.5 Master typography
+
+SF Pro only (Apple-approved). Serif reserved for numbers where editorial/luxury feel is wanted. All text uses semantic roles so Dynamic Type works automatically.
+
+### Notification surfaces (Nudge card, Nudge-branded greeting)
+
+| Element | Font |
+|---|---|
+| "NUDGE" label | `.system(size: 11, weight: .heavy, design: .rounded)` · tracking 1.5 · `DS.accent` · uppercase |
+| Body message | `.system(.subheadline, weight: .semibold)` · `DS.textPrimary` · lineSpacing 3 |
+| Citation (optional, biases only) | `.system(.caption2, weight: .semibold)` · `DS.textTertiary` |
+| Coin avatar | 56pt (card) · 40pt (inline greeting) |
+
+### Buttons
+
+| Element | Font |
+|---|---|
+| Gold CTA (`.goldButtonStyle()`) | `.system(.headline, weight: .bold)` · `DS.goldForeground` |
+| Secondary button label | `.system(.subheadline, weight: .semibold)` · `DS.textPrimary` |
+
+### Headings / greeting
+
+| Element | Font |
+|---|---|
+| Greeting welcome line | `.system(.headline, weight: .semibold)` · `DS.textPrimary` |
+| Date caption | `.system(.caption2, weight: .medium)` · `DS.textTertiary` · format `"EEE · d MMMM"` |
+| Calendar month header | `.system(.headline, weight: .semibold)` · `DS.textPrimary` |
+| Section label (brand) | `.system(size: 11, weight: .heavy, design: .rounded)` · `DS.accent` · uppercase · tracking 1.5 |
+
+### Numbers (kept serif for luxury/editorial feel)
+
+| Element | Font |
+|---|---|
+| Streak count | `.system(size: 40, weight: .black, design: .serif)` · `DS.goldText` |
+| Bias count (stats) | `.system(size: 22, weight: .black, design: .serif)` |
+
+### Rules
+
+- Never hardcode `.font(.system(size: N, ...))` for body/label/heading text. Use semantic roles.
+- Inline sizes (size: N) only for numbers (luxury serif) or the NUDGE brand label.
+- Never use `design: .serif` for body or labels. Serif is reserved for numeric emphasis.
+- All Nudge card instances must use `NudgeSaysCard`. Never reimplement.
+- This spec applies on: Home, Why, Awareness, CheckIn, Log (Money Event save button), Onboarding, SignIn, InsightFeed, Nudge cards everywhere. Do NOT use for in-body content text elsewhere unless that text is itself a button, Nudge card, or greeting.
+
+---
+
 ## 4. Radii + spacing
 
 ```

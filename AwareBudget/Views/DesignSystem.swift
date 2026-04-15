@@ -110,11 +110,11 @@ enum DS {
 struct GoldButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .fontWeight(.bold)
+            .font(.system(.headline, weight: .bold))
             .foregroundStyle(DS.goldForeground)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 999)
                     .fill(DS.nuggetGold)
