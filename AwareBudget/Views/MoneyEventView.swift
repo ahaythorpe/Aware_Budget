@@ -23,6 +23,8 @@ struct MoneyEventView: View {
     /// Tracks which range is currently picked in the popup (before status is picked)
     @State private var pendingRange: AmountRange? = nil
     @State private var showAlgoExplainer: Bool = false
+    @State private var showBiasReview: Bool = false
+    @State private var lastReviewOutcome: BiasReviewView.ReviewOutcome? = nil
 
     private var sessionTotal: Double { sessionLog.reduce(0.0) { $0 + $1.amount } }
 
@@ -75,6 +77,36 @@ struct MoneyEventView: View {
         .sheet(isPresented: $showAlgoExplainer) {
             AlgorithmExplainerSheet()
         }
+        .fullScreenCover(isPresented: $showBiasReview) {
+            NavigationStack {
+                BiasReviewView(
+                    entries: sessionLog.map { e in
+                        BiasReviewView.Entry(
+                            emoji: e.emoji,
+                            category: e.category,
+                            amountLabel: e.amountLabel,
+                            plannedStatus: e.plannedStatus,
+                            suggestedBias: e.behaviourTag ?? suggestedBiasTag(category: e.category, status: e.plannedStatus)
+                        )
+                    },
+                    onDone: { outcome in
+                        lastReviewOutcome = outcome
+                        showBiasReview = false
+                        showSessionSummary = true
+                    }
+                )
+                .navigationTitle("Review")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Skip") {
+                            showBiasReview = false
+                            showSessionSummary = true
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Header
@@ -123,9 +155,9 @@ struct MoneyEventView: View {
             }
 
             Button {
-                showSessionSummary = true
+                showBiasReview = true
             } label: {
-                Text("See session summary →")
+                Text("Review patterns →")
             }
             .goldButtonStyle()
         }
