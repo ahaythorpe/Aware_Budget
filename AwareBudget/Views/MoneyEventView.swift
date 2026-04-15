@@ -43,27 +43,15 @@ struct MoneyEventView: View {
                             sessionBanner
                         }
                         categoryGrid
-                        if viewModel.selectedRange != nil {
-                            plannedStatusPicker
-                        }
-                        if viewModel.plannedStatus != nil {
-                            biasTagSection
-                        }
                         if let errorMessage = viewModel.errorMessage {
                             Text(errorMessage)
                                 .font(.footnote)
                                 .foregroundStyle(DS.warning)
                         }
-                        if viewModel.canSave {
-                            saveButton
-                        }
                     }
                     .padding(.horizontal, DS.hPadding)
                     .padding(.top, 12)
                     .padding(.bottom, 32)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.selectedCategory?.name)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.selectedRange?.label)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.plannedStatus)
                 }
             }
         }
@@ -78,7 +66,7 @@ struct MoneyEventView: View {
         }
         .sheet(item: $rangeSheetCategory) { cat in
             rangeSheet(for: cat)
-                .presentationDetents([.height(440)])
+                .presentationDetents([.medium, .large])
         }
     }
 
@@ -344,55 +332,115 @@ struct MoneyEventView: View {
         .sensoryFeedback(.selection, trigger: isSelected)
     }
 
-    // MARK: - Range sheet (popup)
+    // MARK: - Range + status sheet (full mini-flow in one popup)
 
     private func rangeSheet(for cat: SpendCategory) -> some View {
         let ranges = categoryRanges[cat.name] ?? []
-        return VStack(spacing: 16) {
-            VStack(spacing: 4) {
-                Text(cat.emoji).font(.system(size: 40))
-                Text(cat.name)
-                    .font(.system(.headline, weight: .bold))
-                    .foregroundStyle(DS.textPrimary)
-                Text("How much?")
-                    .font(.system(.caption, design: .rounded, weight: .heavy))
-                    .tracking(1.2)
-                    .foregroundStyle(DS.accent)
-            }
-            .padding(.top, 8)
+        return ScrollView {
+            VStack(spacing: 16) {
+                VStack(spacing: 4) {
+                    Text(cat.emoji).font(.system(size: 40))
+                    Text(cat.name)
+                        .font(.system(.headline, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                }
+                .padding(.top, 8)
 
-            VStack(spacing: 10) {
-                ForEach(ranges) { range in
-                    Button {
-                        viewModel.selectedCategory = cat
-                        viewModel.selectedRange = range
-                        viewModel.plannedStatus = nil
-                        viewModel.behaviourTag = nil
-                        rangeSheetCategory = nil
-                    } label: {
-                        Text(range.label)
-                            .font(.system(.headline, weight: .bold))
-                            .foregroundStyle(DS.goldForeground)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(DS.nuggetGold, in: Capsule())
-                            .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+                // STEP 1 — range
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("HOW MUCH?")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.goldBase)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    VStack(spacing: 8) {
+                        ForEach(ranges) { range in
+                            sheetRangeButton(cat: cat, range: range)
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .sensoryFeedback(.selection, trigger: viewModel.selectedRange?.label == range.label)
+                }
+                .padding(.horizontal, 20)
+
+                // STEP 2 — planned/surprise/impulse (only after range picked)
+                if viewModel.selectedCategory?.name == cat.name && viewModel.selectedRange != nil {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("WAS THIS PLANNED?")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.2)
+                            .foregroundStyle(DS.goldBase)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        VStack(spacing: 8) {
+                            ForEach(MoneyEvent.PlannedStatus.allCases) { status in
+                                sheetStatusButton(cat: cat, status: status)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
+
+                if let avg = absMonthlyAverage[cat.name] {
+                    ResearchFootnote(text: "Avg $\(avg)/mo · ABS 2022–23", icon: "chart.bar.doc.horizontal")
+                        .padding(.top, 6)
                 }
             }
-            .padding(.horizontal, 20)
-
-            if let avg = absMonthlyAverage[cat.name] {
-                ResearchFootnote(text: "Avg $\(avg)/mo · ABS 2022–23", icon: "chart.bar.doc.horizontal")
-                    .padding(.top, 4)
-            }
-            Spacer()
+            .padding(.bottom, 24)
+            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.selectedRange?.label)
         }
         .padding(.horizontal, 8)
         .padding(.top, 8)
         .background(DS.cardBg)
+    }
+
+    private func sheetRangeButton(cat: SpendCategory, range: AmountRange) -> some View {
+        let isSelected = viewModel.selectedCategory?.name == cat.name && viewModel.selectedRange?.label == range.label
+        return Button {
+            viewModel.selectedCategory = cat
+            viewModel.selectedRange = range
+            viewModel.plannedStatus = nil
+            viewModel.behaviourTag = nil
+        } label: {
+            Text(range.label)
+                .font(.system(.headline, weight: .bold))
+                .foregroundStyle(isSelected ? DS.goldForeground : DS.deepGreen)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .background(isSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg), in: Capsule())
+                .overlay(Capsule().stroke(isSelected ? DS.goldBase.opacity(0.5) : DS.goldSurfaceStroke, lineWidth: isSelected ? 1 : 0.5))
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: isSelected)
+    }
+
+    private func sheetStatusButton(cat: SpendCategory, status: MoneyEvent.PlannedStatus) -> some View {
+        Button {
+            viewModel.plannedStatus = status
+            viewModel.onPlannedStatusSet()
+            // Auto-save then close + add to session
+            Task {
+                await viewModel.save()
+                if viewModel.didSave {
+                    captureSessionEntry()
+                    viewModel.reset()
+                    rangeSheetCategory = nil
+                }
+            }
+        } label: {
+            HStack(spacing: 10) {
+                Text(status.emoji).font(.system(size: 18))
+                Text(status.label)
+                    .font(.system(.subheadline, weight: .bold))
+                    .foregroundStyle(DS.goldForeground)
+                Spacer()
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(DS.goldForeground.opacity(0.6))
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
+            .background(DS.nuggetGold, in: Capsule())
+            .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Planned / Surprise / Impulse
