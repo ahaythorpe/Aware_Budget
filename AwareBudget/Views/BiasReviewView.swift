@@ -36,6 +36,9 @@ struct BiasReviewView: View {
     @State private var index: Int = 0
     @State private var outcome = ReviewOutcome()
     @State private var isWriting = false
+    /// When set, show the alternative-bias picker instead of the default buttons
+    /// for this entry. User must pick a different bias before advancing.
+    @State private var pickingAlternativeFor: Entry? = nil
     @Environment(\.dismiss) private var dismiss
 
     private let service = SupabaseService.shared
@@ -47,7 +50,11 @@ struct BiasReviewView: View {
                 if let entry = currentEntry {
                     eventRecapCard(entry)
                     biasExplanationCard(entry)
-                    choiceButtons(entry)
+                    if let picking = pickingAlternativeFor, picking.id == entry.id {
+                        alternativePicker(entry)
+                    } else {
+                        choiceButtons(entry)
+                    }
                 } else {
                     completionCard
                 }
@@ -225,13 +232,92 @@ struct BiasReviewView: View {
             reviewButton(
                 icon: "arrow.triangle.2.circlepath.circle.fill",
                 label: "No, different reason",
-                detail: "We'll remember — doesn't count as tagged",
+                detail: "Pick the actual pattern on the next screen",
                 tint: DS.textSecondary
             ) {
-                Task { await record(entry: entry, choice: .different) }
+                pickingAlternativeFor = entry
             }
         }
         .disabled(isWriting)
+    }
+
+    // MARK: - Alternative picker ("No, different reason" branch)
+
+    /// 16 candidate biases, excluding the one Nudge suggested. User must
+    /// pick one or cancel back — not just skip silently. Nudge motivation
+    /// line at top to encourage thoughtful pick over trigger-happy escape.
+    private func alternativePicker(_ entry: Entry) -> some View {
+        let candidates = allBiasPatterns
+            .map(\.name)
+            .filter { $0 != entry.suggestedBias }
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 18))
+                    .foregroundStyle(DS.goldBase)
+                Text("Nudge: noticing the real reason matters more than clicking fast. Pick the pattern that actually fit.")
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(12)
+            .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldSurfaceStroke, lineWidth: 0.5))
+
+            Text("PICK THE REAL PATTERN")
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.5)
+                .foregroundStyle(DS.goldBase)
+                .padding(.top, 4)
+
+            VStack(spacing: 8) {
+                ForEach(candidates, id: \.self) { alt in
+                    Button {
+                        Task { await recordAlternative(entry: entry, newBias: alt) }
+                    } label: {
+                        HStack {
+                            Text(alt)
+                                .font(.system(.subheadline, weight: .semibold))
+                                .foregroundStyle(DS.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(DS.textTertiary)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity)
+                        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.accent.opacity(0.15), lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isWriting)
+                }
+            }
+
+            Button {
+                pickingAlternativeFor = nil
+            } label: {
+                Text("Back to suggestions")
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textTertiary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    @MainActor
+    private func recordAlternative(entry: Entry, newBias: String) async {
+        isWriting = true
+        defer { isWriting = false }
+        outcome.differentCount += 1
+        // Credit the user's chosen bias as reflected (awareness gained).
+        try? await service.updateBiasProgress(biasName: newBias, reflected: true)
+        pickingAlternativeFor = nil
+        withAnimation { index += 1 }
     }
 
     private func reviewButton(icon: String, label: String, detail: String, tint: Color, action: @escaping () -> Void) -> some View {
@@ -271,7 +357,7 @@ struct BiasReviewView: View {
         case "Anchoring":              return "Did a reference price shape your sense of 'fair'?"
         case "Scarcity Heuristic":     return "Did urgency (\"only a few left\", \"sale ends\") push the buy?"
         case "Ego Depletion":          return "Were you tired, stressed, or drained when you decided?"
-        case "Mental Accounting":      return "Did the money's 'bucket' (bonus, refund, budget) change your choice?"
+        case "Mental Accounting":      return "Did the money's label (bonus, refund, 'fun money', rent) make you treat it differently than ordinary income?"
         case "Moral Licensing":        return "Did a recent good behaviour justify this spend?"
         case "Present Bias":           return "Did you choose now over future you?"
         case "Planning Fallacy":       return "Did this cost more than you expected it to?"
