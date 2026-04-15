@@ -143,7 +143,19 @@ final class HomeViewModel {
 
             // Biases seen count + pattern alerts
             let biasProgress = try await service.fetchBiasProgress()
-            biasesSeenCount = biasProgress.filter { $0.timesEncountered > 0 }.count
+
+            // Count money-event behaviour tags (each logged event with a
+            // suggested bias now contributes to the bias ranking too).
+            let monthEventsForTags = try await service.fetchMoneyEvents(forMonth: Date())
+            let eventTagCounts: [String: Int] = monthEventsForTags
+                .compactMap(\.behaviourTag)
+                .reduce(into: [:]) { counts, tag in counts[tag, default: 0] += 1 }
+
+            // Biases are "seen" if either bias_progress.times_encountered > 0
+            // OR they have >=1 tagged money event this month.
+            let taggedBiasNames = Set(eventTagCounts.keys)
+            let progressBiasNames = Set(biasProgress.filter { $0.timesEncountered > 0 }.map(\.biasName))
+            biasesSeenCount = taggedBiasNames.union(progressBiasNames).count
 
             let emojiLookup = Dictionary(
                 uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) }
@@ -154,7 +166,7 @@ final class HomeViewModel {
                 .prefix(3)
                 .map { bp in
                     let score = BiasScoreService.computeScore(
-                        biasName: bp.biasName, progress: bp, taggedEvents: 0
+                        biasName: bp.biasName, progress: bp, taggedEvents: eventTagCounts[bp.biasName] ?? 0
                     )
                     let trendLabel: String
                     switch score.trend {
@@ -174,16 +186,23 @@ final class HomeViewModel {
             let descLookup = Dictionary(
                 uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.shortDescription) }
             )
-            dailyPatterns = biasProgress
-                .filter { $0.timesEncountered > 0 }
-                .compactMap { bp -> (DailyPattern, Int)? in
+            // Merge bias_progress rows with event-tag-only biases for full ranking.
+            var mergedBiases: [String: BiasProgress?] = [:]
+            for bp in biasProgress { mergedBiases[bp.biasName] = bp }
+            for tagName in taggedBiasNames where mergedBiases[tagName] == nil {
+                mergedBiases[tagName] = nil // event-tag-only bias, no progress row yet
+            }
+
+            dailyPatterns = mergedBiases
+                .filter { ($0.value?.timesEncountered ?? 0) > 0 || (eventTagCounts[$0.key] ?? 0) > 0 }
+                .compactMap { (biasName, bp) -> (DailyPattern, Int)? in
                     let score = BiasScoreService.computeScore(
-                        biasName: bp.biasName, progress: bp, taggedEvents: 0
+                        biasName: biasName, progress: bp, taggedEvents: eventTagCounts[biasName] ?? 0
                     )
-                    let oneLiner = descLookup[bp.biasName] ?? ""
+                    let oneLiner = descLookup[biasName] ?? ""
                     return (DailyPattern(
-                        emoji: emojiLookup[bp.biasName] ?? "🧠",
-                        biasName: bp.biasName,
+                        emoji: emojiLookup[biasName] ?? "🧠",
+                        biasName: biasName,
                         oneLiner: oneLiner,
                         stage: score.masteryStage,
                         score: score.score

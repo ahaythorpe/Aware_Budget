@@ -386,22 +386,36 @@ struct MoneyEventView: View {
         Button {
             Task { await batchSave(status: status) }
         } label: {
-            HStack(spacing: 10) {
-                Text(status.emoji).font(.system(size: 20))
-                Text(status.label)
-                    .font(.system(.headline, weight: .bold))
-                    .foregroundStyle(DS.goldForeground)
+            HStack(alignment: .top, spacing: 12) {
+                Text(status.emoji).font(.system(size: 22))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(status.label)
+                        .font(.system(.headline, weight: .bold))
+                        .foregroundStyle(DS.goldForeground)
+                    Text(statusDetail(status))
+                        .font(.system(.caption, weight: .medium))
+                        .foregroundStyle(DS.goldForeground.opacity(0.75))
+                }
                 Spacer()
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(DS.goldForeground.opacity(0.5))
+                    .padding(.top, 2)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 18)
             .padding(.vertical, 14)
-            .background(DS.nuggetGold, in: Capsule())
-            .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+            .background(DS.nuggetGold, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
         }
         .buttonStyle(.plain)
         .disabled(isBatchSaving)
+    }
+
+    private func statusDetail(_ status: MoneyEvent.PlannedStatus) -> String {
+        switch status {
+        case .planned:  return "I knew this was coming"
+        case .surprise: return "Didn't see it coming — external trigger"
+        case .impulse:  return "Wanted it in the moment — internal pull"
+        }
     }
 
     /// Save every staged entry to Supabase with the chosen status.

@@ -3,9 +3,12 @@ import SwiftUI
 struct AwarenessView: View {
     let patterns = allBiasPatterns
     @State private var biasProgress: [BiasProgress] = []
+    @State private var eventTagCounts: [String: Int] = [:]
 
     func triggerCount(for pattern: BiasPattern) -> Int {
-        biasProgress.first(where: { $0.biasName == pattern.name })?.timesEncountered ?? 0
+        let checkInCount = biasProgress.first(where: { $0.biasName == pattern.name })?.timesEncountered ?? 0
+        let tagCount = eventTagCounts[pattern.name] ?? 0
+        return checkInCount + tagCount
     }
 
     var triggered: [BiasPattern] { patterns.filter { triggerCount(for: $0) > 0 } }
@@ -98,6 +101,10 @@ struct AwarenessView: View {
             if let progress = try? await SupabaseService.shared.fetchBiasProgress() {
                 biasProgress = progress
             }
+            if let events = try? await SupabaseService.shared.fetchMoneyEvents(forMonth: Date()) {
+                eventTagCounts = events.compactMap(\.behaviourTag)
+                    .reduce(into: [:]) { counts, tag in counts[tag, default: 0] += 1 }
+            }
         }
     }
 
@@ -109,6 +116,10 @@ struct AwarenessView: View {
                 Text("Your money mind")
                     .font(.system(.largeTitle, weight: .bold))
                     .foregroundStyle(DS.textPrimary)
+                Text("YOUR BIAS PROFILE")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(1.5)
+                    .foregroundStyle(DS.goldBase)
                 Text("Tap any triggered pattern to hear from Nudge.")
                     .font(.system(.subheadline, weight: .medium))
                     .foregroundStyle(DS.textSecondary)
