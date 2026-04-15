@@ -38,7 +38,11 @@ final class SupabaseService {
     /// builds the user signs in via the normal flow (OTP / OAuth).
     #if DEBUG
     /// Published DEBUG auth status so views can show a diagnostic banner.
-    @MainActor static var debugAuthStatus: String = "unknown"
+    /// Uses a singleton @Observable so SwiftUI refreshes live as it updates.
+    @MainActor static var debugAuthStatus: String {
+        get { DebugAuthStatus.shared.status }
+        set { DebugAuthStatus.shared.status = newValue }
+    }
 
     func ensureDebugSession() async {
         if let uid = await currentUserId {
