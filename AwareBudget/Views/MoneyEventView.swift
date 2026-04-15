@@ -15,9 +15,11 @@ struct MoneyEventView: View {
         let category: String
         let amountLabel: String
         let amount: Double
-        let plannedStatus: MoneyEvent.PlannedStatus
-        let behaviourTag: String?
     }
+
+    @State private var showStatusSheet: Bool = false
+    @State private var isBatchSaving: Bool = false
+    @State private var lastBatchStatus: MoneyEvent.PlannedStatus? = nil
 
     private var sessionTotal: Double { sessionLog.reduce(0.0) { $0 + $1.amount } }
 
@@ -33,8 +35,6 @@ struct MoneyEventView: View {
 
             if showSessionSummary {
                 sessionSummary
-            } else if viewModel.didSave, let nudge = viewModel.nudgeResponse {
-                savedConfirmation(nudge)
             } else {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
@@ -68,6 +68,10 @@ struct MoneyEventView: View {
             rangeSheet(for: cat)
                 .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $showStatusSheet) {
+            statusSheet()
+                .presentationDetents([.medium])
+        }
     }
 
     // MARK: - Header
@@ -89,99 +93,43 @@ struct MoneyEventView: View {
 
     // MARK: - Saved confirmation (with multi-log session affordance)
 
-    private func savedConfirmation(_ nudge: NudgeMessage) -> some View {
-        VStack(spacing: 22) {
-            Spacer()
+    // savedConfirmation removed — multi-log flow handles all save paths
+    // via batchSave() + sessionSummary. Single-save path is dead code in
+    // the new UX.
 
-            ZStack {
-                Circle()
-                    .fill(DS.paleGreen)
-                    .frame(width: 100, height: 100)
-                Image(systemName: "checkmark")
-                    .font(.system(size: 44, weight: .bold))
-                    .foregroundStyle(DS.darkGreen)
-            }
+    // MARK: - Session banner + Save-all CTA
 
-            if let cat = viewModel.selectedCategory, let range = viewModel.selectedRange {
-                VStack(spacing: 4) {
-                    Text("Logged")
-                        .font(.system(.title2, weight: .bold))
-                        .foregroundStyle(DS.textPrimary)
-                    Text("\(cat.emoji) \(cat.name) · \(range.label)")
-                        .font(.system(.subheadline, weight: .medium))
-                        .foregroundStyle(DS.textSecondary)
-                }
-            }
-
-            NudgeSaysCard(message: nudge.body, surface: .whiteShimmer)
-                .padding(.horizontal, DS.hPadding)
-
-            VStack(spacing: 10) {
+    private var sessionBanner: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "list.bullet.rectangle.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(DS.goldBase)
+                Text("\(sessionLog.count) staged · $\(Int(sessionTotal))")
+                    .font(.system(.subheadline, weight: .heavy))
+                    .foregroundStyle(DS.textPrimary)
+                Spacer()
                 Button {
-                    captureSessionEntry()
-                    viewModel.reset()
+                    sessionLog.removeAll()
                 } label: {
-                    Text("Add another →")
-                }
-                .goldButtonStyle()
-
-                Button {
-                    captureSessionEntry()
-                    viewModel.reset()
-                    showSessionSummary = true
-                } label: {
-                    Text("Done with session")
-                        .font(.system(.subheadline, weight: .semibold))
-                        .foregroundStyle(DS.deepGreen)
-                        .padding(.vertical, 10)
+                    Text("Clear")
+                        .font(.system(.caption, weight: .bold))
+                        .foregroundStyle(DS.textTertiary)
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, DS.hPadding)
 
-            Spacer()
-        }
-        .transition(.opacity)
-    }
-
-    // Append the just-saved event to the local session log.
-    private func captureSessionEntry() {
-        guard let cat = viewModel.selectedCategory,
-              let range = viewModel.selectedRange,
-              let status = viewModel.plannedStatus else { return }
-        sessionLog.append(SessionEntry(
-            emoji: cat.emoji,
-            category: cat.name,
-            amountLabel: range.label,
-            amount: range.midpoint,
-            plannedStatus: status,
-            behaviourTag: viewModel.behaviourTag
-        ))
-    }
-
-    // MARK: - Session banner (appears on grid when session has entries)
-
-    private var sessionBanner: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "list.bullet.rectangle.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(DS.goldBase)
-            Text("\(sessionLog.count) logged · $\(Int(sessionTotal))")
-                .font(.system(.subheadline, weight: .heavy))
-                .foregroundStyle(DS.textPrimary)
-            Spacer()
             Button {
-                showSessionSummary = true
+                showStatusSheet = true
             } label: {
-                Text("See summary")
-                    .font(.system(.caption, weight: .bold))
-                    .foregroundStyle(DS.deepGreen)
+                Text("Save \(sessionLog.count) → pick status")
             }
-            .buttonStyle(.plain)
+            .goldButtonStyle()
         }
         .padding(14)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
         .shimmeringGoldBorder(cornerRadius: 12)
+        .premiumCardShadow()
     }
 
     // MARK: - Session summary (end-of-session screen)
@@ -252,9 +200,11 @@ struct MoneyEventView: View {
                 Text(entry.category)
                     .font(.system(.subheadline, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
-                Text(entry.plannedStatus.label)
-                    .font(.system(.caption, weight: .medium))
-                    .foregroundStyle(DS.textTertiary)
+                if let status = lastBatchStatus {
+                    Text(status.label)
+                        .font(.system(.caption, weight: .medium))
+                        .foregroundStyle(DS.textTertiary)
+                }
             }
             Spacer()
             Text(entry.amountLabel)
@@ -269,8 +219,10 @@ struct MoneyEventView: View {
         )
     }
 
+    /// Top biases now derived from suggested tag per category + applied status.
     private var topSessionBiases: [(String, Int)] {
-        let tags = sessionLog.compactMap(\.behaviourTag)
+        guard let status = lastBatchStatus else { return [] }
+        let tags = sessionLog.map { suggestedBiasTag(category: $0.category, status: status) }
         let counts = Dictionary(grouping: tags, by: { $0 }).mapValues(\.count)
         return counts.sorted { $0.value > $1.value }.prefix(3).map { ($0.key, $0.value) }
     }
@@ -332,7 +284,7 @@ struct MoneyEventView: View {
         .sensoryFeedback(.selection, trigger: isSelected)
     }
 
-    // MARK: - Range + status sheet (full mini-flow in one popup)
+    // MARK: - Range sheet (Step 1: pick amount, stage the entry)
 
     private func rangeSheet(for cat: SpendCategory) -> some View {
         let ranges = categoryRanges[cat.name] ?? []
@@ -346,7 +298,6 @@ struct MoneyEventView: View {
                 }
                 .padding(.top, 8)
 
-                // STEP 1 — range
                 VStack(alignment: .leading, spacing: 8) {
                     Text("HOW MUCH?")
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
@@ -355,29 +306,11 @@ struct MoneyEventView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                     VStack(spacing: 8) {
                         ForEach(ranges) { range in
-                            sheetRangeButton(cat: cat, range: range)
+                            stagingRangeButton(cat: cat, range: range)
                         }
                     }
                 }
                 .padding(.horizontal, 20)
-
-                // STEP 2 — planned/surprise/impulse (only after range picked)
-                if viewModel.selectedCategory?.name == cat.name && viewModel.selectedRange != nil {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("WAS THIS PLANNED?")
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .tracking(1.2)
-                            .foregroundStyle(DS.goldBase)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        VStack(spacing: 8) {
-                            ForEach(MoneyEvent.PlannedStatus.allCases) { status in
-                                sheetStatusButton(cat: cat, status: status)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
 
                 if let avg = absMonthlyAverage[cat.name] {
                     ResearchFootnote(text: "Avg $\(avg)/mo · ABS 2022–23", icon: "chart.bar.doc.horizontal")
@@ -385,62 +318,110 @@ struct MoneyEventView: View {
                 }
             }
             .padding(.bottom, 24)
-            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.selectedRange?.label)
         }
         .padding(.horizontal, 8)
         .padding(.top, 8)
         .background(DS.cardBg)
     }
 
-    private func sheetRangeButton(cat: SpendCategory, range: AmountRange) -> some View {
-        let isSelected = viewModel.selectedCategory?.name == cat.name && viewModel.selectedRange?.label == range.label
-        return Button {
-            viewModel.selectedCategory = cat
-            viewModel.selectedRange = range
-            viewModel.plannedStatus = nil
-            viewModel.behaviourTag = nil
+    /// Range button that stages an entry (does NOT save yet).
+    private func stagingRangeButton(cat: SpendCategory, range: AmountRange) -> some View {
+        Button {
+            // Stage the entry — no Supabase write yet
+            sessionLog.append(SessionEntry(
+                emoji: cat.emoji,
+                category: cat.name,
+                amountLabel: range.label,
+                amount: range.midpoint
+            ))
+            rangeSheetCategory = nil
         } label: {
             Text(range.label)
                 .font(.system(.headline, weight: .bold))
-                .foregroundStyle(isSelected ? DS.goldForeground : DS.deepGreen)
+                .foregroundStyle(DS.goldForeground)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 11)
-                .background(isSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg), in: Capsule())
-                .overlay(Capsule().stroke(isSelected ? DS.goldBase.opacity(0.5) : DS.goldSurfaceStroke, lineWidth: isSelected ? 1 : 0.5))
+                .padding(.vertical, 12)
+                .background(DS.nuggetGold, in: Capsule())
+                .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: isSelected)
+        .sensoryFeedback(.selection, trigger: false)
     }
 
-    private func sheetStatusButton(cat: SpendCategory, status: MoneyEvent.PlannedStatus) -> some View {
-        Button {
-            viewModel.plannedStatus = status
-            viewModel.onPlannedStatusSet()
-            // Auto-save then close + add to session
-            Task {
-                await viewModel.save()
-                if viewModel.didSave {
-                    captureSessionEntry()
-                    viewModel.reset()
-                    rangeSheetCategory = nil
+    // MARK: - Status sheet (Step 2: pick ONE status for all staged items, save all)
+
+    private func statusSheet() -> some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                VStack(spacing: 4) {
+                    Text("Almost there")
+                        .font(.system(.headline, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Text("How would you describe all \(sessionLog.count) of these?")
+                        .font(.system(.subheadline, weight: .regular))
+                        .foregroundStyle(DS.textSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 8)
+                .padding(.horizontal, 20)
+
+                VStack(spacing: 10) {
+                    ForEach(MoneyEvent.PlannedStatus.allCases) { status in
+                        batchStatusButton(status)
+                    }
+                }
+                .padding(.horizontal, 20)
+
+                if isBatchSaving {
+                    ProgressView()
+                        .padding(.top, 8)
                 }
             }
+            .padding(.bottom, 24)
+        }
+        .background(DS.cardBg)
+    }
+
+    private func batchStatusButton(_ status: MoneyEvent.PlannedStatus) -> some View {
+        Button {
+            Task { await batchSave(status: status) }
         } label: {
             HStack(spacing: 10) {
-                Text(status.emoji).font(.system(size: 18))
+                Text(status.emoji).font(.system(size: 20))
                 Text(status.label)
-                    .font(.system(.subheadline, weight: .bold))
+                    .font(.system(.headline, weight: .bold))
                     .foregroundStyle(DS.goldForeground)
                 Spacer()
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(DS.goldForeground.opacity(0.6))
+                    .foregroundStyle(DS.goldForeground.opacity(0.5))
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 11)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
             .background(DS.nuggetGold, in: Capsule())
             .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
         }
         .buttonStyle(.plain)
+        .disabled(isBatchSaving)
+    }
+
+    /// Save every staged entry to Supabase with the chosen status.
+    @MainActor
+    private func batchSave(status: MoneyEvent.PlannedStatus) async {
+        guard !isBatchSaving, !sessionLog.isEmpty else { return }
+        isBatchSaving = true
+        defer { isBatchSaving = false }
+
+        for entry in sessionLog {
+            viewModel.selectedCategory = SpendCategory(emoji: entry.emoji, name: entry.category)
+            viewModel.selectedRange = AmountRange(label: entry.amountLabel, midpoint: entry.amount)
+            viewModel.plannedStatus = status
+            viewModel.onPlannedStatusSet()   // auto-suggests bias tag
+            await viewModel.save()
+            viewModel.reset()
+        }
+        lastBatchStatus = status
+        showStatusSheet = false
+        showSessionSummary = true
     }
 
     // MARK: - Planned / Surprise / Impulse
