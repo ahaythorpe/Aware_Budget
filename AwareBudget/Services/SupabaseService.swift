@@ -210,6 +210,60 @@ final class SupabaseService {
         return picked
     }
 
+    /// Returns N questions tailored to the user's top-ranked biases.
+    /// Picks top-N biases by BFAS + activity score, then for each bias fetches
+    /// the least-recently-shown question. Falls back to generic next-question
+    /// if a bias has no available question. See PRD v1.2.
+    func fetchTailoredQuestions(count: Int = 4) async throws -> [Question] {
+        // 1) Rank biases by score
+        let progress = try await fetchBiasProgress()
+        let topBiases: [String] = progress
+            .map { bp -> (String, Int) in
+                let score = BiasScoreService.computeScore(
+                    biasName: bp.biasName, progress: bp, taggedEvents: 0
+                )
+                return (bp.biasName, score.score)
+            }
+            .sorted { $0.1 > $1.1 }
+            .prefix(count)
+            .map(\.0)
+
+        var picked: [Question] = []
+        let today = ISO8601DateFormatter.dateOnly.string(from: Date())
+
+        // 2) For each top bias, pick its least-recently-shown question
+        for bias in topBiases {
+            let rows: [Question] = try await client.from("question_pool")
+                .select()
+                .eq("bias_name", value: bias)
+                .order("last_shown", ascending: true, nullsFirst: true)
+                .limit(1)
+                .execute()
+                .value
+            if let q = rows.first, !picked.contains(where: { $0.id == q.id }) {
+                picked.append(q)
+                try await client.from("question_pool")
+                    .update(["last_shown": today])
+                    .eq("id", value: q.id.uuidString)
+                    .execute()
+            }
+        }
+
+        // 3) Fill remaining slots from generic pool
+        while picked.count < count {
+            do {
+                let q = try await fetchNextQuestion()
+                if !picked.contains(where: { $0.id == q.id }) {
+                    picked.append(q)
+                }
+            } catch {
+                break
+            }
+        }
+
+        return picked
+    }
+
     // MARK: - Budget months
 
     func fetchOrCreateBudgetMonth(for date: Date) async throws -> BudgetMonth {

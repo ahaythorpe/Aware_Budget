@@ -518,16 +518,10 @@ struct CheckInView: View {
 
     private func loadQuestions() async {
         do {
-            var fetched: [Question] = []
-            for _ in 0..<5 {
-                let q = try await service.fetchNextQuestion()
-                if !fetched.contains(where: { $0.id == q.id }) {
-                    fetched.append(q)
-                }
-            }
-            questions = fetched.isEmpty ? Array(QuestionPool.seed.shuffled().prefix(5)) : fetched
+            let fetched = try await service.fetchTailoredQuestions(count: 4)
+            questions = fetched.isEmpty ? Array(QuestionPool.seed.shuffled().prefix(4)) : fetched
         } catch {
-            questions = Array(QuestionPool.seed.shuffled().prefix(5))
+            questions = Array(QuestionPool.seed.shuffled().prefix(4))
         }
     }
 
