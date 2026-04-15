@@ -565,10 +565,55 @@ struct CheckInView: View {
 
         do {
             let fetched = try await service.fetchTailoredQuestions(count: 4)
-            questions = fetched.isEmpty ? Array(QuestionPool.seed.shuffled().prefix(4)) : fetched
+            if fetched.isEmpty {
+                questions = await tailoredSeedQuestions(count: 4)
+            } else {
+                questions = fetched
+            }
         } catch {
-            questions = Array(QuestionPool.seed.shuffled().prefix(4))
+            questions = await tailoredSeedQuestions(count: 4)
         }
+    }
+
+    /// Fallback when Supabase `question_pool` is empty. Ranks local seed
+    /// by top biases (from bias_progress + money-event tags) so the user
+    /// still gets tailored questions without hitting the DB.
+    private func tailoredSeedQuestions(count: Int) async -> [Question] {
+        guard let progress = try? await service.fetchBiasProgress() else {
+            return Array(QuestionPool.seed.shuffled().prefix(count))
+        }
+        let events = (try? await service.fetchMoneyEvents(forMonth: Date())) ?? []
+        let eventTagCounts: [String: Int] = events
+            .compactMap(\.behaviourTag)
+            .reduce(into: [:]) { $0[$1, default: 0] += 1 }
+
+        // Rank every bias by score.
+        let rankedBiases = progress.map { bp -> (String, Int) in
+            let score = BiasScoreService.computeScore(
+                biasName: bp.biasName, progress: bp, taggedEvents: eventTagCounts[bp.biasName] ?? 0
+            )
+            return (bp.biasName, score.score)
+        }
+        .sorted { $0.1 > $1.1 }
+        .map(\.0)
+
+        // For each top bias, find a seed question targeting it. Fill with
+        // shuffled remainder if not enough matches.
+        var picked: [Question] = []
+        for biasName in rankedBiases {
+            if let q = QuestionPool.seed.first(where: { $0.biasName == biasName && !picked.contains(where: { $0.id == $0.id }) }) {
+                picked.append(q)
+                if picked.count >= count { break }
+            }
+        }
+        if picked.count < count {
+            let fill = QuestionPool.seed
+                .filter { q in !picked.contains(where: { $0.id == q.id }) }
+                .shuffled()
+                .prefix(count - picked.count)
+            picked.append(contentsOf: fill)
+        }
+        return Array(picked.prefix(count))
     }
 
     private func loadWeeklyReviewData() async {
