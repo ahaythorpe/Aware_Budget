@@ -102,58 +102,85 @@ struct MonthCalendarView: View {
 
     private func dayPopover(_ date: Date) -> some View {
         let f = DateFormatter()
-        f.dateFormat = "EEEE, d MMMM"
+        f.dateFormat = "EEE · d MMMM"
         let key = ISO8601DateFormatter.dateOnly.string(from: date)
         let events = eventsByDay[key] ?? []
         let tagCounts = Dictionary(grouping: events.compactMap(\.behaviourTag), by: { $0 })
             .mapValues(\.count)
         let topTags = tagCounts.sorted { $0.value > $1.value }.prefix(3)
         let totalAmount = events.reduce(0.0) { $0 + $1.amount }
+        let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
 
-        return VStack(alignment: .leading, spacing: 10) {
+        return VStack(alignment: .leading, spacing: 14) {
+            // Date header
             Text(f.string(from: date))
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(.headline, weight: .bold))
                 .foregroundStyle(DS.textPrimary)
 
-            HStack(spacing: 6) {
-                Text("\(events.count)")
-                    .font(.system(size: 18, weight: .black, design: .serif))
-                    .foregroundStyle(DS.deepGreen)
-                Text(events.count == 1 ? "event" : "events")
-                    .font(.system(size: 11))
-                    .foregroundStyle(DS.textSecondary)
+            // Stats row
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(events.count)")
+                        .font(.system(size: 22, weight: .black, design: .serif))
+                        .foregroundStyle(DS.deepGreen)
+                    Text(events.count == 1 ? "EVENT" : "EVENTS")
+                        .font(.system(size: 9, weight: .heavy, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.textTertiary)
+                }
                 Spacer()
-                Text("$\(Int(totalAmount))")
-                    .font(.system(size: 14, weight: .bold, design: .serif))
-                    .foregroundStyle(DS.goldText)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("$\(Int(totalAmount))")
+                        .font(.system(size: 22, weight: .black, design: .serif))
+                        .foregroundStyle(DS.goldBase)
+                    Text("SPENT")
+                        .font(.system(size: 9, weight: .heavy, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.textTertiary)
+                }
             }
+            .padding(.horizontal, 4)
 
+            // Top 3 biases
             if !topTags.isEmpty {
-                Divider()
-                Text("TOP BIASES")
-                    .font(.system(size: 9, weight: .black))
-                    .foregroundStyle(DS.accent)
-                    .tracking(1.2)
-                ForEach(Array(topTags), id: \.key) { tag, count in
-                    HStack {
-                        Text(tag)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(DS.textPrimary)
-                        Spacer()
-                        Text("×\(count)")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(DS.textSecondary)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("TOP 3 BIASES")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .tracking(1.5)
+                        .foregroundStyle(DS.goldBase)
+
+                    VStack(spacing: 6) {
+                        ForEach(Array(topTags.enumerated()), id: \.element.key) { idx, pair in
+                            HStack(spacing: 10) {
+                                Text("\(idx + 1)")
+                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(DS.goldForeground)
+                                    .frame(width: 20, height: 20)
+                                    .background(DS.nuggetGold, in: Circle())
+                                Text(emojiLookup[pair.key] ?? "🧠")
+                                    .font(.system(size: 16))
+                                Text(pair.key)
+                                    .font(.system(.footnote, weight: .bold))
+                                    .foregroundStyle(DS.textPrimary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
+                                Spacer()
+                                Text("×\(pair.value)")
+                                    .font(.system(.caption, weight: .heavy))
+                                    .foregroundStyle(DS.deepGreen)
+                            }
+                        }
                     }
                 }
             } else {
                 Text("No bias tags that day")
-                    .font(.system(size: 11))
+                    .font(.system(.footnote, weight: .medium))
                     .foregroundStyle(DS.textTertiary)
                     .italic()
             }
         }
         .padding(14)
-        .frame(width: 220)
+        .frame(width: 260)
         .background(DS.cardBg)
     }
 
