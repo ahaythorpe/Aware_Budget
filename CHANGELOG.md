@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-04-15 — Close out §8.2: BiasDetail citation + answer-flash (Claude Code)
+
+- BiasDetailView: new "The research" section appended after "How to
+  counter it". Looks up bias name in allBiasPatterns and renders the
+  full citation in a gold pill (#FFF8E1 bg, book.closed.fill, .footnote
+  medium). Graceful fallback text when no match.
+- CheckInView: citation flash pill. On advance(), the just-answered
+  bias's keyRef is written to @State flashedCitation; the progress
+  footer cross-fades to show it for 1.6s, then reverts to the
+  "Q{n} of {total} · from BFAS assessment" subtitle. Uses the same
+  gold-tone pill style (#FFF8E1 bg, book.closed.fill DS.goldBase,
+  .caption2 semibold #8B6010).
+- DESIGN_HANDBOOK §8.2 — BiasDetail row and answer-flash row marked
+  ✅ Implemented with concrete specs.
+
+Closes out all of §8.2 credibility sprinkle points. Only smart
+time-of-day notifications remain from the original backlog.
+
+Build verified iPhone 17 Pro iOS 26.2.
+
+---
+
 ## 2026-04-15 — Check-in plan complete: tailored Qs + weekly review + sprinkle cues (Claude Code)
 
 Wraps the PRD v1.2 daily check-in architecture (steps 4 + 5) plus

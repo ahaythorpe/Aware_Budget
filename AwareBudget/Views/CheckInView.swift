@@ -14,6 +14,7 @@ struct CheckInView: View {
     @State private var weeklySpend: Double = 0
     @State private var weeklyEventCount: Int = 0
     @State private var weeklyStreak: Int = 0
+    @State private var flashedCitation: String? = nil
 
     @State private var dragOffset: CGSize = .zero
     @State private var showWhy: Bool = false
@@ -142,12 +143,28 @@ struct CheckInView: View {
                         .animation(.easeOut(duration: 0.2), value: attemptedCount)
                 }
             }
-            if !questions.isEmpty {
+            if let flashedCitation {
+                HStack(spacing: 5) {
+                    Image(systemName: "book.closed.fill")
+                        .font(.system(size: 9))
+                        .foregroundStyle(DS.goldBase)
+                    Text(flashedCitation)
+                        .font(.system(.caption2, weight: .semibold))
+                        .foregroundStyle(Color(hex: "8B6010"))
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color(hex: "FFF8E1"), in: Capsule())
+                .overlay(Capsule().stroke(DS.goldBase.opacity(0.25), lineWidth: 0.5))
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            } else if !questions.isEmpty {
                 Text("Q\(min(attemptedCount + 1, questions.count)) of \(questions.count) · from BFAS assessment")
                     .font(.system(.caption2, weight: .semibold))
                     .foregroundStyle(DS.textTertiary)
+                    .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: flashedCitation)
     }
 
     // MARK: - Card stack (2 back cards visible)
@@ -669,6 +686,18 @@ struct CheckInView: View {
     }
 
     private func advance() {
+        // Flash the citation for the question just answered
+        if currentIndex < questions.count {
+            let biasName = questions[currentIndex].biasName
+            if let citation = allBiasPatterns.first(where: { $0.name == biasName })?.keyRef {
+                flashedCitation = citation
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                    if flashedCitation == citation {
+                        flashedCitation = nil
+                    }
+                }
+            }
+        }
         attemptedCount += 1
         currentIndex += 1
         showWhy = false

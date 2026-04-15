@@ -19,6 +19,7 @@ struct BiasDetailView: View {
                     whatItIsSection
                     inRealLifeSection
                     howToCounterSection
+                    researchSection
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, DS.hPadding)
@@ -107,6 +108,39 @@ struct BiasDetailView: View {
                         .fill(DS.paleGreen)
                 )
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Research (handbook §8.2 sprinkle)
+
+    private var researchSection: some View {
+        let citation = allBiasPatterns.first(where: { $0.name == lesson.biasName })?.citation
+        return VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "The research")
+            if let citation {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "book.closed.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(DS.goldBase)
+                        .padding(.top, 2)
+                    Text(citation)
+                        .font(.system(.footnote, weight: .medium))
+                        .foregroundStyle(DS.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineSpacing(3)
+                }
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(hex: "FFF8E1"), in: RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(DS.goldBase.opacity(0.25), lineWidth: 0.5)
+                )
+            } else {
+                Text("Citation coming soon.")
+                    .font(.system(.footnote, weight: .medium))
+                    .foregroundStyle(DS.textTertiary)
+            }
         }
     }
 

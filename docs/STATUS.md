@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-15
-**Current phase:** PRD v1.2 5-step check-in architecture is complete. Daily check-in now fetches 4 questions tailored to top-ranked biases (BFAS + activity score). Sundays show a weekly review summary (top 3 biases, spend, events, streak) before the 4 questions — gated to once per ISO week via WeeklyReviewTracker. Handbook §8.2 sprinkle cues started: check-in progress footer "Q{n} of {total} · BFAS", onboarding screen 1 credibility pill "Based on 40+ years of behavioural research". PRD v1.3 4-tab app unchanged (Home · Log · Insights · Awareness). Build succeeds iPhone 17 Pro / iOS 26.2. Remaining: smart time-of-day notifications, BiasDetail citation audit, remaining §8.2 sprinkle points (answer-citation flash).
+**Current phase:** All of §8.2 credibility sprinkle cues now implemented: onboarding "40+ years" pill, check-in question footer, answer-flash citation pill (1.6s gold cross-fade), BiasDetail "The research" card, weekly review BFAS badge via NudgeSaysCard, BFAS completion caption. PRD v1.2 5-step daily check-in plan complete (tailored 4 questions + Sunday review). PRD v1.3 4-tab app stable (Home · Log · Insights · Awareness). Build succeeds iPhone 17 Pro / iOS 26.2. Remaining backlog: smart time-of-day push notifications (requires analytics of user logging times).
 
 ---
 
