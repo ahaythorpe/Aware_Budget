@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-04-15 — PLAN: master text polish pass (Claude Code)
+
+Audit after simulator screenshots (Home, Log, Insights, Awareness)
+found truncation, inconsistent sizes, invisible footnotes, and missing
+BFAS attribution on most tabs. Planning-only commit — no behaviour
+change yet.
+
+DESIGN_HANDBOOK updates:
+- §3.5 extended with a canonical role → font table (tab title, tab
+  subtitle, section label, card title, card body, card meta, research
+  footnote, empty state, caption, streak numeric). Each role locked to
+  a single semantic font.
+- §3.6 added: ResearchFootnote component spec. One canonical way to
+  render any citation anywhere — inline (icon + text) or pill
+  (#FFF8E1 bg + 0.5px gold stroke). Bumped to .footnote .semibold
+  DS.textSecondary (was .caption2 .medium DS.textTertiary).
+- §5.1 added: research footnote placement per tab. Home, Log x2,
+  Insights, Awareness, CheckIn, Onboarding.
+- §5.2 added: 5-step execution order.
+
+Next commit: execute the plan — build ResearchFootnote, fix Home
+welcome truncation, apply role table, swap citations on all 4 tabs.
+
+---
+
 ## 2026-04-15 — Close out §8.2: BiasDetail citation + answer-flash (Claude Code)
 
 - BiasDetailView: new "The research" section appended after "How to

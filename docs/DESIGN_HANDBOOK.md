@@ -130,7 +130,53 @@ SF Pro only (Apple-approved). Serif reserved for numbers where editorial/luxury 
 - Inline sizes (size: N) only for numbers (luxury serif) or the NUDGE brand label.
 - Never use `design: .serif` for body or labels. Serif is reserved for numeric emphasis.
 - All Nudge card instances must use `NudgeSaysCard`. Never reimplement.
-- This spec applies on: Home, Why, Awareness, CheckIn, Log (Money Event save button), Onboarding, SignIn, InsightFeed, Nudge cards everywhere. Do NOT use for in-body content text elsewhere unless that text is itself a button, Nudge card, or greeting.
+- All research citations must use `ResearchFootnote` (see §3.6). Never roll inline.
+- This spec applies on: Home, Why (removed, now CredibilitySheet), Awareness, CheckIn, Log, Onboarding, SignIn, InsightFeed, Nudge cards everywhere.
+
+### Canonical role → font table (locked)
+
+| Role | Font | Colour |
+|---|---|---|
+| Tab screen title | `.largeTitle .bold` | `DS.textPrimary` |
+| Tab screen subtitle | `.subheadline .medium` | `DS.textSecondary` |
+| Section label (brand) | 11pt `.rounded .heavy` tracking 1.5 uppercase | `DS.accent` |
+| Card title | `.headline .semibold` | `DS.textPrimary` |
+| Card body | `.subheadline .regular` lineSpacing 3 | `DS.textPrimary` |
+| Card subtitle / meta | `.footnote .medium` | `DS.textSecondary` |
+| Research footnote | `.footnote .semibold` (was .caption2) | `DS.textSecondary` (was .textTertiary) |
+| Empty state copy | `.subheadline .medium` | `DS.textSecondary` |
+| Caption / hint | `.caption .medium` | `DS.textTertiary` |
+| Streak / bias count numeric | `.system(size: 40, weight: .black, design: .serif)` | `DS.goldText` / `DS.deepGreen` |
+
+---
+
+## 3.6 Research footnote component
+
+All research citations (BFAS, Pompian, Kahneman, Thaler, Sunstein, ABS data source, etc.) render through a single `ResearchFootnote` view. Never inline.
+
+**API:**
+```swift
+ResearchFootnote(text: "Based on the BFAS framework · Pompian, 2012")
+ResearchFootnote(text: "ABS Household Expenditure Survey 2022–23", icon: "chart.bar.doc.horizontal")
+ResearchFootnote(text: "...", style: .pill)   // gold pill wrapper
+ResearchFootnote(text: "...", style: .inline) // default: icon + text
+```
+
+**Inline style (default):**
+- Icon: 10pt `book.closed.fill` (or passed), `DS.goldBase`
+- Text: `.footnote .semibold`, `DS.textSecondary`
+- HStack spacing 6pt, `.firstTextBaseline`
+
+**Pill style:**
+- Same icon + text
+- Wrapped in `#FFF8E1` bg Capsule, 0.5px `DS.goldBase.opacity(0.3)` stroke
+- Horizontal padding 12, vertical 7
+
+**Where to use:**
+- Under tab titles (Insights, Awareness, Log) — pill style
+- At the bottom of category/bias sections — inline
+- Inside `NudgeSaysCard` citation slot — inline (already implemented)
+- On onboarding screens — pill (already implemented)
 
 ---
 
@@ -156,6 +202,28 @@ sectionGap    20pt
 | Log (MoneyEvent) | confirmation hero | Save button | Category grid: white cards |
 | Insights | bias detail header | "Mark as noticed" button | Stage pills stay semantic |
 | Awareness | bias card active state | "Begin learning" CTA | |
+
+### 5.1 Research footnote placement per tab (locked — text polish pass)
+
+| Tab | Placement | Copy | Style |
+|---|---|---|---|
+| Home | Under Top Biases card | "BFAS · Behavioural Finance Assessment Score" | Inline |
+| Log | Under tab title | "Powered by the BFAS framework · Pompian, 2012" | Pill |
+| Log | Under category grid | "Ranges based on ABS Household Expenditure Survey 2022–23" | Inline, `chart.bar.doc.horizontal` icon |
+| Insights | Under tab title | "Patterns assessed via BFAS · Pompian, 2012" | Pill |
+| Awareness | Under awareness score bar | "Based on the BFAS framework — used in professional financial planning assessments" | Inline, readable weight |
+| CheckIn | Under progress dots | "Q N of M · from BFAS assessment" — already implemented | Inline caption |
+| Onboarding | Screen 1 under intro copy | "Based on 40+ years of behavioural research" — already implemented | Pill |
+
+### 5.2 Text polish master plan (execution order)
+
+1. **Build `ResearchFootnote` component** (new file).
+2. **Fix Home truncation bug** — welcome message `lineLimit(3)`, drop `minimumScaleFactor`.
+3. **Apply §3.5 role table** to tab titles, card titles, footnotes across Home, Log, Insights, Awareness.
+4. **Swap every inline citation** to `ResearchFootnote` (pill or inline per §5.1).
+5. **Handbook + STATUS + CHANGELOG** updated.
+
+No content changes — only rendering consistency + visibility.
 
 ---
 
