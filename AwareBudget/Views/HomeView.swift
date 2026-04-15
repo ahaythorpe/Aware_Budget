@@ -88,16 +88,14 @@ struct HomeView: View {
                                 .animation(.easeInOut(duration: 1.2), value: awarenessPercent)
                             Text("\(viewModel.biasesSeenCount)/\(totalPatterns)")
                                 .font(.system(size: 10, weight: .black, design: .serif))
-                                .foregroundStyle(DS.nuggetGold)
-                                .shimmerOverlay(duration: 5.0, intensity: 0.14)
+                                .foregroundStyle(DS.goldBase)
                         }
                         .frame(width: 54, height: 54)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text("\(Int(awarenessPercent * 100))%")
                                 .font(.system(size: 22, weight: .black, design: .serif))
-                                .foregroundStyle(DS.nuggetGold)
-                                .shimmerOverlay(duration: 5.0, intensity: 0.14)
+                                .foregroundStyle(DS.goldBase)
                             Text("Patterns\nidentified")
                                 .font(.system(.caption, weight: .medium))
                                 .foregroundStyle(DS.textSecondary)

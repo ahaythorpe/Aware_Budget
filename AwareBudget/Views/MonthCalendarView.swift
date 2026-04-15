@@ -59,8 +59,7 @@ struct MonthCalendarView: View {
                 .font(.system(.footnote, design: .rounded, weight: .heavy))
                 .tracking(1.2)
                 .textCase(.uppercase)
-                .foregroundStyle(DS.nuggetGold)
-                .shimmerOverlay(duration: 3.5, intensity: 0.3)
+                .foregroundStyle(DS.goldBase)
         }
     }
 
