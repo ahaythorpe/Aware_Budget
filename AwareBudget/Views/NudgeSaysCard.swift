@@ -12,35 +12,35 @@ struct NudgeSaysCard: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .top, spacing: 16) {
             if showCoin {
                 Image("nudge")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 44, height: 44)
+                    .frame(width: 56, height: 56)
             }
             VStack(alignment: .leading, spacing: 6) {
                 Text("NUDGE")
-                    .font(.system(size: 10, weight: .black))
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .tracking(1.5)
                     .foregroundStyle(DS.accent)
 
                 Text(message)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(.subheadline, design: .default, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                     .lineSpacing(3)
 
                 if let citation, !citation.isEmpty {
                     Text(citation)
-                        .font(.system(size: 9, weight: .semibold))
+                        .font(.system(.caption2, weight: .semibold))
                         .foregroundStyle(DS.textTertiary)
                         .padding(.top, 2)
                 }
             }
             Spacer(minLength: 0)
         }
-        .padding(16)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DS.paleGreen, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(

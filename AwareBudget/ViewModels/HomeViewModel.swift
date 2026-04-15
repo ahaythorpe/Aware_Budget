@@ -74,7 +74,7 @@ final class HomeViewModel {
 
     var todayLabel: String {
         let f = DateFormatter()
-        f.dateFormat = "EEEE, d MMMM"
+        f.dateFormat = "EEE · d MMMM"
         return f.string(from: Date())
     }
 

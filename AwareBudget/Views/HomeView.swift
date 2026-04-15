@@ -12,22 +12,27 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
 
-                // ── GREETING ──
-                HStack {
+                // ── GREETING (Nudge-branded, centered) ──
+                HStack(alignment: .center, spacing: 12) {
+                    Image("nudge")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(viewModel.welcomeMessage)
-                            .font(.system(size: 22, weight: .black, design: .serif))
-                            .foregroundColor(DS.textPrimary)
+                            .font(.system(.headline, design: .default, weight: .semibold))
+                            .foregroundStyle(DS.textPrimary)
                             .lineLimit(2)
-                            .minimumScaleFactor(0.8)
+                            .minimumScaleFactor(0.85)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(viewModel.todayLabel)
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(.system(.caption2, weight: .medium))
+                            .foregroundStyle(DS.textTertiary)
                     }
                     Spacer()
                     Image(systemName: "gearshape")
                         .font(.system(size: 18))
-                        .foregroundColor(DS.accent)
+                        .foregroundStyle(DS.accent)
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 12)

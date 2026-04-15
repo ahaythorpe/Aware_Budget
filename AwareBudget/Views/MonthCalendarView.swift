@@ -50,16 +50,17 @@ struct MonthCalendarView: View {
     private var header: some View {
         let f = DateFormatter()
         f.dateFormat = "MMMM yyyy"
-        return HStack {
+        let total = eventsByDay.values.flatMap { $0 }.count
+        return HStack(alignment: .firstTextBaseline) {
             Text(f.string(from: Date()))
-                .font(.system(size: 16, weight: .black, design: .serif))
+                .font(.system(.headline, design: .default, weight: .semibold))
                 .foregroundStyle(DS.textPrimary)
             Spacer()
-            Text("\(eventsByDay.values.flatMap { $0 }.count) events")
-                .font(.system(size: 10, weight: .semibold))
+            Text("\(total) \(total == 1 ? "event" : "events")")
+                .font(.system(.caption2, weight: .semibold))
                 .foregroundStyle(DS.textTertiary)
                 .textCase(.uppercase)
-                .tracking(0.8)
+                .tracking(1.0)
         }
     }
 
