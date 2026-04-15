@@ -25,10 +25,21 @@ extension Color {
 typealias DesignSystem = DS
 
 enum DS {
-    static let cardRadius: CGFloat = 20
+    // Locked sizing tokens (handbook §3.5 F-rules)
+    static let cardRadius: CGFloat = 20          // primary cards (greeting, Top Biases, Nudge)
+    static let smallCardRadius: CGFloat = 14     // secondary cards (bias rows, stat cards)
     static let buttonRadius: CGFloat = 14
     static let hPadding: CGFloat = 16
     static let sectionGap: CGFloat = 20
+
+    // Button heights (F3)
+    static let buttonHeight: CGFloat = 44
+    static let primaryButtonHeight: CGFloat = 52
+
+    // Locked animation durations (F6)
+    static let animEase: Double = 0.2
+    static let animSpring: Double = 0.35
+    static let animProgress: Double = 1.2
 
     // Money green palette
     static let primary    = Color(hex: "2E7D32")   // hero cards, nav

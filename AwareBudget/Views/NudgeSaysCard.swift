@@ -72,6 +72,14 @@ struct NudgeSaysCard: View {
             }
         }
         .modifier(OptionalShimmerBorder(enabled: useShimmerBorder, radius: DS.cardRadius))
+        .modifier(OptionalShadow(enabled: useShimmerBorder))
+    }
+}
+
+private struct OptionalShadow: ViewModifier {
+    let enabled: Bool
+    func body(content: Content) -> some View {
+        if enabled { content.premiumCardShadow() } else { content }
     }
 }
 

@@ -45,6 +45,7 @@ struct HomeView: View {
                 .padding(16)
                 .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
                 .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+                .premiumCardShadow()
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
                 .padding(.bottom, 14)
@@ -103,6 +104,7 @@ struct HomeView: View {
                     .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
                     .overlay(RoundedRectangle(cornerRadius: DS.cardRadius)
                         .stroke(DS.accent.opacity(0.15), lineWidth: 0.5))
+                    .premiumCardShadow()
                 }
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)

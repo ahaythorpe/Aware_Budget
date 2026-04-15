@@ -39,6 +39,7 @@ struct MonthCalendarView: View {
         .padding(16)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .premiumCardShadow()
         .popover(item: $selectedDay) { day in
             dayPopover(day.date)
                 .presentationCompactAdaptation(.popover)
