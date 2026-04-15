@@ -273,9 +273,9 @@ On the `TopBiasesCard` header, insert a small `info.circle.fill` icon (14pt, `DS
 
 | Surface | Cue |
 |---|---|
-| Onboarding screen 1 | "Based on 40+ years of behavioural research" tag under hero |
-| Check-in question screen | Footer "Q{n} of {total} · from BFAS assessment" (`.caption2` `.medium` `DS.textTertiary`) |
-| After answer submitted | Citation pill flashes briefly (300ms fade) — `#FFF8E1` bg, `book.closed.fill` + citation text |
+| Onboarding screen 1 | ✅ Implemented. Pill capsule under intro copy on the dark hero: white-opacity 0.12 bg, 0.5px white-opacity 0.2 stroke, `book.closed.fill` 10pt `DS.goldText` + `.caption2 .semibold` text "Based on 40+ years of behavioural research". |
+| Check-in question screen | ✅ Implemented. Footer under progress dots: "Q{n} of {total} · from BFAS assessment" (`.caption2 .semibold` `DS.textTertiary`). Updates as user advances. |
+| After answer submitted | Citation pill flashes briefly (300ms fade) — `#FFF8E1` bg, `book.closed.fill` + citation text · **pending** |
 | BiasDetail | Full citation card (audit if present, add if not) |
 | Weekly review | "Reviewed by the BFAS framework" badge on summary header |
 | BFAS completion | "Your baseline is set. Based on Pompian, 2012." caption |

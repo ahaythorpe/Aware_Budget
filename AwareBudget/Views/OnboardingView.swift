@@ -42,6 +42,20 @@ struct OnboardingView: View {
                         .foregroundStyle(.white.opacity(0.8))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "book.closed.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(DS.goldText)
+                        Text("Based on 40+ years of behavioural research")
+                            .font(.system(.caption2, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Color.white.opacity(0.12), in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 0.5))
+                    .padding(.top, 6)
                 }
 
                 Spacer()

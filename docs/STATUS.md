@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-15
-**Current phase:** PRD v1.3 — 4-tab app (Home · Log · Insights · Awareness). Why tab removed; all its content absorbed into the 10-section CredibilitySheet reached from Home Top Biases ⓘ (hero, idea, comparison table, ranking bullets, stage legend, BFAS framework, citations, "You're not broken" hero, Nudge says, Got it CTA). Typography fully SF Pro semantic, DS tokens enforced. Next queued: BFAS assessment backend wiring (step 3c — requires user-run Supabase migration). Build succeeds iPhone 17 Pro / iOS 26.2.
+**Current phase:** PRD v1.2 5-step check-in architecture is complete. Daily check-in now fetches 4 questions tailored to top-ranked biases (BFAS + activity score). Sundays show a weekly review summary (top 3 biases, spend, events, streak) before the 4 questions — gated to once per ISO week via WeeklyReviewTracker. Handbook §8.2 sprinkle cues started: check-in progress footer "Q{n} of {total} · BFAS", onboarding screen 1 credibility pill "Based on 40+ years of behavioural research". PRD v1.3 4-tab app unchanged (Home · Log · Insights · Awareness). Build succeeds iPhone 17 Pro / iOS 26.2. Remaining: smart time-of-day notifications, BiasDetail citation audit, remaining §8.2 sprinkle points (answer-citation flash).
 
 ---
 

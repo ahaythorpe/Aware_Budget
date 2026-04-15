@@ -133,12 +133,19 @@ struct CheckInView: View {
     // MARK: - Progress dots
 
     private var progressDots: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<max(questions.count, 1), id: \.self) { i in
-                Circle()
-                    .fill(i < attemptedCount ? DS.accent : DS.textTertiary.opacity(0.3))
-                    .frame(width: 8, height: 8)
-                    .animation(.easeOut(duration: 0.2), value: attemptedCount)
+        VStack(spacing: 6) {
+            HStack(spacing: 8) {
+                ForEach(0..<max(questions.count, 1), id: \.self) { i in
+                    Circle()
+                        .fill(i < attemptedCount ? DS.accent : DS.textTertiary.opacity(0.3))
+                        .frame(width: 8, height: 8)
+                        .animation(.easeOut(duration: 0.2), value: attemptedCount)
+                }
+            }
+            if !questions.isEmpty {
+                Text("Q\(min(attemptedCount + 1, questions.count)) of \(questions.count) · from BFAS assessment")
+                    .font(.system(.caption2, weight: .semibold))
+                    .foregroundStyle(DS.textTertiary)
             }
         }
     }

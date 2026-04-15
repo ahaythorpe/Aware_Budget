@@ -5,6 +5,44 @@
 
 ---
 
+## 2026-04-15 — Check-in plan complete: tailored Qs + weekly review + sprinkle cues (Claude Code)
+
+Wraps the PRD v1.2 daily check-in architecture (steps 4 + 5) plus
+first pass of §8.2 credibility sprinkle points.
+
+Step 4 — tailored daily questions:
+- New SupabaseService.fetchTailoredQuestions(count:). Ranks biases
+  by BiasScoreService.computeScore (BFAS weight + activity), then
+  for each top bias pulls the least-recently-shown question. Falls
+  back to fetchNextQuestion for unfilled slots. Updates last_shown
+  as it picks.
+- CheckInView.loadQuestions switched to fetchTailoredQuestions(4).
+  Offline fallback kept (QuestionPool.seed.shuffled().prefix(4)).
+
+Step 5 — Sunday weekly review:
+- New WeeklyReviewTracker (Services): isDueNow() true iff Sunday AND
+  current ISO week not marked done; markDone() stores "YYYY-WW" in
+  UserDefaults.
+- New WeeklyReviewSummary view: hero ("Your week in patterns" + ISO
+  week range) / 3-stat grid ($ spent / events / streak) / top 3 biases
+  with stage pills / NudgeSaysCard commentary / gold "Begin 4
+  questions →" CTA.
+- CheckInView wires the tracker: on load, if due, fetches week events,
+  today's check-in, bias progress → shows the summary first.
+
+Sprinkle cues (handbook §8.2):
+- Check-in progress dots now show "Q{n} of {total} · from BFAS
+  assessment" subtitle — surfaces the research pedigree on every
+  question.
+- Onboarding screen 1 gets a research credibility pill directly under
+  the intro copy: "Based on 40+ years of behavioural research" with
+  book.closed.fill icon. White-opacity capsule against the dark green
+  hero.
+
+Build verified iPhone 17 Pro iOS 26.2 — BUILD SUCCEEDED.
+
+---
+
 ## 2026-04-15 — Why tab absorbed into CredibilitySheet; 4-tab app (Claude Code)
 
 PRD v1.3. All Why tab content merged into the expandable CredibilitySheet
