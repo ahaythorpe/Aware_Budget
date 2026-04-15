@@ -3,6 +3,11 @@ import SwiftUI
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var showCredibility = false
+    @State private var showDevMenu = false
+    @State private var previewOnboarding = false
+    @State private var previewBFAS = false
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
     let totalPatterns = 16
 
     var awarenessPercent: Double {
@@ -18,7 +23,7 @@ struct HomeView: View {
                     Image("nudge")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 44, height: 44)
+                        .frame(width: 52, height: 52)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(viewModel.welcomeMessage)
                             .font(.system(.headline, design: .default, weight: .semibold))
@@ -31,9 +36,12 @@ struct HomeView: View {
                             .foregroundStyle(DS.textSecondary)
                     }
                     Spacer(minLength: 8)
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 18))
-                        .foregroundStyle(DS.deepGreen)
+                    Button { showDevMenu = true } label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 18))
+                            .foregroundStyle(DS.deepGreen)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(16)
                 .background(DS.paleGreen, in: RoundedRectangle(cornerRadius: DS.cardRadius))
@@ -148,5 +156,101 @@ struct HomeView: View {
         .sheet(isPresented: $showCredibility) {
             CredibilitySheet()
         }
+        .sheet(isPresented: $showDevMenu) {
+            devMenu
+        }
+        .fullScreenCover(isPresented: $previewOnboarding) {
+            OnboardingView(hasCompletedOnboarding: .constant(false))
+                .overlay(alignment: .topTrailing) {
+                    Button("Close") { previewOnboarding = false }
+                        .font(.system(.caption, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.black.opacity(0.35), in: Capsule())
+                        .padding(.top, 60)
+                        .padding(.trailing, 16)
+                }
+        }
+        .fullScreenCover(isPresented: $previewBFAS) {
+            BFASAssessmentView { _ in previewBFAS = false }
+                .overlay(alignment: .topTrailing) {
+                    Button("Close") { previewBFAS = false }
+                        .font(.system(.caption, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(DS.cardBg, in: Capsule())
+                        .padding(.top, 60)
+                        .padding(.trailing, 16)
+                }
+        }
+    }
+
+    private var devMenu: some View {
+        NavigationStack {
+            List {
+                Section("Preview flows") {
+                    Button {
+                        showDevMenu = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            previewOnboarding = true
+                        }
+                    } label: {
+                        Label("Preview OnboardingView", systemImage: "rectangle.stack")
+                    }
+                    Button {
+                        showDevMenu = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            previewBFAS = true
+                        }
+                    } label: {
+                        Label("Preview BFAS assessment", systemImage: "list.bullet.clipboard")
+                    }
+                }
+                Section("Reset flags") {
+                    Button("Reset onboarding + BFAS", role: .destructive) {
+                        hasCompletedOnboarding = false
+                        hasCompletedBFAS = false
+                        showDevMenu = false
+                    }
+                    Button("Reset weekly review flag") {
+                        UserDefaults.standard.removeObject(forKey: "weeklyReviewDone")
+                        showDevMenu = false
+                    }
+                    Button("Reset demo data seed flag") {
+                        UserDefaults.standard.removeObject(forKey: "demoDataSeeded")
+                        showDevMenu = false
+                    }
+                }
+                Section("State") {
+                    HStack {
+                        Text("Onboarding")
+                        Spacer()
+                        Text(hasCompletedOnboarding ? "Done" : "Pending")
+                            .foregroundStyle(DS.textSecondary)
+                    }
+                    HStack {
+                        Text("BFAS assessment")
+                        Spacer()
+                        Text(hasCompletedBFAS ? "Done" : "Pending")
+                            .foregroundStyle(DS.textSecondary)
+                    }
+                }
+                Section {
+                    Text("DEBUG builds skip onboarding + BFAS and go straight to Home. Reset flags above, then cold-launch the app from Xcode (⌘R) to preview the gated flows.")
+                        .font(.system(.footnote, weight: .regular))
+                        .foregroundStyle(DS.textSecondary)
+                }
+            }
+            .navigationTitle("Dev")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showDevMenu = false }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 }
