@@ -1,0 +1,191 @@
+import SwiftUI
+
+/// Plain-English explanation of how the bias suggestion + ranking algorithm
+/// works. Opened from the info button on the Most Triggered Pattern card
+/// (and anywhere else the user might ask "how did you decide this?").
+struct AlgorithmExplainerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                hero
+                stepsCard
+                scoringCard
+                awarenessCard
+                citationCard
+                cta
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 32)
+        }
+        .background(DS.bg.ignoresSafeArea())
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    // MARK: - Hero
+
+    private var hero: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(systemName: "brain.head.profile")
+                .font(.system(size: 44))
+                .foregroundStyle(DS.goldBase)
+
+            Text("How Nudge decides")
+                .font(.system(.largeTitle, weight: .bold))
+                .foregroundStyle(.white)
+                .shadow(color: DS.deepGreen.opacity(0.7), radius: 3, x: 0, y: 1)
+
+            Text("A plain-English walk-through of the bias suggestion and ranking.")
+                .font(.system(.subheadline, weight: .medium))
+                .foregroundStyle(.white.opacity(0.85))
+                .shadow(color: DS.deepGreen.opacity(0.6), radius: 2, x: 0, y: 1)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .fill(DS.heroGradient)
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase, lineWidth: 1)
+        )
+    }
+
+    // MARK: - Steps
+
+    private var stepsCard: some View {
+        sectionCard(title: "STEP BY STEP") {
+            VStack(alignment: .leading, spacing: 14) {
+                step(1, "You pick a category (e.g. Coffee), a range, and a reason (Planned / Surprise / Impulse).")
+                step(2, "Nudge suggests a bias based on your combination — for example, Coffee + Impulse → Status Quo Bias (habitual choice).")
+                step(3, "The event is saved with that suggested tag. Every save nudges that bias up in your ranking.")
+                step(4, "Your BFAS baseline (the 16 questions on first open) seeds each bias with 0–10. Your actual spending overrides that over time.")
+            }
+        }
+    }
+
+    private func step(_ n: Int, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            ZStack {
+                Circle().fill(DS.nuggetGold).frame(width: 26, height: 26)
+                Text("\(n)")
+                    .font(.system(.footnote, weight: .heavy))
+                    .foregroundStyle(DS.goldForeground)
+            }
+            Text(text)
+                .font(.system(.subheadline, weight: .regular))
+                .foregroundStyle(DS.textPrimary)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
+        }
+    }
+
+    // MARK: - Scoring
+
+    private var scoringCard: some View {
+        sectionCard(title: "HOW THE SCORE MOVES") {
+            VStack(alignment: .leading, spacing: 10) {
+                scoreRow("⬆ Each tagged event", "+3 to that bias")
+                scoreRow("⬆ Each YES check-in answer", "+2")
+                scoreRow("⬇ Each NO check-in answer", "−1 (pattern weakening)")
+                scoreRow("⬆ BFAS baseline at signup", "0–10 one-time seed")
+                Divider().background(DS.accent.opacity(0.15))
+                Text("Higher score = pattern is active in your life right now. Lower score = you're already aware and overriding it.")
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func scoreRow(_ label: String, _ value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(.subheadline, weight: .semibold))
+                .foregroundStyle(DS.textPrimary)
+            Spacer()
+            Text(value)
+                .font(.system(.subheadline, weight: .heavy))
+                .foregroundStyle(DS.goldBase)
+        }
+    }
+
+    // MARK: - Awareness reduces score
+
+    private var awarenessCard: some View {
+        sectionCard(title: "AWARENESS REDUCES THE SCORE") {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("The more you recognise a pattern yourself, the lower it ranks.")
+                    .font(.system(.body, weight: .semibold))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("If you can identify what's driving a decision, you can override it. That's why your mastery stage moves Unseen → Noticed → Emerging → Active → Aware as you correctly flag your patterns in check-ins.")
+                    .font(.system(.footnote, weight: .regular))
+                    .foregroundStyle(DS.textSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Coming soon: after each session, you can review each logged bias and confirm or re-tag it. Correct self-identification = stronger awareness signal.")
+                    .font(.system(.caption, weight: .semibold))
+                    .foregroundStyle(Color(hex: "8B6010"))
+                    .italic()
+                    .padding(.top, 4)
+            }
+        }
+    }
+
+    // MARK: - Citation
+
+    private var citationCard: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "book.closed.fill")
+                .font(.system(size: 11))
+                .foregroundStyle(DS.goldBase)
+            Text("Based on BFAS · Pompian, 2012 · with scoring adapted from Kahneman & Tversky (1979).")
+                .font(.system(.footnote, weight: .semibold))
+                .foregroundStyle(DS.textSecondary)
+        }
+        .padding(14)
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.goldSurfaceStroke, lineWidth: 0.5))
+    }
+
+    // MARK: - CTA
+
+    private var cta: some View {
+        Button { dismiss() } label: { Text("Got it") }
+            .goldButtonStyle()
+    }
+
+    // MARK: - Section card helper
+
+    @ViewBuilder
+    private func sectionCard<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.5)
+                .foregroundStyle(DS.goldBase)
+            content()
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+                .premiumCardShadow()
+        }
+    }
+}
+
+#Preview {
+    AlgorithmExplainerSheet()
+}

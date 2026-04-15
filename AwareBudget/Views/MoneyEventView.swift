@@ -22,6 +22,7 @@ struct MoneyEventView: View {
     @State private var isBatchSaving: Bool = false
     /// Tracks which range is currently picked in the popup (before status is picked)
     @State private var pendingRange: AmountRange? = nil
+    @State private var showAlgoExplainer: Bool = false
 
     private var sessionTotal: Double { sessionLog.reduce(0.0) { $0 + $1.amount } }
 
@@ -70,6 +71,9 @@ struct MoneyEventView: View {
             rangeSheet(for: cat)
                 .presentationDetents([.medium, .large])
                 .onDisappear { pendingRange = nil }
+        }
+        .sheet(isPresented: $showAlgoExplainer) {
+            AlgorithmExplainerSheet()
         }
     }
 
@@ -179,10 +183,19 @@ struct MoneyEventView: View {
         let citation: String = allBiasPatterns.first(where: { $0.name == name })?.keyRef ?? ""
 
         return VStack(alignment: .leading, spacing: 16) {
-            Text("MOST TRIGGERED PATTERN")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .tracking(1.5)
-                .foregroundStyle(Color(hex: "8B6010"))
+            HStack(spacing: 6) {
+                Text("MOST TRIGGERED PATTERN")
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.5)
+                    .foregroundStyle(Color(hex: "8B6010"))
+                Button { showAlgoExplainer = true } label: {
+                    Image(systemName: "info.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color(hex: "8B6010"))
+                }
+                .buttonStyle(.plain)
+                Spacer()
+            }
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(name)
@@ -240,12 +253,12 @@ struct MoneyEventView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .fill(DS.nuggetGold)
-                .shimmerOverlay(duration: 4.0, intensity: 0.28)
+                .fill(DS.goldSurfaceBg)
+                .shimmerOverlay(duration: 5.5, intensity: 0.14)
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.goldBase, lineWidth: 1.5)
+                .stroke(DS.goldBase.opacity(0.5), lineWidth: 1)
         )
         .premiumCardShadow()
     }
