@@ -333,6 +333,44 @@ final class SupabaseService {
                 .execute()
         }
     }
+
+    /// Saves 16 BFAS baseline answers. YES -> bfas_weight 7, NO -> 2.
+    /// Upserts by (user_id, bias_name): updates existing row or inserts new.
+    func saveBFASAssessment(answers: [String: Bool]) async throws {
+        guard let uid = await currentUserId else { return }
+
+        let existing: [BiasProgress] = try await client.from("user_bias_progress")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .execute()
+            .value
+        let existingByBias = Dictionary(uniqueKeysWithValues: existing.map { ($0.biasName, $0) })
+
+        for (biasName, yes) in answers {
+            let weight = yes ? 7 : 2
+            if let row = existingByBias[biasName] {
+                try await client.from("user_bias_progress")
+                    .update(["bfas_weight": AnyJSON.integer(weight)])
+                    .eq("id", value: row.id.uuidString)
+                    .execute()
+            } else {
+                let new = BiasProgress(
+                    id: UUID(),
+                    userId: uid,
+                    biasName: biasName,
+                    timesEncountered: 0,
+                    timesReflected: 0,
+                    firstSeen: nil,
+                    lastSeen: nil,
+                    createdAt: Date(),
+                    bfasWeight: weight
+                )
+                try await client.from("user_bias_progress")
+                    .insert(new)
+                    .execute()
+            }
+        }
+    }
 }
 
 // MARK: - BiasProgress model
@@ -346,6 +384,7 @@ struct BiasProgress: Identifiable, Codable, Hashable {
     var firstSeen: Date?
     var lastSeen: Date?
     var createdAt: Date
+    var bfasWeight: Int
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -356,6 +395,32 @@ struct BiasProgress: Identifiable, Codable, Hashable {
         case firstSeen = "first_seen"
         case lastSeen = "last_seen"
         case createdAt = "created_at"
+        case bfasWeight = "bfas_weight"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        userId = try c.decode(UUID.self, forKey: .userId)
+        biasName = try c.decode(String.self, forKey: .biasName)
+        timesEncountered = try c.decode(Int.self, forKey: .timesEncountered)
+        timesReflected = try c.decode(Int.self, forKey: .timesReflected)
+        firstSeen = try c.decodeIfPresent(Date.self, forKey: .firstSeen)
+        lastSeen = try c.decodeIfPresent(Date.self, forKey: .lastSeen)
+        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        bfasWeight = try c.decodeIfPresent(Int.self, forKey: .bfasWeight) ?? 0
+    }
+
+    init(id: UUID, userId: UUID, biasName: String, timesEncountered: Int, timesReflected: Int, firstSeen: Date?, lastSeen: Date?, createdAt: Date, bfasWeight: Int = 0) {
+        self.id = id
+        self.userId = userId
+        self.biasName = biasName
+        self.timesEncountered = timesEncountered
+        self.timesReflected = timesReflected
+        self.firstSeen = firstSeen
+        self.lastSeen = lastSeen
+        self.createdAt = createdAt
+        self.bfasWeight = bfasWeight
     }
 }
 

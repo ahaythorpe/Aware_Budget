@@ -102,9 +102,11 @@ enum BiasScoreService {
         for _ in 0..<yesCount { recentAnswers.append(true) }
         for _ in 0..<noCount { recentAnswers.append(false) }
 
+        let bfasWeight = progress?.bfasWeight ?? 0
         let score = (yesCount * yesWeight)
             + (noCount * noWeight)
             + (taggedEvents * taggedWeight)
+            + bfasWeight
 
         let stage = calculateStage(score: score, recentAnswers: recentAnswers)
         let trend = calculateTrend(recentAnswers: recentAnswers)
