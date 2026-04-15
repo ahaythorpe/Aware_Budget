@@ -173,37 +173,40 @@ struct MoneyEventView: View {
     }
 
     /// Full card: most-triggered pattern + why + how to combat.
+    /// Gold surface with thick black heading for emphasis.
     private func mostTriggeredPatternCard(name: String, count: Int) -> some View {
         let insight = driverInsights[name]
         let citation: String = allBiasPatterns.first(where: { $0.name == name })?.keyRef ?? ""
 
-        return VStack(alignment: .leading, spacing: 14) {
+        return VStack(alignment: .leading, spacing: 16) {
             Text("MOST TRIGGERED PATTERN")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(DS.goldBase)
+                .foregroundStyle(Color(hex: "8B6010"))
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(name)
-                    .font(.system(.title3, weight: .bold))
-                    .foregroundStyle(DS.textPrimary)
+                    .font(.system(.largeTitle, weight: .black))
+                    .foregroundStyle(.black)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(2)
                 Spacer()
                 Text("×\(count)")
-                    .font(.system(.headline, weight: .heavy))
-                    .foregroundStyle(DS.goldBase)
+                    .font(.system(.title2, weight: .black))
+                    .foregroundStyle(DS.goldForeground)
             }
 
             if let insight {
-                Divider().background(DS.accent.opacity(0.15))
+                Divider().background(DS.goldBase.opacity(0.3))
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text("WHAT THIS MEANS")
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .tracking(1.2)
-                        .foregroundStyle(DS.accent)
+                        .foregroundStyle(DS.deepGreen)
                     Text(insight.means)
-                        .font(.system(.subheadline, weight: .regular))
-                        .foregroundStyle(DS.textPrimary)
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(.black)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -212,24 +215,38 @@ struct MoneyEventView: View {
                     Text("HOW TO COMBAT IT")
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .tracking(1.2)
-                        .foregroundStyle(DS.goldBase)
+                        .foregroundStyle(Color(hex: "8B6010"))
                     Text(insight.fix)
-                        .font(.system(.subheadline, weight: .regular))
-                        .foregroundStyle(DS.textPrimary)
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(.black)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
             if !citation.isEmpty {
-                ResearchFootnote(text: citation)
-                    .padding(.top, 2)
+                HStack(spacing: 6) {
+                    Image(systemName: "book.closed.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color(hex: "8B6010"))
+                    Text(citation)
+                        .font(.system(.footnote, weight: .semibold))
+                        .foregroundStyle(Color(hex: "8B6010"))
+                }
+                .padding(.top, 2)
             }
         }
-        .padding(16)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .fill(DS.goldSurfaceBg)
+                .shimmerOverlay(duration: 5.0, intensity: 0.18)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.5), lineWidth: 1)
+        )
         .premiumCardShadow()
     }
 
