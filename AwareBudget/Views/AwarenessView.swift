@@ -11,8 +11,31 @@ struct AwarenessView: View {
     var triggered: [BiasPattern] { patterns.filter { triggerCount(for: $0) > 0 } }
     var awarenessScore: Int { triggered.count }
 
-    // Category label icon (single consistent brand icon, not per-category emoji).
-    private let categoryIcon = "sparkle"
+    /// Per-category SF Symbol — rendered in gold on the category pill.
+    private func icon(for category: String) -> String {
+        switch category.lowercased() {
+        case "avoidance":         return "eye.slash"
+        case "decision making":   return "arrow.triangle.branch"
+        case "money psychology":  return "brain.head.profile"
+        case "time perception":   return "hourglass"
+        case "social":            return "person.2.fill"
+        case "defaults & habits": return "arrow.clockwise"
+        default:                  return "sparkle"
+        }
+    }
+
+    /// Category-level BFAS anchor (short attribution under the pill).
+    private func anchor(for category: String) -> String {
+        switch category.lowercased() {
+        case "avoidance":         return "Pompian 2012 · Ch. 4"
+        case "decision making":   return "Kahneman 2011 · Thinking Fast & Slow"
+        case "money psychology":  return "Thaler 1985 · Mental Accounting"
+        case "time perception":   return "Laibson 1997 · Hyperbolic Discounting"
+        case "social":            return "Cialdini 1984 · Influence"
+        case "defaults & habits": return "Samuelson & Zeckhauser 1988"
+        default:                  return "Pompian 2012"
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -35,9 +58,9 @@ struct AwarenessView: View {
                 )
                 .padding(.horizontal, 18)
 
-                // ── CATEGORIES ──
+                // ── CATEGORIES (with mid-tab BFAS callouts every 2 sections) ──
                 VStack(alignment: .leading, spacing: 18) {
-                    ForEach(biasCategories, id: \.name) { category in
+                    ForEach(Array(biasCategories.enumerated()), id: \.element.name) { index, category in
                         VStack(alignment: .leading, spacing: 8) {
                             categoryHeader(category.name)
                                 .padding(.horizontal, 18)
@@ -45,6 +68,24 @@ struct AwarenessView: View {
                                 BiasAwarenessCard(pattern: pattern, triggerCount: triggerCount(for: pattern))
                                     .padding(.horizontal, 18)
                             }
+                        }
+
+                        // After every 2nd + 4th category
+                        if index == 1 {
+                            bfasCallout(
+                                "These 16 patterns come from the Behavioural Finance Assessment Score — the same framework used by professional financial planners.",
+                                cite: "Pompian, 2012"
+                            )
+                            .padding(.horizontal, 18)
+                            .padding(.top, 6)
+                        }
+                        if index == 3 {
+                            bfasCallout(
+                                "Noticing a pattern is the first step. The algorithm tracks what you recognise — not what you avoid.",
+                                cite: "Kahneman & Tversky, 1979"
+                            )
+                            .padding(.horizontal, 18)
+                            .padding(.top, 6)
                         }
                     }
                 }
@@ -133,20 +174,55 @@ struct AwarenessView: View {
 
     // MARK: - Category header (gold pill)
 
-    private func categoryHeader(_ name: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: categoryIcon)
-                .font(.system(size: 12, weight: .heavy))
-                .foregroundStyle(DS.goldBase)
-            Text(name.uppercased())
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .tracking(1.5)
-                .foregroundStyle(DS.goldBase)
+    // MARK: - Mid-tab BFAS callout (gold statement card, not a button)
+
+    private func bfasCallout(_ text: String, cite: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(text)
+                .font(.system(.subheadline, weight: .semibold))
+                .italic()
+                .foregroundStyle(DS.textPrimary)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 6) {
+                Image(systemName: "book.closed.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(DS.goldBase)
+                Text("— \(cite)")
+                    .font(.system(.caption2, weight: .heavy))
+                    .foregroundStyle(DS.goldBase)
+            }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(DS.cardBg, in: Capsule())
-        .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
+        )
+    }
+
+    private func categoryHeader(_ name: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: icon(for: name))
+                    .font(.system(size: 12, weight: .heavy))
+                    .foregroundStyle(DS.goldBase)
+                Text(name.uppercased())
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.5)
+                    .foregroundStyle(DS.goldBase)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(DS.cardBg, in: Capsule())
+            .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+
+            Text(anchor(for: name))
+                .font(.system(.caption2, weight: .semibold))
+                .foregroundStyle(DS.onDarkSecondary)
+                .padding(.leading, 14)
+        }
     }
 }
 
@@ -183,6 +259,8 @@ struct BiasAwarenessCard: View {
                         .foregroundStyle(DS.textSecondary)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
+                    ResearchFootnote(text: pattern.keyRef)
+                        .padding(.top, 2)
                 }
 
                 Spacer()
