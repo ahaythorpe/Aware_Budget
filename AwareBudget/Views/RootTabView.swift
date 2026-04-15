@@ -5,6 +5,7 @@ enum RootTab: Int, Hashable {
     case log = 1
     case insights = 2
     case awareness = 3
+    case research = 4
 }
 
 struct RootTabView: View {
@@ -24,6 +25,9 @@ struct RootTabView: View {
             NavigationStack { AwarenessView() }
                 .tabItem { Label("Awareness", systemImage: "brain.head.profile") }
                 .tag(RootTab.awareness)
+            NavigationStack { ResearchView() }
+                .tabItem { Label("Research", systemImage: "book.closed.fill") }
+                .tag(RootTab.research)
         }
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarBackground(DS.cardBg, for: .tabBar)
