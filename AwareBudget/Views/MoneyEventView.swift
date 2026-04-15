@@ -306,16 +306,9 @@ struct MoneyEventView: View {
                 }
 
                 if let inline = viewModel.nudgeInline {
-                    HStack(alignment: .top, spacing: 10) {
-                        NudgeAvatar(size: 28)
-                        Text(inline)
-                            .font(.system(size: 13))
-                            .foregroundStyle(DS.textSecondary)
-                    }
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(DS.paleGreen)
+                    NudgeSaysCard(
+                        message: inline,
+                        surface: .whiteShimmer
                     )
                 }
 
@@ -323,12 +316,8 @@ struct MoneyEventView: View {
                     driverInsightCard(tag: tag, insight: insight)
                         .transition(.move(edge: .top).combined(with: .opacity))
 
-                    Text(biasCitation(for: tag))
-                        .font(.system(size: 9))
-                        .italic()
-                        .foregroundStyle(DS.textTertiary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
+                    ResearchFootnote(text: biasCitation(for: tag))
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
         }
@@ -378,14 +367,8 @@ struct MoneyEventView: View {
             }
             .padding(14)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(DS.cardBg)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
-                )
-        )
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shimmeringGoldBorder(cornerRadius: 12)
     }
 
     // MARK: - Save

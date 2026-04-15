@@ -55,10 +55,11 @@ struct MonthCalendarView: View {
                 .foregroundStyle(DS.textPrimary)
             Spacer()
             Text("\(total) \(total == 1 ? "event" : "events")")
-                .font(.system(.caption2, weight: .semibold))
-                .foregroundStyle(DS.goldBase)
+                .font(.system(.footnote, design: .rounded, weight: .heavy))
+                .tracking(1.2)
                 .textCase(.uppercase)
-                .tracking(1.0)
+                .foregroundStyle(DS.nuggetGold)
+                .shimmerOverlay(duration: 3.5, intensity: 0.3)
         }
     }
 
