@@ -18,21 +18,21 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
 
-                // ── GREETING (Nudge-branded notification) ──
+                // ── GREETING (gold surface on metallic green bg) ──
                 HStack(alignment: .center, spacing: 14) {
                     Image("nudge")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 52, height: 52)
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(viewModel.welcomeMessage)
                             .font(.system(.headline, design: .default, weight: .semibold))
                             .foregroundStyle(DS.textPrimary)
                             .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
                         Text(viewModel.todayLabel)
-                            .font(.system(.caption, weight: .semibold))
-                            .foregroundStyle(DS.textSecondary)
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(Color(hex: "8B6010"))
                     }
                     Spacer(minLength: 8)
                     Button { showDevMenu = true } label: {
@@ -43,10 +43,10 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                 }
                 .padding(16)
-                .background(DS.paleGreen, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
                 .overlay(
                     RoundedRectangle(cornerRadius: DS.cardRadius)
-                        .stroke(DS.deepGreen, lineWidth: 1)
+                        .stroke(DS.goldSurfaceStroke, lineWidth: 1)
                 )
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
@@ -69,41 +69,36 @@ struct HomeView: View {
                     .background(DS.heroGradient)
                     .cornerRadius(DS.cardRadius)
 
-                    // Awareness circle
+                    // Awareness circle (frosted dark)
                     HStack(spacing: 12) {
                         ZStack {
                             Circle()
-                                .stroke(DS.mintBg, lineWidth: 5)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 5)
                             Circle()
                                 .trim(from: 0, to: CGFloat(awarenessPercent))
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [DS.primary, DS.accent],
-                                        startPoint: .leading, endPoint: .trailing),
-                                    style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                                .stroke(DS.nuggetGold, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                                 .rotationEffect(.degrees(-90))
                                 .animation(.easeInOut(duration: 1.2), value: awarenessPercent)
                             Text("\(viewModel.biasesSeenCount)/\(totalPatterns)")
                                 .font(.system(size: 10, weight: .black, design: .serif))
-                                .foregroundColor(DS.deepGreen)
+                                .foregroundStyle(DS.goldText)
                         }
                         .frame(width: 54, height: 54)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text("\(Int(awarenessPercent * 100))%")
                                 .font(.system(size: 22, weight: .black, design: .serif))
-                                .foregroundColor(DS.deepGreen)
+                                .foregroundStyle(DS.goldText)
                             Text("Patterns\nidentified")
                                 .font(.system(.caption, weight: .medium))
-                                .foregroundStyle(DS.textSecondary)
+                                .foregroundStyle(DS.onDarkSecondary)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(14)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .overlay(RoundedRectangle(cornerRadius: 16)
-                        .stroke(DS.accent.opacity(0.2), lineWidth: 0.5))
+                    .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                    .overlay(RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.frostedCardStroke, lineWidth: 0.5))
                 }
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
@@ -138,19 +133,20 @@ struct HomeView: View {
                 .padding(.horizontal, 18)
                 .padding(.bottom, 4)
 
-                ResearchFootnote(text: "BFAS · Behavioural Finance Assessment Score")
+                ResearchFootnote(text: "BFAS · Behavioural Finance Assessment Score", style: .pill)
                     .padding(.horizontal, 22)
                     .padding(.bottom, 12)
 
-                // ── NUDGE ──
+                // ── NUDGE (gold on dark bg) ──
                 NudgeSaysCard(
-                    message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame."
+                    message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame.",
+                    surface: .gold
                 )
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
             }
         }
-        .background(DS.bg)
+        .background(DS.heroGradient.ignoresSafeArea())
         .navigationBarHidden(true)
         .task {
             await viewModel.load()

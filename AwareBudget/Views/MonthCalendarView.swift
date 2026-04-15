@@ -21,7 +21,7 @@ struct MonthCalendarView: View {
                     Text(label)
                         .font(.system(.caption2, design: .rounded, weight: .heavy))
                         .tracking(0.8)
-                        .foregroundStyle(DS.textTertiary)
+                        .foregroundStyle(DS.onDarkSecondary)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -37,10 +37,10 @@ struct MonthCalendarView: View {
             }
         }
         .padding(16)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                .stroke(DS.frostedCardStroke, lineWidth: 0.5)
         )
         .popover(item: $selectedDay) { day in
             dayPopover(day.date)
@@ -55,11 +55,11 @@ struct MonthCalendarView: View {
         return HStack(alignment: .firstTextBaseline) {
             Text(f.string(from: Date()))
                 .font(.system(.headline, design: .default, weight: .semibold))
-                .foregroundStyle(DS.textPrimary)
+                .foregroundStyle(DS.onDarkPrimary)
             Spacer()
             Text("\(total) \(total == 1 ? "event" : "events")")
                 .font(.system(.caption2, weight: .semibold))
-                .foregroundStyle(DS.textTertiary)
+                .foregroundStyle(DS.onDarkSecondary)
                 .textCase(.uppercase)
                 .tracking(1.0)
         }
@@ -79,8 +79,8 @@ struct MonthCalendarView: View {
             Text("\(day)")
                 .font(.system(.footnote, weight: hasEvents ? .bold : .medium))
                 .foregroundStyle(
-                    hasEvents ? Color.white :
-                    isToday ? DS.textPrimary : DS.textSecondary
+                    hasEvents ? DS.goldForeground :
+                    isToday ? DS.onDarkPrimary : DS.onDarkSecondary
                 )
                 .frame(maxWidth: .infinity)
                 .frame(height: 32)
@@ -88,11 +88,11 @@ struct MonthCalendarView: View {
                     ZStack {
                         if hasEvents {
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(DS.accent)
+                                .fill(DS.nuggetGold)
                         }
                         if isToday {
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(DS.goldBase, lineWidth: 1.5)
+                                .stroke(DS.goldText, lineWidth: 1.5)
                         }
                     }
                 )
