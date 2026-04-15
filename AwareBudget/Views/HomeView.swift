@@ -113,8 +113,7 @@ struct HomeView: View {
 
                 // ── NUDGE ──
                 NudgeSaysCard(
-                    message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame.",
-                    citation: "Kahneman & Tversky, 1979 · Prospect Theory"
+                    message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame."
                 )
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
