@@ -122,6 +122,14 @@ struct HomeView: View {
                     .padding(.horizontal, 18)
                     .padding(.bottom, 12)
 
+                // ── TOP 4 BIASES ──
+                TopBiasesCard(
+                    patterns: viewModel.dailyPatterns,
+                    totalSeen: viewModel.biasesSeenCount
+                )
+                .padding(.horizontal, 18)
+                .padding(.bottom, 12)
+
                 // ── NUDGE ──
                 NudgeSaysCard(
                     message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame."
