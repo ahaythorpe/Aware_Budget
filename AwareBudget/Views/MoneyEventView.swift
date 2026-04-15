@@ -371,8 +371,9 @@ struct MoneyEventView: View {
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(DS.goldForeground)
                     Text(statusDetail(status))
-                        .font(.system(.caption, weight: .medium))
-                        .foregroundStyle(DS.goldForeground.opacity(0.75))
+                        .font(.system(.subheadline, weight: .bold))
+                        .foregroundStyle(DS.goldForeground.opacity(0.92))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
                 Image(systemName: "checkmark.circle.fill")
