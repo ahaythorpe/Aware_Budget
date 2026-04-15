@@ -37,34 +37,52 @@ final class SupabaseService {
     /// and fetches actually have a user_id to associate with. In release
     /// builds the user signs in via the normal flow (OTP / OAuth).
     #if DEBUG
+    /// Published DEBUG auth status so views can show a diagnostic banner.
+    @MainActor static var debugAuthStatus: String = "unknown"
+
     func ensureDebugSession() async {
-        if await currentUserId != nil { return }
+        if let uid = await currentUserId {
+            await MainActor.run { Self.debugAuthStatus = "signed in · \(String(uid.uuidString.prefix(8)))" }
+            print("[DEBUG AUTH] already signed in: \(uid)")
+            return
+        }
 
         let defaults = UserDefaults.standard
         let savedEmail = defaults.string(forKey: "debugEmail")
         let savedPassword = defaults.string(forKey: "debugPassword")
 
-        // If we have saved creds, try sign in first.
+        // Try saved creds.
         if let e = savedEmail, let p = savedPassword {
             do {
                 try await client.auth.signIn(email: e, password: p)
-                return
+                if let uid = await currentUserId {
+                    await MainActor.run { Self.debugAuthStatus = "signed in via saved creds · \(String(uid.uuidString.prefix(8)))" }
+                    print("[DEBUG AUTH] signed in via saved creds: \(uid)")
+                    return
+                }
             } catch {
-                // Saved creds expired or project rotated — fall through to signup.
+                print("[DEBUG AUTH] saved creds failed: \(error.localizedDescription)")
             }
         }
 
-        // Generate fresh creds and sign up.
+        // Fresh signup.
         let email = "debug-\(UUID().uuidString.prefix(8))@awarebudget.test"
         let password = "Dbg-\(UUID().uuidString.prefix(12))"
         do {
             try await client.auth.signUp(email: String(email), password: String(password))
             defaults.set(email, forKey: "debugEmail")
             defaults.set(password, forKey: "debugPassword")
+            if let uid = await currentUserId {
+                await MainActor.run { Self.debugAuthStatus = "signed up · \(String(uid.uuidString.prefix(8)))" }
+                print("[DEBUG AUTH] signed up: \(uid)")
+            } else {
+                await MainActor.run { Self.debugAuthStatus = "signup OK but no session (email confirmation?)" }
+                print("[DEBUG AUTH] signup returned but no session — email confirmation likely required in Supabase settings")
+            }
         } catch {
-            // If project disables self-signup, nothing we can do from DEBUG.
-            // Saves will keep failing silently — user must sign in via
-            // release build or enable anonymous/email signup in Supabase dashboard.
+            await MainActor.run { Self.debugAuthStatus = "signup FAILED: \(error.localizedDescription)" }
+            print("[DEBUG AUTH] signup FAILED: \(error)")
+            print("[DEBUG AUTH] Fix: Supabase dashboard -> Authentication -> Providers -> Email -> ENABLE + disable 'Confirm email' for DEBUG.")
         }
     }
     #endif
