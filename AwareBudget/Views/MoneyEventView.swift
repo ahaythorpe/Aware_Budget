@@ -151,28 +151,8 @@ struct MoneyEventView: View {
                     }
                 }
 
-                if !topSessionBiases.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("PATTERNS TRIGGERED")
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .tracking(1.5)
-                            .foregroundStyle(DS.goldBase)
-                        ForEach(topSessionBiases, id: \.0) { name, count in
-                            HStack {
-                                Text(name)
-                                    .font(.system(.subheadline, weight: .semibold))
-                                    .foregroundStyle(DS.textPrimary)
-                                Spacer()
-                                Text("×\(count)")
-                                    .font(.system(.footnote, weight: .heavy))
-                                    .foregroundStyle(DS.deepGreen)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                    .padding(14)
-                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
-                    .shimmeringGoldBorder(cornerRadius: 12)
+                if let (topName, topCount) = topSessionBiases.first {
+                    mostTriggeredPatternCard(name: topName, count: topCount)
                 }
 
                 NudgeSaysCard(message: sessionNudgeMessage, surface: .whiteShimmer)
@@ -190,6 +170,67 @@ struct MoneyEventView: View {
             .padding(.horizontal, DS.hPadding)
             .padding(.top, 16)
         }
+    }
+
+    /// Full card: most-triggered pattern + why + how to combat.
+    private func mostTriggeredPatternCard(name: String, count: Int) -> some View {
+        let insight = driverInsights[name]
+        let citation: String = allBiasPatterns.first(where: { $0.name == name })?.keyRef ?? ""
+
+        return VStack(alignment: .leading, spacing: 14) {
+            Text("MOST TRIGGERED PATTERN")
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.5)
+                .foregroundStyle(DS.goldBase)
+
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(name)
+                    .font(.system(.title3, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                Spacer()
+                Text("×\(count)")
+                    .font(.system(.headline, weight: .heavy))
+                    .foregroundStyle(DS.goldBase)
+            }
+
+            if let insight {
+                Divider().background(DS.accent.opacity(0.15))
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("WHAT THIS MEANS")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.accent)
+                    Text(insight.means)
+                        .font(.system(.subheadline, weight: .regular))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("HOW TO COMBAT IT")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.goldBase)
+                    Text(insight.fix)
+                        .font(.system(.subheadline, weight: .regular))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            if !citation.isEmpty {
+                ResearchFootnote(text: citation)
+                    .padding(.top, 2)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .premiumCardShadow()
     }
 
     private func sessionRow(_ entry: SessionEntry) -> some View {
