@@ -15,11 +15,13 @@ struct MoneyEventView: View {
         let category: String
         let amountLabel: String
         let amount: Double
+        let plannedStatus: MoneyEvent.PlannedStatus
+        let behaviourTag: String?
     }
 
-    @State private var showStatusSheet: Bool = false
     @State private var isBatchSaving: Bool = false
-    @State private var lastBatchStatus: MoneyEvent.PlannedStatus? = nil
+    /// Tracks which range is currently picked in the popup (before status is picked)
+    @State private var pendingRange: AmountRange? = nil
 
     private var sessionTotal: Double { sessionLog.reduce(0.0) { $0 + $1.amount } }
 
@@ -67,10 +69,7 @@ struct MoneyEventView: View {
         .sheet(item: $rangeSheetCategory) { cat in
             rangeSheet(for: cat)
                 .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showStatusSheet) {
-            statusSheet()
-                .presentationDetents([.medium])
+                .onDisappear { pendingRange = nil }
         }
     }
 
@@ -97,7 +96,7 @@ struct MoneyEventView: View {
     // via batchSave() + sessionSummary. Single-save path is dead code in
     // the new UX.
 
-    // MARK: - Session banner + Save-all CTA
+    // MARK: - Session banner (saves happen per-tile, this shows progress)
 
     private var sessionBanner: some View {
         VStack(spacing: 10) {
@@ -105,14 +104,14 @@ struct MoneyEventView: View {
                 Image(systemName: "list.bullet.rectangle.fill")
                     .font(.system(size: 14))
                     .foregroundStyle(DS.goldBase)
-                Text("\(sessionLog.count) staged · $\(Int(sessionTotal))")
+                Text("\(sessionLog.count) logged · $\(Int(sessionTotal))")
                     .font(.system(.subheadline, weight: .heavy))
                     .foregroundStyle(DS.textPrimary)
                 Spacer()
                 Button {
                     sessionLog.removeAll()
                 } label: {
-                    Text("Clear")
+                    Text("Hide")
                         .font(.system(.caption, weight: .bold))
                         .foregroundStyle(DS.textTertiary)
                 }
@@ -120,9 +119,9 @@ struct MoneyEventView: View {
             }
 
             Button {
-                showStatusSheet = true
+                showSessionSummary = true
             } label: {
-                Text("Save \(sessionLog.count) → pick status")
+                Text("See session summary →")
             }
             .goldButtonStyle()
         }
@@ -200,11 +199,9 @@ struct MoneyEventView: View {
                 Text(entry.category)
                     .font(.system(.subheadline, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
-                if let status = lastBatchStatus {
-                    Text(status.label)
-                        .font(.system(.caption, weight: .medium))
-                        .foregroundStyle(DS.textTertiary)
-                }
+                Text("\(entry.plannedStatus.emoji) \(entry.plannedStatus.label)")
+                    .font(.system(.caption, weight: .medium))
+                    .foregroundStyle(DS.textSecondary)
             }
             Spacer()
             Text(entry.amountLabel)
@@ -219,10 +216,9 @@ struct MoneyEventView: View {
         )
     }
 
-    /// Top biases now derived from suggested tag per category + applied status.
+    /// Top biases from each entry's actual tagged bias (per-item status drove suggestion).
     private var topSessionBiases: [(String, Int)] {
-        guard let status = lastBatchStatus else { return [] }
-        let tags = sessionLog.map { suggestedBiasTag(category: $0.category, status: status) }
+        let tags = sessionLog.compactMap(\.behaviourTag)
         let counts = Dictionary(grouping: tags, by: { $0 }).mapValues(\.count)
         return counts.sorted { $0.value > $1.value }.prefix(3).map { ($0.key, $0.value) }
     }
@@ -284,12 +280,12 @@ struct MoneyEventView: View {
         .sensoryFeedback(.selection, trigger: isSelected)
     }
 
-    // MARK: - Range sheet (Step 1: pick amount, stage the entry)
+    // MARK: - Range + status sheet (2-step inline flow per item)
 
     private func rangeSheet(for cat: SpendCategory) -> some View {
         let ranges = categoryRanges[cat.name] ?? []
         return ScrollView {
-            VStack(spacing: 16) {
+            VStack(spacing: 18) {
                 VStack(spacing: 4) {
                     Text(cat.emoji).font(.system(size: 40))
                     Text(cat.name)
@@ -298,19 +294,38 @@ struct MoneyEventView: View {
                 }
                 .padding(.top, 8)
 
+                // Step 1 — pick range
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("HOW MUCH?")
+                    Text(pendingRange == nil ? "HOW MUCH?" : "✓ \(pendingRange!.label)")
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
                         .tracking(1.2)
                         .foregroundStyle(DS.goldBase)
                         .frame(maxWidth: .infinity, alignment: .center)
                     VStack(spacing: 8) {
                         ForEach(ranges) { range in
-                            stagingRangeButton(cat: cat, range: range)
+                            rangePickButton(range: range)
                         }
                     }
                 }
                 .padding(.horizontal, 20)
+
+                // Step 2 — pick status (appears after range)
+                if pendingRange != nil {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("WAS THIS PLANNED?")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.2)
+                            .foregroundStyle(DS.goldBase)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        VStack(spacing: 10) {
+                            ForEach(MoneyEvent.PlannedStatus.allCases) { status in
+                                statusPickButton(cat: cat, status: status)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
 
                 if let avg = absMonthlyAverage[cat.name] {
                     ResearchFootnote(text: "Avg $\(avg)/mo · ABS 2022–23", icon: "chart.bar.doc.horizontal")
@@ -318,76 +333,39 @@ struct MoneyEventView: View {
                 }
             }
             .padding(.bottom, 24)
+            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: pendingRange?.label)
         }
         .padding(.horizontal, 8)
         .padding(.top, 8)
         .background(DS.cardBg)
     }
 
-    /// Range button that stages an entry (does NOT save yet).
-    private func stagingRangeButton(cat: SpendCategory, range: AmountRange) -> some View {
-        Button {
-            // Stage the entry — no Supabase write yet
-            sessionLog.append(SessionEntry(
-                emoji: cat.emoji,
-                category: cat.name,
-                amountLabel: range.label,
-                amount: range.midpoint
-            ))
-            rangeSheetCategory = nil
+    /// Step 1 button — picks range, reveals status buttons (does NOT save yet).
+    private func rangePickButton(range: AmountRange) -> some View {
+        let isSelected = pendingRange?.label == range.label
+        return Button {
+            pendingRange = range
         } label: {
             Text(range.label)
                 .font(.system(.headline, weight: .bold))
-                .foregroundStyle(DS.goldForeground)
+                .foregroundStyle(isSelected ? DS.goldForeground : DS.deepGreen)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(DS.nuggetGold, in: Capsule())
-                .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+                .padding(.vertical, 11)
+                .background(isSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg), in: Capsule())
+                .overlay(Capsule().stroke(isSelected ? DS.goldBase.opacity(0.5) : DS.goldSurfaceStroke, lineWidth: isSelected ? 1 : 0.5))
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: false)
+        .sensoryFeedback(.selection, trigger: isSelected)
     }
 
-    // MARK: - Status sheet (Step 2: pick ONE status for all staged items, save all)
-
-    private func statusSheet() -> some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                VStack(spacing: 4) {
-                    Text("Almost there")
-                        .font(.system(.headline, weight: .bold))
-                        .foregroundStyle(DS.textPrimary)
-                    Text("How would you describe all \(sessionLog.count) of these?")
-                        .font(.system(.subheadline, weight: .regular))
-                        .foregroundStyle(DS.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top, 8)
-                .padding(.horizontal, 20)
-
-                VStack(spacing: 10) {
-                    ForEach(MoneyEvent.PlannedStatus.allCases) { status in
-                        batchStatusButton(status)
-                    }
-                }
-                .padding(.horizontal, 20)
-
-                if isBatchSaving {
-                    ProgressView()
-                        .padding(.top, 8)
-                }
-            }
-            .padding(.bottom, 24)
-        }
-        .background(DS.cardBg)
-    }
-
-    private func batchStatusButton(_ status: MoneyEvent.PlannedStatus) -> some View {
+    /// Step 2 button — picks status, saves immediately, adds to sessionLog, closes popup.
+    private func statusPickButton(cat: SpendCategory, status: MoneyEvent.PlannedStatus) -> some View {
         Button {
-            Task { await batchSave(status: status) }
+            guard let range = pendingRange else { return }
+            Task { await saveOne(cat: cat, range: range, status: status) }
         } label: {
             HStack(alignment: .top, spacing: 12) {
-                Text(status.emoji).font(.system(size: 22))
+                Text(status.emoji).font(.system(size: 20))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(status.label)
                         .font(.system(.headline, weight: .bold))
@@ -401,10 +379,10 @@ struct MoneyEventView: View {
                     .foregroundStyle(DS.goldForeground.opacity(0.5))
                     .padding(.top, 2)
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 14)
-            .background(DS.nuggetGold, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(DS.nuggetGold, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
         }
         .buttonStyle(.plain)
         .disabled(isBatchSaving)
@@ -413,34 +391,42 @@ struct MoneyEventView: View {
     private func statusDetail(_ status: MoneyEvent.PlannedStatus) -> String {
         switch status {
         case .planned:  return "I knew this was coming"
-        case .surprise: return "Didn't see it coming — external trigger"
-        case .impulse:  return "Wanted it in the moment — internal pull"
+        case .surprise: return "Didn't see it coming — external"
+        case .impulse:  return "Wanted it in the moment — internal"
         }
     }
 
-    /// Save every staged entry to Supabase with the chosen status.
+    /// Save a single event to Supabase with its status, append to sessionLog, close popup.
     @MainActor
-    private func batchSave(status: MoneyEvent.PlannedStatus) async {
-        guard !isBatchSaving, !sessionLog.isEmpty else { return }
+    private func saveOne(cat: SpendCategory, range: AmountRange, status: MoneyEvent.PlannedStatus) async {
+        guard !isBatchSaving else { return }
         isBatchSaving = true
         defer { isBatchSaving = false }
 
-        for entry in sessionLog {
-            viewModel.selectedCategory = SpendCategory(emoji: entry.emoji, name: entry.category)
-            viewModel.selectedRange = AmountRange(label: entry.amountLabel, midpoint: entry.amount)
-            viewModel.plannedStatus = status
-            viewModel.onPlannedStatusSet()   // auto-suggests bias tag
-            await viewModel.save()
-            viewModel.reset()
-        }
-        lastBatchStatus = status
-        showStatusSheet = false
-        showSessionSummary = true
+        viewModel.selectedCategory = cat
+        viewModel.selectedRange = range
+        viewModel.plannedStatus = status
+        viewModel.onPlannedStatusSet()
+        await viewModel.save()
+        let tag = viewModel.behaviourTag
+        viewModel.reset()
 
-        // Refresh smart-nudge schedule so new log times feed back into tomorrow's pushes
-        let events = (try? await SupabaseService.shared.fetchMoneyEvents(forMonth: Date())) ?? []
-        NotificationService.scheduleSmartNudges(hours: LogTimeAnalytics.medianHours(from: events))
+        sessionLog.append(SessionEntry(
+            emoji: cat.emoji,
+            category: cat.name,
+            amountLabel: range.label,
+            amount: range.midpoint,
+            plannedStatus: status,
+            behaviourTag: tag
+        ))
+
+        pendingRange = nil
+        rangeSheetCategory = nil
     }
+
+    // (Previous batch-status-at-end flow removed. Each Log popup now
+    //  handles range + status for one item and saves inline — see
+    //  rangeSheet + statusPickButton + saveOne above.)
 
     // MARK: - Planned / Surprise / Impulse
 
