@@ -132,22 +132,47 @@ struct BiasReviewView: View {
 
     private func biasExplanationCard(_ entry: Entry) -> some View {
         let insight = driverInsights[entry.suggestedBias]
-        let citation = allBiasPatterns.first(where: { $0.name == entry.suggestedBias })?.keyRef ?? ""
+        let pattern = allBiasPatterns.first(where: { $0.name == entry.suggestedBias })
+        let citation = pattern?.keyRef ?? ""
+        let category = pattern?.category ?? ""
 
         return VStack(alignment: .leading, spacing: 12) {
-            Text("NUDGE SUGGESTS")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .tracking(1.5)
-                .foregroundStyle(Color(hex: "8B6010"))
+            HStack(spacing: 8) {
+                Text("NUDGE SUGGESTS")
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.5)
+                    .foregroundStyle(Color(hex: "8B6010"))
+                if !category.isEmpty {
+                    Text("·")
+                        .font(.system(.caption, weight: .bold))
+                        .foregroundStyle(Color(hex: "8B6010").opacity(0.6))
+                    Text(category.uppercased())
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .tracking(1.0)
+                        .foregroundStyle(Color(hex: "8B6010").opacity(0.75))
+                }
+                Spacer()
+            }
 
             Text(entry.suggestedBias)
                 .font(.system(.title2, weight: .black))
                 .foregroundStyle(.black)
+                .minimumScaleFactor(0.7)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let question = biasQuestion(bias: entry.suggestedBias, category: entry.category, status: entry.plannedStatus) {
+                Text(question)
+                    .font(.system(.subheadline, weight: .bold))
+                    .foregroundStyle(.black)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             if let insight {
                 Text(insight.means)
-                    .font(.system(.subheadline, weight: .semibold))
-                    .foregroundStyle(.black)
+                    .font(.system(.footnote, weight: .medium))
+                    .foregroundStyle(Color(hex: "3A2000"))
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -232,6 +257,32 @@ struct BiasReviewView: View {
             .premiumCardShadow()
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Per-bias question (context-aware)
+
+    /// One-line contextual question per bias — asked as the lead question
+    /// on the review card, tailored to how that bias usually shows up.
+    private func biasQuestion(bias: String, category: String, status: MoneyEvent.PlannedStatus) -> String? {
+        switch bias {
+        case "Social Proof":          return "Was this influenced by what others do?"
+        case "Availability Heuristic": return "Did a vivid recent memory drive this?"
+        case "Status Quo Bias":        return "Did you default to this out of habit?"
+        case "Anchoring":              return "Did a reference price shape your sense of 'fair'?"
+        case "Scarcity Heuristic":     return "Did urgency (\"only a few left\", \"sale ends\") push the buy?"
+        case "Ego Depletion":          return "Were you tired, stressed, or drained when you decided?"
+        case "Mental Accounting":      return "Did the money's 'bucket' (bonus, refund, budget) change your choice?"
+        case "Moral Licensing":        return "Did a recent good behaviour justify this spend?"
+        case "Present Bias":           return "Did you choose now over future you?"
+        case "Planning Fallacy":       return "Did this cost more than you expected it to?"
+        case "Loss Aversion":          return "Did the fear of losing weigh heavier than the chance of gaining?"
+        case "Sunk Cost Fallacy":      return "Did past spending on this pull you in further?"
+        case "Overconfidence Bias":    return "Were you more sure about this than evidence warranted?"
+        case "Framing Effect":         return "Did how it was presented ('save 30%' vs 'pay 70%') shape the choice?"
+        case "Denomination Effect":    return "Did paying by tap or card feel different to cash?"
+        case "Ostrich Effect":         return "Did you avoid info that might have stopped this?"
+        default:                       return nil
+        }
     }
 
     // MARK: - Completion screen

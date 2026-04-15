@@ -24,7 +24,19 @@ struct MoneyEventView: View {
     @State private var pendingRange: AmountRange? = nil
     @State private var showAlgoExplainer: Bool = false
     @State private var showBiasReview: Bool = false
+    @State private var showSkipAlert: Bool = false
     @State private var lastReviewOutcome: BiasReviewView.ReviewOutcome? = nil
+
+    /// Rotating dry-wit chastise shown when the user tries to skip review.
+    private var skipChastise: String {
+        [
+            "Nudge was just getting warm. Patterns you don't look at keep running the show.",
+            "Skipping is logging without learning. Up to you — but we'd notice more together.",
+            "Awareness builds by looking, not logging. Two minutes now saves twenty later.",
+            "Nudge will still be here. But your blind spots won't flag themselves.",
+            "Skip is fine. Next week's 'why did I do that?' is also fine.",
+        ].randomElement() ?? "Nudge will remember you skipped."
+    }
 
     private var sessionTotal: Double { sessionLog.reduce(0.0) { $0 + $1.amount } }
 
@@ -99,11 +111,17 @@ struct MoneyEventView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Skip") {
-                            showBiasReview = false
-                            showSessionSummary = true
-                        }
+                        Button("Skip") { showSkipAlert = true }
                     }
+                }
+                .alert("Skipping already?", isPresented: $showSkipAlert) {
+                    Button("Keep reviewing", role: .cancel) {}
+                    Button("Skip anyway", role: .destructive) {
+                        showBiasReview = false
+                        showSessionSummary = true
+                    }
+                } message: {
+                    Text(skipChastise)
                 }
             }
         }
