@@ -48,6 +48,17 @@ enum DS {
     static let textSecondary = Color(hex: "6B7A6B")
     static let textTertiary  = Color(hex: "A0B0A0")
 
+    // Text on dark (metallic green bg) — handbook §1.3
+    static let onDarkPrimary   = Color.white
+    static let onDarkSecondary = Color.white.opacity(0.75)
+    static let onDarkTertiary  = Color.white.opacity(0.55)
+
+    // Card surface overlays on dark green bg
+    static let frostedCardBg     = Color.white.opacity(0.08)
+    static let frostedCardStroke = Color.white.opacity(0.15)
+    static let goldSurfaceBg     = Color(hex: "FFF8E1")   // key-feature cards on dark bg
+    static let goldSurfaceStroke = Color(hex: "C59430").opacity(0.3)
+
     // Semantic
     static let positive = Color(hex: "4CAF50")
     static let warning  = Color(hex: "FF7043")

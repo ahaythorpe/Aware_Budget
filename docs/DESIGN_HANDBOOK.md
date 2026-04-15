@@ -51,6 +51,55 @@ For gold button: `shadow = #5C3A0A`, rim highlight = `rgba(255,251,232,0.50)`
 
 ---
 
+## 1.3 Visual language — metallic green first (v2)
+
+The app runs on a **metallic green background** (`DS.heroGradient`) on every tab. Surfaces above the bg layer in one of 3 ways. Gold is the priority highlight.
+
+### Surface layers
+
+| Layer | Spec | Use for |
+|---|---|---|
+| **Gold surface** | `DS.goldSurfaceBg` (#FFF8E1) bg · `DS.goldSurfaceStroke` 0.5px stroke · `DS.textPrimary` text · `DS.cardRadius` 20pt | Key features (bias rows on Awareness, research, Nudge Says cards, category tiles on Log) |
+| **Frosted dark** | `DS.frostedCardBg` (white 8%) bg · `DS.frostedCardStroke` 0.5px stroke · `DS.onDarkPrimary` text | Secondary (calendar, Top Biases list, stats cards, awareness score card) |
+| **Solid deep panel** | `DS.deepGreen` bg · `DS.goldBase` 1px stroke · white text · gold accents | Hero/standout (streak card, "You're not broken", score hero) |
+
+### Text tokens
+
+**On green bg:**
+```
+DS.onDarkPrimary   = .white              // headlines, body on green
+DS.onDarkSecondary = .white.opacity(0.75) // meta, captions
+DS.onDarkTertiary  = .white.opacity(0.55) // footnotes, disabled
+```
+
+**On gold surface:** use existing `DS.textPrimary` (dark text reads on gold).
+
+### Gold accent placement
+
+Gold (`DS.goldBase`, `DS.goldText`, `DS.nuggetGold`, `#FFF8E1`) is reserved for:
+- Score numbers (streak count, awareness score)
+- Progress fills
+- Today's calendar ring
+- BFAS / research pills (`ResearchFootnote` style: .pill)
+- Section highlights (bias rows, category tiles)
+- Primary CTAs (existing `.goldButtonStyle()`)
+
+Do NOT use gold for: section labels (stay `DS.accent` green), body text, navigation.
+
+### Contrast check
+
+- White on `DS.deepGreen` = 12:1 ✅ WCAG AAA
+- `DS.textPrimary` on `#FFF8E1` gold surface = 8:1 ✅ WCAG AAA
+- White 75% on `DS.heroGradient` mid-stop = ~5:1 ✅ WCAG AA body
+
+### What stays white
+
+- Form inputs (text fields, range pickers) — white for legibility only
+- Sheet/popup bodies — keep light bg for contrast moment over dark tab (Apple Music pattern)
+- Tab bar — white (already set)
+
+---
+
 ## 2. Supporting tokens
 
 ```
