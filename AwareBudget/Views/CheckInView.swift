@@ -9,6 +9,11 @@ struct CheckInView: View {
     @State private var questions: [Question] = []
     @State private var currentIndex = 0
     @State private var attemptedCount = 0
+    @State private var showWeeklyReview: Bool = false
+    @State private var weeklyTopBiases: [HomeViewModel.DailyPattern] = []
+    @State private var weeklySpend: Double = 0
+    @State private var weeklyEventCount: Int = 0
+    @State private var weeklyStreak: Int = 0
 
     @State private var dragOffset: CGSize = .zero
     @State private var showWhy: Bool = false
@@ -51,6 +56,17 @@ struct CheckInView: View {
             VStack(spacing: 16) {
                 if let existing = alreadyCheckedIn {
                     alreadyDoneView(existing)
+                } else if showWeeklyReview {
+                    WeeklyReviewSummary(
+                        topBiases: weeklyTopBiases,
+                        weekSpend: weeklySpend,
+                        eventCount: weeklyEventCount,
+                        streak: weeklyStreak,
+                        onContinue: {
+                            WeeklyReviewTracker.markDone()
+                            withAnimation { showWeeklyReview = false }
+                        }
+                    )
                 } else {
                     progressDots
                         .padding(.horizontal, DS.hPadding)
@@ -517,11 +533,52 @@ struct CheckInView: View {
     // MARK: - Load questions from Supabase (fallback to local mock)
 
     private func loadQuestions() async {
+        // Sunday weekly review — once per ISO week
+        if WeeklyReviewTracker.isDueNow() {
+            await loadWeeklyReviewData()
+            showWeeklyReview = true
+        }
+
         do {
             let fetched = try await service.fetchTailoredQuestions(count: 4)
             questions = fetched.isEmpty ? Array(QuestionPool.seed.shuffled().prefix(4)) : fetched
         } catch {
             questions = Array(QuestionPool.seed.shuffled().prefix(4))
+        }
+    }
+
+    private func loadWeeklyReviewData() async {
+        do {
+            let events = try await service.fetchMoneyEventsThisWeek()
+            weeklySpend = events.reduce(0.0) { $0 + $1.amount }
+            weeklyEventCount = events.count
+
+            let today = try? await service.fetchTodaysCheckIn()
+            weeklyStreak = today?.streakCount ?? 0
+
+            let progress = try await service.fetchBiasProgress()
+            let emojiLookup = Dictionary(
+                uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) }
+            )
+            weeklyTopBiases = progress
+                .filter { $0.timesEncountered > 0 }
+                .compactMap { bp -> (HomeViewModel.DailyPattern, Int)? in
+                    let score = BiasScoreService.computeScore(
+                        biasName: bp.biasName, progress: bp, taggedEvents: 0
+                    )
+                    return (HomeViewModel.DailyPattern(
+                        emoji: emojiLookup[bp.biasName] ?? "🧠",
+                        biasName: bp.biasName,
+                        oneLiner: "",
+                        stage: score.masteryStage,
+                        score: score.score
+                    ), score.score)
+                }
+                .sorted { $0.1 > $1.1 }
+                .prefix(3)
+                .map(\.0)
+        } catch {
+            weeklyTopBiases = []
         }
     }
 
