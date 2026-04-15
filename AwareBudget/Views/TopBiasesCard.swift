@@ -7,6 +7,7 @@ struct TopBiasesCard: View {
     let patterns: [HomeViewModel.DailyPattern]
     let totalSeen: Int
     var onTap: ((String) -> Void)? = nil
+    var onInfoTap: (() -> Void)? = nil
 
     private var topFour: [HomeViewModel.DailyPattern] {
         Array(patterns.prefix(4))
@@ -42,11 +43,19 @@ struct TopBiasesCard: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
             Text("YOUR TOP BIASES")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
                 .foregroundStyle(DS.accent)
+            if onInfoTap != nil {
+                Button { onInfoTap?() } label: {
+                    Image(systemName: "info.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(DS.deepGreen)
+                }
+                .buttonStyle(.plain)
+            }
             Spacer()
             Text("\(totalSeen)/16")
                 .font(.system(.caption2, weight: .semibold))

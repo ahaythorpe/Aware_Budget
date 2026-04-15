@@ -2,6 +2,8 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
+    @State private var showCredibility = false
+    var selectedTab: Binding<RootTab>? = nil
     let totalPatterns = 16
 
     var awarenessPercent: Double {
@@ -125,7 +127,8 @@ struct HomeView: View {
                 // ── TOP 4 BIASES ──
                 TopBiasesCard(
                     patterns: viewModel.dailyPatterns,
-                    totalSeen: viewModel.biasesSeenCount
+                    totalSeen: viewModel.biasesSeenCount,
+                    onInfoTap: { showCredibility = true }
                 )
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
@@ -142,6 +145,11 @@ struct HomeView: View {
         .navigationBarHidden(true)
         .task {
             await viewModel.load()
+        }
+        .sheet(isPresented: $showCredibility) {
+            CredibilitySheet(onReadMore: {
+                selectedTab?.wrappedValue = .why
+            })
         }
     }
 }

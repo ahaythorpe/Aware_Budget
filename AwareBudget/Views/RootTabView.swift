@@ -16,7 +16,7 @@ struct RootTabView: View {
             NavigationStack { WhyView() }
                 .tabItem { Label("Why", systemImage: "questionmark.circle") }
                 .tag(RootTab.why)
-            NavigationStack { HomeView() }
+            NavigationStack { HomeView(selectedTab: $selection) }
                 .tabItem { Label("Home", systemImage: "house.fill") }
                 .tag(RootTab.home)
             NavigationStack { MoneyEventView(selectedTab: $selection) }
