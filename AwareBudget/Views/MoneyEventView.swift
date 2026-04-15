@@ -4,36 +4,26 @@ struct MoneyEventView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isPresented) private var isPresented
     @State private var viewModel = MoneyEventViewModel()
+    @State private var rangeSheetCategory: SpendCategory? = nil
     var selectedTab: Binding<RootTab>? = nil
 
-    @State private var showAllCategories = false
-    @State private var expandedQuickCategory: String?
-    private let fullGridColumns = [
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8),
-    ]
-
-    private let quickCategories: [(emoji: String, name: String, ranges: [(label: String, midpoint: Double)])] = [
-        ("☕", "Coffee", [("$4–6", 5), ("$6–8", 7), ("$8–12", 10)]),
-        ("🥗", "Lunch", [("$12–18", 15), ("$18–25", 21), ("$25–40", 32)]),
-        ("🍺", "Drinks", [("$10–20", 15), ("$20–50", 35), ("$50+", 75)]),
-        ("🍕", "Eating out", [("$15–25", 20), ("$25–40", 32), ("$40+", 55)]),
+    private let tileColumns = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10),
     ]
 
     var body: some View {
         ZStack {
-            DS.bg.ignoresSafeArea()
+            DS.heroGradient.ignoresSafeArea()
 
             if viewModel.didSave, let nudge = viewModel.nudgeResponse {
                 savedConfirmation(nudge)
             } else {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
+                        headerSection
                         categoryGrid
-                        if viewModel.selectedCategory != nil && !isQuickCategory(viewModel.selectedCategory?.name) {
-                            rangePicker
-                        }
                         if viewModel.selectedRange != nil {
                             plannedStatusPicker
                         }
@@ -58,15 +48,37 @@ struct MoneyEventView: View {
                 }
             }
         }
-        .navigationTitle(viewModel.didSave ? "" : "Quick log")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
         .toolbar {
             if isPresented {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(viewModel.didSave ? "Done" : "Cancel") { dismiss() }
+                        .foregroundStyle(DS.onDarkPrimary)
                 }
             }
         }
+        .sheet(item: $rangeSheetCategory) { cat in
+            rangeSheet(for: cat)
+                .presentationDetents([.height(340)])
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    // MARK: - Header
+
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Quick log")
+                .font(.system(.largeTitle, weight: .bold))
+                .foregroundStyle(DS.onDarkPrimary)
+            Text("Tap what you spent on. Log at your own pace — patterns show up over time.")
+                .font(.system(.subheadline, weight: .medium))
+                .foregroundStyle(DS.onDarkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            ResearchFootnote(text: "Powered by the BFAS framework · Pompian, 2012", style: .pill)
+                .padding(.top, 4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Saved confirmation
@@ -112,222 +124,111 @@ struct MoneyEventView: View {
         .transition(.opacity)
     }
 
-    // MARK: - Category grid
+    // MARK: - Category grid (16 gold tiles)
 
     private var categoryGrid: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ResearchFootnote(text: "Powered by the BFAS framework · Pompian, 2012", style: .pill)
-                .padding(.bottom, 2)
-            SectionHeader(title: "What did you spend on?")
-
-            // Quick categories with expandable ranges
-            VStack(spacing: 0) {
-                ForEach(quickCategories, id: \.name) { qc in
-                    quickCategoryRow(qc)
-                    if qc.name != quickCategories.last?.name {
-                        Divider().padding(.horizontal, 14)
-                    }
+        VStack(alignment: .leading, spacing: 14) {
+            LazyVGrid(columns: tileColumns, spacing: 10) {
+                ForEach(spendCategories) { cat in
+                    categoryTile(cat)
                 }
             }
-            .background(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(DS.cardBg)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                            .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
-                    )
-            )
-
             ResearchFootnote(
                 text: "Ranges based on ABS Household Expenditure Survey 2022–23",
                 icon: "chart.bar.doc.horizontal"
             )
             .padding(.top, 2)
-
-            // More categories link
-            if showAllCategories {
-                LazyVGrid(columns: fullGridColumns, spacing: 8) {
-                    ForEach(spendCategories) { cat in
-                        categoryCell(cat)
-                    }
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-            } else {
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        showAllCategories = true
-                    }
-                } label: {
-                    Text("More categories \u{2192}")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(DS.accent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                }
-                .buttonStyle(.plain)
-            }
         }
     }
 
-    private func quickCategoryRow(_ qc: (emoji: String, name: String, ranges: [(label: String, midpoint: Double)])) -> some View {
-        let isExpanded = expandedQuickCategory == qc.name
-        let isSelected = viewModel.selectedCategory?.name == qc.name
-
-        return VStack(spacing: 0) {
-            Button {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    if isExpanded {
-                        expandedQuickCategory = nil
-                    } else {
-                        expandedQuickCategory = qc.name
-                    }
-                }
-            } label: {
-                HStack(spacing: 12) {
-                    Text(qc.emoji)
-                        .font(.title2)
-                    Text(qc.name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(isSelected ? DS.primary : DS.textPrimary)
-                    Spacer()
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(DS.textTertiary)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-            }
-            .buttonStyle(.plain)
-
-            if isExpanded {
-                HStack(spacing: 8) {
-                    ForEach(qc.ranges, id: \.label) { range in
-                        let rangeSelected = viewModel.selectedCategory?.name == qc.name
-                            && viewModel.selectedRange?.label == range.label
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                viewModel.selectedCategory = SpendCategory(emoji: qc.emoji, name: qc.name)
-                                viewModel.selectedRange = AmountRange(label: range.label, midpoint: range.midpoint)
-                                viewModel.plannedStatus = nil
-                                viewModel.behaviourTag = nil
-                            }
-                        } label: {
-                            Text(range.label)
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(rangeSelected ? DS.goldForeground : DS.primary)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 8)
-                                .background(rangeSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
-                                .clipShape(Capsule())
-                                .overlay(
-                                    Capsule()
-                                        .stroke(DS.primary.opacity(rangeSelected ? 0 : 0.4), lineWidth: 1)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .sensoryFeedback(.selection, trigger: rangeSelected)
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.bottom, 12)
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-        }
-    }
-
-    private let quickCategoryNames: Set<String> = ["Coffee", "Lunch", "Drinks", "Eating out"]
-
-    private func isQuickCategory(_ name: String?) -> Bool {
-        guard let name else { return false }
-        return quickCategoryNames.contains(name)
-    }
-
-    private func selectCategory(_ cat: SpendCategory) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            viewModel.selectedCategory = cat
-            viewModel.selectedRange = nil
-            viewModel.plannedStatus = nil
-            viewModel.behaviourTag = nil
-        }
-    }
-
-    private func categoryCell(_ cat: SpendCategory) -> some View {
-        let selected = viewModel.selectedCategory?.name == cat.name
+    private func categoryTile(_ cat: SpendCategory) -> some View {
+        let isLocked = viewModel.selectedCategory?.name == cat.name && viewModel.selectedRange != nil
         return Button {
-            selectCategory(cat)
+            rangeSheetCategory = cat
         } label: {
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 Text(cat.emoji)
-                    .font(.system(size: 28))
+                    .font(.system(size: 36))
                 Text(cat.name)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(selected ? .white : DS.textPrimary)
+                    .font(.system(.caption, weight: .heavy))
+                    .foregroundStyle(DS.goldForeground)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 80)
+            .frame(height: 96)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(Color.white))
+                isLocked ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg),
+                in: RoundedRectangle(cornerRadius: 16)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(selected ? Color.clear : DS.accent.opacity(0.3), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isLocked ? DS.goldBase : DS.goldSurfaceStroke, lineWidth: isLocked ? 1 : 0.5)
             )
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: selected)
+        .sensoryFeedback(.selection, trigger: isLocked)
     }
 
-    // MARK: - Range picker
+    // MARK: - Range sheet (popup)
 
-    private var rangePicker: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "How much?")
-            if let cat = viewModel.selectedCategory,
-               let avg = absMonthlyAverage[cat.name] {
-                Text("Avg: $\(avg)/mo \u{00B7} ABS 2022\u{2013}23")
-                    .font(.caption)
-                    .italic()
-                    .foregroundStyle(DS.textTertiary)
+    private func rangeSheet(for cat: SpendCategory) -> some View {
+        let ranges = categoryRanges[cat.name] ?? []
+        return VStack(spacing: 16) {
+            VStack(spacing: 4) {
+                Text(cat.emoji).font(.system(size: 40))
+                Text(cat.name)
+                    .font(.system(.headline, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                Text("How much?")
+                    .font(.system(.caption, design: .rounded, weight: .heavy))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.accent)
             }
+            .padding(.top, 8)
+
             VStack(spacing: 10) {
-                ForEach(viewModel.availableRanges) { range in
-                    rangeButton(range)
+                ForEach(ranges) { range in
+                    Button {
+                        viewModel.selectedCategory = cat
+                        viewModel.selectedRange = range
+                        viewModel.plannedStatus = nil
+                        viewModel.behaviourTag = nil
+                        rangeSheetCategory = nil
+                    } label: {
+                        Text(range.label)
+                            .font(.system(.headline, weight: .bold))
+                            .foregroundStyle(DS.goldForeground)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(DS.nuggetGold, in: Capsule())
+                            .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.selection, trigger: viewModel.selectedRange?.label == range.label)
                 }
             }
-        }
-        .transition(.move(edge: .top).combined(with: .opacity))
-    }
+            .padding(.horizontal, 20)
 
-    private func rangeButton(_ range: AmountRange) -> some View {
-        let selected = viewModel.selectedRange?.label == range.label
-        return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                viewModel.selectedRange = range
+            if let avg = absMonthlyAverage[cat.name] {
+                ResearchFootnote(text: "Avg $\(avg)/mo · ABS 2022–23", icon: "chart.bar.doc.horizontal")
+                    .padding(.top, 4)
             }
-        } label: {
-            Text(range.label)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(selected ? DS.goldForeground : DS.primary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(selected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(DS.primary.opacity(selected ? 0 : 0.4), lineWidth: 1.5)
-                )
+            Spacer()
         }
-        .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: selected)
+        .padding(.horizontal, 8)
+        .padding(.top, 8)
+        .background(DS.cardBg)
     }
 
     // MARK: - Planned / Surprise / Impulse
 
     private var plannedStatusPicker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Was this planned?")
+            Text("WAS THIS PLANNED?")
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.5)
+                .foregroundStyle(DS.goldText)
             VStack(spacing: 12) {
                 ForEach(MoneyEvent.PlannedStatus.allCases) { status in
                     plannedPill(status)
@@ -350,7 +251,7 @@ struct MoneyEventView: View {
                     .font(.system(size: 20))
                 Text(status.label)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(selected ? DS.goldForeground : DS.primary)
+                    .foregroundStyle(selected ? DS.goldForeground : DS.goldForeground)
                 Spacer()
                 if selected {
                     Image(systemName: "checkmark.circle.fill")
@@ -360,11 +261,11 @@ struct MoneyEventView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 12)
             .padding(.horizontal, 20)
-            .background(selected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(Color.white))
+            .background(selected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg))
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(DS.primary.opacity(selected ? 0 : 0.4), lineWidth: 1.5)
+                    .stroke(selected ? DS.goldBase.opacity(0.6) : DS.goldSurfaceStroke, lineWidth: selected ? 1.5 : 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -375,11 +276,11 @@ struct MoneyEventView: View {
 
     private var biasTagSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "What's driving this?")
-            Text("Used in professional financial planning assessments \u{00B7} BFAS framework (Grable & Joo, 2004)")
-                .font(.system(size: 9))
-                .italic()
-                .foregroundStyle(DS.textTertiary)
+            Text("WHAT'S DRIVING THIS?")
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.5)
+                .foregroundStyle(DS.goldText)
+            ResearchFootnote(text: "BFAS framework · Grable & Joo, 2004")
 
             if let tag = viewModel.behaviourTag {
                 HStack(spacing: 10) {
