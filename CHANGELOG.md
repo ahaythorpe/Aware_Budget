@@ -5,6 +5,42 @@
 
 ---
 
+## 2026-04-15 — Phase A tokens + Phase B1 Awareness repaint (Claude Code)
+
+Phase A (already committed 7b9b044): added DS.onDarkPrimary/Secondary/
+Tertiary, DS.frostedCardBg/Stroke, DS.goldSurfaceBg/Stroke tokens;
+locked handbook §1.3 metallic-green-first visual language spec.
+
+Phase B1 — Awareness tab full repaint:
+- Background: DS.heroGradient.ignoresSafeArea (was #FAFAF8).
+- Hero redesign: "Your money mind" .largeTitle white + subtitle
+  white-0.75 on green + gold score pill top-right showing N/16 in
+  serif with OF N subcaption.
+- Awareness score card: frosted-dark surface (white 8% bg, white 15%
+  stroke). Gold nuggetGold progress fill (was 2-tone green). BFAS
+  ResearchFootnote .pill shown clearly inside.
+- Nudge Says: gold surface variant (new). Uses the .gold case added
+  to NudgeSaysCard.Surface.
+- Category section headers: gold pill capsule with per-category
+  emoji (🙈 Avoidance / 🔀 Decision Making / 💚 Emotion / 🧠 Memory /
+  ⚡ Heuristic / 👥 Social). Dark-gold text #8B6010.
+- Bias rows: gold-surface bg (was white). Bigger bias name .headline
+  semibold DS.textPrimary. Description .subheadline regular
+  DS.textSecondary lineSpacing 3 (was 9.5pt grey). Triggered count
+  pill now deep-green bg + white text. Chevron gold.
+- Expanded row: Nudge section uses ResearchFootnote for the key ref.
+
+NudgeSaysCard component: added Surface enum (.paleGreen / .gold).
+Existing call sites unchanged (default .paleGreen). Awareness passes
+.gold.
+
+Build verified iPhone 17 Pro iOS 26.2.
+
+Remaining Phase B: Home (B2), Log (B3), Insights (B4). Sheets (S1+S2),
+Formatting rhythm sweep (F1–F9), Smart notifications (N1+N2).
+
+---
+
 ## 2026-04-15 — PLAN: master text polish pass (Claude Code)
 
 Audit after simulator screenshots (Home, Log, Insights, Awareness)

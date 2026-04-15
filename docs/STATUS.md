@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-15
-**Current phase:** All of §8.2 credibility sprinkle cues now implemented: onboarding "40+ years" pill, check-in question footer, answer-flash citation pill (1.6s gold cross-fade), BiasDetail "The research" card, weekly review BFAS badge via NudgeSaysCard, BFAS completion caption. PRD v1.2 5-step daily check-in plan complete (tailored 4 questions + Sunday review). PRD v1.3 4-tab app stable (Home · Log · Insights · Awareness). Build succeeds iPhone 17 Pro / iOS 26.2. Remaining backlog: smart time-of-day push notifications (requires analytics of user logging times).
+**Current phase:** Phase B metallic-green theme rollout in flight. Phase A tokens + handbook §1.3 locked. Phase B1 Awareness repainted (green bg, frosted score card, gold Nudge Says, gold category pills with per-category emojis, gold bias rows with bigger readable text). NudgeSaysCard gained `.gold` surface variant. Open backlog documented in `memory/project_open_backlog.md`: B2 Home, B3 Log redesign (square tiles), B4 Insights redesign, S1 CredibilitySheet rebuild, F1–F9 formatting rhythm sweep, N1 smart time-of-day notifications. Build succeeds iPhone 17 Pro / iOS 26.2.
 
 ---
 

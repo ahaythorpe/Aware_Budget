@@ -1,14 +1,32 @@
 import SwiftUI
 
 struct NudgeSaysCard: View {
+    enum Surface { case paleGreen, gold }
+
     let message: String
     let citation: String?
     var showCoin: Bool = true
+    var surface: Surface = .paleGreen
 
-    init(message: String, citation: String? = nil, showCoin: Bool = true) {
+    init(message: String, citation: String? = nil, showCoin: Bool = true, surface: Surface = .paleGreen) {
         self.message = message
         self.citation = citation
         self.showCoin = showCoin
+        self.surface = surface
+    }
+
+    private var backgroundColor: Color {
+        switch surface {
+        case .paleGreen: return DS.paleGreen
+        case .gold:      return DS.goldSurfaceBg
+        }
+    }
+
+    private var borderColor: Color {
+        switch surface {
+        case .paleGreen: return DS.deepGreen
+        case .gold:      return DS.goldSurfaceStroke
+        }
     }
 
     var body: some View {
@@ -42,10 +60,10 @@ struct NudgeSaysCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DS.paleGreen, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .background(backgroundColor, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.deepGreen, lineWidth: 1)
+                .stroke(borderColor, lineWidth: 1)
         )
     }
 }
