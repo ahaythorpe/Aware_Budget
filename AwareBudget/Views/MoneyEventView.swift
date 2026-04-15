@@ -5,7 +5,21 @@ struct MoneyEventView: View {
     @Environment(\.isPresented) private var isPresented
     @State private var viewModel = MoneyEventViewModel()
     @State private var rangeSheetCategory: SpendCategory? = nil
+    @State private var sessionLog: [SessionEntry] = []
+    @State private var showSessionSummary: Bool = false
     var selectedTab: Binding<RootTab>? = nil
+
+    struct SessionEntry: Identifiable {
+        let id = UUID()
+        let emoji: String
+        let category: String
+        let amountLabel: String
+        let amount: Double
+        let plannedStatus: MoneyEvent.PlannedStatus
+        let behaviourTag: String?
+    }
+
+    private var sessionTotal: Double { sessionLog.reduce(0.0) { $0 + $1.amount } }
 
     private let tileColumns = [
         GridItem(.flexible(), spacing: 10),
@@ -17,12 +31,17 @@ struct MoneyEventView: View {
         ZStack {
             DS.bg.ignoresSafeArea()
 
-            if viewModel.didSave, let nudge = viewModel.nudgeResponse {
+            if showSessionSummary {
+                sessionSummary
+            } else if viewModel.didSave, let nudge = viewModel.nudgeResponse {
                 savedConfirmation(nudge)
             } else {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
                         headerSection
+                        if !sessionLog.isEmpty {
+                            sessionBanner
+                        }
                         categoryGrid
                         if viewModel.selectedRange != nil {
                             plannedStatusPicker
@@ -80,10 +99,10 @@ struct MoneyEventView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // MARK: - Saved confirmation
+    // MARK: - Saved confirmation (with multi-log session affordance)
 
     private func savedConfirmation(_ nudge: NudgeMessage) -> some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 22) {
             Spacer()
 
             ZStack {
@@ -98,29 +117,184 @@ struct MoneyEventView: View {
             if let cat = viewModel.selectedCategory, let range = viewModel.selectedRange {
                 VStack(spacing: 4) {
                     Text("Logged")
-                        .font(.title2.weight(.bold))
+                        .font(.system(.title2, weight: .bold))
                         .foregroundStyle(DS.textPrimary)
                     Text("\(cat.emoji) \(cat.name) · \(range.label)")
-                        .font(.subheadline)
+                        .font(.system(.subheadline, weight: .medium))
                         .foregroundStyle(DS.textSecondary)
                 }
             }
 
-            NudgeCardView(message: nudge)
-
-            Button("Done") {
-                    if isPresented {
-                        dismiss()
-                    } else {
-                        viewModel.reset()
-                    }
-                }
-                .buttonStyle(PrimaryButtonStyle())
+            NudgeSaysCard(message: nudge.body, surface: .whiteShimmer)
                 .padding(.horizontal, DS.hPadding)
+
+            VStack(spacing: 10) {
+                Button {
+                    captureSessionEntry()
+                    viewModel.reset()
+                } label: {
+                    Text("Add another →")
+                }
+                .goldButtonStyle()
+
+                Button {
+                    captureSessionEntry()
+                    viewModel.reset()
+                    showSessionSummary = true
+                } label: {
+                    Text("Done with session")
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(DS.deepGreen)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, DS.hPadding)
 
             Spacer()
         }
         .transition(.opacity)
+    }
+
+    // Append the just-saved event to the local session log.
+    private func captureSessionEntry() {
+        guard let cat = viewModel.selectedCategory,
+              let range = viewModel.selectedRange,
+              let status = viewModel.plannedStatus else { return }
+        sessionLog.append(SessionEntry(
+            emoji: cat.emoji,
+            category: cat.name,
+            amountLabel: range.label,
+            amount: range.midpoint,
+            plannedStatus: status,
+            behaviourTag: viewModel.behaviourTag
+        ))
+    }
+
+    // MARK: - Session banner (appears on grid when session has entries)
+
+    private var sessionBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "list.bullet.rectangle.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(DS.goldBase)
+            Text("\(sessionLog.count) logged · $\(Int(sessionTotal))")
+                .font(.system(.subheadline, weight: .heavy))
+                .foregroundStyle(DS.textPrimary)
+            Spacer()
+            Button {
+                showSessionSummary = true
+            } label: {
+                Text("See summary")
+                    .font(.system(.caption, weight: .bold))
+                    .foregroundStyle(DS.deepGreen)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+        .shimmeringGoldBorder(cornerRadius: 12)
+    }
+
+    // MARK: - Session summary (end-of-session screen)
+
+    private var sessionSummary: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Session summary")
+                        .font(.system(.largeTitle, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Text("\(sessionLog.count) event\(sessionLog.count == 1 ? "" : "s") · $\(Int(sessionTotal)) total")
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(DS.textSecondary)
+                }
+
+                VStack(spacing: 8) {
+                    ForEach(sessionLog) { entry in
+                        sessionRow(entry)
+                    }
+                }
+
+                if !topSessionBiases.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("PATTERNS TRIGGERED")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(DS.goldBase)
+                        ForEach(topSessionBiases, id: \.0) { name, count in
+                            HStack {
+                                Text(name)
+                                    .font(.system(.subheadline, weight: .semibold))
+                                    .foregroundStyle(DS.textPrimary)
+                                Spacer()
+                                Text("×\(count)")
+                                    .font(.system(.footnote, weight: .heavy))
+                                    .foregroundStyle(DS.deepGreen)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    .padding(14)
+                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+                    .shimmeringGoldBorder(cornerRadius: 12)
+                }
+
+                NudgeSaysCard(message: sessionNudgeMessage, surface: .whiteShimmer)
+
+                Button {
+                    sessionLog.removeAll()
+                    showSessionSummary = false
+                    if isPresented { dismiss() } else { selectedTab?.wrappedValue = .home }
+                } label: {
+                    Text("Back to Home →")
+                }
+                .goldButtonStyle()
+                .padding(.bottom, 24)
+            }
+            .padding(.horizontal, DS.hPadding)
+            .padding(.top, 16)
+        }
+    }
+
+    private func sessionRow(_ entry: SessionEntry) -> some View {
+        HStack(spacing: 12) {
+            Text(entry.emoji).font(.system(size: 22))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.category)
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(DS.textPrimary)
+                Text(entry.plannedStatus.label)
+                    .font(.system(.caption, weight: .medium))
+                    .foregroundStyle(DS.textTertiary)
+            }
+            Spacer()
+            Text(entry.amountLabel)
+                .font(.system(.subheadline, weight: .heavy))
+                .foregroundStyle(DS.goldBase)
+        }
+        .padding(12)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+        )
+    }
+
+    private var topSessionBiases: [(String, Int)] {
+        let tags = sessionLog.compactMap(\.behaviourTag)
+        let counts = Dictionary(grouping: tags, by: { $0 }).mapValues(\.count)
+        return counts.sorted { $0.value > $1.value }.prefix(3).map { ($0.key, $0.value) }
+    }
+
+    private var sessionNudgeMessage: String {
+        if let top = topSessionBiases.first {
+            return "Most logged pattern: \(top.0). Worth a look in your bias profile."
+        } else if sessionLog.count >= 3 {
+            return "Three or more events in one session — that's the noticing muscle building."
+        } else {
+            return "Logged. Patterns show up over time."
+        }
     }
 
     // MARK: - Category grid (16 gold tiles)
