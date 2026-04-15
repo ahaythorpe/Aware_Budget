@@ -52,7 +52,7 @@ struct CheckInView: View {
 
     var body: some View {
         ZStack {
-            DS.altBg.ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
 
             VStack(spacing: 16) {
                 if let existing = alreadyCheckedIn {

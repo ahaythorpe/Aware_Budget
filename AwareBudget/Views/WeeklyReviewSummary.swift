@@ -22,7 +22,7 @@ struct WeeklyReviewSummary: View {
             }
             .padding(22)
         }
-        .background(DS.bg)
+        .background(DS.bg.ignoresSafeArea())
     }
 
     private var header: some View {
@@ -54,19 +54,17 @@ struct WeeklyReviewSummary: View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 28, weight: .black, design: .serif))
-                .foregroundStyle(tint)
+                .foregroundStyle(DS.nuggetGold)
+                .shimmerOverlay(duration: 2.2, intensity: 0.5)
             Text(label)
                 .font(.system(size: 10, weight: .heavy, design: .rounded))
                 .tracking(1.2)
-                .foregroundStyle(DS.textTertiary)
+                .foregroundStyle(DS.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
-        )
+        .shimmeringGoldBorder(cornerRadius: 14)
     }
 
     private var biasesList: some View {
@@ -113,7 +111,8 @@ struct WeeklyReviewSummary: View {
     private var nudgeSays: some View {
         NudgeSaysCard(
             message: nudgeCommentary,
-            citation: "Reviewed by the BFAS framework"
+            citation: "Reviewed by the BFAS framework",
+            surface: .whiteShimmer
         )
     }
 
