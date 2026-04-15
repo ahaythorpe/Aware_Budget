@@ -55,7 +55,7 @@ struct WeeklyReviewSummary: View {
             Text(value)
                 .font(.system(size: 28, weight: .black, design: .serif))
                 .foregroundStyle(DS.nuggetGold)
-                .shimmerOverlay(duration: 2.2, intensity: 0.5)
+                .shimmerOverlay(duration: 3.8, intensity: 0.22)
             Text(label)
                 .font(.system(size: 10, weight: .heavy, design: .rounded))
                 .tracking(1.2)
