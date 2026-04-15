@@ -247,6 +247,50 @@ The top-left greeting on `HomeView` is produced by `NudgeEngine.welcomeMessage(.
 
 ---
 
-## 8. Reference preview
+## 8. Credibility cues
+
+Evidence-based consumer design (NNg Group pattern). Hide the ranking math, surface research authority at key moments. Applied sparingly, never shouty.
+
+### 8.1 Home — Top Biases `ⓘ` + CredibilitySheet
+
+On the `TopBiasesCard` header, insert a small `info.circle.fill` icon (14pt, `DS.deepGreen`) right after the "YOUR TOP BIASES" label. Tap → presents `CredibilitySheet` as a `.sheet(isPresented:)`.
+
+**CredibilitySheet sections (top to bottom):**
+
+1. **Hero** — Nudge 56pt coin · "Backed by research" `.title3` bold · subtitle "How AwareBudget ranks your patterns" `.subheadline` `DS.textSecondary`.
+2. **Short Why** (3 lines reused from `WhyView`) — "Most budgets track the wrong thing. AwareBudget tracks how you decide, not what you bought."
+3. **How the ranking works** — 3 plain-English bullets. Never show formula.
+   - "Each check-in answer and tagged spend feeds your bias profile."
+   - "The algorithm ranks biases by how often they show up in your decisions."
+   - "As you notice them, they move from *Active* → *Aware*."
+4. **Stage legend** — 5 rows (Unseen / Noticed / Emerging / Active / Aware) — each with its pill color from §3 + 1-line description.
+5. **The research** — 4 citation cards (grid 2×2), each `#FFF8E1` bg + `book.closed.fill` icon + citation line:
+   - Pompian, 2012 · BFAS
+   - Kahneman & Tversky, 1979 · Prospect Theory
+   - Thaler & Sunstein, 2008 · Nudge
+   - Kahneman et al., 2004 · Day Reconstruction
+6. **CTA** — `.goldButtonStyle()` "Read the full story →" — closes sheet + switches to `Why` tab.
+
+### 8.2 Other sprinkle points (implemented later)
+
+| Surface | Cue |
+|---|---|
+| Onboarding screen 1 | "Based on 40+ years of behavioural research" tag under hero |
+| Check-in question screen | Footer "Q{n} of {total} · from BFAS assessment" (`.caption2` `.medium` `DS.textTertiary`) |
+| After answer submitted | Citation pill flashes briefly (300ms fade) — `#FFF8E1` bg, `book.closed.fill` + citation text |
+| BiasDetail | Full citation card (audit if present, add if not) |
+| Weekly review | "Reviewed by the BFAS framework" badge on summary header |
+| BFAS completion | "Your baseline is set. Based on Pompian, 2012." caption |
+
+### 8.3 Rules
+
+- Never expose raw score, BFAS weight, or formula text in the UI.
+- Citations must be real — the 4 above are the canonical set. Never fabricate.
+- Don't shout — each cue is a single line, small size. No full-page "how it works" walls except in `Why` tab.
+- Don't duplicate — if `WhyView` already says it, link to it, don't re-render.
+
+---
+
+## 9. Reference preview
 
 Static HTML palette preview at repo root: `preview_palette.html` — open in browser to see hero, gold button, swatches, A/B strips. Kept in sync with `DesignSystem.swift` whenever the palette changes.

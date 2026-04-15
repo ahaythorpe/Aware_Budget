@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-04-15 — Top 4 biases card + credibility cues strategy (Claude Code)
+
+- New `Views/TopBiasesCard.swift`. Implements DESIGN_HANDBOOK §7.3. Shows
+  up to 4 top-ranked biases under Home calendar (emoji · name · trend ·
+  stage pill). User sees zero raw scores. onTap scaffolded.
+- PRD v1.2 extended: Credibility cues strategy. Verified 4 canonical papers
+  (Pompian 2012, Kahneman & Tversky 1979, Thaler & Sunstein 2008,
+  Kahneman et al. 2004). 6 sprinkle points documented. Reference apps
+  (Noom, Headspace, Fitness+, Waking Up, Duolingo).
+- DESIGN_HANDBOOK §8 added: CredibilitySheet spec for Home Top Biases
+  ⓘ tap — hero / short Why / ranking explanation (plain English, no
+  formula) / stage legend / 4 citation cards / gold CTA to Why tab.
+
+---
+
 ## 2026-04-15 — PRD v1.2 check-in architecture + bias tracker spec (Claude Code)
 
 - PRD.md bumped to v1.2. Added Check-in architecture section: time-of-day

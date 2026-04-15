@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-15
-**Current phase:** Home improvements rolling feature-by-feature. Implemented: monthly calendar card (§7.1) with tap-to-popover showing top biases per day, and Nudge welcome message (§7.2) replacing hardcoded greeting with contextual time/streak/activity-aware copy. Misplaced Log empty-state blocks reverted. Next queued: button formatting sweep. Build succeeds on iPhone 17 Pro / iOS 26.2.
+**Current phase:** Home rebuild rolling feature-by-feature. Done: monthly calendar (§7.1), Nudge welcome (§7.2) + Nudge-card-wrapped top greeting, Top 4 biases card (§7.3), sharpened gold foil + gold button polish, NudgeSaysCard v2 + dark green border, SF Pro semantic typography (§3.5), PRD v1.2 check-in architecture + credibility cues strategy, DESIGN_HANDBOOK §8 Credibility cues with 4 verified canonical papers. Next: implement Home ⓘ + CredibilitySheet (handbook §8.1). Build succeeds iPhone 17 Pro / iOS 26.2.
 
 ---
 

@@ -47,6 +47,30 @@ Stage: unseen → noticed → emerging → active → aware.
 | **Loss aversion** | Nudge line: "Missing a log keeps you blind to the pattern" (behavioural-econ meta, not shamey) |
 | **Pattern reveal** | After 3 same-category logs: "Your Wednesday coffees: 4× — Status Quo Bias" |
 
+### Credibility cues strategy
+
+**Design pattern:** evidence-based consumer design (NNg Group / Norman & Nielsen). Hide the math, surface authority at data-capture moments so seemingly-boring questions feel consequential.
+
+**Canonical papers** (all verified, all already in `BiasData.swift`):
+- Pompian (2012) *Behavioral Finance and Wealth Management* — BFAS framework
+- Kahneman & Tversky (1979) *Prospect Theory*, Econometrica 47(2):263–291
+- Thaler & Sunstein (2008) *Nudge*, Yale University Press
+- Kahneman et al. (2004) *Day Reconstruction Method*, Science 306(5702):1776–1780
+
+**Sprinkle points:**
+
+| Surface | Cue |
+|---|---|
+| Onboarding screen 1 | "Based on 40+ years of behavioural research" tag under hero |
+| Home · Top Biases card | `ⓘ` icon → `CredibilitySheet` (algorithm plain-English + stage legend + citation grid + "Read the full story" CTA to Why) |
+| Check-in question screen | Footer "Q{n} of {total} · from BFAS assessment" |
+| After answer submitted | Citation pill flashes briefly: "Kahneman & Tversky, 1979" |
+| BiasDetail | Full citation card + "Why this matters" (audit existing) |
+| Weekly review | "Reviewed by the BFAS framework" badge on summary |
+| First-time BFAS assessment completion | "Your baseline is set. Based on Pompian, 2012." |
+
+**Reference apps** confirming this pattern works for behavioural/health: Noom, Headspace, Apple Fitness+, Waking Up, Duolingo.
+
 ### Explicit anti-patterns
 
 - No badges, confetti, XP, streak-freeze power-ups, level-ups
