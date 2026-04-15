@@ -563,6 +563,16 @@ struct CheckInView: View {
             showWeeklyReview = true
         }
 
+        // Monthly checkpoint takes priority over daily — re-asks
+        // previously YES-answered questions to measure change.
+        if MonthlyReviewTracker.isDueNow() {
+            if let checkpoint = await checkpointQuestions(count: 4), !checkpoint.isEmpty {
+                questions = checkpoint
+                MonthlyReviewTracker.markDone()
+                return
+            }
+        }
+
         do {
             let fetched = try await service.fetchTailoredQuestions(count: 4)
             if fetched.isEmpty {
@@ -573,6 +583,28 @@ struct CheckInView: View {
         } catch {
             questions = await tailoredSeedQuestions(count: 4)
         }
+    }
+
+    /// Checkpoint: pick 4 questions targeting biases the user previously
+    /// answered YES to (times_encountered > 0) and hasn't yet fully
+    /// reflected on. Gives a "how do you feel now?" moment once a month.
+    private func checkpointQuestions(count: Int) async -> [Question]? {
+        guard let progress = try? await service.fetchBiasProgress() else { return nil }
+        let unresolvedBiases = progress
+            .filter { $0.timesEncountered > $0.timesReflected && $0.timesEncountered > 0 }
+            .sorted { ($0.timesEncountered - $0.timesReflected) > ($1.timesEncountered - $1.timesReflected) }
+            .map(\.biasName)
+
+        guard !unresolvedBiases.isEmpty else { return nil }
+
+        var picked: [Question] = []
+        for biasName in unresolvedBiases {
+            if let q = QuestionPool.seed.first(where: { $0.biasName == biasName }) {
+                picked.append(q)
+                if picked.count >= count { break }
+            }
+        }
+        return picked.isEmpty ? nil : picked
     }
 
     /// Fallback when Supabase `question_pool` is empty. Ranks local seed
