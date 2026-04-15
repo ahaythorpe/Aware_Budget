@@ -18,7 +18,7 @@ struct InsightFeedView: View {
 
     var body: some View {
         ZStack {
-            DS.altBg.ignoresSafeArea()
+            DS.heroGradient.ignoresSafeArea()
 
             if hasNoData {
                 insightsEmptyState
@@ -43,7 +43,7 @@ struct InsightFeedView: View {
             ToolbarItem(placement: .primaryAction) {
                 Button { showAboutScore = true } label: {
                     Image(systemName: "info.circle")
-                        .foregroundStyle(DS.textTertiary)
+                        .foregroundStyle(DS.goldText)
                 }
             }
         }
@@ -62,19 +62,35 @@ struct InsightFeedView: View {
     // MARK: - Full-page empty state
 
     private var insightsEmptyState: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 22) {
             Spacer()
-            NudgeAvatar(size: 64)
 
-            Text("Your insights appear here after you log a few events")
-                .font(.system(.subheadline, weight: .medium))
-                .foregroundStyle(DS.textSecondary)
+            Image("nudge")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 96, height: 96)
+
+            NudgeSaysCard(
+                message: "Your insights appear after you log an event. Start logging now.",
+                surface: .gold
+            )
+            .padding(.horizontal, DS.hPadding)
+
+            // Statement block — gold surface, not a button
+            Text("Nudge tracks patterns, not perfection.")
+                .font(.system(.headline, weight: .bold))
+                .italic()
+                .foregroundStyle(DS.textPrimary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-
-            Text("Nudge tracks patterns, not perfection")
-                .font(.system(.footnote, weight: .semibold))
-                .foregroundStyle(DS.textSecondary)
+                .padding(.vertical, 14)
+                .padding(.horizontal, 22)
+                .frame(maxWidth: .infinity)
+                .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
+                )
+                .padding(.horizontal, DS.hPadding)
 
             ResearchFootnote(text: "Patterns assessed via BFAS · Pompian, 2012", style: .pill)
 
@@ -82,15 +98,11 @@ struct InsightFeedView: View {
                 showMoneyEvent = true
             } label: {
                 Text("Log your first event")
-                    .font(.system(.headline, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.buttonRadius, style: .continuous))
             }
-            .buttonStyle(.plain)
+            .goldButtonStyle()
             .padding(.horizontal, DS.hPadding)
-            .padding(.top, 8)
+            .padding(.top, 6)
+
             Spacer()
         }
     }
