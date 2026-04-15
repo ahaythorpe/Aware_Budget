@@ -28,8 +28,8 @@ struct HomeView: View {
                             .minimumScaleFactor(0.85)
                             .fixedSize(horizontal: false, vertical: true)
                         Text(viewModel.todayLabel)
-                            .font(.system(.caption2, weight: .medium))
-                            .foregroundStyle(DS.textTertiary)
+                            .font(.system(.caption, weight: .semibold))
+                            .foregroundStyle(DS.textSecondary)
                     }
                     Spacer(minLength: 8)
                     Image(systemName: "gearshape")
