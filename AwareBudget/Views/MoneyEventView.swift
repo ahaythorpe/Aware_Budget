@@ -59,7 +59,7 @@ struct MoneyEventView: View {
         }
         .sheet(item: $rangeSheetCategory) { cat in
             rangeSheet(for: cat)
-                .presentationDetents([.height(340)])
+                .presentationDetents([.height(440)])
         }
     }
 

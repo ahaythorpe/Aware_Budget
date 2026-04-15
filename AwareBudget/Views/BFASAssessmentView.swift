@@ -68,18 +68,7 @@ struct BFASAssessmentView: View {
     }
 
     private var credibilityPill: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "book.closed.fill")
-                .font(.system(size: 10))
-                .foregroundStyle(DS.goldBase)
-            Text("Based on the BFAS framework · Pompian, 2012")
-                .font(.system(.caption2, weight: .semibold))
-                .foregroundStyle(Color(hex: "8B6010"))
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(Color(hex: "FFF8E1"), in: Capsule())
-        .overlay(Capsule().stroke(DS.goldBase.opacity(0.3), lineWidth: 0.5))
+        ResearchFootnote(text: "Based on the BFAS framework · Pompian, 2012", style: .pill)
     }
 
     // MARK: - Quiz
@@ -142,10 +131,7 @@ struct BFASAssessmentView: View {
         .frame(maxWidth: .infinity)
         .padding(28)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.deepGreen, lineWidth: 1)
-        )
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
     }
 
     private func yesNoButtons(for q: BFASQuestion) -> some View {
@@ -179,14 +165,7 @@ struct BFASAssessmentView: View {
     }
 
     private var citationFooter: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "book.closed.fill")
-                .font(.system(size: 9))
-                .foregroundStyle(DS.goldBase)
-            Text("From BFAS · Pompian, 2012")
-                .font(.system(.caption2, weight: .semibold))
-                .foregroundStyle(DS.textTertiary)
-        }
+        ResearchFootnote(text: "From BFAS · Pompian, 2012")
     }
 
     private func record(_ q: BFASQuestion, yes: Bool) {
