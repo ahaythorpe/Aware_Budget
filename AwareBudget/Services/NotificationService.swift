@@ -7,6 +7,21 @@ enum NotificationService {
     private static let noEventsID = "awarebudget.no.events"
     private static let biasHitID  = "awarebudget.bias.hit"
 
+    // Smart time-of-day nudges (F — personalised to user's log hours)
+    private static let smartMorningID   = "awarebudget.smart.morning"
+    private static let smartAfternoonID = "awarebudget.smart.afternoon"
+    private static let smartEveningID   = "awarebudget.smart.evening"
+
+    private static let morningBodies = [
+        "Coffee run?", "Any spends before work?", "Nudge is listening.",
+    ]
+    private static let afternoonBodies = [
+        "Lunch logged?", "Mid-day check-in?", "Pattern check.",
+    ]
+    private static let eveningBodies = [
+        "After work?", "Wrap the day.", "One last nudge.",
+    ]
+
     // MARK: - Permission
 
     static func requestPermission() async {
@@ -102,6 +117,36 @@ enum NotificationService {
 
     static func resetNoEventsTimer() {
         scheduleNoEventsReminder()
+    }
+
+    // MARK: - Smart time-of-day nudges (F)
+
+    /// Schedule 3 daily pushes at the user's median logging hours.
+    /// Copy rotates per slot. Falls back to 11/14/19 defaults if
+    /// history is thin. See LogTimeAnalytics.
+    static func scheduleSmartNudges(hours: LogTimeAnalytics.SlotHours) {
+        scheduleSmart(id: smartMorningID, hour: hours.morning, bodies: morningBodies)
+        scheduleSmart(id: smartAfternoonID, hour: hours.afternoon, bodies: afternoonBodies)
+        scheduleSmart(id: smartEveningID, hour: hours.evening, bodies: eveningBodies)
+    }
+
+    private static func scheduleSmart(id: String, hour: Int, bodies: [String]) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [id])
+
+        let body = bodies.randomElement() ?? bodies[0]
+        let content = UNMutableNotificationContent()
+        content.title = "AwareBudget"
+        content.body = body
+        content.sound = .default
+
+        var components = DateComponents()
+        components.hour = hour
+        components.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        center.add(request)
     }
 
     // MARK: - Legacy compatibility

@@ -6,6 +6,14 @@ struct AwareBudgetApp: App {
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
     @State private var checkingSession = true
 
+    /// Pulls last 30 days of events, computes user's median log hour per
+    /// slot, schedules smart nudges at those hours. See F / LogTimeAnalytics.
+    private func scheduleSmartNudgesFromHistory() async {
+        let events = (try? await SupabaseService.shared.fetchMoneyEvents(forMonth: Date())) ?? []
+        let hours = LogTimeAnalytics.medianHours(from: events)
+        NotificationService.scheduleSmartNudges(hours: hours)
+    }
+
     var body: some Scene {
         WindowGroup {
             #if DEBUG
@@ -15,6 +23,7 @@ struct AwareBudgetApp: App {
                     NotificationService.scheduleMorningReminder()
                     NotificationService.scheduleEveningNudge()
                     NotificationService.scheduleNoEventsReminder()
+                    await scheduleSmartNudgesFromHistory()
                 }
             #else
             Group {
@@ -39,6 +48,7 @@ struct AwareBudgetApp: App {
                             NotificationService.scheduleMorningReminder()
                             NotificationService.scheduleEveningNudge()
                             NotificationService.scheduleNoEventsReminder()
+                            await scheduleSmartNudgesFromHistory()
                         }
                 }
             }

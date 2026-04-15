@@ -422,6 +422,10 @@ struct MoneyEventView: View {
         lastBatchStatus = status
         showStatusSheet = false
         showSessionSummary = true
+
+        // Refresh smart-nudge schedule so new log times feed back into tomorrow's pushes
+        let events = (try? await SupabaseService.shared.fetchMoneyEvents(forMonth: Date())) ?? []
+        NotificationService.scheduleSmartNudges(hours: LogTimeAnalytics.medianHours(from: events))
     }
 
     // MARK: - Planned / Surprise / Impulse
