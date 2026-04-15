@@ -5,6 +5,45 @@
 
 ---
 
+## 2026-04-15 — Why tab absorbed into CredibilitySheet; 4-tab app (Claude Code)
+
+PRD v1.3. All Why tab content merged into the expandable CredibilitySheet
+reached from Home Top Biases ⓘ. Why tab removed entirely. Tab bar now has
+4 tabs: Home · Log · Insights · Awareness.
+
+CredibilitySheet rewritten with 10 sections:
+1. Hero — Nudge 64pt + "Backed by research" .largeTitle
+2. THE IDEA
+3. THE DIFFERENCE — 5-row comparison table (Traditional × vs AwareBudget ✓)
+4. HOW THE RANKING WORKS — 3 plain-English bullets
+5. WHAT THE STAGES MEAN — 5-row legend
+6. THE FRAMEWORK — "Built on BFAS" card (absorbed from Why)
+7. THE RESEARCH — 4 citation cards
+8. YOU'RE NOT BROKEN — dark green hero panel (absorbed from Why)
+9. NUDGE SAYS — in-context NudgeSaysCard about the assessment
+10. CTA — "Got it" (closes sheet)
+
+Typography polish: all SF Pro semantic roles (.largeTitle, .body,
+.subheadline, .footnote, .caption2). Section labels keep master §3.5 spec
+(11pt .rounded heavy DS.accent tracking 1.5). Comparison table header uses
+DS.paleGreen zebra. No hardcoded hex in views (only #FFF8E1 citation bg
+which is a handbook-designated value).
+
+File changes:
+- AwareBudget/Views/WhyView.swift DELETED
+- AwareBudget/Views/CredibilitySheet.swift rewritten
+- AwareBudget/Views/RootTabView.swift — Why tab removed, RootTab enum
+  reindexed (home=0, log=1, insights=2, awareness=3)
+- AwareBudget/Views/HomeView.swift — selectedTab param dropped (no longer
+  needed to route to Why); sheet presents CredibilitySheet with no args
+- docs/PRD.md bumped to v1.3
+- docs/DESIGN_HANDBOOK.md §5 updated (4 tabs); §8.1 rewritten for new
+  10-section sheet structure
+
+Build verified iPhone 17 Pro iOS 26.2 — BUILD SUCCEEDED.
+
+---
+
 ## 2026-04-15 — Top 4 biases card + credibility cues strategy (Claude Code)
 
 - New `Views/TopBiasesCard.swift`. Implements DESIGN_HANDBOOK §7.3. Shows

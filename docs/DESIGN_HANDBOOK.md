@@ -148,13 +148,14 @@ sectionGap    20pt
 
 ## 5. Tab-by-tab application
 
+4-tab app (v1.3). Why tab removed — all its content absorbed into the `CredibilitySheet` accessible from the Home Top Biases `ⓘ`.
+
 | Tab | Hero uses | Gold uses | Notes |
 |---|---|---|---|
 | Home | streak card, check-in card | Start check-in button | Awareness circle: `heroGradient` stroke |
-| Insights (Learn) | bias detail header | "Mark as noticed" button | Stage pills stay semantic |
 | Log (MoneyEvent) | confirmation hero | Save button | Category grid: white cards |
-| Library | bias card active state | "Begin learning" CTA | |
-| Why | top hero, bottom CTA panel | "That's why AwareBudget exists →" | Comparison table: white card |
+| Insights | bias detail header | "Mark as noticed" button | Stage pills stay semantic |
+| Awareness | bias card active state | "Begin learning" CTA | |
 
 ---
 
@@ -255,21 +256,18 @@ Evidence-based consumer design (NNg Group pattern). Hide the ranking math, surfa
 
 On the `TopBiasesCard` header, insert a small `info.circle.fill` icon (14pt, `DS.deepGreen`) right after the "YOUR TOP BIASES" label. Tap → presents `CredibilitySheet` as a `.sheet(isPresented:)`.
 
-**CredibilitySheet sections (top to bottom):**
+**CredibilitySheet sections (top to bottom) — absorbs all content from the deprecated Why tab:**
 
-1. **Hero** — Nudge 56pt coin · "Backed by research" `.title3` bold · subtitle "How AwareBudget ranks your patterns" `.subheadline` `DS.textSecondary`.
-2. **Short Why** (3 lines reused from `WhyView`) — "Most budgets track the wrong thing. AwareBudget tracks how you decide, not what you bought."
-3. **How the ranking works** — 3 plain-English bullets. Never show formula.
-   - "Each check-in answer and tagged spend feeds your bias profile."
-   - "The algorithm ranks biases by how often they show up in your decisions."
-   - "As you notice them, they move from *Active* → *Aware*."
-4. **Stage legend** — 5 rows (Unseen / Noticed / Emerging / Active / Aware) — each with its pill color from §3 + 1-line description.
-5. **The research** — 4 citation cards (grid 2×2), each `#FFF8E1` bg + `book.closed.fill` icon + citation line:
-   - Pompian, 2012 · BFAS
-   - Kahneman & Tversky, 1979 · Prospect Theory
-   - Thaler & Sunstein, 2008 · Nudge
-   - Kahneman et al., 2004 · Day Reconstruction
-6. **CTA** — `.goldButtonStyle()` "Read the full story →" — closes sheet + switches to `Why` tab.
+1. **Hero** — Nudge 56pt coin · "Backed by research" `.largeTitle` bold · subtitle "How AwareBudget ranks your patterns" `.subheadline` `DS.textSecondary`.
+2. **THE IDEA** — 3 lines: "Most budgets track the wrong thing. AwareBudget tracks how you decide, not what you bought."
+3. **THE DIFFERENCE** — comparison table (2 columns, Traditional × vs AwareBudget ✓), 5 rows (Focuses on / Feels like / Based on / When wrong / Result). Absorbed from Why.
+4. **HOW THE RANKING WORKS** — 3 plain-English bullets. Never show formula.
+5. **WHAT THE STAGES MEAN** — 5-row stage legend with pill colors + descriptions.
+6. **THE FRAMEWORK** — "Built on the BFAS framework" expanded card. Absorbed from Why's BFAS panel.
+7. **THE RESEARCH** — 4 citation cards in 2×2 grid (Pompian 2012, Kahneman & Tversky 1979, Thaler & Sunstein 2008, Kahneman et al 2004).
+8. **YOU'RE NOT BROKEN** — closing hero panel (dark `heroGradient`, Nudge coin 36pt, "You're not broken. The method is.", supporting copy). Absorbed from Why.
+9. **NUDGE SAYS** — one `NudgeSaysCard` about the assessment (NOT redundant — this is the in-context Nudge voice talking *about* the research sheet itself).
+10. **CTA** — `.goldButtonStyle()` "Got it" — closes sheet.
 
 ### 8.2 Other sprinkle points (implemented later)
 

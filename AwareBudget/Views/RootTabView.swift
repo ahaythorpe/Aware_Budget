@@ -1,11 +1,10 @@
 import SwiftUI
 
 enum RootTab: Int, Hashable {
-    case why = 0
-    case home = 1
-    case log = 2
-    case insights = 3
-    case awareness = 4
+    case home = 0
+    case log = 1
+    case insights = 2
+    case awareness = 3
 }
 
 struct RootTabView: View {
@@ -13,10 +12,7 @@ struct RootTabView: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            NavigationStack { WhyView() }
-                .tabItem { Label("Why", systemImage: "questionmark.circle") }
-                .tag(RootTab.why)
-            NavigationStack { HomeView(selectedTab: $selection) }
+            NavigationStack { HomeView() }
                 .tabItem { Label("Home", systemImage: "house.fill") }
                 .tag(RootTab.home)
             NavigationStack { MoneyEventView(selectedTab: $selection) }

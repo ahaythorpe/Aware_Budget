@@ -3,7 +3,6 @@ import SwiftUI
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var showCredibility = false
-    var selectedTab: Binding<RootTab>? = nil
     let totalPatterns = 16
 
     var awarenessPercent: Double {
@@ -147,9 +146,7 @@ struct HomeView: View {
             await viewModel.load()
         }
         .sheet(isPresented: $showCredibility) {
-            CredibilitySheet(onReadMore: {
-                selectedTab?.wrappedValue = .why
-            })
+            CredibilitySheet()
         }
     }
 }

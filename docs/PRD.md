@@ -1,6 +1,6 @@
 # AwareBudget — Product Requirements Document
 ### For: Claude Code (iOS/SwiftUI Build)
-### Version: 1.2 — Check-in architecture + bias ranking
+### Version: 1.3 — 4-tab app + absorbed Why into CredibilitySheet
 
 ---
 
