@@ -18,7 +18,7 @@ struct InsightFeedView: View {
 
     var body: some View {
         ZStack {
-            DS.heroGradient.ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
 
             if hasNoData {
                 insightsEmptyState
@@ -43,7 +43,7 @@ struct InsightFeedView: View {
             ToolbarItem(placement: .primaryAction) {
                 Button { showAboutScore = true } label: {
                     Image(systemName: "info.circle")
-                        .foregroundStyle(DS.goldText)
+                        .foregroundStyle(DS.goldBase)
                 }
             }
         }

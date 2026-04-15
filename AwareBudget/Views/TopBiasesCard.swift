@@ -36,10 +36,7 @@ struct TopBiasesCard: View {
         }
         .padding(18)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
-        )
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
     }
 
     private var header: some View {

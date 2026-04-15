@@ -5,6 +5,48 @@
 
 ---
 
+## 2026-04-15 — White-gallery pivot + ShimmeringGoldBorder (Claude Code)
+
+Direction change after seeing green-flood theme in context. Pivot to
+App Store convention: white base, green reserved for moments, gold as
+signature accent. Matches Apple Wallet / Apple Fitness+ / Monarch /
+Copilot Money / Stripe pattern.
+
+Safe revert: tag `before-white-pivot` (commit 0e7148d).
+
+All 4 tabs + CredibilitySheet: heroGradient background -> DS.bg white.
+
+Green kept for moments (unchanged):
+- HomeView streak card + check-in hero.
+- CredibilitySheet internal hero panel at top.
+- CredibilitySheet "You're not broken" dark panel.
+- Awareness hero still just text/hero area on white.
+
+Text tokens reverted to black/grey for white bg:
+- DS.onDarkPrimary/Secondary -> DS.textPrimary/Secondary/Tertiary
+  across HomeView, AwarenessView, InsightFeedView, MoneyEventView,
+  CredibilitySheet, MonthCalendarView, TopBiasesCard (cards also
+  reverted from frostedCardBg -> cardBg in earlier commit).
+
+Gold: the signature accent.
+- All .goldButtonStyle() buttons unchanged (already shimmer).
+- ResearchFootnote pills unchanged.
+- NEW ShimmeringGoldBorder.swift: animated AngularGradient stroke
+  that rotates a bright highlight around a rounded rectangle.
+  Apply via `.shimmeringGoldBorder(cornerRadius:)`.
+- Applied to: Home greeting card, Top Biases card, NudgeSaysCard
+  (.whiteShimmer variant), CredibilitySheet "THE DIFFERENCE" table.
+- NudgeSaysCard gained .whiteShimmer surface variant = white bg +
+  animated gold border. Handbook §1.3 update pending.
+
+Log sheet drag indicator removed (user ask).
+
+Build verified iPhone 17 Pro iOS 26.2.
+
+Revert: `git reset --hard before-white-pivot` (or `git revert <hash>`).
+
+---
+
 ## 2026-04-15 — Autonomous Phase B rollout + S1 Credibility rebuild (Claude Code)
 
 Executed while user was at lunch/interview prep. Full autonomy granted

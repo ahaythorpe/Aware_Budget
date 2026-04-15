@@ -4,7 +4,7 @@
 > Update this file whenever you finish a unit of work.
 
 **Last updated:** 2026-04-15
-**Current phase:** Phase B metallic-green theme fully rolled out on all 4 tabs (Home B2, Log B3, Insights B4, Awareness B1 already done) + CredibilitySheet rebuilt per §8.4 (S1). App is now green-first throughout. Safe revert tag `phase-b1-stable`. Remaining backlog: F1–F9 formatting rhythm sweep (spacing/radius/shadows), N1+N2 smart time-of-day notifications, chart cards on Insights non-empty state still need gold/frosted refit (only bg changed in B4). Build succeeds iPhone 17 Pro / iOS 26.2 after every commit.
+**Current phase:** Pivoted from green-flood theme to **white-gallery** direction. All 4 tabs + CredibilitySheet back on white bg. Green reserved for moments (streak card, check-in hero, "You're not broken" panel, CredibilitySheet hero, onboarding hero). Gold is the signature accent: all buttons, all ResearchFootnote pills, progress rings, and a new animated shimmer border on key white cards (greeting, Top Biases, Nudge Says). ShimmeringGoldBorder modifier added. Safe revert tags: `before-white-pivot` (pre-pivot state), `phase-b1-stable` (before Phase B). Remaining backlog: F1–F9 formatting rhythm sweep, N1+N2 smart time-of-day notifications, Insights non-empty chart cards, CheckInView/WeeklyReview/BFAS/Onboarding still on their own legacy styling. Build succeeds iPhone 17 Pro / iOS 26.2.
 
 ---
 

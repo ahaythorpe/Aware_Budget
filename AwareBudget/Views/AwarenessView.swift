@@ -54,7 +54,7 @@ struct AwarenessView: View {
                 NudgeSaysCard(
                     message: "Each pattern you identify sharpens your BFAS profile. Professional financial planners use the same framework to assess client behaviour.",
                     citation: "BFAS · Behavioural Finance Assessment Score",
-                    surface: .gold
+                    surface: .whiteShimmer
                 )
                 .padding(.horizontal, 18)
 
@@ -92,7 +92,7 @@ struct AwarenessView: View {
                 .padding(.bottom, 40)
             }
         }
-        .background(DS.heroGradient.ignoresSafeArea())
+        .background(DS.bg.ignoresSafeArea())
         .navigationBarHidden(true)
         .task {
             if let progress = try? await SupabaseService.shared.fetchBiasProgress() {
@@ -108,10 +108,10 @@ struct AwarenessView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Your money mind")
                     .font(.system(.largeTitle, weight: .bold))
-                    .foregroundStyle(DS.onDarkPrimary)
+                    .foregroundStyle(DS.textPrimary)
                 Text("Tap any triggered pattern to hear from Nudge.")
                     .font(.system(.subheadline, weight: .medium))
-                    .foregroundStyle(DS.onDarkSecondary)
+                    .foregroundStyle(DS.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
@@ -220,7 +220,7 @@ struct AwarenessView: View {
 
             Text(anchor(for: name))
                 .font(.system(.caption2, weight: .semibold))
-                .foregroundStyle(DS.onDarkSecondary)
+                .foregroundStyle(DS.textSecondary)
                 .padding(.leading, 14)
         }
     }

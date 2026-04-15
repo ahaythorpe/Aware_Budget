@@ -41,12 +41,12 @@ struct CredibilitySheet: View {
                     .padding(.bottom, 40)
             }
         }
-        .background(DS.heroGradient.ignoresSafeArea())
+        .background(DS.bg.ignoresSafeArea())
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
 
-    // MARK: - 1. Hero
+    // MARK: - 1. Hero (green panel on white body)
 
     private var hero: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -57,13 +57,20 @@ struct CredibilitySheet: View {
 
             Text("Backed by research")
                 .font(.system(.largeTitle, weight: .bold))
-                .foregroundStyle(DS.onDarkPrimary)
+                .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text("How AwareBudget ranks your patterns")
                 .font(.system(.subheadline, weight: .medium))
-                .foregroundStyle(DS.onDarkSecondary)
+                .foregroundStyle(.white.opacity(0.75))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(22)
+        .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase, lineWidth: 1)
+        )
     }
 
     // MARK: - 2. The Idea (gold card)
@@ -85,24 +92,23 @@ struct CredibilitySheet: View {
             sectionLabel("THE DIFFERENCE")
 
             VStack(spacing: 0) {
-                // Header row
                 HStack {
                     Text("")
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Text("Traditional")
                         .font(.system(.caption2, weight: .heavy))
                         .tracking(0.8)
-                        .foregroundStyle(DS.onDarkSecondary)
+                        .foregroundStyle(DS.textTertiary)
                         .frame(width: 96, alignment: .center)
                     Text("AwareBudget")
                         .font(.system(.caption2, weight: .heavy))
                         .tracking(0.8)
-                        .foregroundStyle(DS.goldText)
+                        .foregroundStyle(DS.goldBase)
                         .frame(width: 112, alignment: .center)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
-                .background(Color.white.opacity(0.12))
+                .background(DS.paleGreen.opacity(0.5))
 
                 compareRow("Focuses on", "Categories", "Behaviour", 0)
                 compareRow("Feels like", "Shame", "Awareness", 1)
@@ -110,11 +116,8 @@ struct CredibilitySheet: View {
                 compareRow("When wrong", "You hide it", "You adjust", 1)
                 compareRow("Result", "You quit", "You keep going", 0)
             }
-            .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(DS.frostedCardStroke, lineWidth: 0.5)
-            )
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
+            .shimmeringGoldBorder(cornerRadius: 14)
         }
     }
 
@@ -122,7 +125,7 @@ struct CredibilitySheet: View {
         HStack {
             Text(label)
                 .font(.system(.footnote, weight: .bold))
-                .foregroundStyle(DS.onDarkPrimary)
+                .foregroundStyle(DS.textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 4) {
@@ -131,23 +134,23 @@ struct CredibilitySheet: View {
                     .foregroundStyle(DS.warning)
                 Text(bad)
                     .font(.system(.caption, weight: .regular))
-                    .foregroundStyle(DS.onDarkSecondary)
+                    .foregroundStyle(DS.textSecondary)
             }
             .frame(width: 96, alignment: .center)
 
             HStack(spacing: 4) {
                 Image(systemName: "checkmark")
                     .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(DS.goldText)
+                    .foregroundStyle(DS.goldBase)
                 Text(good)
                     .font(.system(.caption, weight: .bold))
-                    .foregroundStyle(DS.goldText)
+                    .foregroundStyle(DS.deepGreen)
             }
             .frame(width: 112, alignment: .center)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(tint == 1 ? Color.white.opacity(0.05) : Color.clear)
+        .background(tint == 1 ? DS.paleGreen.opacity(0.25) : Color.clear)
     }
 
     // MARK: - 4. How ranking works (gold card, numbered circles ①②③)
@@ -188,17 +191,17 @@ struct CredibilitySheet: View {
             sectionLabel("WHAT THE STAGES MEAN")
 
             VStack(spacing: 10) {
-                stageRow("Unseen", DS.onDarkSecondary, "Not yet encountered in your data")
+                stageRow("Unseen", DS.textTertiary, "Not yet encountered in your data")
                 stageRow("Noticed", DS.stageNoticed, "Showing up occasionally")
                 stageRow("Emerging", DS.stageEmerging, "Becoming a clear pattern")
                 stageRow("Active", DS.stageActive, "Frequently driving decisions")
                 stageRow("Aware", DS.positive, "You recognise it — breaking the grip")
             }
             .padding(14)
-            .background(DS.frostedCardBg, in: RoundedRectangle(cornerRadius: 14))
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(DS.frostedCardStroke, lineWidth: 0.5)
+                    .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
             )
         }
     }
@@ -215,7 +218,7 @@ struct CredibilitySheet: View {
                 .frame(width: 82, alignment: .leading)
             Text(desc)
                 .font(.system(.footnote, weight: .medium))
-                .foregroundStyle(DS.onDarkSecondary)
+                .foregroundStyle(DS.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -298,13 +301,13 @@ struct CredibilitySheet: View {
 
             Text("You're not broken.\nThe method is.")
                 .font(.system(.title2, weight: .bold))
-                .foregroundStyle(DS.onDarkPrimary)
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
 
             Text("70% of people abandon budgeting apps within 30 days. Not from laziness — from apps that create shame, not awareness.")
                 .font(.system(.footnote, weight: .regular))
-                .foregroundStyle(DS.onDarkSecondary)
+                .foregroundStyle(.white.opacity(0.75))
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
@@ -324,7 +327,7 @@ struct CredibilitySheet: View {
         NudgeSaysCard(
             message: "This is not a generic quiz. It's the same framework professional planners use — so when you share your profile, they know exactly which biases to watch for.",
             citation: "BFAS · Pompian, 2012",
-            surface: .gold
+            surface: .whiteShimmer
         )
     }
 

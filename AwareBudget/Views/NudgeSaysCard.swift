@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NudgeSaysCard: View {
-    enum Surface { case paleGreen, gold }
+    enum Surface { case paleGreen, gold, whiteShimmer }
 
     let message: String
     let citation: String?
@@ -17,17 +17,21 @@ struct NudgeSaysCard: View {
 
     private var backgroundColor: Color {
         switch surface {
-        case .paleGreen: return DS.paleGreen
-        case .gold:      return DS.goldSurfaceBg
+        case .paleGreen:    return DS.paleGreen
+        case .gold:         return DS.goldSurfaceBg
+        case .whiteShimmer: return DS.cardBg
         }
     }
 
     private var borderColor: Color {
         switch surface {
-        case .paleGreen: return DS.deepGreen
-        case .gold:      return DS.goldSurfaceStroke
+        case .paleGreen:    return DS.deepGreen
+        case .gold:         return DS.goldSurfaceStroke
+        case .whiteShimmer: return .clear
         }
     }
+
+    private var useShimmerBorder: Bool { surface == .whiteShimmer }
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
@@ -61,9 +65,24 @@ struct NudgeSaysCard: View {
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(backgroundColor, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(borderColor, lineWidth: 1)
-        )
+        .overlay {
+            if !useShimmerBorder {
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(borderColor, lineWidth: 1)
+            }
+        }
+        .modifier(OptionalShimmerBorder(enabled: useShimmerBorder, radius: DS.cardRadius))
+    }
+}
+
+private struct OptionalShimmerBorder: ViewModifier {
+    let enabled: Bool
+    let radius: CGFloat
+    func body(content: Content) -> some View {
+        if enabled {
+            content.shimmeringGoldBorder(cornerRadius: radius)
+        } else {
+            content
+        }
     }
 }

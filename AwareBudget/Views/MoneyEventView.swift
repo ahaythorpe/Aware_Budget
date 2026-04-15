@@ -15,7 +15,7 @@ struct MoneyEventView: View {
 
     var body: some View {
         ZStack {
-            DS.heroGradient.ignoresSafeArea()
+            DS.bg.ignoresSafeArea()
 
             if viewModel.didSave, let nudge = viewModel.nudgeResponse {
                 savedConfirmation(nudge)
@@ -53,14 +53,13 @@ struct MoneyEventView: View {
             if isPresented {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(viewModel.didSave ? "Done" : "Cancel") { dismiss() }
-                        .foregroundStyle(DS.onDarkPrimary)
+                        .foregroundStyle(DS.textPrimary)
                 }
             }
         }
         .sheet(item: $rangeSheetCategory) { cat in
             rangeSheet(for: cat)
                 .presentationDetents([.height(340)])
-                .presentationDragIndicator(.visible)
         }
     }
 
@@ -70,10 +69,10 @@ struct MoneyEventView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Quick log")
                 .font(.system(.largeTitle, weight: .bold))
-                .foregroundStyle(DS.onDarkPrimary)
+                .foregroundStyle(DS.textPrimary)
             Text("Tap what you spent on. Log at your own pace — patterns show up over time.")
                 .font(.system(.subheadline, weight: .medium))
-                .foregroundStyle(DS.onDarkSecondary)
+                .foregroundStyle(DS.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             ResearchFootnote(text: "Powered by the BFAS framework · Pompian, 2012", style: .pill)
                 .padding(.top, 4)
@@ -229,7 +228,7 @@ struct MoneyEventView: View {
             Text("WAS THIS PLANNED?")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(DS.goldText)
+                .foregroundStyle(DS.goldBase)
             VStack(spacing: 12) {
                 ForEach(MoneyEvent.PlannedStatus.allCases) { status in
                     plannedPill(status)
@@ -280,7 +279,7 @@ struct MoneyEventView: View {
             Text("WHAT'S DRIVING THIS?")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(DS.goldText)
+                .foregroundStyle(DS.goldBase)
             ResearchFootnote(text: "BFAS framework · Grable & Joo, 2004")
 
             if let tag = viewModel.behaviourTag {

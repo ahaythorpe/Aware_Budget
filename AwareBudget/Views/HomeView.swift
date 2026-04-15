@@ -44,10 +44,7 @@ struct HomeView: View {
                 }
                 .padding(16)
                 .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-                .overlay(
-                    RoundedRectangle(cornerRadius: DS.cardRadius)
-                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
-                )
+                .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
                 .padding(.bottom, 14)
@@ -137,16 +134,16 @@ struct HomeView: View {
                     .padding(.horizontal, 22)
                     .padding(.bottom, 12)
 
-                // ── NUDGE (gold "speaking" card — signature) ──
+                // ── NUDGE (white card with shimmering gold border — signature) ──
                 NudgeSaysCard(
                     message: viewModel.nudgeMessage?.body ?? "Stay aware. Adjust early. No shame.",
-                    surface: .gold
+                    surface: .whiteShimmer
                 )
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
             }
         }
-        .background(DS.heroGradient.ignoresSafeArea())
+        .background(DS.bg.ignoresSafeArea())
         .navigationBarHidden(true)
         .task {
             await viewModel.load()
