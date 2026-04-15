@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-04-15 — PRD v1.2 check-in architecture + bias tracker spec (Claude Code)
+
+- PRD.md bumped to v1.2. Added Check-in architecture section: time-of-day
+  flow (first-open BFAS 16Q → throughout-day quick logs → evening 2Q →
+  morning 2Q → Sunday 4Q), ranking formula (current_score +
+  BFAS_initial_weight, hidden from user), question selection logic, motivation
+  mechanisms (smart time nudges, loss aversion, pattern reveal), and
+  explicit anti-patterns (no badges, XP, confetti).
+- DESIGN_HANDBOOK §7.3: spec for "Top 4 biases" tracker card under
+  Home monthly calendar. Emoji · name · trend · stage pill, tap -> BiasDetail.
+  Reuses HomeViewModel.dailyPatterns (already populated).
+
+---
+
 ## 2026-04-15 — Home monthly calendar + Nudge welcome message (Claude Code)
 
 Reverts the misplaced Log empty-state feature and delivers two Home features in its place, per `DESIGN_HANDBOOK.md` §7.1 and §7.2.

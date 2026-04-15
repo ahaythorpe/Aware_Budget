@@ -1,6 +1,59 @@
 # AwareBudget — Product Requirements Document
 ### For: Claude Code (iOS/SwiftUI Build)
-### Version: 1.1 — Education Layer + Expanded Biases
+### Version: 1.2 — Check-in architecture + bias ranking
+
+---
+
+## Check-in architecture (v1.2)
+
+**Goal:** capture high-quality behavioural data without burning the user out. Split the work across the day.
+
+### Flow by time of day
+
+| Trigger | Content | Friction budget |
+|---|---|---|
+| **First open (onboarding)** | BFAS baseline — 16 questions (1 per bias) to seed initial bias weights | 3–4 min, one-time |
+| **Throughout day (passive)** | Smart nudge pushes at 11am / 2pm / 7pm based on user's historical logging times. One-tap quick log. | 5 sec per log |
+| **Evening check-in** | Today's event summary + 2 questions on today's top-ranked biases | 30 sec |
+| **Morning check-in** | Yesterday's pattern recap + 2 deeper questions on yesterday's biases | 30 sec |
+| **Sunday weekly review** | Week summary + 4 deeper questions on weekly top biases | 2 min |
+
+**Daily total:** 4 behavioural questions across 2 moments (evening + next morning) — never one dreaded block.
+
+### Ranking system (backend-only, invisible to user)
+
+Lives in `BiasScoreService.computeScore`. User sees **outputs** (top biases, stage, trend) but never the maths.
+
+```
+final_score = current_score + BFAS_initial_weight
+
+current_score = (YES answers × 2) + (tagged events × 3) − (NO answers × 1)
+BFAS_initial_weight = 0–10 per bias, seeded from onboarding assessment
+```
+
+Trend: improving / worsening / stable (last 3 answers).
+Stage: unseen → noticed → emerging → active → aware.
+
+**Question selection:** for each daily check-in, pick top N ranked biases and fetch next unused question from `question_pool` where `bias_name = bias` ORDER BY `last_shown ASC`. After answer, append to `bias_progress.recentAnswers` and update `last_shown`.
+
+### Motivation mechanisms (not gamification)
+
+| Mechanism | Implementation |
+|---|---|
+| **Smart time nudges** | Push notifications at user's historical logging times, not fixed schedule. Body e.g. "Coffee run?" |
+| **One-tap quick log** | 3-tap flow already implemented (`MoneyEventView` quick categories) |
+| **Streak = pattern**, not punishment | Copy: "12-day logging streak — you're seeing more than most" (awareness frame) |
+| **Evening preview** | Evening check-in shows "5 events today" — rewards daytime logging |
+| **Loss aversion** | Nudge line: "Missing a log keeps you blind to the pattern" (behavioural-econ meta, not shamey) |
+| **Pattern reveal** | After 3 same-category logs: "Your Wednesday coffees: 4× — Status Quo Bias" |
+
+### Explicit anti-patterns
+
+- No badges, confetti, XP, streak-freeze power-ups, level-ups
+- No push notifications more than 3×/day
+- No "great job" from Nudge — dry wit only
+- No hardcoded bias suggestions — all from ranking + `question_pool`
+- No user-facing score, points, or rank number
 
 ---
 

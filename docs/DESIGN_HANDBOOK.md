@@ -186,6 +186,41 @@ Inserted between the check-in hero and the Nudge card on `HomeView`. Shows the c
 - Component: `Views/MonthCalendarView.swift`
 - No hardcoded events, no mock fallback — empty months render empty cells
 
+### 7.3 Home — Top 4 biases tracker card (under calendar)
+
+Backend-driven. Inserted directly beneath `MonthCalendarView` on Home. Shows the user's top-ranked biases from `BiasScoreService`. User never sees raw scores — only ranked name, trend, stage.
+
+**Layout:**
+```
+┌──────────────────────────────────────┐
+│ YOUR TOP BIASES              4/16    │
+│                                      │
+│ 🧠  Present Bias          ↗️  Active │
+│ 🏷️  Anchoring             –   Noticed│
+│ 👥  Social Proof          ↘️  Emerging│
+│ ⚡  Scarcity Heuristic   ↗️  Active │
+└──────────────────────────────────────┘
+```
+
+- Section label: `YOUR TOP BIASES` (11pt `.rounded` heavy, handbook §3.5)
+- Counter right-aligned: `N/16` where N = biases with score > 0
+- Row: emoji (18pt) · bias name (`.subheadline` semibold) · trend arrow · mastery stage pill
+- Tap row → opens `BiasDetailView`
+- Empty state: "Complete your first check-in to start tracking"
+- Source: `HomeViewModel.dailyPatterns` (already populated in `load()`)
+- Take top 4 by `score` DESC
+
+**Stage pill colors** (from `DS.stage*`):
+- `unseen` → grey outline
+- `noticed` → `DS.stageNoticed` bg
+- `emerging` → `DS.stageEmerging` bg
+- `active` → `DS.stageActive` bg
+- `aware` → `DS.positive` bg
+
+**Never shown to user:** raw score number, BFAS weight, answer history.
+
+---
+
 ### 7.2 Home — Nudge welcome message (top greeting)
 
 The top-left greeting on `HomeView` is produced by `NudgeEngine.welcomeMessage(...)`. Never hardcode greeting copy in the view.
