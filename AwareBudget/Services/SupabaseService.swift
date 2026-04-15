@@ -32,6 +32,43 @@ final class SupabaseService {
         try await client.auth.signIn(email: email, password: password)
     }
 
+    /// DEBUG-only — ensures there's a valid Supabase session on every launch.
+    /// Uses a persistent per-device test user stored in UserDefaults so saves
+    /// and fetches actually have a user_id to associate with. In release
+    /// builds the user signs in via the normal flow (OTP / OAuth).
+    #if DEBUG
+    func ensureDebugSession() async {
+        if await currentUserId != nil { return }
+
+        let defaults = UserDefaults.standard
+        let savedEmail = defaults.string(forKey: "debugEmail")
+        let savedPassword = defaults.string(forKey: "debugPassword")
+
+        // If we have saved creds, try sign in first.
+        if let e = savedEmail, let p = savedPassword {
+            do {
+                try await client.auth.signIn(email: e, password: p)
+                return
+            } catch {
+                // Saved creds expired or project rotated — fall through to signup.
+            }
+        }
+
+        // Generate fresh creds and sign up.
+        let email = "debug-\(UUID().uuidString.prefix(8))@awarebudget.test"
+        let password = "Dbg-\(UUID().uuidString.prefix(12))"
+        do {
+            try await client.auth.signUp(email: String(email), password: String(password))
+            defaults.set(email, forKey: "debugEmail")
+            defaults.set(password, forKey: "debugPassword")
+        } catch {
+            // If project disables self-signup, nothing we can do from DEBUG.
+            // Saves will keep failing silently — user must sign in via
+            // release build or enable anonymous/email signup in Supabase dashboard.
+        }
+    }
+    #endif
+
     func signOut() async throws {
         try await client.auth.signOut()
     }

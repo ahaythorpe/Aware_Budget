@@ -68,7 +68,11 @@ struct CredibilitySheet: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(22)
-        .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .fill(DS.heroGradient)
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+        )
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(DS.goldBase, lineWidth: 1)

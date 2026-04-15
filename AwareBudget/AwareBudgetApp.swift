@@ -19,6 +19,7 @@ struct AwareBudgetApp: App {
             #if DEBUG
             RootTabView()
                 .task {
+                    await SupabaseService.shared.ensureDebugSession()
                     await NotificationService.requestPermission()
                     NotificationService.scheduleMorningReminder()
                     NotificationService.scheduleEveningNudge()
