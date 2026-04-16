@@ -5,6 +5,54 @@
 
 ---
 
+## 2026-04-16 — Onboarding gates + tab refresh + unified review/popup styling (Claude Code)
+
+Session focused on UX consistency, removing the duplicate Quick log entry
+point, and making logs actually flow through to Home + Insights.
+
+- `AwareBudgetApp.swift`: removed the DEBUG bypass that mounted RootTabView
+  directly. Onboarding + BFAS gates now run in DEBUG too — `Reset onboarding
+  + BFAS` in the dev menu now actually shows the flow on next launch. Buggy
+  release-mode `if currentUserId != nil { hasCompletedOnboarding = true }`
+  removed (was auto-skipping onboarding for any signed-in user).
+- `OnboardingView.swift`: bottom safe-area strip changed from solid
+  `DS.deepGreen` to `DS.heroGradient` with shimmer overlay so the green
+  reads as one continuous shimmery hero instead of a dark stripe.
+- `BiasReviewView.swift`: event recap card now ALWAYS renders above the
+  bias question (was gated on `eventId != nil`).
+- `MoneyEventView.swift`:
+  - `reviewEntriesToppedUp` rewritten — top-up questions recycle real
+    session events (so the spending recap is always shown above the
+    question) and rotate the bias via a status-aware shortlist.
+  - `.alert("Skipping already?", ...)` replaced with a custom
+    Apple-style modal: ONE white rounded card containing Nudge coin,
+    NUDGE label, title, rotating chastise line, gold "Keep reviewing"
+    pill, and warning-red text-only "Skip anyway" — all inside a single
+    container with soft shadow + tap-outside-to-dismiss.
+- `InsightFeedView.swift`: killed the duplicate Quick log sheet — the
+  "Log your first event" CTA now switches `selectedTab` to `.log`
+  instead of opening a second copy of MoneyEventView. Single source of
+  truth for the Quick log form. Added `.onChange(of: selectedTab)` to
+  refetch when user returns to the Insights tab.
+- `HomeView.swift`: same `.onChange(of: selectedTab)` refetch pattern
+  added so calendar + cards reload when user returns to Home (fixes
+  "logged event doesn't show on calendar" — the `.task` modifier only
+  fired on first appear and never again). Pull-to-refresh added.
+- `MonthCalendarView.swift`: day popover now shows a one-line "how to
+  counter" sentence under each top-3 bias (first sentence of
+  `BiasLesson.howToCounter`).
+- `RootTabView.swift`: `selectedTab` binding wired through to HomeView
+  + InsightFeedView for the new tab-switch refresh logic.
+
+Build: clean. Verified iPhone 17 Pro / iOS 26.2 simulator launch.
+
+Backlog: bias rotation per-event (cycle through 5–6 plausible biases for
+each category × status so all 16 get covered over time + neglected-bias
+boost after 14 days), 3-check-in cadence (morning/midday/evening +
+end-of-day chunky purchases prompt), kill review pool padding entirely.
+
+---
+
 ## 2026-04-15 — Backlog: multi-log session + Research tab + status sync (Claude Code)
 
 Documentation-only commit while user reviews the rebuilt UI.

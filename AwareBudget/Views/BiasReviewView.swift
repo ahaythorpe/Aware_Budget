@@ -54,9 +54,7 @@ struct BiasReviewView: View {
             VStack(alignment: .leading, spacing: 20) {
                 header
                 if let entry = currentEntry {
-                    if entry.eventId != nil {
-                        eventRecapCard(entry)
-                    }
+                    eventRecapCard(entry)
                     biasExplanationCard(entry)
                     if let picking = pickingAlternativeFor, picking.id == entry.id {
                         alternativePicker(entry)

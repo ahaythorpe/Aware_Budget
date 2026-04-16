@@ -82,7 +82,8 @@ struct OnboardingView: View {
             .padding(.bottom, 16)
             .background(
                 Rectangle()
-                    .fill(DS.deepGreen)
+                    .fill(DS.heroGradient)
+                    .shimmerOverlay(duration: 4.5, intensity: 0.22)
                     .ignoresSafeArea()
             )
         }
@@ -172,7 +173,8 @@ struct OnboardingView: View {
             .padding(.bottom, 16)
             .background(
                 Rectangle()
-                    .fill(DS.deepGreen)
+                    .fill(DS.heroGradient)
+                    .shimmerOverlay(duration: 4.5, intensity: 0.22)
                     .ignoresSafeArea()
             )
         }

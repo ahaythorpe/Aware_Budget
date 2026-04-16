@@ -86,31 +86,105 @@ struct MoneyEventView: View {
         }
         .fullScreenCover(isPresented: $showBiasReview) {
             NavigationStack {
-                BiasReviewView(
-                    entries: reviewEntriesToppedUp(target: 10),
-                    onDone: { outcome in
-                        lastReviewOutcome = outcome
-                        showBiasReview = false
-                        showSessionSummary = true
+                ZStack {
+                    BiasReviewView(
+                        entries: reviewEntriesToppedUp(target: 10),
+                        onDone: { outcome in
+                            lastReviewOutcome = outcome
+                            showBiasReview = false
+                            showSessionSummary = true
+                        }
+                    )
+                    .navigationTitle("Review")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Skip") { showSkipAlert = true }
+                        }
                     }
-                )
-                .navigationTitle("Review")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Skip") { showSkipAlert = true }
+
+                    if showSkipAlert {
+                        skipChastiseOverlay
+                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                            .zIndex(1)
                     }
                 }
-                .alert("Skipping already?", isPresented: $showSkipAlert) {
-                    Button("Keep reviewing", role: .cancel) {}
-                    Button("Skip anyway", role: .destructive) {
+                .animation(.spring(response: 0.32, dampingFraction: 0.85), value: showSkipAlert)
+            }
+        }
+    }
+
+    // MARK: - Nudge skip chastise overlay (replaces iOS .alert)
+    // Same NudgeSaysCard style used everywhere else Nudge speaks.
+
+    private var skipChastiseOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.45)
+                .ignoresSafeArea()
+                .onTapGesture { showSkipAlert = false }
+
+            VStack(spacing: 18) {
+                Image("nudge")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 56, height: 56)
+
+                VStack(spacing: 8) {
+                    Text("NUDGE")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .tracking(1.5)
+                        .foregroundStyle(DS.accent)
+
+                    Text("Skipping already?")
+                        .font(.system(.title3, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                        .multilineTextAlignment(.center)
+
+                    Text(skipChastise)
+                        .font(.system(.subheadline, weight: .medium))
+                        .foregroundStyle(DS.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 4)
+
+                VStack(spacing: 10) {
+                    Button {
+                        showSkipAlert = false
+                    } label: {
+                        Text("Keep reviewing")
+                            .font(.system(.headline, weight: .bold))
+                            .foregroundStyle(DS.goldForeground)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(DS.nuggetGold, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        showSkipAlert = false
                         showBiasReview = false
                         showSessionSummary = true
+                    } label: {
+                        Text("Skip anyway")
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(DS.warning)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
                     }
-                } message: {
-                    Text(skipChastise)
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(24)
+            .frame(maxWidth: 320)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 22))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+            )
+            .shadow(color: .black.opacity(0.25), radius: 30, x: 0, y: 12)
+            .padding(.horizontal, 32)
         }
     }
 
@@ -340,7 +414,7 @@ struct MoneyEventView: View {
     /// review view skips the event recap for those and shows the bias
     /// reflection card only.
     private func reviewEntriesToppedUp(target: Int) -> [BiasReviewView.Entry] {
-        // Event-anchored cards first.
+        // Event-anchored cards first — one per logged event with its primary bias.
         let eventCards: [BiasReviewView.Entry] = sessionLog.map { e in
             BiasReviewView.Entry(
                 eventId: e.eventId,
@@ -352,39 +426,88 @@ struct MoneyEventView: View {
             )
         }
         let needed = max(0, target - eventCards.count)
-        if needed == 0 { return eventCards }
+        if needed == 0 || sessionLog.isEmpty { return eventCards }
 
-        // Rotation: prefer biases NOT already covered by event cards.
-        let covered = Set(eventCards.map(\.suggestedBias))
-        let emojiFor = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
-
-        var pool = QuestionPool.seed.shuffled()
-        pool.sort { a, b in
-            let aCovered = covered.contains(a.biasName)
-            let bCovered = covered.contains(b.biasName)
-            if aCovered == bCovered { return false }
-            return !aCovered // uncovered first
+        // Top-ups recycle real session events so the spending recap is ALWAYS
+        // shown above the question. Each recycle picks a *different* bias for
+        // the same (category × status) — picked from a status-aware shortlist
+        // so the question stays relevant to that spend type.
+        var biasUsage: [UUID: Set<String>] = [:]
+        for card in eventCards {
+            if let id = card.eventId {
+                biasUsage[id, default: []].insert(card.suggestedBias)
+            }
         }
 
-        // Dedupe by bias for the first 12 ( = 16 - ~4 session ). Allow repeats after.
-        var seenBias: [String: Int] = [:]
         var fills: [BiasReviewView.Entry] = []
-        for q in pool {
-            let c = seenBias[q.biasName, default: 0]
-            if fills.count < needed, c < 2 {
+        var cursor = 0
+        while fills.count < needed {
+            let source = sessionLog[cursor % sessionLog.count]
+            cursor += 1
+            let alreadyUsed = source.eventId.map { biasUsage[$0] ?? [] } ?? []
+            let candidates = relevantBiases(category: source.category, status: source.plannedStatus)
+            guard let bias = candidates.first(where: { !alreadyUsed.contains($0) }) else {
+                // Exhausted distinct biases for every event; allow a repeat.
+                let bias = candidates.first ?? suggestedBiasTag(category: source.category, status: source.plannedStatus)
                 fills.append(BiasReviewView.Entry(
-                    eventId: nil,
-                    emoji: emojiFor[q.biasName] ?? "🧠",
-                    category: q.question,
-                    amountLabel: "",
-                    plannedStatus: .planned,
-                    suggestedBias: q.biasName
+                    eventId: source.eventId,
+                    emoji: source.emoji,
+                    category: source.category,
+                    amountLabel: source.amountLabel,
+                    plannedStatus: source.plannedStatus,
+                    suggestedBias: bias
                 ))
-                seenBias[q.biasName] = c + 1
+                continue
             }
-            if fills.count == needed { break }
+            if let id = source.eventId { biasUsage[id, default: []].insert(bias) }
+            fills.append(BiasReviewView.Entry(
+                eventId: source.eventId,
+                emoji: source.emoji,
+                category: source.category,
+                amountLabel: source.amountLabel,
+                plannedStatus: source.plannedStatus,
+                suggestedBias: bias
+            ))
         }
         return eventCards + fills
+    }
+
+    /// Status-aware bias shortlist used to pick relevant follow-up questions
+    /// for the same spending event. Mirrors BiasReviewView.categoryBiasShortlist
+    /// scope intentionally — keep both lists in sync if you tune one.
+    private func relevantBiases(category: String, status: MoneyEvent.PlannedStatus) -> [String] {
+        let statusFallback: [String]
+        switch status {
+        case .impulse:
+            statusFallback = ["Present Bias", "Ego Depletion", "Scarcity Heuristic", "Social Proof", "Loss Aversion", "Framing Effect", "Moral Licensing"]
+        case .surprise:
+            statusFallback = ["Availability Heuristic", "Planning Fallacy", "Ostrich Effect", "Loss Aversion", "Framing Effect", "Overconfidence Bias"]
+        case .planned:
+            statusFallback = ["Mental Accounting", "Anchoring", "Sunk Cost Fallacy", "Status Quo Bias", "Moral Licensing", "Denomination Effect"]
+        }
+        let categoryLeads: [String]
+        switch category {
+        case "Coffee", "Lunch", "Drinks", "Eating out":
+            categoryLeads = status == .impulse
+                ? ["Ego Depletion", "Present Bias", "Social Proof", "Moral Licensing"]
+                : ["Mental Accounting", "Status Quo Bias", "Anchoring"]
+        case "Shopping", "Clothing":
+            categoryLeads = status == .impulse
+                ? ["Scarcity Heuristic", "Framing Effect", "Loss Aversion"]
+                : ["Anchoring", "Sunk Cost Fallacy"]
+        case "Transport":
+            categoryLeads = ["Ego Depletion", "Status Quo Bias", "Availability Heuristic"]
+        case "Subscriptions":
+            categoryLeads = ["Status Quo Bias", "Sunk Cost Fallacy", "Framing Effect"]
+        case "Travel":
+            categoryLeads = ["Anchoring", "Planning Fallacy", "Sunk Cost Fallacy"]
+        case "Entertainment", "Gift":
+            categoryLeads = ["Social Proof", "Mental Accounting", "Moral Licensing"]
+        default:
+            categoryLeads = []
+        }
+        var seen = Set<String>()
+        return (categoryLeads + statusFallback).filter { seen.insert($0).inserted }
     }
 
     private var sessionNudgeMessage: String {

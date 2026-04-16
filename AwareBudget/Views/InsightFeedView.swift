@@ -2,11 +2,12 @@ import SwiftUI
 import Charts
 
 struct InsightFeedView: View {
+    var selectedTab: Binding<RootTab>? = nil
+
     @State private var weekEvents: [MoneyEvent] = []
     @State private var allEvents: [MoneyEvent] = []
     @State private var recentCheckIns: [CheckIn] = []
     @State private var isLoading = false
-    @State private var showMoneyEvent = false
     @State private var showAboutScore = false
 
     private let service = SupabaseService.shared
@@ -52,10 +53,8 @@ struct InsightFeedView: View {
         }
         .task { await load() }
         .refreshable { await load() }
-        .sheet(isPresented: $showMoneyEvent, onDismiss: {
-            Task { await load() }
-        }) {
-            NavigationStack { MoneyEventView() }
+        .onChange(of: selectedTab?.wrappedValue) { _, new in
+            if new == .insights { Task { await load() } }
         }
     }
 
@@ -95,7 +94,7 @@ struct InsightFeedView: View {
             ResearchFootnote(text: "Patterns assessed via BFAS · Pompian, 2012", style: .pill)
 
             Button {
-                showMoneyEvent = true
+                selectedTab?.wrappedValue = .log
             } label: {
                 Text("Log your first event")
             }

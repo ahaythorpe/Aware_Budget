@@ -16,19 +16,6 @@ struct AwareBudgetApp: App {
 
     var body: some Scene {
         WindowGroup {
-            #if DEBUG
-            RootTabView()
-                .task {
-                    await SupabaseService.shared.ensureDebugSession()
-                    await NotificationService.requestPermission()
-                    NotificationService.scheduleMorningReminder()
-                    NotificationService.scheduleEveningNudge()
-                    NotificationService.scheduleNoEventsReminder()
-                    NotificationService.scheduleWeeklyReview()
-                    NotificationService.scheduleMonthlyCheckpoint()
-                    await scheduleSmartNudgesFromHistory()
-                }
-            #else
             Group {
                 if checkingSession {
                     ZStack {
@@ -58,14 +45,11 @@ struct AwareBudgetApp: App {
                 }
             }
             .task {
-                if !hasCompletedOnboarding {
-                    if await SupabaseService.shared.currentUserId != nil {
-                        hasCompletedOnboarding = true
-                    }
-                }
+                #if DEBUG
+                await SupabaseService.shared.ensureDebugSession()
+                #endif
                 checkingSession = false
             }
-            #endif
         }
     }
 }

@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    var selectedTab: Binding<RootTab>? = nil
+
     @State private var viewModel = HomeViewModel()
     @State private var showCredibility = false
     @State private var showDevMenu = false
@@ -159,6 +161,12 @@ struct HomeView: View {
         .navigationBarHidden(true)
         .task {
             await viewModel.load()
+        }
+        .refreshable {
+            await viewModel.load()
+        }
+        .onChange(of: selectedTab?.wrappedValue) { _, new in
+            if new == .home { Task { await viewModel.load() } }
         }
         .sheet(isPresented: $showCredibility) {
             CredibilitySheet()

@@ -109,6 +109,13 @@ struct MonthCalendarView: View {
         let topTags = tagCounts.sorted { $0.value > $1.value }.prefix(3)
         let totalAmount = events.reduce(0.0) { $0 + $1.amount }
         let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
+        let counterLookup: [String: String] = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { lesson in
+            let firstSentence = lesson.howToCounter
+                .split(separator: ".", maxSplits: 1, omittingEmptySubsequences: true)
+                .first
+                .map { String($0).trimmingCharacters(in: .whitespaces) + "." } ?? lesson.howToCounter
+            return (lesson.biasName, firstSentence)
+        })
 
         return VStack(alignment: .leading, spacing: 14) {
             // Date header
@@ -148,25 +155,35 @@ struct MonthCalendarView: View {
                         .tracking(1.5)
                         .foregroundStyle(DS.goldBase)
 
-                    VStack(spacing: 6) {
+                    VStack(spacing: 10) {
                         ForEach(Array(topTags.enumerated()), id: \.element.key) { idx, pair in
-                            HStack(spacing: 10) {
-                                Text("\(idx + 1)")
-                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(DS.goldForeground)
-                                    .frame(width: 20, height: 20)
-                                    .background(DS.nuggetGold, in: Circle())
-                                Text(emojiLookup[pair.key] ?? "🧠")
-                                    .font(.system(size: 16))
-                                Text(pair.key)
-                                    .font(.system(.footnote, weight: .bold))
-                                    .foregroundStyle(DS.textPrimary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.85)
-                                Spacer()
-                                Text("×\(pair.value)")
-                                    .font(.system(.caption, weight: .heavy))
-                                    .foregroundStyle(DS.deepGreen)
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 10) {
+                                    Text("\(idx + 1)")
+                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(DS.goldForeground)
+                                        .frame(width: 20, height: 20)
+                                        .background(DS.nuggetGold, in: Circle())
+                                    Text(emojiLookup[pair.key] ?? "🧠")
+                                        .font(.system(size: 16))
+                                    Text(pair.key)
+                                        .font(.system(.footnote, weight: .bold))
+                                        .foregroundStyle(DS.textPrimary)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.85)
+                                    Spacer()
+                                    Text("×\(pair.value)")
+                                        .font(.system(.caption, weight: .heavy))
+                                        .foregroundStyle(DS.deepGreen)
+                                }
+                                if let counter = counterLookup[pair.key] {
+                                    Text(counter)
+                                        .font(.system(.caption2, weight: .medium))
+                                        .foregroundStyle(DS.textSecondary)
+                                        .lineSpacing(1.5)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        .padding(.leading, 30)
+                                }
                             }
                         }
                     }
