@@ -80,21 +80,29 @@ struct WeeklyReviewSummary: View {
                     .foregroundStyle(DS.textTertiary)
                     .padding(.vertical, 4)
             } else {
-                VStack(spacing: 8) {
+                VStack(spacing: 14) {
                     ForEach(topBiases.prefix(3)) { p in
-                        HStack(spacing: 12) {
-                            Text(p.emoji).font(.system(size: 20))
-                            Text(p.biasName)
-                                .font(.system(.subheadline, weight: .semibold))
-                                .foregroundStyle(DS.textPrimary)
-                            Spacer()
-                            Text(p.stage.rawValue)
-                                .font(.system(size: 9, weight: .heavy, design: .rounded))
-                                .tracking(0.8)
-                                .foregroundStyle(DS.deepGreen)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(DS.paleGreen, in: Capsule())
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 12) {
+                                Text(p.emoji).font(.system(size: 20))
+                                Text(p.biasName)
+                                    .font(.system(.subheadline, weight: .semibold))
+                                    .foregroundStyle(DS.textPrimary)
+                                Spacer()
+                                Text(p.stage.rawValue)
+                                    .font(.system(size: 9, weight: .heavy, design: .rounded))
+                                    .tracking(0.8)
+                                    .foregroundStyle(DS.deepGreen)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(DS.paleGreen, in: Capsule())
+                            }
+                            Text(NudgeVoice.researchCueFor(bias: p.biasName))
+                                .font(.system(.caption2, weight: .medium))
+                                .foregroundStyle(DS.textSecondary)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.leading, 32)
                         }
                     }
                 }

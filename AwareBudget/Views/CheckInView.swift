@@ -319,7 +319,13 @@ struct CheckInView: View {
                         .foregroundStyle(.white.opacity(0.85))
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text(q.researchSource ?? "BFAS framework \u{00B7} Grable & Joo, 2004")
+                    Text(NudgeVoice.researchCueFor(bias: q.biasName))
+                        .font(.system(.caption2, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(q.researchSource ?? "BFAS framework \u{00B7} Pompian, 2012")
                         .font(.system(size: 9))
                         .foregroundStyle(.white.opacity(0.4))
                         .italic()
