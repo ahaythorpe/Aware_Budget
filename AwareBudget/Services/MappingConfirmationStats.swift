@@ -93,6 +93,28 @@ enum MappingConfirmationStats {
         return loadAll()[key.storageKey] ?? Stats()
     }
 
+    /// Async hydrate the local cache from Supabase. Fire-and-forget
+    /// from any view that wants the freshest stats — e.g.
+    /// AlgorithmExplainerSheet.task. Silently skipped if offline or
+    /// no session.
+    static func refreshFromRemote() async {
+        do {
+            let rows = try await SupabaseService.shared.fetchMappingStats()
+            var merged = loadAll()
+            for row in rows {
+                let key = MappingKey(category: row.category, status: row.planned_status, bias: row.bias_name)
+                merged[key.storageKey] = Stats(
+                    yesCount: row.identified_count,
+                    notSureCount: row.not_sure_count,
+                    differentCount: row.different_count
+                )
+            }
+            save(merged)
+        } catch {
+            // Offline / RLS / no session — local cache remains as-is.
+        }
+    }
+
     /// All mappings flagged as low-confirmation (rate < 0.30 with
     /// sample ≥ 20). Returned sorted by sample size desc — biggest
     /// evidence base first.

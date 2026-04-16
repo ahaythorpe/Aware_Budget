@@ -24,6 +24,11 @@ struct AlgorithmExplainerSheet: View {
         .background(DS.bg.ignoresSafeArea())
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .task {
+            // Hydrate local stats from Supabase so the self-audit
+            // panel reflects the durable cross-device state.
+            await MappingConfirmationStats.refreshFromRemote()
+        }
     }
 
     // MARK: - Self-audit (low-confirmation mappings)

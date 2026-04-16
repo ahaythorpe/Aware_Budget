@@ -570,6 +570,29 @@ final class SupabaseService {
         }
     }
 
+    /// Pull all of the current user's mapping confirmation stats from
+    /// Supabase. Used by AlgorithmExplainerSheet's self-audit panel as
+    /// the durable source of truth — UserDefaults is a local cache,
+    /// this is the survives-reinstall + cross-device version.
+    struct MappingStatRow: Decodable, Hashable {
+        let category: String
+        let planned_status: String
+        let bias_name: String
+        let identified_count: Int
+        let not_sure_count: Int
+        let different_count: Int
+    }
+
+    func fetchMappingStats() async throws -> [MappingStatRow] {
+        guard let uid = await currentUserId else { return [] }
+        let rows: [MappingStatRow] = try await client.from("bias_mapping_stats")
+            .select("category,planned_status,bias_name,identified_count,not_sure_count,different_count")
+            .eq("user_id", value: uid.uuidString)
+            .execute()
+            .value
+        return rows
+    }
+
     /// Saves 16 BFAS baseline answers. YES -> bfas_weight 7, NO -> 2.
     /// Upserts by (user_id, bias_name): updates existing row or inserts new.
     func saveBFASAssessment(answers: [String: Bool]) async throws {

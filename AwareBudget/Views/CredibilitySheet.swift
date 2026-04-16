@@ -122,8 +122,8 @@ struct CredibilitySheet: View {
                 compareRow("When wrong", "You hide it", "You adjust", 1)
                 compareRow("Result", "You quit", "You keep going", 0)
             }
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-            .shimmeringGoldBorder(cornerRadius: 14)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
         }
     }
 
@@ -204,9 +204,9 @@ struct CredibilitySheet: View {
                 stageRow("Aware", DS.positive, "You recognise it — breaking the grip")
             }
             .padding(14)
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: DS.cardRadius)
                     .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
             )
         }
@@ -289,9 +289,9 @@ struct CredibilitySheet: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 12))
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
         )
     }
