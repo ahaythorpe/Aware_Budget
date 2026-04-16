@@ -129,20 +129,19 @@ struct OnboardingView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .fill(Color.white)
-                            )
+                            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                            .shimmeringGoldBorder(cornerRadius: DS.cardRadius, lineWidth: 2.5)
+                            .premiumCardShadow()
                         }
                     }
                     .padding(.horizontal, DS.hPadding)
 
-                    Text("Source: Pompian, 2012 \u{00B7} Behavioural Finance and Wealth Management")
-                        .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.5))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 16)
+                    ResearchFootnote(
+                        text: "Pompian, 2012 \u{00B7} Behavioural Finance and Wealth Management",
+                        style: .pill
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
                 }
             }
         }
@@ -266,15 +265,27 @@ struct OnboardingView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    Capsule()
-                        .fill(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(Color.white))
+                    selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg),
+                    in: Capsule()
                 )
-                .overlay(
-                    Capsule()
-                        .stroke(selected ? Color.clear : DS.primary, lineWidth: 1)
-                )
+                .modifier(QuizPillBorderModifier(selected: selected))
+                .premiumCardShadow()
         }
         .buttonStyle(.plain)
+    }
+
+    /// Selected pill gets the green hero with no extra border;
+    /// unselected pill gets the canonical shimmering gold capsule
+    /// border so it matches the in-app card spec.
+    private struct QuizPillBorderModifier: ViewModifier {
+        let selected: Bool
+        func body(content: Content) -> some View {
+            if selected {
+                content
+            } else {
+                content.shimmeringGoldBorder(cornerRadius: 999, lineWidth: 2)
+            }
+        }
     }
 
     // MARK: - Screen 4: Sign Up
