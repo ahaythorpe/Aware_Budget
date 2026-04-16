@@ -5,6 +5,112 @@
 
 ---
 
+## 2026-04-17 — Big day: rigour foundation + B/C layers + finance trend (Claude Code)
+
+Long session that landed the algorithm-rigour foundation, the
+B + C decision-helper layers, the financial-trend story v1, plus
+several blocker fixes. Twenty-plus commits — chronological summary
+below.
+
+**Critical fixes:**
+- `4e5eb7c` — global JSON decoder handles Postgres DATE columns.
+  Root cause of "events save but Home/Insights show 0." VERIFIED:
+  calendar went 0 EVENTS → 2 EVENTS, patterns 0/16 → 2/16.
+- `3aee96b` — debug session no longer creates a fresh user every
+  launch. Save creds before signUp; sign-in fallback inside catch;
+  clear bad creds if both fail. (4 orphan users in the table from
+  the bug.)
+- `e1cb137` — MonthlyReviewTracker now requires 30 days since first
+  install before "Monthly checkpoint" appears. Stops day-1 install
+  showing it as the prompt.
+
+**Algorithm rigour foundation (Waves 1–4 + 5 follow-ons):**
+- `860b9e8` — citation-grounded BiasMappings.swift (40+ rows tying
+  category × status × bias → published reference + confidence flag).
+- `a30c90a` — re-weighted scoring 5:1 active vs passive (was backwards
+  in PRD); NudgeVoice.researchCueFor() one-liner per bias paired with
+  foundational paper; AlgoExplainerSheet citation footer expanded
+  (Tversky & Kahneman, Thaler, Cialdini, Samuelson & Zeckhauser,
+  Baumeister, Stone, Robinson & Clore, Beck, Pompian).
+- `2046c9b` — adaptive neglected-bias threshold (clamp 14–60 days,
+  scales with median log gap × 5).
+- `0ab5a84` — per-mapping confirmation rate stats (UserDefaults v1).
+- `fa24b88` — post-save Nudge cites the research per bias.
+- `e91561e` — algorithm self-audit panel in AlgoExplainerSheet
+  surfaces low-confirmation mappings (rate < 30% after 20+ samples).
+- `551a57f` — Supabase aggregate VIEW (k-anonymity floor 50) +
+  Supabase-backed self-audit read path.
+- `913cb69` — research cues in WeeklyReview top-biases + CheckIn
+  'why this matters'.
+- `7441db1` — sibling-bias hint when same bias hits 3+ in a session
+  (addresses "feels broken when same heuristic keeps showing").
+
+**B + C decision-helper layers:**
+- `928c5d3` — decision_lessons table (live Supabase) + Layer B
+  pre-spend hint banner (Gollwitzer 1999 implementation intentions).
+- `b091b48` — Layer C DecisionHelperSheet (Gawande 2009 checklists)
+  via long-press on category tile.
+
+**Financial-trend story v1 (manual entry, Privacy Act only):**
+- `6822948` — user_monthly_income + user_balance_snapshots tables;
+  Settings entry flow; net worth gold line on Insights.
+- `47cb9c8` — bias-awareness overlay on the chart (decision_lessons
+  cumulative count, faint dashed green) + trend insight Nudge above
+  the chart with three states (gold-up + awareness-up / gold-up /
+  awareness-up).
+- `346b6aa` — expandable category trend chart replaces the unplanned
+  bar chart (top 5 categories overlaid, tap legend to focus).
+
+**Notifications + UX:**
+- `b32f8e7` — meal-anchored notification copy + 9pm chunky-buys
+  reminder.
+- `f7ff0f6` — deep-link notifications → Log tab with pre-highlighted
+  tiles (NotificationRouter @Observable singleton).
+
+**Auth:**
+- `08d12e6` — signup gracefully recovers from missing-SMTP
+  confirmation error (auto-sign-in fallback).
+
+**Visual sweep + spec consistency:**
+- `73862eb`, `e91561e`, `e51f782` — card audit Waves 1, 2a, 2b
+  (Home/Log/Insights/Awareness/Research/CheckIn/BiasReview/
+  CredibilitySheet/WeeklyReview all use DS.cardRadius).
+- `66f4ff1`, `795f71a`, `fe7c75b` — onboarding follows in-app spec
+  (metallic shimmer hero + goldButtonStyle Next + spec card radius).
+- `7536844`, `3018488` — BFAS question copy refined (19 questions
+  rewritten plain-English, theory-grounded).
+- `c1bfae4` — "40+ years" → "50+ years" of behavioural research
+  (Tversky & Kahneman 1973 → 2026 = 53 years).
+- `2740344` — clarified Mental Accounting whyExplanations
+  (overspending mechanism made explicit) + readable check-in
+  citation footer.
+- `7ce10f8` — 4 abstract emojis swapped (😨→📉, 🕳️→🧾, 🎯→📈,
+  🔋→🌙) + CheckIn skip-chastise overlay matching MoneyEvent's.
+- `ff964b6` — Insights chart palette: gold + green, no orange.
+
+**Documentation:**
+- `5d118f5` — `docs/ALGORITHM.md` full methodology + ~25 references
+  + known issues (Availability over-assignment, demo-data flag,
+  hand-curated shortlist plan, lesson decay backlog,
+  income/savings roadmap).
+
+**Roadmap items still pending:**
+- Visual nits 5/8/11/12/13/14/15 (need pointer screenshots from user).
+- Basiq aggregator integration (v2 of finance side).
+- CDR accreditation (v3, partner-or-build decision).
+- Per-bias trend overlay (currently aggregate awareness count).
+- Tests on BiasRotation + BiasScoreService maths.
+
+Build verified iPhone 17 Pro / iOS 26.2.
+
+Supabase migrations applied directly via MCP:
+- 20260416180000_add_bias_mapping_stats.sql
+- 20260416190000_add_bias_mapping_aggregate_view.sql
+- (in-MCP) decision_lessons
+- (in-MCP) user_monthly_income + user_balance_snapshots
+
+---
+
 ## 2026-04-16 (PM) — Neglected-bias boost + review = events-only (Claude Code)
 
 Two backlog items closed:
