@@ -255,9 +255,13 @@ final class MoneyEventViewModel {
         return categoryRanges[cat.name] ?? []
     }
 
+    /// Rotates through the (category, status) shortlist so the same purchase
+    /// pattern probes a different bias each time — see BiasRotation. Uses
+    /// `peek` here so just *previewing* the picker doesn't burn an index;
+    /// `nextBias` (which advances) fires inside `onPlannedStatusSet`.
     var suggestedTag: String? {
         guard let cat = selectedCategory, let status = plannedStatus else { return nil }
-        return suggestedBiasTag(category: cat.name, status: status)
+        return BiasRotation.peekNextBias(category: cat.name, status: status)
     }
 
     var canSave: Bool {
@@ -276,10 +280,12 @@ final class MoneyEventViewModel {
     }
 
     func onPlannedStatusSet() {
-        if let tag = suggestedTag {
-            behaviourTag = tag
-            Task { await loadBiasCount(tag) }
-        }
+        guard let cat = selectedCategory, let status = plannedStatus else { return }
+        // Advances the rotation index so the NEXT log of this same
+        // (category, status) probes a different bias from the shortlist.
+        let tag = BiasRotation.nextBias(category: cat.name, status: status)
+        behaviourTag = tag
+        Task { await loadBiasCount(tag) }
     }
 
     func loadBiasCount(_ biasName: String) async {

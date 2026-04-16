@@ -487,7 +487,7 @@ struct MoneyEventView: View {
             let source = sessionLog[cursor % sessionLog.count]
             cursor += 1
             let alreadyUsed = source.eventId.map { biasUsage[$0] ?? [] } ?? []
-            let candidates = relevantBiases(category: source.category, status: source.plannedStatus)
+            let candidates = BiasRotation.shortlist(category: source.category, status: source.plannedStatus)
             guard let bias = candidates.first(where: { !alreadyUsed.contains($0) }) else {
                 // Exhausted distinct biases for every event; allow a repeat.
                 let bias = candidates.first ?? suggestedBiasTag(category: source.category, status: source.plannedStatus)
@@ -512,44 +512,6 @@ struct MoneyEventView: View {
             ))
         }
         return eventCards + fills
-    }
-
-    /// Status-aware bias shortlist used to pick relevant follow-up questions
-    /// for the same spending event. Mirrors BiasReviewView.categoryBiasShortlist
-    /// scope intentionally — keep both lists in sync if you tune one.
-    private func relevantBiases(category: String, status: MoneyEvent.PlannedStatus) -> [String] {
-        let statusFallback: [String]
-        switch status {
-        case .impulse:
-            statusFallback = ["Present Bias", "Ego Depletion", "Scarcity Heuristic", "Social Proof", "Loss Aversion", "Framing Effect", "Moral Licensing"]
-        case .surprise:
-            statusFallback = ["Availability Heuristic", "Planning Fallacy", "Ostrich Effect", "Loss Aversion", "Framing Effect", "Overconfidence Bias"]
-        case .planned:
-            statusFallback = ["Mental Accounting", "Anchoring", "Sunk Cost Fallacy", "Status Quo Bias", "Moral Licensing", "Denomination Effect"]
-        }
-        let categoryLeads: [String]
-        switch category {
-        case "Coffee", "Lunch", "Drinks", "Eating out":
-            categoryLeads = status == .impulse
-                ? ["Ego Depletion", "Present Bias", "Social Proof", "Moral Licensing"]
-                : ["Mental Accounting", "Status Quo Bias", "Anchoring"]
-        case "Shopping", "Clothing":
-            categoryLeads = status == .impulse
-                ? ["Scarcity Heuristic", "Framing Effect", "Loss Aversion"]
-                : ["Anchoring", "Sunk Cost Fallacy"]
-        case "Transport":
-            categoryLeads = ["Ego Depletion", "Status Quo Bias", "Availability Heuristic"]
-        case "Subscriptions":
-            categoryLeads = ["Status Quo Bias", "Sunk Cost Fallacy", "Framing Effect"]
-        case "Travel":
-            categoryLeads = ["Anchoring", "Planning Fallacy", "Sunk Cost Fallacy"]
-        case "Entertainment", "Gift":
-            categoryLeads = ["Social Proof", "Mental Accounting", "Moral Licensing"]
-        default:
-            categoryLeads = []
-        }
-        var seen = Set<String>()
-        return (categoryLeads + statusFallback).filter { seen.insert($0).inserted }
     }
 
     private var sessionNudgeMessage: String {
