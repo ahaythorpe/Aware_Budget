@@ -24,8 +24,36 @@ final class SupabaseService {
 
     // MARK: - Auth
 
+    /// Sign up with a graceful fallback. If Supabase's hosted email
+    /// service is mis-configured (no SMTP) it returns "500: Error
+    /// sending confirmation email" — but the user IS created. We try
+    /// to sign in immediately afterwards so signup still completes
+    /// from the user's perspective. If sign-in also fails, surface a
+    /// human-readable message instead of the raw 500.
     func signUp(email: String, password: String) async throws {
-        try await client.auth.signUp(email: email, password: password)
+        do {
+            try await client.auth.signUp(email: email, password: password)
+        } catch {
+            let msg = error.localizedDescription.lowercased()
+            if msg.contains("error sending confirmation email") ||
+               msg.contains("email rate limit") ||
+               msg.contains("smtp") {
+                // The user row was created — try to sign in so the app
+                // proceeds even when the dashboard email config is off.
+                do {
+                    try await client.auth.signIn(email: email, password: password)
+                    return
+                } catch {
+                    throw NSError(
+                        domain: "MoneyMind.Auth",
+                        code: 1,
+                        userInfo: [NSLocalizedDescriptionKey:
+                            "Account created, but email verification is unavailable right now. Try signing in instead."]
+                    )
+                }
+            }
+            throw error
+        }
     }
 
     func signIn(email: String, password: String) async throws {
