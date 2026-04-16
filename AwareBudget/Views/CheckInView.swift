@@ -292,12 +292,12 @@ struct CheckInView: View {
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("Used in professional financial\nplanning assessments \u{00B7} BFAS framework")
-                .font(.caption2)
-                .italic()
-                .foregroundStyle(.white.opacity(0.5))
+            Text("Used in professional financial planning · BFAS framework · Pompian 2012")
+                .font(.system(.caption, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
+                .heroTextLegibility()
 
             // Why section (collapsed by default)
             Button {
