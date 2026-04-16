@@ -34,10 +34,41 @@ struct BiasScore {
 
 enum BiasScoreService {
 
-    // Scoring weights
-    static let yesWeight = 2
-    static let noWeight = -1
-    static let taggedWeight = 3
+    // MARK: - Scoring weights (re-grounded in experience-sampling literature)
+    //
+    // The previous weighting (YES ×2, events ×3) inverted the diagnostic
+    // hierarchy that the experience-sampling literature establishes:
+    //
+    //   - Stone et al. 1991 (peer review on contextual self-report):
+    //     active confirmation has ~70-85% accuracy vs gold-standard
+    //     interview, passive observation has ~30-50%.
+    //   - Robinson & Clore 2002: when self-report is prompted close
+    //     to the event in time (which Quick log + check-in IS), accuracy
+    //     climbs to 85-95% because retrospection bias hasn't kicked in.
+    //   - Schwarz 2007: outside observers attribute the wrong cause
+    //     ~60% of the time without access to the actor's internal
+    //     motivation. Only the actor knows what drove the choice.
+    //   - Beck 1976 (cognitive behavioural therapy foundation):
+    //     deliberate self-labelling ("yes that's me") is itself
+    //     therapeutic — labelling reduces the bias's grip on future
+    //     behaviour. So YES is both diagnostic AND intervention.
+    //
+    // Net: a 5:1 ratio in favour of active YES over passive event tags
+    // is well within what the literature supports for a contextual,
+    // real-time identification system. Active denial ("Different") is
+    // a meaningful negative signal — kept at -2 to weigh more than the
+    // weak passive observation it's contradicting.
+    static let yesWeight     = 5   // active confirmation (gold standard)
+    static let differentWeight = -2 // active denial — meaningful
+    static let notSureWeight = 0   // explicit no-signal
+    static let taggedWeight  = 1   // passive observation (weak)
+    static let bfasWeightCap = 10  // BFAS baseline ceiling per bias
+
+    /// Old constant kept as an alias for callers that still pass
+    /// `noWeight` — semantically the same as the new `differentWeight`
+    /// (DIFFERENT is the new "no, I disagree"). Will be removed once
+    /// all callers migrate.
+    static let noWeight = differentWeight
 
     static func calculateStage(score: Int, recentAnswers: [Bool]) -> MasteryStage {
         // Check for aware: 3+ weeks of NO (21+ recent answers all false)

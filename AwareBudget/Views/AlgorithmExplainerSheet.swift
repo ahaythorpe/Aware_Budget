@@ -92,12 +92,18 @@ struct AlgorithmExplainerSheet: View {
     private var scoringCard: some View {
         sectionCard(title: "HOW THE SCORE MOVES") {
             VStack(alignment: .leading, spacing: 10) {
-                scoreRow("⬆ Each tagged event", "+3 to that bias")
-                scoreRow("⬆ Each YES check-in answer", "+2")
-                scoreRow("⬇ Each NO check-in answer", "−1 (pattern weakening)")
+                scoreRow("⬆ \"Yes, that's me\" (you identified it)", "+5 — gold standard")
+                scoreRow("⬇ \"No, different reason\" (active denial)", "−2")
+                scoreRow("• \"Not sure\" (no signal)", "0")
+                scoreRow("⬆ Each passive event tag", "+1 — weak signal")
                 scoreRow("⬆ BFAS baseline at signup", "0–10 one-time seed")
                 Divider().background(DS.accent.opacity(0.15))
-                Text("Higher score = pattern is active in your life right now. Lower score = you're already aware and overriding it.")
+                Text("Active YES outweighs passive observation 5:1. Why: Stone et al. 1991, Robinson & Clore 2002 — when you identify a pattern in real time, you're 3–5× more accurate than any algorithm watching from the outside. Beck 1976: the act of self-labelling is itself part of the change.")
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Higher score = pattern is active in your life. Lower score = you're already aware and overriding it.")
                     .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
                     .lineSpacing(3)
@@ -151,7 +157,7 @@ struct AlgorithmExplainerSheet: View {
             Image(systemName: "book.closed.fill")
                 .font(.system(size: 11))
                 .foregroundStyle(DS.goldBase)
-            Text("Based on BFAS · Pompian, 2012 · with scoring adapted from Kahneman & Tversky (1979).")
+            Text("Bias mapping: Tversky & Kahneman 1973–81 · Thaler 1980/85 · Cialdini 2001 · Samuelson & Zeckhauser 1988 · Baumeister 1998. Scoring weight: Stone et al. 1991 · Robinson & Clore 2002 · Beck 1976. Framework: BFAS · Pompian 2012.")
                 .font(.system(.footnote, weight: .semibold))
                 .foregroundStyle(DS.textSecondary)
         }

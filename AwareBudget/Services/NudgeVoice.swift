@@ -131,6 +131,54 @@ enum NudgeVoice {
         }
     }
 
+    // MARK: - Research-grounded one-liner per bias
+    //
+    // Pairs the Nudge voice with the foundational paper for each of the 16
+    // biases. Used in NudgeSaysCard contexts where credibility weight should
+    // match BFAS framing — e.g. "Nudge says X. Source: Y." This rewrites the
+    // app's research-credibility surface so every claim cites a paper, the
+    // way Pompian 2012 (BFAS) is cited.
+    //
+    // Format: "Plain-English what-it-means · Source paper".
+    static func researchCueFor(bias: String) -> String {
+        switch bias {
+        case "Loss Aversion":
+            return "Losses feel ~2× sharper than equal-sized gains. · Kahneman & Tversky 1979"
+        case "Present Bias":
+            return "We over-pick now over later, even when later is bigger. · O'Donoghue & Rabin 1999"
+        case "Status Quo Bias":
+            return "We default to whatever's already happening. · Samuelson & Zeckhauser 1988"
+        case "Anchoring":
+            return "First number we see biases every estimate that follows. · Tversky & Kahneman 1974"
+        case "Social Proof":
+            return "We copy peers as a shortcut to 'safe.' · Cialdini 2001 + Berger & Heath 2007"
+        case "Moral Licensing":
+            return "Past good behaviour gives us permission for slips. · Merritt et al. 2010"
+        case "Scarcity Heuristic":
+            return "Limited availability raises perceived value. · Cialdini 2001"
+        case "Sunk Cost Fallacy":
+            return "We protect past spend even when it's wasted. · Thaler 1980 + Arkes & Blumer 1985"
+        case "Ego Depletion":
+            return "Self-control is a finite resource that drains through the day. · Baumeister 1998 + Vohs 2008"
+        case "Mental Accounting":
+            return "We treat money differently based on its source or label. · Thaler 1985"
+        case "Overconfidence Bias":
+            return "We trust our own forecasts more than the data warrants. · Barber & Odean 2001"
+        case "Framing Effect":
+            return "How a choice is worded shifts the choice itself. · Tversky & Kahneman 1981"
+        case "Availability Heuristic":
+            return "Easy-to-recall examples feel more probable than they are. · Tversky & Kahneman 1973"
+        case "Ostrich Effect":
+            return "We avoid information we suspect is bad. · Galai & Sade 2006"
+        case "Planning Fallacy":
+            return "We underestimate cost and time by ~30% on average. · Buehler, Griffin & Ross 1994"
+        case "Denomination Effect":
+            return "Smaller chunks of money spend more easily than larger ones. · Raghubir & Srivastava 2009"
+        default:
+            return "Behavioural finance has 50+ years of evidence behind it. · Pompian 2012 (BFAS)"
+        }
+    }
+
     // MARK: - Random picker helper
     static func random(_ pool: [String]) -> String {
         pool.randomElement() ?? pool.first ?? ""
