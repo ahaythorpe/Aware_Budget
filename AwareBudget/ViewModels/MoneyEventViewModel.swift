@@ -281,11 +281,30 @@ final class MoneyEventViewModel {
 
     func onPlannedStatusSet() {
         guard let cat = selectedCategory, let status = plannedStatus else { return }
-        // Advances the rotation index so the NEXT log of this same
-        // (category, status) probes a different bias from the shortlist.
-        let tag = BiasRotation.nextBias(category: cat.name, status: status)
-        behaviourTag = tag
-        Task { await loadBiasCount(tag) }
+        // Optimistic sync pick (advances rotation index) so the picker
+        // shows a tag immediately. Then async-upgrade with the
+        // neglected-bias boost using the latest bias_progress rows —
+        // if a neglected bias qualifies, it overrides the rotation.
+        let optimistic = BiasRotation.nextBias(category: cat.name, status: status)
+        behaviourTag = optimistic
+        Task {
+            await loadBiasCount(optimistic)
+            do {
+                let progress = try await service.fetchBiasProgress()
+                let boosted = BiasRotation.boostedPick(
+                    rotatedPick: optimistic,
+                    category: cat.name,
+                    status: status,
+                    progress: progress
+                )
+                if boosted != optimistic {
+                    behaviourTag = boosted
+                    await loadBiasCount(boosted)
+                }
+            } catch {
+                // Offline / RLS error — keep the optimistic rotation pick.
+            }
+        }
     }
 
     func loadBiasCount(_ biasName: String) async {

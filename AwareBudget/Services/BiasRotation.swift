@@ -137,4 +137,51 @@ enum BiasRotation {
         let index = UserDefaults.standard.integer(forKey: key)
         return list[index % list.count]
     }
+
+    // MARK: - Neglected-bias boost (14 days)
+
+    /// Days a bias can sit untouched before the boost kicks in.
+    static let neglectedThresholdDays: Int = 14
+
+    /// Picks a bias for this (category, status), preferring one that
+    /// hasn't been seen in `neglectedThresholdDays` days. Returns the
+    /// most-stale neglected bias from the shortlist if any qualifies;
+    /// otherwise falls back to the standard rotation pick. Always
+    /// advances the rotation index either way so cycling continues.
+    ///
+    /// `progress` is the user's current `bias_progress` rows (from
+    /// `SupabaseService.fetchBiasProgress()`). Pass [] to bypass the
+    /// boost — useful when offline or before progress has loaded.
+    /// Pure peek — does NOT advance the rotation index. Use when the
+    /// caller has already advanced (or will advance) the index via
+    /// `nextBias` and just wants the boost-adjusted result. Returns
+    /// the same `rotatedPick` you pass in if no neglected bias
+    /// qualifies for the boost.
+    static func boostedPick(
+        rotatedPick: String,
+        category: String,
+        status: MoneyEvent.PlannedStatus,
+        progress: [BiasProgress]
+    ) -> String {
+        let list = shortlist(category: category, status: status)
+        guard !list.isEmpty else { return rotatedPick }
+
+        let cutoff = Date().addingTimeInterval(TimeInterval(-neglectedThresholdDays * 24 * 60 * 60))
+        let lastSeenByBias: [String: Date] = Dictionary(
+            uniqueKeysWithValues: progress.compactMap { p in
+                guard let last = p.lastSeen else { return nil }
+                return (p.biasName, last)
+            }
+        )
+
+        // A bias qualifies as neglected if it's in the shortlist AND
+        // (never recorded OR last seen before the cutoff). Among
+        // qualifying biases, pick the *most* neglected — never-seen
+        // first (.distantPast), then oldest lastSeen.
+        let candidates: [(bias: String, last: Date)] = list.compactMap { bias in
+            let last = lastSeenByBias[bias] ?? .distantPast
+            return last <= cutoff ? (bias, last) : nil
+        }
+        return candidates.min(by: { $0.last < $1.last })?.bias ?? rotatedPick
+    }
 }

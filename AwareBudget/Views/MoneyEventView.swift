@@ -96,7 +96,7 @@ struct MoneyEventView: View {
             NavigationStack {
                 ZStack {
                     BiasReviewView(
-                        entries: reviewEntriesToppedUp(target: 10),
+                        entries: reviewEntriesFromSessionOnly(),
                         onDone: { outcome in
                             lastReviewOutcome = outcome
                             showBiasReview = false
@@ -447,71 +447,22 @@ struct MoneyEventView: View {
         return counts.sorted { $0.value > $1.value }.prefix(3).map { ($0.key, $0.value) }
     }
 
-    /// Build the review entry list:
-    ///   1. One event-anchored card per logged money event (real context)
-    ///   2. Fill the rest up to `target` with pool questions from QuestionPool,
-    ///      prioritising biases not yet covered in the event cards so the user
-    ///      sees rotation across most of the 16 biases.
-    /// Fill entries have `eventId == nil` and `amountLabel == ""` — the
-    /// review view skips the event recap for those and shows the bias
-    /// reflection card only.
-    private func reviewEntriesToppedUp(target: Int) -> [BiasReviewView.Entry] {
-        // Event-anchored cards first — one per logged event with its primary bias.
-        let eventCards: [BiasReviewView.Entry] = sessionLog.map { e in
+    /// Review = one question per real session event. No padding, no
+    /// pool fillers. Each event uses the bias the model rotated to at
+    /// save time (BiasRotation), with a sync fallback if behaviourTag
+    /// is nil for any reason.
+    private func reviewEntriesFromSessionOnly() -> [BiasReviewView.Entry] {
+        sessionLog.map { e in
             BiasReviewView.Entry(
                 eventId: e.eventId,
                 emoji: e.emoji,
                 category: e.category,
                 amountLabel: e.amountLabel,
                 plannedStatus: e.plannedStatus,
-                suggestedBias: e.behaviourTag ?? suggestedBiasTag(category: e.category, status: e.plannedStatus)
+                suggestedBias: e.behaviourTag
+                    ?? BiasRotation.peekNextBias(category: e.category, status: e.plannedStatus)
             )
         }
-        let needed = max(0, target - eventCards.count)
-        if needed == 0 || sessionLog.isEmpty { return eventCards }
-
-        // Top-ups recycle real session events so the spending recap is ALWAYS
-        // shown above the question. Each recycle picks a *different* bias for
-        // the same (category × status) — picked from a status-aware shortlist
-        // so the question stays relevant to that spend type.
-        var biasUsage: [UUID: Set<String>] = [:]
-        for card in eventCards {
-            if let id = card.eventId {
-                biasUsage[id, default: []].insert(card.suggestedBias)
-            }
-        }
-
-        var fills: [BiasReviewView.Entry] = []
-        var cursor = 0
-        while fills.count < needed {
-            let source = sessionLog[cursor % sessionLog.count]
-            cursor += 1
-            let alreadyUsed = source.eventId.map { biasUsage[$0] ?? [] } ?? []
-            let candidates = BiasRotation.shortlist(category: source.category, status: source.plannedStatus)
-            guard let bias = candidates.first(where: { !alreadyUsed.contains($0) }) else {
-                // Exhausted distinct biases for every event; allow a repeat.
-                let bias = candidates.first ?? suggestedBiasTag(category: source.category, status: source.plannedStatus)
-                fills.append(BiasReviewView.Entry(
-                    eventId: source.eventId,
-                    emoji: source.emoji,
-                    category: source.category,
-                    amountLabel: source.amountLabel,
-                    plannedStatus: source.plannedStatus,
-                    suggestedBias: bias
-                ))
-                continue
-            }
-            if let id = source.eventId { biasUsage[id, default: []].insert(bias) }
-            fills.append(BiasReviewView.Entry(
-                eventId: source.eventId,
-                emoji: source.emoji,
-                category: source.category,
-                amountLabel: source.amountLabel,
-                plannedStatus: source.plannedStatus,
-                suggestedBias: bias
-            ))
-        }
-        return eventCards + fills
     }
 
     private var sessionNudgeMessage: String {

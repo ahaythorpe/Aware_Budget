@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-04-16 (PM) — Neglected-bias boost + review = events-only (Claude Code)
+
+Two backlog items closed:
+
+1. **Review pool padding killed.** Review now asks one question per
+   real session event — no fillers, no padding to 10. If user logs 3
+   events, review is 3 questions. Was previously hard-capped at 10 and
+   recycled session entries with rotated biases to fill the gap; the
+   recycling logic was a workaround for a problem the rotation system
+   now solves at save time. ~70 lines deleted from MoneyEventView.
+
+2. **14-day neglected-bias boost.** New `BiasRotation.boostedPick`:
+   given the user's `bias_progress` rows, prefers any bias in the
+   current shortlist whose `last_seen` is older than 14 days (or
+   never recorded). Most-neglected wins. Wired into
+   `MoneyEventViewModel.onPlannedStatusSet` as an async upgrade —
+   optimistic sync rotation pick first (so picker shows a tag
+   immediately), then async fetch progress + upgrade if a stale bias
+   qualifies. Net effect: rare biases like Denomination Effect and
+   Endowment Effect get force-promoted into the next compatible
+   event after 2 weeks of neglect, guaranteeing all 16 stay touched
+   over time.
+
+Build verified iPhone 17 Pro / iOS 26.2.
+
+Backlog: 3-check-in daily cadence (meal-anchored notifications +
+end-of-day chunky-buys prompt), card audit Wave 1 (Home/Log/Insights
+spec sweep).
+
+---
+
 ## 2026-04-16 — Home check-in works + morphs daily/weekly/monthly + Quick log reward + BiasRotation service (Claude Code)
 
 Two reframes shipped together:
