@@ -290,12 +290,18 @@ final class MoneyEventViewModel {
         Task {
             await loadBiasCount(optimistic)
             do {
-                let progress = try await service.fetchBiasProgress()
+                async let progressFetch = service.fetchBiasProgress()
+                async let recentEventsFetch = service.fetchMoneyEvents(forMonth: Date())
+                let progress = try await progressFetch
+                let recentEvents = (try? await recentEventsFetch) ?? []
+                let medianGap = BiasRotation.medianLogGapDays(events: recentEvents)
+                let threshold = BiasRotation.adaptiveThreshold(medianGapDays: medianGap)
                 let boosted = BiasRotation.boostedPick(
                     rotatedPick: optimistic,
                     category: cat.name,
                     status: status,
-                    progress: progress
+                    progress: progress,
+                    thresholdDays: threshold
                 )
                 if boosted != optimistic {
                     behaviourTag = boosted

@@ -79,10 +79,43 @@ enum BiasRotation {
         return list[index % list.count]
     }
 
-    // MARK: - Neglected-bias boost (14 days)
+    // MARK: - Neglected-bias boost (adaptive threshold)
 
-    /// Days a bias can sit untouched before the boost kicks in.
+    /// Default fallback when the user hasn't logged enough to derive
+    /// a personal cadence. Used as the lower bound of the adaptive
+    /// threshold too (so even very-active loggers keep a minimum
+    /// 14-day window between neglect promotions).
     static let neglectedThresholdDays: Int = 14
+
+    /// Compute the user's personal "stale" threshold from their actual
+    /// log cadence. Multiplier 5× means: roughly 5 missed log
+    /// opportunities before the boost fires.
+    ///
+    /// Daily logger (gap = 1d):  max(14, min(60,  5)) → 14 days
+    /// Weekly logger (gap = 7d): max(14, min(60, 35)) → 35 days
+    /// Monthly logger (gap = 30d): max(14, min(60, 150)) → 60 days (capped)
+    ///
+    /// Bounded [14, 60] so it never gets too aggressive (< 2 weeks)
+    /// or too lazy (> 2 months). Pass `medianGapDays = 0` (or call
+    /// without progress data) to fall back to the static 14-day default.
+    static func adaptiveThreshold(medianGapDays: Int) -> Int {
+        guard medianGapDays > 0 else { return neglectedThresholdDays }
+        return max(neglectedThresholdDays, min(60, medianGapDays * 5))
+    }
+
+    /// Median number of days between consecutive logs for this user.
+    /// Returns 0 if there are < 2 events to compute a gap from. Used
+    /// to seed `adaptiveThreshold(...)`.
+    static func medianLogGapDays(events: [MoneyEvent]) -> Int {
+        let dates = events.map(\.date).sorted()
+        guard dates.count >= 2 else { return 0 }
+        let gaps: [Int] = zip(dates, dates.dropFirst()).compactMap { earlier, later in
+            Calendar.current.dateComponents([.day], from: earlier, to: later).day
+        }.filter { $0 > 0 }
+        guard !gaps.isEmpty else { return 0 }
+        let sorted = gaps.sorted()
+        return sorted[sorted.count / 2]
+    }
 
     /// Picks a bias for this (category, status), preferring one that
     /// hasn't been seen in `neglectedThresholdDays` days. Returns the
@@ -102,12 +135,13 @@ enum BiasRotation {
         rotatedPick: String,
         category: String,
         status: MoneyEvent.PlannedStatus,
-        progress: [BiasProgress]
+        progress: [BiasProgress],
+        thresholdDays: Int = neglectedThresholdDays
     ) -> String {
         let list = shortlist(category: category, status: status)
         guard !list.isEmpty else { return rotatedPick }
 
-        let cutoff = Date().addingTimeInterval(TimeInterval(-neglectedThresholdDays * 24 * 60 * 60))
+        let cutoff = Date().addingTimeInterval(TimeInterval(-thresholdDays * 24 * 60 * 60))
         let lastSeenByBias: [String: Date] = Dictionary(
             uniqueKeysWithValues: progress.compactMap { p in
                 guard let last = p.lastSeen else { return nil }
