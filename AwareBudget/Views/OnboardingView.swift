@@ -25,7 +25,9 @@ struct OnboardingView: View {
 
     private var welcomePage: some View {
         ZStack {
-            DS.heroGradient.ignoresSafeArea()
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
 
             VStack(spacing: 32) {
                 Spacer()
@@ -68,24 +70,13 @@ struct OnboardingView: View {
                     withAnimation { currentPage = 1 }
                 } label: {
                     Text("Next \u{2192}")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundStyle(DS.goldForeground)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(DS.nuggetGold, in: Capsule())
                 }
-                .buttonStyle(.plain)
+                .goldButtonStyle()
                 .padding(.horizontal, 24)
 
                 progressDots(current: 0, total: 4, light: true)
             }
             .padding(.bottom, 16)
-            .background(
-                Rectangle()
-                    .fill(DS.heroGradient)
-                    .shimmerOverlay(duration: 4.5, intensity: 0.22)
-                    .ignoresSafeArea()
-            )
         }
     }
 
@@ -103,7 +94,9 @@ struct OnboardingView: View {
 
     private var patternsPage: some View {
         ZStack {
-            DS.heroGradient.ignoresSafeArea()
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 24) {
@@ -159,24 +152,13 @@ struct OnboardingView: View {
                     withAnimation { currentPage = 2 }
                 } label: {
                     Text("Next \u{2192}")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundStyle(DS.goldForeground)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(DS.nuggetGold, in: Capsule())
                 }
-                .buttonStyle(.plain)
+                .goldButtonStyle()
                 .padding(.horizontal, 24)
 
                 progressDots(current: 1, total: 4, light: true)
             }
             .padding(.bottom, 16)
-            .background(
-                Rectangle()
-                    .fill(DS.heroGradient)
-                    .shimmerOverlay(duration: 4.5, intensity: 0.22)
-                    .ignoresSafeArea()
-            )
         }
     }
 
@@ -329,7 +311,9 @@ private struct AuthFormView: View {
 
     var body: some View {
         ZStack {
-            DS.heroGradient.ignoresSafeArea()
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 28) {
@@ -391,22 +375,17 @@ private struct AuthFormView: View {
                     Button {
                         Task { await submit() }
                     } label: {
-                        HStack {
-                            Spacer()
-                            if isSubmitting {
-                                ProgressView()
-                                    .tint(DS.goldTint)
-                            } else {
-                                Text(isSignIn ? "Sign in" : "Create account")
-                                    .font(.system(size: 17, weight: .bold))
+                        if isSubmitting {
+                            HStack {
+                                Spacer()
+                                ProgressView().tint(DS.goldTint)
+                                Spacer()
                             }
-                            Spacer()
+                        } else {
+                            Text(isSignIn ? "Sign in" : "Create account")
                         }
-                        .foregroundStyle(DS.goldForeground)
-                        .padding(.vertical, 16)
-                        .background(DS.nuggetGold, in: Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .goldButtonStyle()
                     .disabled(isSubmitting || email.isEmpty || password.isEmpty)
                     .opacity((email.isEmpty || password.isEmpty) ? 0.5 : 1.0)
                     .padding(.horizontal, DS.hPadding)
