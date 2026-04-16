@@ -34,30 +34,32 @@ struct OnboardingView: View {
 
                 NudgeAvatar(size: 120)
 
-                VStack(spacing: 12) {
+                VStack(spacing: 14) {
                     Text("Hi, I'm Nudge.")
-                        .font(.largeTitle.weight(.bold))
+                        .font(.system(size: 38, weight: .black))
                         .foregroundStyle(.white)
+                        .heroTextLegibility()
 
                     Text("Most budgeting apps track your spending.\nMoneyMind tracks why you spend.")
-                        .font(.body)
-                        .foregroundStyle(.white.opacity(0.8))
+                        .font(.system(.title3, weight: .semibold))
+                        .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
+                        .heroTextLegibility()
 
                     HStack(spacing: 6) {
                         Image(systemName: "book.closed.fill")
-                            .font(.system(size: 10))
+                            .font(.system(size: 12))
                             .foregroundStyle(DS.goldText)
                         Text("Based on 50+ years of behavioural research")
-                            .font(.system(.caption2, weight: .semibold))
-                            .foregroundStyle(.white.opacity(0.85))
+                            .font(.system(.footnote, weight: .bold))
+                            .foregroundStyle(.white)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background(Color.white.opacity(0.12), in: Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 0.5))
-                    .padding(.top, 6)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 9)
+                    .background(Color.black.opacity(0.35), in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.35), lineWidth: 0.75))
+                    .padding(.top, 8)
                 }
 
                 Spacer()
@@ -83,13 +85,13 @@ struct OnboardingView: View {
     // MARK: - Screen 2: The 7 Patterns
 
     private let patterns: [(emoji: String, name: String, line: String)] = [
-        ("😰", "Loss Aversion", "Holding losers too long"),
+        ("📉", "Loss Aversion", "Holding losers too long"),
         ("⏰", "Present Bias", "Robbing future you"),
-        ("🎯", "Overconfidence", "Overtrading, underperforming"),
+        ("📈", "Overconfidence", "Overtrading, underperforming"),
         ("🧮", "Mental Accounting", "Saving while in debt"),
         ("🛑", "Status Quo Bias", "Never reviewing super"),
-        ("⚓", "Anchoring", "Stuck on a purchase price"),
-        ("🫣", "Ostrich Effect", "Avoiding the statements"),
+        ("🏷️", "Anchoring", "Stuck on a purchase price"),
+        ("📭", "Ostrich Effect", "Avoiding the statements"),
     ]
 
     private var patternsPage: some View {
@@ -105,9 +107,10 @@ struct OnboardingView: View {
                     NudgeAvatar(size: 60)
 
                     Text("The 7 patterns that cost\npeople most")
-                        .font(.title2.weight(.bold))
+                        .font(.system(.title, weight: .black))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
+                        .heroTextLegibility()
 
                     VStack(spacing: 10) {
                         ForEach(patterns, id: \.name) { p in
@@ -260,12 +263,12 @@ struct OnboardingView: View {
     private func quizPill(_ text: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(text)
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: 16, weight: selected ? .bold : .semibold))
                 .foregroundStyle(selected ? .white : DS.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg),
+                    selected ? AnyShapeStyle(DS.deepGreen) : AnyShapeStyle(DS.cardBg),
                     in: Capsule()
                 )
                 .modifier(QuizPillBorderModifier(selected: selected))
@@ -334,15 +337,17 @@ private struct AuthFormView: View {
 
                     VStack(spacing: 8) {
                         Text(isSignIn ? "Welcome back" : "Create your account")
-                            .font(.title2.weight(.bold))
+                            .font(.system(.title, weight: .black))
                             .foregroundStyle(.white)
+                            .heroTextLegibility()
                         Text(isSignIn
                              ? "Sign in to pick up where you left off."
                              : "No bank access. Your data stays private.")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.7))
+                            .font(.system(.body, weight: .semibold))
+                            .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
+                            .heroTextLegibility()
                     }
 
                     VStack(spacing: 12) {

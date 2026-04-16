@@ -185,6 +185,19 @@ extension View {
     func goldRing() -> some View {
         modifier(GoldRingModifier())
     }
+    /// Layered shadow stack that fakes a black "outline" around white
+    /// text, plus a soft drop for depth. Use on white text sitting on
+    /// the shimmer green hero gradient (onboarding, BiasReview header,
+    /// CheckIn cards, etc.). Without this, white-on-green at body
+    /// sizes is hard to read against the lighter shimmer band.
+    func heroTextLegibility() -> some View {
+        self
+            .shadow(color: .black.opacity(0.85), radius: 0.5, x: -1, y: 0)
+            .shadow(color: .black.opacity(0.85), radius: 0.5, x: 1, y: 0)
+            .shadow(color: .black.opacity(0.85), radius: 0.5, x: 0, y: -1)
+            .shadow(color: .black.opacity(0.85), radius: 0.5, x: 0, y: 1)
+            .shadow(color: .black.opacity(0.45), radius: 5, x: 0, y: 2)
+    }
 }
 
 // MARK: - Nudge avatar (green circle hides black bg in PNG)

@@ -337,34 +337,34 @@ struct CheckInView: View {
 
             Spacer(minLength: 0)
 
-            // YES / NO buttons inside card
+            // YES (left) / NO (right) buttons inside card
             HStack(spacing: 12) {
-                Button { swipeNo() } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "xmark")
-                            .font(.subheadline.weight(.bold))
-                        Text("No")
-                    }
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(DS.danger)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                }
-                .buttonStyle(.plain)
-
                 Button { swipeYes() } label: {
                     HStack(spacing: 6) {
-                        Text("Yes")
                         Image(systemName: "checkmark")
                             .font(.subheadline.weight(.bold))
+                        Text("Yes")
                     }
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(DS.goldForeground)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(DS.nuggetGold)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+
+                Button { swipeNo() } label: {
+                    HStack(spacing: 6) {
+                        Text("No")
+                        Image(systemName: "xmark")
+                            .font(.subheadline.weight(.bold))
+                    }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(DS.danger)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)
