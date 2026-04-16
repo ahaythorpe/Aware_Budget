@@ -388,10 +388,10 @@ struct CheckInView: View {
                         Text("Yes")
                     }
                     .font(.subheadline.weight(.bold))
-                    .foregroundStyle(DS.goldForeground)
+                    .foregroundStyle(DS.matteYellowForeground)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(DS.nuggetGold)
+                    .background(DS.matteYellow)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)

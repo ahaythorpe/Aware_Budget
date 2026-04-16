@@ -297,7 +297,7 @@ struct InsightFeedView: View {
                         y: .value("Net worth", point.value),
                         series: .value("Series", "Net worth")
                     )
-                    .foregroundStyle(DS.goldBase)
+                    .foregroundStyle(DS.matteYellow)
                     .interpolationMethod(.catmullRom)
                     .lineStyle(StrokeStyle(lineWidth: 2.5))
                     AreaMark(
@@ -306,7 +306,7 @@ struct InsightFeedView: View {
                         series: .value("Series", "Net worth")
                     )
                     .foregroundStyle(LinearGradient(
-                        colors: [DS.goldBase.opacity(0.25), DS.goldBase.opacity(0.0)],
+                        colors: [DS.matteYellow.opacity(0.25), DS.matteYellow.opacity(0.0)],
                         startPoint: .top, endPoint: .bottom
                     ))
                     .interpolationMethod(.catmullRom)
@@ -327,7 +327,7 @@ struct InsightFeedView: View {
             // Tiny legend for the two series
             HStack(spacing: 14) {
                 HStack(spacing: 5) {
-                    Capsule().fill(DS.goldBase).frame(width: 14, height: 3)
+                    Capsule().fill(DS.matteYellow).frame(width: 14, height: 3)
                     Text("Net worth")
                         .font(.system(.caption2, weight: .semibold))
                         .foregroundStyle(DS.textSecondary)
@@ -493,7 +493,7 @@ struct InsightFeedView: View {
     @ViewBuilder
     private func categoryTrendChart(series: [CategoryTrendPoint]) -> some View {
         let categories = Array(Set(series.map(\.category))).sorted()
-        let palette: [Color] = [DS.goldBase, DS.primary, DS.accent, DS.deepGreen, DS.lightGreen]
+        let palette: [Color] = [DS.matteYellow, DS.primary, DS.accent, DS.deepGreen, DS.lightGreen]
 
         VStack(alignment: .leading, spacing: 10) {
             Chart(series) { point in
@@ -596,7 +596,7 @@ struct InsightFeedView: View {
                     )
                     // improving = soft green; not-improving = brand gold
                     // (was warning orange — too flashy for this analysis)
-                    .foregroundStyle(item.improving ? DS.primary : DS.goldBase)
+                    .foregroundStyle(item.improving ? DS.primary : DS.matteYellow)
                     .cornerRadius(4)
                 }
                 .frame(height: 180)
@@ -649,7 +649,7 @@ struct InsightFeedView: View {
                     )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [DS.goldBase, DS.goldText],
+                            colors: [DS.matteYellow, DS.matteYellow.opacity(0.7)],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
@@ -700,7 +700,7 @@ struct InsightFeedView: View {
             } else {
                 let slices: [DonutSlice] = [
                     DonutSlice(label: "Planned", value: planned, color: DS.primary),
-                    DonutSlice(label: "Unplanned", value: max(unplanned, 0.01), color: DS.goldBase),
+                    DonutSlice(label: "Unplanned", value: max(unplanned, 0.01), color: DS.matteYellow),
                 ]
 
                 HStack(spacing: 20) {
@@ -717,7 +717,7 @@ struct InsightFeedView: View {
 
                     VStack(alignment: .leading, spacing: 10) {
                         donutLegend(color: DS.primary, label: "Planned", pct: plannedPct)
-                        donutLegend(color: DS.goldBase, label: "Unplanned", pct: unplannedPct)
+                        donutLegend(color: DS.matteYellow, label: "Unplanned", pct: unplannedPct)
                     }
 
                     Spacer()
