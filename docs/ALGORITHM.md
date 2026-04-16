@@ -283,13 +283,27 @@ realisations. Backlog: rank lessons by `(times_useful + 1) /
 (times_surfaced + 1)` × recency, prune anything below threshold after
 N surfacings.
 
-### 10.5 No income/savings/investment side
-The "behaviour change → financial outcome" loop is incomplete without
-showing whether spending awareness translates to savings growth.
-Roadmap (post-launch):
-- v1: manual entry for income/savings/investments (Privacy Act only)
+### 10.5 Income/savings/investment — manual v1 shipped
+The "behaviour change → financial outcome" loop needs the user to see
+whether spending awareness translates to savings growth.
+
+**v1 — shipped (manual entry, Privacy Act only):**
+- `user_monthly_income` table — set-once monthly take-home
+- `user_balance_snapshots` table — periodic savings + investment
+  balance (one row per user per day, UPSERT on re-entry)
+- Settings → "Net worth tracking" section to enter all three
+- Insights → "Net worth trend" section showing the gold line
+  (catmullRom interpolated, gradient area fill below) over the
+  last 6 months
+
+**Roadmap (still pending):**
+- Bias-confirmation overlay on the trend chart — currently the line
+  shows alone; Option B from the design conversation also includes
+  a faint band for bias-confirmation rate over the same window
 - v2: aggregate via Basiq/Frollo (their CDR accreditation)
 - v3: become CDR-accredited
+- Trend insight Nudge — "Your net worth grew 8% this quarter while
+  Loss Aversion confirmation dropped 30%. Keep noticing."
 
 ---
 

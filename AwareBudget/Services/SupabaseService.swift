@@ -564,6 +564,83 @@ final class SupabaseService {
         }
     }
 
+    // MARK: - Finance tracking (manual entry — no bank API)
+
+    struct MonthlyIncome: Codable, Hashable {
+        let monthly_income: Double
+    }
+
+    struct BalanceSnapshot: Identifiable, Codable, Hashable {
+        let id: UUID
+        var savings_balance: Double
+        var investment_balance: Double
+        var recorded_at: Date
+    }
+
+    /// Get the user's stored monthly income. Returns 0 if never set.
+    func fetchMonthlyIncome() async throws -> Double {
+        guard let uid = await currentUserId else { return 0 }
+        let rows: [MonthlyIncome] = try await client.from("user_monthly_income")
+            .select("monthly_income")
+            .eq("user_id", value: uid.uuidString)
+            .limit(1)
+            .execute()
+            .value
+        return rows.first?.monthly_income ?? 0
+    }
+
+    /// Upsert the monthly income — set-once, editable any time.
+    /// Manual entry only; no bank API. Privacy Act is the only
+    /// compliance surface (see docs/ALGORITHM.md §10.5).
+    func saveMonthlyIncome(_ amount: Double) async throws {
+        guard let uid = await currentUserId else { return }
+        struct Row: Encodable {
+            let user_id: String
+            let monthly_income: Double
+        }
+        try await client.from("user_monthly_income")
+            .upsert(Row(user_id: uid.uuidString, monthly_income: amount),
+                    onConflict: "user_id")
+            .execute()
+    }
+
+    /// Insert OR update today's snapshot. UNIQUE(user_id, recorded_at)
+    /// means re-entering on the same day overwrites instead of stacking.
+    func saveBalanceSnapshot(savings: Double, investment: Double) async throws {
+        guard let uid = await currentUserId else { return }
+        struct Row: Encodable {
+            let user_id: String
+            let savings_balance: Double
+            let investment_balance: Double
+            let recorded_at: String
+        }
+        let today = ISO8601DateFormatter.dateOnly.string(from: Date())
+        try await client.from("user_balance_snapshots")
+            .upsert(Row(
+                user_id: uid.uuidString,
+                savings_balance: savings,
+                investment_balance: investment,
+                recorded_at: today
+            ), onConflict: "user_id,recorded_at")
+            .execute()
+    }
+
+    /// Fetch the trend window — used by Insights to plot the
+    /// net-worth line. Returns oldest → newest.
+    func fetchBalanceSnapshots(monthsBack: Int = 6) async throws -> [BalanceSnapshot] {
+        guard let uid = await currentUserId else { return [] }
+        let cutoff = Calendar.current.date(byAdding: .month, value: -monthsBack, to: Date())!
+        let cutoffStr = ISO8601DateFormatter.dateOnly.string(from: cutoff)
+        let rows: [BalanceSnapshot] = try await client.from("user_balance_snapshots")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+            .gte("recorded_at", value: cutoffStr)
+            .order("recorded_at", ascending: true)
+            .execute()
+            .value
+        return rows
+    }
+
     // MARK: - Decision lessons (Layer B + C: pre-spend hint + decision helper)
 
     struct DecisionLesson: Identifiable, Codable, Hashable {

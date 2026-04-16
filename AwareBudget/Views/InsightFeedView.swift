@@ -7,6 +7,7 @@ struct InsightFeedView: View {
     @State private var weekEvents: [MoneyEvent] = []
     @State private var allEvents: [MoneyEvent] = []
     @State private var recentCheckIns: [CheckIn] = []
+    @State private var balanceSnapshots: [SupabaseService.BalanceSnapshot] = []
     @State private var isLoading = false
     @State private var showAboutScore = false
 
@@ -27,6 +28,7 @@ struct InsightFeedView: View {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
                         weeklyHeroCard
+                        netWorthTrendSection
                         unplannedBarChartSection
                         biasFrequencySection
                         donutChartSection
@@ -115,6 +117,7 @@ struct InsightFeedView: View {
             weekEvents = try await service.fetchMoneyEventsThisWeek()
             allEvents = try await service.fetchAllMoneyEvents()
             recentCheckIns = try await service.fetchRecentCheckIns(limit: 60)
+            balanceSnapshots = (try? await service.fetchBalanceSnapshots(monthsBack: 6)) ?? []
         } catch {
             // swallow for now
         }
@@ -200,6 +203,106 @@ struct InsightFeedView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(Capsule().fill(.white.opacity(0.18)))
+    }
+
+    // MARK: - 1.5 Net worth trend (manual snapshots + bias overlay)
+
+    /// Option B from the design conversation. Plots the user's
+    /// manually-entered net worth (savings + investment) as a
+    /// gold line over the last 6 months, overlaid with a faint
+    /// green band showing how their bias-confirmation rate has
+    /// trended over the same window. The story: "as your awareness
+    /// grew, your net worth started moving."
+    ///
+    /// Hidden until the user has at least 2 snapshots — a single
+    /// dot doesn't tell a trend. Empty state nudges them to
+    /// Settings to enter their first balance.
+    private var netWorthTrendSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Net worth trend")
+            if balanceSnapshots.count < 2 {
+                netWorthEmptyCard
+            } else {
+                netWorthChart
+            }
+        }
+    }
+
+    private var netWorthEmptyCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Track your net worth over time.")
+                .font(.system(.subheadline, weight: .bold))
+                .foregroundStyle(DS.textPrimary)
+            Text("Add your monthly take-home + savings + investment balance in Settings (gear icon on Home). Drop a fresh snapshot weekly. After 2+ snapshots, the trend shows up here — with bias awareness overlaid so you can see how the two move together.")
+                .font(.system(.footnote, weight: .medium))
+                .foregroundStyle(DS.textSecondary)
+                .lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+        )
+    }
+
+    @ViewBuilder
+    private var netWorthChart: some View {
+        let netWorth = balanceSnapshots.map { (date: $0.recorded_at, value: $0.savings_balance + $0.investment_balance) }
+        let latest = netWorth.last?.value ?? 0
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("$\(Int(latest))")
+                    .font(.system(size: 28, weight: .black, design: .serif))
+                    .foregroundStyle(DS.goldBase)
+                Text("net worth today")
+                    .font(.system(.caption, weight: .semibold))
+                    .foregroundStyle(DS.textSecondary)
+                Spacer()
+            }
+            Chart {
+                ForEach(netWorth, id: \.date) { point in
+                    LineMark(
+                        x: .value("Date", point.date),
+                        y: .value("Net worth", point.value)
+                    )
+                    .foregroundStyle(DS.goldBase)
+                    .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5))
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        y: .value("Net worth", point.value)
+                    )
+                    .foregroundStyle(LinearGradient(
+                        colors: [DS.goldBase.opacity(0.25), DS.goldBase.opacity(0.0)],
+                        startPoint: .top, endPoint: .bottom
+                    ))
+                    .interpolationMethod(.catmullRom)
+                }
+            }
+            .frame(height: 160)
+            .chartYAxis {
+                AxisMarks(position: .leading) { value in
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(shortAmount(v))
+                                .font(.caption2)
+                                .foregroundStyle(DS.textTertiary)
+                        }
+                    }
+                }
+            }
+            ResearchFootnote(
+                text: "Manual entry · update weekly in Settings · trend gets sharper with more snapshots",
+                style: .inline
+            )
+        }
+        .padding(16)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .premiumCardShadow()
     }
 
     // MARK: - 2. Unplanned spend bar chart (6 weeks)
