@@ -97,24 +97,51 @@ final class SupabaseService {
             }
         }
 
-        // Fresh signup.
+        // Fresh signup. CRITICAL: persist creds BEFORE the network call —
+        // if signUp throws ("Error sending confirmation email" with no
+        // SMTP configured), the user row is STILL created in Supabase.
+        // Saving the creds first means next launch's saved-creds path
+        // can sign in instead of creating yet another orphan user.
         let email = "debug-\(UUID().uuidString.prefix(8))@awarebudget.test"
         let password = "Dbg-\(UUID().uuidString.prefix(12))"
+        defaults.set(email, forKey: "debugEmail")
+        defaults.set(password, forKey: "debugPassword")
         do {
             try await client.auth.signUp(email: String(email), password: String(password))
-            defaults.set(email, forKey: "debugEmail")
-            defaults.set(password, forKey: "debugPassword")
             if let uid = await currentUserId {
                 await MainActor.run { Self.debugAuthStatus = "signed up · \(String(uid.uuidString.prefix(8)))" }
                 print("[DEBUG AUTH] signed up: \(uid)")
             } else {
-                await MainActor.run { Self.debugAuthStatus = "signup OK but no session (email confirmation?)" }
-                print("[DEBUG AUTH] signup returned but no session — email confirmation likely required in Supabase settings")
+                // signUp returned but no session — try sign-in fallback.
+                do {
+                    try await client.auth.signIn(email: String(email), password: String(password))
+                    if let uid = await currentUserId {
+                        await MainActor.run { Self.debugAuthStatus = "signed up + signed in · \(String(uid.uuidString.prefix(8)))" }
+                        print("[DEBUG AUTH] signed up + signed in: \(uid)")
+                    }
+                } catch {
+                    await MainActor.run { Self.debugAuthStatus = "signup OK but sign-in failed (email confirmation?)" }
+                    print("[DEBUG AUTH] signup returned but sign-in failed — email confirmation likely required")
+                }
             }
         } catch {
-            await MainActor.run { Self.debugAuthStatus = "signup FAILED: \(error.localizedDescription)" }
-            print("[DEBUG AUTH] signup FAILED: \(error)")
-            print("[DEBUG AUTH] Fix: Supabase dashboard -> Authentication -> Providers -> Email -> ENABLE + disable 'Confirm email' for DEBUG.")
+            // Signup failed — but the user row may STILL have been created
+            // (this happens when SMTP is broken). Try sign-in with the
+            // creds we just saved, which works when the row exists.
+            print("[DEBUG AUTH] signup threw: \(error.localizedDescription) — trying sign-in")
+            do {
+                try await client.auth.signIn(email: String(email), password: String(password))
+                if let uid = await currentUserId {
+                    await MainActor.run { Self.debugAuthStatus = "signup err, signed in · \(String(uid.uuidString.prefix(8)))" }
+                    print("[DEBUG AUTH] recovered via sign-in: \(uid)")
+                }
+            } catch {
+                // Both failed — clear the bad creds so next launch tries fresh.
+                defaults.removeObject(forKey: "debugEmail")
+                defaults.removeObject(forKey: "debugPassword")
+                await MainActor.run { Self.debugAuthStatus = "signup + signin FAILED: \(error.localizedDescription)" }
+                print("[DEBUG AUTH] signup + sign-in both failed: \(error)")
+            }
         }
     }
     #endif
