@@ -28,7 +28,7 @@ enum BiasLessonsMock {
             fullExplanation: "Kahneman and Tversky's Prospect Theory (1979) showed the pain of losing $50 is psychologically equivalent to the pleasure of gaining ~$100. This asymmetry distorts decisions in both directions.",
             realWorldExample: "You bought shares that have fallen 30%. Selling would lock in the loss — so you hold, telling yourself they will recover, while a better opportunity sits in front of you.",
             howToCounter: "Ask: if I did not already own this, would I buy it today? If no, loss aversion may be driving the decision. Reframing as choosing between options reduces the emotional charge.",
-            emoji: "😨",
+            emoji: "📉",
             sortOrder: 2
         ),
         BiasLesson(
@@ -50,7 +50,7 @@ enum BiasLessonsMock {
             fullExplanation: "The sunk cost fallacy leads us to continue investing in something because of what we have already put in rather than what we expect to get out. Past costs should be irrelevant to future decisions, but they rarely feel that way.",
             realWorldExample: "You have spent $3,000 renovating a car that keeps breaking down. You spend another $1,500 because otherwise the first $3,000 was wasted. But it was already wasted.",
             howToCounter: "Ask: would I choose this if I were starting from scratch today? If no, the sunk cost is driving the decision. Walk away from past spending and evaluate the future on its own terms.",
-            emoji: "🕳️",
+            emoji: "🧾",
             sortOrder: 4
         ),
         BiasLesson(
@@ -61,7 +61,7 @@ enum BiasLessonsMock {
             fullExplanation: "One of the most robust findings in psychology. In finance it leads to under-diversification, excessive trading, and skipping due diligence because we already know enough. Studies consistently show people rate themselves as above-average investors.",
             realWorldExample: "You are convinced a particular investment will do well based on a trend you noticed. You put in more than you would normally risk. You are right 40% of the time — but your confidence is calibrated for 70%.",
             howToCounter: "Keep a decision journal. Write down your predictions and confidence levels, then check back. Most people discover their confidence significantly outstrips their accuracy.",
-            emoji: "🎯",
+            emoji: "📈",
             sortOrder: 5
         ),
         BiasLesson(
@@ -72,7 +72,7 @@ enum BiasLessonsMock {
             fullExplanation: "Baumeister's research showed that self-control draws from a finite pool. After a long day of decisions, your ability to resist impulse purchases drops significantly. Evening and late-night shopping exploit this depletion.",
             realWorldExample: "After a stressful workday you browse online and add $200 of things to your cart. In the morning you cannot remember why any of it seemed necessary.",
             howToCounter: "Never make financial decisions when you are tired, hungry, or emotionally drained. Sleep on it. Literally. If it still makes sense tomorrow, it will still be available.",
-            emoji: "🔋",
+            emoji: "🌙",
             sortOrder: 6
         ),
         BiasLesson(

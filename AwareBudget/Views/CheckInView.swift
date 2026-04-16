@@ -28,6 +28,11 @@ struct CheckInView: View {
     @State private var savedStreak: Int = 0
     @State private var isSaving = false
     @State private var alreadyCheckedIn: CheckIn?
+    /// Skip chastise overlay — fires when user taps "Skip" on the
+    /// driver-pick step without identifying a driver. Mirrors the
+    /// MoneyEventView skip chastise pattern (consistent UX).
+    @State private var showSkipChastise: Bool = false
+    private var skipChastise: String { NudgeVoice.random(NudgeVoice.skipChastise) }
 
     private let service = SupabaseService.shared
 
@@ -443,7 +448,11 @@ struct CheckInView: View {
 
             Button {
                 guard !isSaving else { return }
-                Task { await saveCheckIn() }
+                if selectedDriver == nil {
+                    showSkipChastise = true
+                } else {
+                    Task { await saveCheckIn() }
+                }
             } label: {
                 if isSaving {
                     ProgressView()
@@ -460,6 +469,87 @@ struct CheckInView: View {
             .buttonStyle(.plain)
         }
         .padding(.top, 20)
+        .overlay {
+            if showSkipChastise {
+                skipChastiseOverlay
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            }
+        }
+        .animation(.spring(response: 0.32, dampingFraction: 0.85), value: showSkipChastise)
+    }
+
+    /// Same Apple-style modal as MoneyEventView's skip overlay.
+    /// Single white card · Nudge coin · NUDGE label · title +
+    /// rotating chastise · gold "Pick a driver" · warning-red
+    /// "Skip anyway".
+    private var skipChastiseOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.45)
+                .ignoresSafeArea()
+                .onTapGesture { showSkipChastise = false }
+
+            VStack(spacing: 18) {
+                Image("nudge")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 56, height: 56)
+
+                VStack(spacing: 8) {
+                    Text("NUDGE")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .tracking(1.5)
+                        .foregroundStyle(DS.accent)
+
+                    Text("Skipping the why?")
+                        .font(.system(.title3, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                        .multilineTextAlignment(.center)
+
+                    Text(skipChastise)
+                        .font(.system(.subheadline, weight: .medium))
+                        .foregroundStyle(DS.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 4)
+
+                VStack(spacing: 10) {
+                    Button {
+                        showSkipChastise = false
+                    } label: {
+                        Text("Pick a driver")
+                            .font(.system(.headline, weight: .bold))
+                            .foregroundStyle(DS.goldForeground)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(DS.nuggetGold, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        showSkipChastise = false
+                        Task { await saveCheckIn() }
+                    } label: {
+                        Text("Skip anyway")
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(DS.warning)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(24)
+            .frame(maxWidth: 320)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 22))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+            )
+            .shadow(color: .black.opacity(0.25), radius: 30, x: 0, y: 12)
+            .padding(.horizontal, 32)
+        }
     }
 
     private func driverPill(_ driver: CheckIn.SpendingDriver) -> some View {
