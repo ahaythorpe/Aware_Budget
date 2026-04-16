@@ -56,6 +56,7 @@ enum MappingConfirmationStats {
         bias: String,
         outcome: Outcome
     ) {
+        // Local UserDefaults — fast, offline-safe, survives session.
         var all = loadAll()
         let key = MappingKey(category: category, status: status.rawValue, bias: bias)
         var stats = all[key.storageKey] ?? Stats()
@@ -66,6 +67,25 @@ enum MappingConfirmationStats {
         }
         all[key.storageKey] = stats
         save(all)
+
+        // Push to Supabase fire-and-forget — survives reinstall AND
+        // enables cross-user aggregation for the research deliverable.
+        // Migration: 20260416180000_add_bias_mapping_stats.sql
+        let outcomeStr: String = {
+            switch outcome {
+            case .yes:       return "identified"
+            case .notSure:   return "not_sure"
+            case .different: return "different"
+            }
+        }()
+        Task {
+            try? await SupabaseService.shared.incrementMappingStat(
+                category: category,
+                plannedStatus: status.rawValue,
+                biasName: bias,
+                outcome: outcomeStr
+            )
+        }
     }
 
     static func stats(category: String, status: MoneyEvent.PlannedStatus, bias: String) -> Stats {

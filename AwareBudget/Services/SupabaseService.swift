@@ -468,6 +468,80 @@ final class SupabaseService {
         }
     }
 
+    // MARK: - Bias mapping stats (per-user algorithm self-audit)
+
+    /// Increment the per-(category × status × bias) outcome counter for
+    /// the current user. UPSERT via .insert with onConflict to merge.
+    /// Silently no-ops when offline so the local UserDefaults fallback
+    /// in MappingConfirmationStats keeps working.
+    func incrementMappingStat(
+        category: String,
+        plannedStatus: String,
+        biasName: String,
+        outcome: String  // "identified" | "not_sure" | "different"
+    ) async throws {
+        guard let uid = await currentUserId else { return }
+
+        struct Existing: Decodable {
+            let id: UUID
+            let identified_count: Int
+            let not_sure_count: Int
+            let different_count: Int
+        }
+
+        let rows: [Existing] = try await client.from("bias_mapping_stats")
+            .select("id,identified_count,not_sure_count,different_count")
+            .eq("user_id", value: uid.uuidString)
+            .eq("category", value: category)
+            .eq("planned_status", value: plannedStatus)
+            .eq("bias_name", value: biasName)
+            .limit(1)
+            .execute()
+            .value
+
+        let nowISO = ISO8601DateFormatter().string(from: Date())
+
+        if let row = rows.first {
+            var updates: [String: AnyJSON] = [
+                "last_review_at": .string(nowISO),
+            ]
+            switch outcome {
+            case "identified": updates["identified_count"] = .integer(row.identified_count + 1)
+            case "not_sure":   updates["not_sure_count"]   = .integer(row.not_sure_count + 1)
+            case "different":  updates["different_count"]  = .integer(row.different_count + 1)
+            default: return
+            }
+            try await client.from("bias_mapping_stats")
+                .update(updates)
+                .eq("id", value: row.id.uuidString)
+                .execute()
+        } else {
+            struct NewRow: Encodable {
+                let user_id: String
+                let category: String
+                let planned_status: String
+                let bias_name: String
+                let identified_count: Int
+                let not_sure_count: Int
+                let different_count: Int
+                let last_review_at: String
+            }
+            let new = NewRow(
+                user_id: uid.uuidString,
+                category: category,
+                planned_status: plannedStatus,
+                bias_name: biasName,
+                identified_count: outcome == "identified" ? 1 : 0,
+                not_sure_count:   outcome == "not_sure"   ? 1 : 0,
+                different_count:  outcome == "different"  ? 1 : 0,
+                last_review_at:   nowISO
+            )
+            try await client.from("bias_mapping_stats")
+                .insert(new)
+                .execute()
+        }
+    }
+
     /// Saves 16 BFAS baseline answers. YES -> bfas_weight 7, NO -> 2.
     /// Upserts by (user_id, bias_name): updates existing row or inserts new.
     func saveBFASAssessment(answers: [String: Bool]) async throws {
