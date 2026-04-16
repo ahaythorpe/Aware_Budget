@@ -218,7 +218,9 @@ struct InsightFeedView: View {
                         x: .value("Week", item.label),
                         y: .value("Amount", item.amount)
                     )
-                    .foregroundStyle(item.improving ? DS.positive : DS.warning)
+                    // improving = soft green; not-improving = brand gold
+                    // (was warning orange — too flashy for this analysis)
+                    .foregroundStyle(item.improving ? DS.primary : DS.goldBase)
                     .cornerRadius(4)
                 }
                 .frame(height: 180)
@@ -271,7 +273,7 @@ struct InsightFeedView: View {
                     )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [DS.deepGreen, DS.accent],
+                            colors: [DS.goldBase, DS.goldText],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
@@ -321,8 +323,8 @@ struct InsightFeedView: View {
                 emptyCard(message: "Log events to see your planned vs unplanned split.")
             } else {
                 let slices: [DonutSlice] = [
-                    DonutSlice(label: "Planned", value: planned, color: DS.positive),
-                    DonutSlice(label: "Unplanned", value: max(unplanned, 0.01), color: DS.warning),
+                    DonutSlice(label: "Planned", value: planned, color: DS.primary),
+                    DonutSlice(label: "Unplanned", value: max(unplanned, 0.01), color: DS.goldBase),
                 ]
 
                 HStack(spacing: 20) {
@@ -338,8 +340,8 @@ struct InsightFeedView: View {
                     .frame(width: 120, height: 120)
 
                     VStack(alignment: .leading, spacing: 10) {
-                        donutLegend(color: DS.positive, label: "Planned", pct: plannedPct)
-                        donutLegend(color: DS.warning, label: "Unplanned", pct: unplannedPct)
+                        donutLegend(color: DS.primary, label: "Planned", pct: plannedPct)
+                        donutLegend(color: DS.goldBase, label: "Unplanned", pct: unplannedPct)
                     }
 
                     Spacer()
