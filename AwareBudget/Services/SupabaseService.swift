@@ -927,10 +927,66 @@ struct BiasProgress: Identifiable, Codable, Hashable {
         biasName = try c.decode(String.self, forKey: .biasName)
         timesEncountered = try c.decode(Int.self, forKey: .timesEncountered)
         timesReflected = try c.decode(Int.self, forKey: .timesReflected)
-        firstSeen = try c.decodeIfPresent(Date.self, forKey: .firstSeen)
-        lastSeen = try c.decodeIfPresent(Date.self, forKey: .lastSeen)
-        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        firstSeen = try BiasProgress.decodeOptionalFlexibleDate(from: c, key: .firstSeen)
+        lastSeen = try BiasProgress.decodeOptionalFlexibleDate(from: c, key: .lastSeen)
+        createdAt = try BiasProgress.decodeFlexibleDate(from: c, key: .createdAt)
         bfasWeight = try c.decodeIfPresent(Int.self, forKey: .bfasWeight) ?? 0
+    }
+
+    /// Same flexible Date parsing as MoneyEvent — handles Postgres
+    /// DATE columns (bare YYYY-MM-DD) AND TIMESTAMPTZ (ISO with/without
+    /// fractional seconds, with optional space-T swap). Without this,
+    /// any BiasProgress row whose first_seen/last_seen is a DATE
+    /// silently fails decode → fetchBiasProgress returns [] → Home's
+    /// patterns count + entire load() catch fires → calendar shows 0.
+    private static let dateOnlyParser: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withFullDate]
+        return f
+    }()
+    private static let isoFrac: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+    private static let isoNoFrac: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
+    private static func parseFlexible(_ s: String) -> Date? {
+        if let d = isoFrac.date(from: s) { return d }
+        if let d = isoNoFrac.date(from: s) { return d }
+        if let d = dateOnlyParser.date(from: s) { return d }
+        let normalized = s.replacingOccurrences(of: " ", with: "T")
+        if let d = isoFrac.date(from: normalized) { return d }
+        if let d = isoNoFrac.date(from: normalized) { return d }
+        return nil
+    }
+
+    private static func decodeFlexibleDate(
+        from c: KeyedDecodingContainer<CodingKeys>,
+        key: CodingKeys
+    ) throws -> Date {
+        if let d = try? c.decode(Date.self, forKey: key) { return d }
+        let s = try c.decode(String.self, forKey: key)
+        guard let d = parseFlexible(s) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: key, in: c,
+                debugDescription: "BiasProgress date '\(s)' didn't match any format"
+            )
+        }
+        return d
+    }
+
+    private static func decodeOptionalFlexibleDate(
+        from c: KeyedDecodingContainer<CodingKeys>,
+        key: CodingKeys
+    ) throws -> Date? {
+        if let d = try? c.decodeIfPresent(Date.self, forKey: key) { return d }
+        guard let s = try? c.decodeIfPresent(String.self, forKey: key) else { return nil }
+        return parseFlexible(s)
     }
 
     init(id: UUID, userId: UUID, biasName: String, timesEncountered: Int, timesReflected: Int, firstSeen: Date?, lastSeen: Date?, createdAt: Date, bfasWeight: Int = 0) {

@@ -93,4 +93,91 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         case createdAt = "created_at"
     }
 
+    /// Explicit memberwise init — needed because adding the custom
+    /// `init(from:)` below suppresses Swift's synthesised one, which
+    /// DemoDataService + MoneyEventViewModel rely on.
+    init(
+        id: UUID,
+        userId: UUID,
+        date: Date,
+        amount: Double,
+        plannedStatus: PlannedStatus,
+        behaviourTag: String? = nil,
+        lifeEvent: String? = nil,
+        lifeArea: String? = nil,
+        note: String? = nil,
+        createdAt: Date
+    ) {
+        self.id = id
+        self.userId = userId
+        self.date = date
+        self.amount = amount
+        self.plannedStatus = plannedStatus
+        self.behaviourTag = behaviourTag
+        self.lifeEvent = lifeEvent
+        self.lifeArea = lifeArea
+        self.note = note
+        self.createdAt = createdAt
+    }
+
+    /// Per-model tolerant decoder — safety net in case the global
+    /// SupabaseClient JSONDecoder isn't actually respected by the
+    /// Postgrest Swift SDK (it uses its own internal decoder for
+    /// some return paths). Without this, money_events.date as a
+    /// bare "2026-04-16" string fails decode silently → Home shows
+    /// "0 EVENTS" even when the data is sitting in Supabase. This
+    /// regressed when the global decoder was assumed sufficient.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        userId = try c.decode(UUID.self, forKey: .userId)
+        date = try MoneyEvent.decodeFlexibleDate(from: c, key: .date)
+        amount = try c.decode(Double.self, forKey: .amount)
+        plannedStatus = try c.decode(PlannedStatus.self, forKey: .plannedStatus)
+        behaviourTag = try c.decodeIfPresent(String.self, forKey: .behaviourTag)
+        lifeEvent = try c.decodeIfPresent(String.self, forKey: .lifeEvent)
+        lifeArea = try c.decodeIfPresent(String.self, forKey: .lifeArea)
+        note = try c.decodeIfPresent(String.self, forKey: .note)
+        createdAt = try MoneyEvent.decodeFlexibleDate(from: c, key: .createdAt)
+    }
+
+    private static let dateOnlyParser: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withFullDate]
+        return f
+    }()
+
+    private static let isoParserFrac: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    private static let isoParserNoFrac: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
+    private static func decodeFlexibleDate(
+        from c: KeyedDecodingContainer<CodingKeys>,
+        key: CodingKeys
+    ) throws -> Date {
+        // Try Date directly first (works if the global decoder strategy fired).
+        if let d = try? c.decode(Date.self, forKey: key) { return d }
+        // Fall back to manual string parse covering all formats Postgres
+        // emits (DATE, TIMESTAMPTZ with/without fractional seconds, with
+        // optional space-T swap).
+        let s = try c.decode(String.self, forKey: key)
+        if let d = isoParserFrac.date(from: s) { return d }
+        if let d = isoParserNoFrac.date(from: s) { return d }
+        if let d = dateOnlyParser.date(from: s) { return d }
+        let normalized = s.replacingOccurrences(of: " ", with: "T")
+        if let d = isoParserFrac.date(from: normalized) { return d }
+        if let d = isoParserNoFrac.date(from: normalized) { return d }
+        throw DecodingError.dataCorruptedError(
+            forKey: key, in: c,
+            debugDescription: "MoneyEvent date '\(s)' didn't match any expected format"
+        )
+    }
 }
