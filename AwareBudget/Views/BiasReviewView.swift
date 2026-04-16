@@ -614,6 +614,24 @@ struct BiasReviewView: View {
         isWriting = true
         defer { isWriting = false }
 
+        // Per-mapping confirmation stats — algorithm audits itself.
+        // Every review answer feeds the (category × status × bias)
+        // confirmation rate; mappings consistently below 30% confirm
+        // get flagged for tuning.
+        let mappingOutcome: MappingConfirmationStats.Outcome = {
+            switch choice {
+            case .identified: return .yes
+            case .notSure:    return .notSure
+            case .different:  return .different
+            }
+        }()
+        MappingConfirmationStats.record(
+            category: entry.category,
+            status: entry.plannedStatus,
+            bias: entry.suggestedBias,
+            outcome: mappingOutcome
+        )
+
         switch choice {
         case .identified:
             outcome.identifiedCount += 1
@@ -621,7 +639,7 @@ struct BiasReviewView: View {
             try? await service.updateBiasProgress(biasName: entry.suggestedBias, reflected: true)
         case .notSure:
             outcome.notSureCount += 1
-            // no update — tag stays, score keeps +3 from tagged event
+            // no update — tag stays, score keeps the passive event tag
         case .different:
             outcome.differentCount += 1
             // Future: re-tag the money_event. For now, locally tracked only.
