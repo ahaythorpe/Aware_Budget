@@ -34,6 +34,10 @@ struct MoneyEventView: View {
     /// Lessons banked from prior reviews for the currently-open category
     /// sheet. Used to show the Layer B pre-spend hint banner.
     @State private var lessonsForCurrentSheet: [SupabaseService.DecisionLesson] = []
+    /// Layer C — opt-in decision-helper sheet. Long-press on a category
+    /// tile to open. Surfaces 3 banked lessons as a tickable checklist
+    /// before the user proceeds to log.
+    @State private var helperSheetCategory: SpendCategory? = nil
 
     /// Rotating dry-wit chastise when user tries to skip review — see NudgeVoice.
     private var skipChastise: String { NudgeVoice.random(NudgeVoice.skipChastise) }
@@ -95,6 +99,16 @@ struct MoneyEventView: View {
                     pendingRange = nil
                     lessonsForCurrentSheet = []
                 }
+        }
+        .sheet(item: $helperSheetCategory) { cat in
+            DecisionHelperSheet(
+                category: cat.name,
+                plannedStatus: nil,
+                onProceed: {
+                    // Land on the normal range picker after the helper.
+                    rangeSheetCategory = cat
+                }
+            )
         }
         .sheet(isPresented: $showAlgoExplainer) {
             AlgorithmExplainerSheet()
@@ -542,6 +556,12 @@ struct MoneyEventView: View {
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
+        // Long-press = "Help me think this through" — opens the
+        // Layer C decision helper checklist before the range picker.
+        // Power-user gesture; doesn't disrupt the default tap flow.
+        .onLongPressGesture(minimumDuration: 0.5) {
+            helperSheetCategory = cat
+        }
     }
 
     // MARK: - Range + status sheet (2-step inline flow per item)
