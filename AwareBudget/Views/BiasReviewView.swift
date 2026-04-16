@@ -208,6 +208,16 @@ struct BiasReviewView: View {
                         .foregroundStyle(Color(hex: "8B6010"))
                 }
             }
+
+            // Sibling-bias hint — when the same bias has been proposed
+            // 3+ times in the current session, the algorithm risks
+            // looking broken ("why does it keep saying Availability?").
+            // Surface 2-3 related biases from the same shortlist so the
+            // user has alternatives to consider. Doesn't change the
+            // proposed tag — just adds context.
+            if streakCount(for: entry.suggestedBias) >= 3 {
+                siblingBiasesHint(for: entry)
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -221,6 +231,61 @@ struct BiasReviewView: View {
                 .stroke(DS.goldBase.opacity(0.7), lineWidth: 2.5)
         )
         .premiumCardShadow()
+    }
+
+    // MARK: - Sibling-bias hint
+
+    /// Counts how many entries in the session (up to and including the
+    /// current index) share the given bias. Used to detect "same bias
+    /// keeps coming up" so we can surface alternatives.
+    private func streakCount(for bias: String) -> Int {
+        guard index < entries.count else { return 0 }
+        return entries.prefix(index + 1).filter { $0.suggestedBias == bias }.count
+    }
+
+    /// Inline footer on the bias card: 2–3 alternative biases from the
+    /// same (category × status) shortlist that the user might also be
+    /// experiencing. Reads as "you're seeing this a lot — here's what
+    /// else could be at play" rather than overriding the model's pick.
+    private func siblingBiasesHint(for entry: Entry) -> some View {
+        let siblings = topContextualBiases(for: entry, excluding: entry.suggestedBias, limit: 3)
+        let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
+
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: "info.circle.fill")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color(hex: "8B6010"))
+                Text("ALSO WORTH CONSIDERING")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundStyle(Color(hex: "8B6010"))
+            }
+            Text("This bias has come up a few times — these related ones might also fit:")
+                .font(.system(.caption, weight: .medium))
+                .foregroundStyle(Color(hex: "3A2000").opacity(0.75))
+                .lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(siblings, id: \.self) { bias in
+                    HStack(spacing: 8) {
+                        Text(emojiLookup[bias] ?? "🧠")
+                            .font(.system(size: 14))
+                        Text(bias)
+                            .font(.system(.caption, weight: .bold))
+                            .foregroundStyle(Color(hex: "3A2000"))
+                        Spacer()
+                        Text(biasHint(bias))
+                            .font(.system(.caption2, weight: .medium))
+                            .foregroundStyle(Color(hex: "3A2000").opacity(0.65))
+                            .lineLimit(2)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+            }
+        }
+        .padding(.top, 6)
+        .padding(.horizontal, 2)
     }
 
     // MARK: - Choice buttons
