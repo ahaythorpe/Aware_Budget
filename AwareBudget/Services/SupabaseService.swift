@@ -625,6 +625,25 @@ final class SupabaseService {
             .execute()
     }
 
+    /// Fetch decision_lessons created_at timestamps for the trend
+    /// window — used as the "awareness moments" series overlaid
+    /// on the net worth chart. Each banked lesson = a moment the
+    /// user actively identified a bias. Cumulative count over time
+    /// = awareness curve. Returns oldest → newest.
+    func fetchLessonTimestamps(monthsBack: Int = 6) async throws -> [Date] {
+        guard let uid = await currentUserId else { return [] }
+        let cutoff = Calendar.current.date(byAdding: .month, value: -monthsBack, to: Date())!
+        struct Row: Decodable { let created_at: Date }
+        let rows: [Row] = try await client.from("decision_lessons")
+            .select("created_at")
+            .eq("user_id", value: uid.uuidString)
+            .gte("created_at", value: ISO8601DateFormatter().string(from: cutoff))
+            .order("created_at", ascending: true)
+            .execute()
+            .value
+        return rows.map(\.created_at)
+    }
+
     /// Fetch the trend window — used by Insights to plot the
     /// net-worth line. Returns oldest → newest.
     func fetchBalanceSnapshots(monthsBack: Int = 6) async throws -> [BalanceSnapshot] {

@@ -296,14 +296,21 @@ whether spending awareness translates to savings growth.
   (catmullRom interpolated, gradient area fill below) over the
   last 6 months
 
+**v1.5 — shipped (this commit):**
+- Awareness overlay on the trend chart — `decision_lessons.created_at`
+  cumulative count plotted as a faint dashed green line on the same
+  axis (normalised to net worth max so they read together).
+- Trend insight Nudge above the chart — fires when there's enough
+  data to compare last 30 days vs the prior 30. Three states:
+  - Net worth up + awareness up → "The two move together"
+  - Net worth up alone → "Keep noticing — the data is moving"
+  - Awareness up alone → "Net worth hasn't moved yet — that's
+    normal. Awareness comes first."
+
 **Roadmap (still pending):**
-- Bias-confirmation overlay on the trend chart — currently the line
-  shows alone; Option B from the design conversation also includes
-  a faint band for bias-confirmation rate over the same window
 - v2: aggregate via Basiq/Frollo (their CDR accreditation)
 - v3: become CDR-accredited
-- Trend insight Nudge — "Your net worth grew 8% this quarter while
-  Loss Aversion confirmation dropped 30%. Keep noticing."
+- Per-bias trend overlay (currently aggregate awareness count)
 
 ---
 

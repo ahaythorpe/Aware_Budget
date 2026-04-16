@@ -8,6 +8,7 @@ struct InsightFeedView: View {
     @State private var allEvents: [MoneyEvent] = []
     @State private var recentCheckIns: [CheckIn] = []
     @State private var balanceSnapshots: [SupabaseService.BalanceSnapshot] = []
+    @State private var awarenessTimestamps: [Date] = []
     @State private var isLoading = false
     @State private var showAboutScore = false
 
@@ -118,6 +119,7 @@ struct InsightFeedView: View {
             allEvents = try await service.fetchAllMoneyEvents()
             recentCheckIns = try await service.fetchRecentCheckIns(limit: 60)
             balanceSnapshots = (try? await service.fetchBalanceSnapshots(monthsBack: 6)) ?? []
+            awarenessTimestamps = (try? await service.fetchLessonTimestamps(monthsBack: 6)) ?? []
         } catch {
             // swallow for now
         }
@@ -252,6 +254,13 @@ struct InsightFeedView: View {
     private var netWorthChart: some View {
         let netWorth = balanceSnapshots.map { (date: $0.recorded_at, value: $0.savings_balance + $0.investment_balance) }
         let latest = netWorth.last?.value ?? 0
+        let maxNet = max(netWorth.map(\.value).max() ?? 1, 1)
+        // Cumulative awareness curve — each banked lesson is a moment
+        // the user actively identified a bias. Normalised to the same
+        // y-range as net worth so the two read on one chart.
+        let awareness = cumulativeAwareness(timestamps: awarenessTimestamps, normaliseTo: maxNet)
+        let trendInsight = computeTrendInsight(netWorth: netWorth, awareness: awarenessTimestamps)
+
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 Text("$\(Int(latest))")
@@ -262,18 +271,35 @@ struct InsightFeedView: View {
                     .foregroundStyle(DS.textSecondary)
                 Spacer()
             }
+            if let insight = trendInsight {
+                trendInsightNudge(insight)
+            }
             Chart {
+                // Awareness line (faint green, behind)
+                ForEach(awareness, id: \.date) { point in
+                    LineMark(
+                        x: .value("Date", point.date),
+                        y: .value("Awareness", point.value),
+                        series: .value("Series", "Awareness")
+                    )
+                    .foregroundStyle(DS.accent.opacity(0.55))
+                    .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [3, 3]))
+                }
+                // Net worth line (gold, foreground)
                 ForEach(netWorth, id: \.date) { point in
                     LineMark(
                         x: .value("Date", point.date),
-                        y: .value("Net worth", point.value)
+                        y: .value("Net worth", point.value),
+                        series: .value("Series", "Net worth")
                     )
                     .foregroundStyle(DS.goldBase)
                     .interpolationMethod(.catmullRom)
                     .lineStyle(StrokeStyle(lineWidth: 2.5))
                     AreaMark(
                         x: .value("Date", point.date),
-                        y: .value("Net worth", point.value)
+                        y: .value("Net worth", point.value),
+                        series: .value("Series", "Net worth")
                     )
                     .foregroundStyle(LinearGradient(
                         colors: [DS.goldBase.opacity(0.25), DS.goldBase.opacity(0.0)],
@@ -294,8 +320,23 @@ struct InsightFeedView: View {
                     }
                 }
             }
+            // Tiny legend for the two series
+            HStack(spacing: 14) {
+                HStack(spacing: 5) {
+                    Capsule().fill(DS.goldBase).frame(width: 14, height: 3)
+                    Text("Net worth")
+                        .font(.system(.caption2, weight: .semibold))
+                        .foregroundStyle(DS.textSecondary)
+                }
+                HStack(spacing: 5) {
+                    Capsule().fill(DS.accent.opacity(0.55)).frame(width: 14, height: 3)
+                    Text("Awareness moments")
+                        .font(.system(.caption2, weight: .semibold))
+                        .foregroundStyle(DS.textSecondary)
+                }
+            }
             ResearchFootnote(
-                text: "Manual entry · update weekly in Settings · trend gets sharper with more snapshots",
+                text: "Manual entry · update weekly in Settings · awareness = lessons banked",
                 style: .inline
             )
         }
@@ -303,6 +344,75 @@ struct InsightFeedView: View {
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
         .premiumCardShadow()
+    }
+
+    /// Build a cumulative-count awareness series scaled to share the
+    /// y-axis with net worth. Each timestamp = +1 to a running total;
+    /// the final total is normalised to the chart's max net-worth value
+    /// so the curve reads alongside the line without a secondary axis.
+    private func cumulativeAwareness(timestamps: [Date], normaliseTo maxValue: Double) -> [(date: Date, value: Double)] {
+        guard !timestamps.isEmpty else { return [] }
+        let total = Double(timestamps.count)
+        guard total > 0 else { return [] }
+        let scale = maxValue / total
+        return timestamps.enumerated().map { idx, date in
+            (date: date, value: Double(idx + 1) * scale)
+        }
+    }
+
+    /// Compute a celebratory or neutral one-liner about how net worth
+    /// and awareness have moved together. Fires when there's enough
+    /// data to compare the most recent month vs the prior month.
+    private func computeTrendInsight(
+        netWorth: [(date: Date, value: Double)],
+        awareness: [Date]
+    ) -> String? {
+        guard let latest = netWorth.last, netWorth.count >= 2 else { return nil }
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        guard let priorAnchor = netWorth.last(where: { $0.date < cutoff }) else { return nil }
+        let netDelta = latest.value - priorAnchor.value
+        let recentAwareness = awareness.filter { $0 >= cutoff }.count
+        let priorAwareness = max(0, awareness.count - recentAwareness)
+
+        if netDelta > 0 && recentAwareness > priorAwareness {
+            let pct = Int((netDelta / max(priorAnchor.value, 1)) * 100)
+            return "Net worth up \(pct)% this month while you banked \(recentAwareness) new awareness moments. The two move together."
+        }
+        if netDelta > 0 {
+            let pct = Int((netDelta / max(priorAnchor.value, 1)) * 100)
+            return "Net worth up \(pct)% this month. Keep noticing — the data is moving in your direction."
+        }
+        if recentAwareness > priorAwareness {
+            return "You banked \(recentAwareness) new lessons this month. Net worth hasn't moved yet — that's normal. Awareness comes first."
+        }
+        return nil
+    }
+
+    private func trendInsightNudge(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image("nudge")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 32, height: 32)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("NUDGE")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundStyle(DS.accent)
+                Text(message)
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
+        )
     }
 
     // MARK: - 2. Unplanned spend bar chart (6 weeks)
