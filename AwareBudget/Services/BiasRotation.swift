@@ -34,73 +34,14 @@ enum BiasRotation {
         }
     }
 
-    /// Hand-curated (category, status) → top biases shortlist.
-    /// Mirrors the data previously duplicated across BiasReviewView
-    /// and MoneyEventView. Single source of truth lives here.
+    /// Cited (category × status) shortlist sourced from `BiasMappings`.
+    /// Returns the bias names ordered by confidence (high → medium → low).
+    /// Empty for combos without curated citations — caller falls through
+    /// to `statusFallback` (status-level construct prior, not a category
+    /// claim). This is the swap from "Claude's opinion table" to a
+    /// citation-grounded mapping the algorithm can defend.
     static func categoryShortlist(category: String, status: MoneyEvent.PlannedStatus) -> [String] {
-        switch (category, status) {
-        case ("Coffee", .impulse):        return ["Ego Depletion", "Present Bias", "Status Quo Bias", "Moral Licensing", "Social Proof"]
-        case ("Coffee", .planned):        return ["Status Quo Bias", "Mental Accounting", "Anchoring"]
-        case ("Coffee", .surprise):       return ["Availability Heuristic", "Ego Depletion"]
-
-        case ("Lunch", .impulse):         return ["Ego Depletion", "Present Bias", "Social Proof", "Moral Licensing", "Mental Accounting"]
-        case ("Lunch", .planned):         return ["Mental Accounting", "Status Quo Bias", "Anchoring"]
-        case ("Lunch", .surprise):        return ["Availability Heuristic", "Ego Depletion", "Planning Fallacy"]
-
-        case ("Drinks", .impulse):        return ["Social Proof", "Ego Depletion", "Present Bias", "Moral Licensing", "Mental Accounting"]
-        case ("Drinks", .planned):        return ["Mental Accounting", "Social Proof", "Anchoring"]
-        case ("Drinks", .surprise):       return ["Social Proof", "Availability Heuristic"]
-
-        case ("Eating out", .impulse):    return ["Social Proof", "Present Bias", "Moral Licensing", "Ego Depletion", "Framing Effect"]
-        case ("Eating out", .planned):    return ["Mental Accounting", "Anchoring", "Status Quo Bias", "Social Proof"]
-        case ("Eating out", .surprise):   return ["Availability Heuristic", "Planning Fallacy"]
-
-        case ("Shopping", .impulse):      return ["Scarcity Heuristic", "Framing Effect", "Social Proof", "Present Bias", "Loss Aversion"]
-        case ("Shopping", .planned):      return ["Anchoring", "Sunk Cost Fallacy", "Mental Accounting", "Framing Effect"]
-        case ("Shopping", .surprise):     return ["Availability Heuristic", "Loss Aversion", "Planning Fallacy"]
-
-        case ("Clothing", .impulse):      return ["Scarcity Heuristic", "Framing Effect", "Social Proof", "Present Bias", "Moral Licensing"]
-        case ("Clothing", .planned):      return ["Anchoring", "Sunk Cost Fallacy", "Mental Accounting"]
-        case ("Clothing", .surprise):     return ["Availability Heuristic", "Loss Aversion"]
-
-        case ("Transport", .impulse):     return ["Ego Depletion", "Present Bias", "Status Quo Bias", "Availability Heuristic", "Mental Accounting"]
-        case ("Transport", .planned):     return ["Status Quo Bias", "Mental Accounting", "Anchoring"]
-        case ("Transport", .surprise):    return ["Availability Heuristic", "Planning Fallacy", "Loss Aversion"]
-
-        case ("Pharmacy", .impulse):      return ["Availability Heuristic", "Loss Aversion", "Present Bias", "Framing Effect"]
-        case ("Pharmacy", .planned):      return ["Mental Accounting", "Status Quo Bias", "Anchoring"]
-        case ("Pharmacy", .surprise):     return ["Availability Heuristic", "Loss Aversion", "Planning Fallacy", "Ostrich Effect"]
-
-        case ("Subscriptions", .impulse): return ["Framing Effect", "Social Proof", "Scarcity Heuristic", "Present Bias", "Moral Licensing"]
-        case ("Subscriptions", .planned): return ["Status Quo Bias", "Sunk Cost Fallacy", "Mental Accounting", "Anchoring", "Overconfidence Bias"]
-        case ("Subscriptions", .surprise):return ["Ostrich Effect", "Planning Fallacy", "Status Quo Bias"]
-
-        case ("Entertainment", .impulse): return ["Social Proof", "Present Bias", "Moral Licensing", "Sunk Cost Fallacy", "Scarcity Heuristic"]
-        case ("Entertainment", .planned): return ["Mental Accounting", "Anchoring", "Status Quo Bias", "Social Proof"]
-        case ("Entertainment", .surprise):return ["Availability Heuristic", "Planning Fallacy"]
-
-        case ("Travel", .impulse):        return ["Present Bias", "Scarcity Heuristic", "Social Proof", "Loss Aversion", "Framing Effect"]
-        case ("Travel", .planned):        return ["Anchoring", "Mental Accounting", "Sunk Cost Fallacy", "Overconfidence Bias", "Planning Fallacy"]
-        case ("Travel", .surprise):       return ["Planning Fallacy", "Availability Heuristic", "Loss Aversion"]
-
-        case ("Gift", .impulse):          return ["Social Proof", "Loss Aversion", "Scarcity Heuristic", "Framing Effect", "Anchoring"]
-        case ("Gift", .planned):          return ["Anchoring", "Social Proof", "Mental Accounting", "Moral Licensing"]
-        case ("Gift", .surprise):         return ["Availability Heuristic", "Social Proof", "Loss Aversion"]
-
-        case ("Home", .impulse):          return ["Present Bias", "Framing Effect", "Scarcity Heuristic", "Social Proof"]
-        case ("Home", .planned):          return ["Status Quo Bias", "Anchoring", "Sunk Cost Fallacy", "Mental Accounting", "Overconfidence Bias"]
-        case ("Home", .surprise):         return ["Planning Fallacy", "Availability Heuristic", "Loss Aversion"]
-
-        case ("Fitness", .impulse):       return ["Moral Licensing", "Social Proof", "Sunk Cost Fallacy", "Scarcity Heuristic"]
-        case ("Fitness", .planned):       return ["Overconfidence Bias", "Sunk Cost Fallacy", "Status Quo Bias", "Anchoring"]
-        case ("Fitness", .surprise):      return ["Planning Fallacy", "Availability Heuristic"]
-
-        case ("Big purchase", .impulse):  return ["Social Proof", "Scarcity Heuristic", "Framing Effect", "Anchoring", "Loss Aversion"]
-        case ("Big purchase", .planned):  return ["Anchoring", "Sunk Cost Fallacy", "Overconfidence Bias", "Planning Fallacy"]
-        case ("Big purchase", .surprise): return ["Scarcity Heuristic", "Loss Aversion", "Planning Fallacy"]
-
-        default:                          return []
-        }
+        BiasMappings.citedBiases(category: category, status: status)
     }
 
     /// Merge curated category list with the status fallback, dedup,
