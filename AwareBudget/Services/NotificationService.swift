@@ -11,19 +11,37 @@ enum NotificationService {
     private static let smartMorningID   = "awarebudget.smart.morning"
     private static let smartAfternoonID = "awarebudget.smart.afternoon"
     private static let smartEveningID   = "awarebudget.smart.evening"
+    /// 9pm end-of-day prompt for one-off chunky buys (Shopping, Travel,
+    /// Subscriptions, Big purchase) the user might've missed during the
+    /// day. Surface-level reminder so the day's data isn't incomplete.
+    private static let chunkyBuysID     = "awarebudget.chunky.buys"
 
     // Weekly + monthly review pushes
     private static let weeklyReviewID  = "awarebudget.weekly"
     private static let monthlyCheckpointID = "awarebudget.monthly"
 
+    // Meal-anchored copy. Default fire times are 11/14/19, refined by
+    // LogTimeAnalytics once the user has 30 days of logs.
     private static let morningBodies = [
-        "Coffee run?", "Any spends before work?", "Nudge is listening.",
+        "Coffee or breakfast spend today?",
+        "☕ Quick log: anything before work?",
+        "Morning purchase to capture?",
     ]
     private static let afternoonBodies = [
-        "Lunch logged?", "Mid-day check-in?", "Pattern check.",
+        "Lunch happen?",
+        "🥗 Midday spend to log?",
+        "What did lunch cost?",
     ]
     private static let eveningBodies = [
-        "After work?", "Wrap the day.", "One last nudge.",
+        "Dinner or after-work spend?",
+        "🍽️ Wrap the day's logs?",
+        "Anything from the evening to log?",
+    ]
+    /// End-of-day catch for chunky one-offs the meal slots wouldn't catch.
+    private static let chunkyBuysBodies = [
+        "Anything chunky today? Shopping, travel, sub renewals, big buys.",
+        "💸 One-off purchases worth logging?",
+        "Any out-of-pattern spend today?",
     ]
 
     // MARK: - Permission
@@ -132,6 +150,31 @@ enum NotificationService {
         scheduleSmart(id: smartMorningID, hour: hours.morning, bodies: morningBodies)
         scheduleSmart(id: smartAfternoonID, hour: hours.afternoon, bodies: afternoonBodies)
         scheduleSmart(id: smartEveningID, hour: hours.evening, bodies: eveningBodies)
+        scheduleChunkyBuysReminder()
+    }
+
+    // MARK: - End-of-day chunky-buys reminder (9pm daily)
+
+    /// Catches one-off larger purchases (Shopping, Travel, Subscriptions,
+    /// Big purchase) that wouldn't naturally come up during the meal-slot
+    /// nudges. Fires at 9pm so the user can sweep the day before sleep.
+    static func scheduleChunkyBuysReminder() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [chunkyBuysID])
+
+        let body = chunkyBuysBodies.randomElement() ?? chunkyBuysBodies[0]
+        let content = UNMutableNotificationContent()
+        content.title = "MoneyMind"
+        content.body = body
+        content.sound = .default
+
+        var components = DateComponents()
+        components.hour = 21
+        components.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: chunkyBuysID, content: content, trigger: trigger)
+        center.add(request)
     }
 
     private static func scheduleSmart(id: String, hour: Int, bodies: [String]) {
