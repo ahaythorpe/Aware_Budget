@@ -309,19 +309,10 @@ struct BiasReviewView: View {
         let visible = showMoreReasons ? (topContextual + moreCandidates) : topContextual
 
         return VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 10) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 18))
-                    .foregroundStyle(DS.goldBase)
-                Text("Nudge: noticing the real reason matters more than clicking fast. Pick the one that actually fit.")
-                    .font(.system(.footnote, weight: .semibold))
-                    .foregroundStyle(DS.textSecondary)
-                    .lineSpacing(3)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(12)
-            .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldSurfaceStroke, lineWidth: 0.5))
+            NudgeSaysCard(
+                message: NudgeVoice.random(NudgeVoice.altPickerChastise),
+                surface: .whiteShimmer
+            )
 
             Text("WHAT WAS THE REAL REASON?")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
@@ -479,21 +470,121 @@ struct BiasReviewView: View {
 
     /// Rank biases by how plausible they are given this event's category +
     /// planned status, so the picker shows the most likely reasons first
-    /// (~6) and hides the rest behind "More reasons". Same mapping table
-    /// as `suggestedBiasTag` — we pull the category-aware shortlist and
-    /// extend it with generic-plausibility fallbacks.
+    /// (~6) and hides the rest behind "More reasons".
+    ///
+    /// Two levels:
+    /// 1. Category × status shortlist (hand-curated, realistic per-category).
+    ///    e.g. Lunch-Impulse surfaces Ego Depletion / Present Bias / Social
+    ///    Proof — not retail framings like "save 30%".
+    /// 2. Status-only fallback for unmapped categories or after level-1
+    ///    list is exhausted, ensuring we always have 6 to show.
     private func topContextualBiases(for entry: Entry, excluding suggested: String, limit: Int) -> [String] {
         let status = entry.plannedStatus
-        let base: [String]
+        let categoryList = categoryBiasShortlist[entry.category]?[status] ?? []
+        let statusFallback: [String]
         switch status {
         case .impulse:
-            base = ["Present Bias", "Scarcity Heuristic", "Social Proof", "Ego Depletion", "Loss Aversion", "Framing Effect"]
+            statusFallback = ["Present Bias", "Scarcity Heuristic", "Social Proof", "Ego Depletion", "Loss Aversion", "Framing Effect"]
         case .surprise:
-            base = ["Availability Heuristic", "Planning Fallacy", "Ostrich Effect", "Loss Aversion", "Framing Effect", "Overconfidence Bias"]
+            statusFallback = ["Availability Heuristic", "Planning Fallacy", "Ostrich Effect", "Loss Aversion", "Framing Effect", "Overconfidence Bias"]
         case .planned:
-            base = ["Mental Accounting", "Anchoring", "Sunk Cost Fallacy", "Status Quo Bias", "Moral Licensing", "Denomination Effect"]
+            statusFallback = ["Mental Accounting", "Anchoring", "Sunk Cost Fallacy", "Status Quo Bias", "Moral Licensing", "Denomination Effect"]
         }
-        return Array(base.filter { $0 != suggested }.prefix(limit))
+        var seen = Set<String>()
+        seen.insert(suggested)
+        var result: [String] = []
+        for bias in categoryList + statusFallback {
+            if seen.insert(bias).inserted {
+                result.append(bias)
+                if result.count == limit { break }
+            }
+        }
+        return result
+    }
+
+    /// Hand-curated (category, status) → top biases, grounded in how each
+    /// category actually gets decided. Food/drink impulse is ego-depletion
+    /// + present bias territory; shopping is scarcity + framing; transport
+    /// is tired-brain shortcuts; subscriptions are status-quo traps.
+    /// Omit a category to fall through to the generic status shortlist.
+    private var categoryBiasShortlist: [String: [MoneyEvent.PlannedStatus: [String]]] {
+        [
+            "Coffee": [
+                .impulse: ["Ego Depletion", "Present Bias", "Status Quo Bias", "Moral Licensing", "Social Proof"],
+                .planned: ["Status Quo Bias", "Mental Accounting", "Anchoring"],
+                .surprise: ["Availability Heuristic", "Ego Depletion"],
+            ],
+            "Lunch": [
+                .impulse: ["Ego Depletion", "Present Bias", "Social Proof", "Moral Licensing", "Mental Accounting"],
+                .planned: ["Mental Accounting", "Status Quo Bias", "Anchoring"],
+                .surprise: ["Availability Heuristic", "Ego Depletion", "Planning Fallacy"],
+            ],
+            "Drinks": [
+                .impulse: ["Social Proof", "Ego Depletion", "Present Bias", "Moral Licensing", "Mental Accounting"],
+                .planned: ["Mental Accounting", "Social Proof", "Anchoring"],
+                .surprise: ["Social Proof", "Availability Heuristic"],
+            ],
+            "Eating out": [
+                .impulse: ["Social Proof", "Present Bias", "Moral Licensing", "Ego Depletion", "Framing Effect"],
+                .planned: ["Mental Accounting", "Anchoring", "Status Quo Bias", "Social Proof"],
+                .surprise: ["Availability Heuristic", "Planning Fallacy"],
+            ],
+            "Shopping": [
+                .impulse: ["Scarcity Heuristic", "Framing Effect", "Social Proof", "Present Bias", "Loss Aversion"],
+                .planned: ["Anchoring", "Sunk Cost Fallacy", "Mental Accounting", "Framing Effect"],
+                .surprise: ["Availability Heuristic", "Loss Aversion", "Planning Fallacy"],
+            ],
+            "Clothing": [
+                .impulse: ["Scarcity Heuristic", "Framing Effect", "Social Proof", "Present Bias", "Moral Licensing"],
+                .planned: ["Anchoring", "Sunk Cost Fallacy", "Mental Accounting"],
+                .surprise: ["Availability Heuristic", "Loss Aversion"],
+            ],
+            "Transport": [
+                .impulse: ["Ego Depletion", "Present Bias", "Status Quo Bias", "Availability Heuristic", "Mental Accounting"],
+                .planned: ["Status Quo Bias", "Mental Accounting", "Anchoring"],
+                .surprise: ["Availability Heuristic", "Planning Fallacy", "Loss Aversion"],
+            ],
+            "Pharmacy": [
+                .impulse: ["Availability Heuristic", "Loss Aversion", "Present Bias", "Framing Effect"],
+                .planned: ["Mental Accounting", "Status Quo Bias", "Anchoring"],
+                .surprise: ["Availability Heuristic", "Loss Aversion", "Planning Fallacy", "Ostrich Effect"],
+            ],
+            "Subscriptions": [
+                .impulse: ["Framing Effect", "Social Proof", "Scarcity Heuristic", "Present Bias", "Moral Licensing"],
+                .planned: ["Status Quo Bias", "Sunk Cost Fallacy", "Mental Accounting", "Anchoring", "Overconfidence Bias"],
+                .surprise: ["Ostrich Effect", "Planning Fallacy", "Status Quo Bias"],
+            ],
+            "Entertainment": [
+                .impulse: ["Social Proof", "Present Bias", "Moral Licensing", "Sunk Cost Fallacy", "Scarcity Heuristic"],
+                .planned: ["Mental Accounting", "Anchoring", "Status Quo Bias", "Social Proof"],
+                .surprise: ["Availability Heuristic", "Planning Fallacy"],
+            ],
+            "Travel": [
+                .impulse: ["Present Bias", "Scarcity Heuristic", "Social Proof", "Loss Aversion", "Framing Effect"],
+                .planned: ["Anchoring", "Mental Accounting", "Sunk Cost Fallacy", "Overconfidence Bias", "Planning Fallacy"],
+                .surprise: ["Planning Fallacy", "Availability Heuristic", "Loss Aversion"],
+            ],
+            "Gift": [
+                .impulse: ["Social Proof", "Loss Aversion", "Scarcity Heuristic", "Framing Effect", "Anchoring"],
+                .planned: ["Anchoring", "Social Proof", "Mental Accounting", "Moral Licensing"],
+                .surprise: ["Availability Heuristic", "Social Proof", "Loss Aversion"],
+            ],
+            "Home": [
+                .impulse: ["Present Bias", "Framing Effect", "Scarcity Heuristic", "Social Proof"],
+                .planned: ["Status Quo Bias", "Anchoring", "Sunk Cost Fallacy", "Mental Accounting", "Overconfidence Bias"],
+                .surprise: ["Availability Heuristic", "Planning Fallacy", "Ostrich Effect", "Loss Aversion"],
+            ],
+            "Fitness": [
+                .impulse: ["Moral Licensing", "Social Proof", "Scarcity Heuristic", "Present Bias", "Framing Effect"],
+                .planned: ["Status Quo Bias", "Sunk Cost Fallacy", "Overconfidence Bias", "Mental Accounting"],
+                .surprise: ["Availability Heuristic", "Planning Fallacy"],
+            ],
+            "Big purchase": [
+                .impulse: ["Present Bias", "Scarcity Heuristic", "Framing Effect", "Social Proof", "Loss Aversion"],
+                .planned: ["Anchoring", "Sunk Cost Fallacy", "Overconfidence Bias", "Mental Accounting", "Planning Fallacy"],
+                .surprise: ["Planning Fallacy", "Loss Aversion", "Availability Heuristic"],
+            ],
+        ]
     }
 
     /// Plain-English one-liner for each of the 16 biases. Shown as the

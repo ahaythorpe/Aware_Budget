@@ -18,6 +18,18 @@ enum NudgeVoice {
         "Closing your eyes doesn't close the tab.",
     ]
 
+    // MARK: - Alt-picker chastise (when user taps "No, different reason"
+    // — nudge them to pick the real reason slowly, not trigger-happy click)
+    static let altPickerChastise: [String] = [
+        "Don't just click. The wrong reason gives you the wrong insight.",
+        "Fast-clicking through is how blind spots survive. Sit with it.",
+        "The real reason is usually the one you'd rather not pick.",
+        "Nudge can't read minds. Pick the one that actually fit.",
+        "Your future self can tell when you lied here. So can Nudge.",
+        "Slow down. The pattern you skip is the one that repeats.",
+        "Wrong label now = wrong insight later. Get it right.",
+    ]
+
     // MARK: - Motto lines (Nudge Says cards, session summaries, general rotation)
     static let motto: [String] = [
         "Awareness is interest — it compounds for future-you's savings.",
