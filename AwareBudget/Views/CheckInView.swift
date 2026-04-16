@@ -313,25 +313,43 @@ struct CheckInView: View {
             .buttonStyle(.plain)
 
             if showWhy {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(q.whyExplanation)
-                        .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.85))
-                        .fixedSize(horizontal: false, vertical: true)
+                // Mini Nudge Says card — same brand voice (Nudge coin
+                // + NUDGE label) as the white NudgeSaysCard elsewhere,
+                // but recoloured for legibility on the dark green
+                // check-in surface. Copy is hard-coded per question
+                // (q.whyExplanation + per-bias research cue).
+                HStack(alignment: .top, spacing: 12) {
+                    Image("nudge")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("NUDGE SAYS")
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(DS.goldText)
 
-                    Text(NudgeVoice.researchCueFor(bias: q.biasName))
-                        .font(.system(.caption2, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.7))
-                        .lineSpacing(2)
-                        .fixedSize(horizontal: false, vertical: true)
+                        Text(q.whyExplanation)
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                    Text(q.researchSource ?? "BFAS framework \u{00B7} Pompian, 2012")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.white.opacity(0.4))
-                        .italic()
+                        Text(NudgeVoice.researchCueFor(bias: q.biasName))
+                            .font(.system(.caption2, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.85))
+                            .lineSpacing(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 2)
+                    }
                 }
-                .padding(12)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.goldText.opacity(0.4), lineWidth: 0.75)
+                )
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
 

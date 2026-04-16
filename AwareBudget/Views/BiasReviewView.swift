@@ -245,7 +245,7 @@ struct BiasReviewView: View {
             reviewButton(
                 icon: "checkmark.circle.fill",
                 label: "Yes, that's me",
-                tint: DS.positive
+                tint: DS.goldBase
             ) {
                 Task { await record(entry: entry, choice: .identified) }
             }
