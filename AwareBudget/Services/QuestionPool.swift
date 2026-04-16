@@ -73,7 +73,7 @@ enum QuestionPool {
         .init(id: UUID(), question: "Did 'save 30%' feel more compelling than 'pay 70%'?",
               whyExplanation: "Framing bends identical maths. Restating the deal in absolute dollars reveals the truth.",
               biasName: "Framing Effect", biasCategory: "Decision Making", difficulty: "intermediate", lastShown: nil),
-        .init(id: UUID(), question: "Did a friend's purchase push you to make your own?",
+        .init(id: UUID(), question: "Did seeing a friend buy something make you want one too?",
               whyExplanation: "The desire to match peers is ancient and largely invisible. Ask: would I want this if nobody else had it?",
               biasName: "Social Proof", biasCategory: "External Influence", difficulty: "beginner", lastShown: nil),
         .init(id: UUID(), question: "Did a big purchase end up costing more than you planned?",
