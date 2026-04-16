@@ -13,6 +13,7 @@ struct AlgorithmExplainerSheet: View {
                 stepsCard
                 scoringCard
                 awarenessCard
+                selfAuditCard
                 citationCard
                 cta
             }
@@ -23,6 +24,71 @@ struct AlgorithmExplainerSheet: View {
         .background(DS.bg.ignoresSafeArea())
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+    }
+
+    // MARK: - Self-audit (low-confirmation mappings)
+
+    /// Surfaces mappings the user's own data is rejecting. Builds trust:
+    /// the algorithm is being graded by the user, not just running blind.
+    /// Hidden when there are no flagged mappings yet (waiting for ≥20
+    /// reviews per mapping before flagging).
+    private var selfAuditCard: some View {
+        let flagged = MappingConfirmationStats.lowConfirmationMappings()
+        return Group {
+            if flagged.isEmpty {
+                sectionCard(title: "ALGORITHM AUDITS ITSELF") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Every YES / Not sure / Different feeds a per-mapping confirmation rate.")
+                            .font(.system(.body, weight: .semibold))
+                            .foregroundStyle(DS.textPrimary)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text("If a mapping (e.g. \"Ego Depletion on Coffee+Impulse\") drops below 30% confirmation after 20+ reviews, it gets flagged here for retirement. Right now, no mappings have crossed the threshold.")
+                            .font(.system(.footnote, weight: .regular))
+                            .foregroundStyle(DS.textSecondary)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            } else {
+                sectionCard(title: "MAPPINGS YOUR DATA IS REJECTING") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("These (purchase × bias) mappings are being confirmed less than 30% of the time across your reviews. Flagged for retirement.")
+                            .font(.system(.footnote, weight: .semibold))
+                            .foregroundStyle(DS.textSecondary)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                        ForEach(flagged.prefix(5), id: \.key.storageKey) { row in
+                            flaggedRow(category: row.key.category, status: row.key.status, bias: row.key.bias, stats: row.stats)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func flaggedRow(category: String, status: String, bias: String, stats: MappingConfirmationStats.Stats) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 12))
+                .foregroundStyle(DS.warning)
+                .padding(.top, 2)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("\(bias) on \(category) + \(status)")
+                    .font(.system(.subheadline, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                Text("\(Int(stats.confirmationRate * 100))% confirmed · \(stats.sampleSize) reviews")
+                    .font(.system(.caption, weight: .semibold))
+                    .foregroundStyle(DS.textSecondary)
+            }
+            Spacer()
+        }
+        .padding(10)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.warning.opacity(0.3), lineWidth: 0.75)
+        )
     }
 
     // MARK: - Hero

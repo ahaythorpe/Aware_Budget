@@ -63,8 +63,8 @@ struct WeeklyReviewSummary: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-        .shimmeringGoldBorder(cornerRadius: 14)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
     }
 
     private var biasesList: some View {

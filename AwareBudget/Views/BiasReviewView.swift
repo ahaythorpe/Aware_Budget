@@ -339,8 +339,8 @@ struct BiasReviewView: View {
                         }
                         .padding(14)
                         .frame(maxWidth: .infinity)
-                        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldBase.opacity(0.25), lineWidth: 1))
+                        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                        .overlay(RoundedRectangle(cornerRadius: DS.cardRadius).stroke(DS.goldBase.opacity(0.25), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .disabled(isWriting)
@@ -387,8 +387,8 @@ struct BiasReviewView: View {
                     }
                     .padding(14)
                     .frame(maxWidth: .infinity)
-                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldBase.opacity(0.25), lineWidth: 1))
+                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                    .overlay(RoundedRectangle(cornerRadius: DS.cardRadius).stroke(DS.goldBase.opacity(0.25), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .disabled(isWriting)
