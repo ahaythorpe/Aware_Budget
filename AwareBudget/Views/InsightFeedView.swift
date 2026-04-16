@@ -9,6 +9,10 @@ struct InsightFeedView: View {
     @State private var recentCheckIns: [CheckIn] = []
     @State private var balanceSnapshots: [SupabaseService.BalanceSnapshot] = []
     @State private var awarenessTimestamps: [Date] = []
+    /// Selected category to drill into on the expandable trend chart.
+    /// nil = overlaid view of top 5 categories. Setting a value
+    /// expands that category's line full-screen with daily breakdown.
+    @State private var expandedCategory: String? = nil
     @State private var isLoading = false
     @State private var showAboutScore = false
 
@@ -30,7 +34,7 @@ struct InsightFeedView: View {
                     VStack(spacing: DS.sectionGap) {
                         weeklyHeroCard
                         netWorthTrendSection
-                        unplannedBarChartSection
+                        categoryTrendSection
                         biasFrequencySection
                         donutChartSection
                         nudgeInsightCard
@@ -415,7 +419,166 @@ struct InsightFeedView: View {
         )
     }
 
-    // MARK: - 2. Unplanned spend bar chart (6 weeks)
+    // MARK: - 2. Category trend (expandable line graph)
+
+    /// Replaces the old weekly bar chart with a per-category trend
+    /// line. Default view: top 5 categories overlaid as muted lines
+    /// over the last 6 weeks. Tap a category in the legend to expand
+    /// just that line full-width with a richer y-axis. Tap again to
+    /// collapse back to the overlay.
+    ///
+    /// Why: the bar chart only showed total unplanned spend, which
+    /// hides which categories drive the spike. The trend graph
+    /// answers "where does my money actually trend over time?" — the
+    /// foundation question for behavioural awareness.
+    private var categoryTrendSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Category trend")
+            let series = computeCategoryTrend()
+            if series.isEmpty {
+                emptyCard(message: "Log spend events across a few weeks to see your category trends.")
+            } else {
+                categoryTrendChart(series: series)
+            }
+        }
+    }
+
+    private struct CategoryTrendPoint: Identifiable {
+        let id = UUID()
+        let category: String
+        let weekStart: Date
+        let amount: Double
+    }
+
+    /// Build (category × week) totals for the top 5 most-spent
+    /// categories over the last 6 weeks. Older weeks bucketed by ISO
+    /// week start (Monday).
+    private func computeCategoryTrend() -> [CategoryTrendPoint] {
+        let cal = Calendar.current
+        let now = Date()
+        let cutoff = cal.date(byAdding: .day, value: -42, to: now) ?? now
+        let recent = allEvents.filter { $0.date >= cutoff }
+
+        // Top 5 categories by total spend in window.
+        let totals = recent.reduce(into: [String: Double]()) { acc, e in
+            let cat = e.lifeArea ?? "Other"
+            acc[cat, default: 0] += e.amount
+        }
+        let topCategories = totals
+            .sorted { $0.value > $1.value }
+            .prefix(5)
+            .map(\.key)
+        let allowed = Set(topCategories)
+
+        // Bucket by week-start.
+        var buckets: [String: [Date: Double]] = [:]
+        for e in recent {
+            let cat = e.lifeArea ?? "Other"
+            guard allowed.contains(cat) else { continue }
+            var comps = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: e.date)
+            comps.weekday = 2 // Monday
+            let weekStart = cal.date(from: comps) ?? e.date
+            buckets[cat, default: [:]][weekStart, default: 0] += e.amount
+        }
+        var out: [CategoryTrendPoint] = []
+        for cat in topCategories {
+            let weeks = buckets[cat] ?? [:]
+            for (weekStart, amount) in weeks {
+                out.append(CategoryTrendPoint(category: cat, weekStart: weekStart, amount: amount))
+            }
+        }
+        return out.sorted { $0.weekStart < $1.weekStart }
+    }
+
+    @ViewBuilder
+    private func categoryTrendChart(series: [CategoryTrendPoint]) -> some View {
+        let categories = Array(Set(series.map(\.category))).sorted()
+        let palette: [Color] = [DS.goldBase, DS.primary, DS.accent, DS.deepGreen, DS.lightGreen]
+
+        VStack(alignment: .leading, spacing: 10) {
+            Chart(series) { point in
+                let isExpanded = expandedCategory == nil || expandedCategory == point.category
+                LineMark(
+                    x: .value("Week", point.weekStart),
+                    y: .value("Amount", point.amount),
+                    series: .value("Category", point.category)
+                )
+                .foregroundStyle(by: .value("Category", point.category))
+                .interpolationMethod(.catmullRom)
+                .lineStyle(StrokeStyle(
+                    lineWidth: expandedCategory == point.category ? 3 : 2,
+                    lineCap: .round
+                ))
+                .opacity(isExpanded ? 1.0 : 0.18)
+            }
+            .chartForegroundStyleScale(domain: categories, range: Array(palette.prefix(categories.count)))
+            .chartLegend(.hidden)
+            .frame(height: 180)
+            .chartYAxis {
+                AxisMarks(position: .leading) { value in
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(shortAmount(v))
+                                .font(.caption2)
+                                .foregroundStyle(DS.textTertiary)
+                        }
+                    }
+                }
+            }
+            // Tappable legend doubles as the expand/collapse control.
+            categoryLegend(categories: categories, palette: palette)
+
+            if let expanded = expandedCategory {
+                Text("Showing \(expanded) only — tap again to see all.")
+                    .font(.system(.caption, weight: .medium))
+                    .foregroundStyle(DS.textSecondary)
+            } else {
+                Text("Tap a category to focus its trend.")
+                    .font(.system(.caption, weight: .medium))
+                    .foregroundStyle(DS.textTertiary)
+            }
+        }
+        .padding(16)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .premiumCardShadow()
+    }
+
+    private func categoryLegend(categories: [String], palette: [Color]) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(Array(categories.enumerated()), id: \.element) { idx, cat in
+                let colour = palette[idx % palette.count]
+                let isExpanded = expandedCategory == cat
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                            expandedCategory = isExpanded ? nil : cat
+                        }
+                    } label: {
+                        HStack(spacing: 5) {
+                            Capsule()
+                                .fill(colour)
+                                .frame(width: 12, height: 3)
+                            Text(cat)
+                                .font(.system(.caption2, weight: isExpanded ? .heavy : .semibold))
+                                .foregroundStyle(isExpanded ? DS.textPrimary : DS.textSecondary)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(
+                            isExpanded ? AnyShapeStyle(DS.goldSurfaceBg) : AnyShapeStyle(Color.clear),
+                            in: Capsule()
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    // MARK: - 2b. (Legacy) Unplanned spend bar chart — replaced by categoryTrendSection
+    // Kept here for now so existing seed data + screenshots still work.
+    // Remove in a follow-up once the new section is verified across users.
 
     private var unplannedBarChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
