@@ -29,9 +29,15 @@ struct CheckInView: View {
     @State private var isSaving = false
     @State private var alreadyCheckedIn: CheckIn?
     /// Skip chastise overlay — fires when user taps "Skip" on the
-    /// driver-pick step without identifying a driver. Mirrors the
+    /// driver-pick step without identifying a driver, OR taps the
+    /// toolbar X to abandon the whole check-in. Mirrors the
     /// MoneyEventView skip chastise pattern (consistent UX).
     @State private var showSkipChastise: Bool = false
+    /// Tracks WHICH skip path triggered the chastise so "Skip anyway"
+    /// does the right thing: X = abandon, driver-pick = save without
+    /// driver.
+    private enum SkipOrigin { case toolbarX, driverPick }
+    @State private var skipOrigin: SkipOrigin = .driverPick
     private var skipChastise: String { NudgeVoice.random(NudgeVoice.skipChastise) }
 
     private let service = SupabaseService.shared
@@ -43,7 +49,7 @@ struct CheckInView: View {
     // MARK: - Design constants
 
     private let cardCornerRadius: CGFloat = 28
-    private let cardHeight: CGFloat = 520
+    private let cardHeight: CGFloat = 380
     private let swipeThreshold: CGFloat = 80
     private let maxRotation: Double = 15
 
@@ -108,11 +114,25 @@ struct CheckInView: View {
         }
         .navigationTitle("Daily check-in")
         .navigationBarTitleDisplayMode(.inline)
+        .overlay {
+            // Top-level chastise overlay so it shows from EITHER the
+            // questions screen (toolbar X tap) or the driver-pick
+            // (Skip button). Was previously only attached to the
+            // driver-pick subview.
+            if showSkipChastise {
+                skipChastiseOverlay
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            }
+        }
+        .animation(.spring(response: 0.32, dampingFraction: 0.85), value: showSkipChastise)
         .toolbar {
             if selectedTab == nil {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
-                        dismiss()
+                        // Chastise instead of immediate dismiss — same
+                        // Nudge popup as the driver-pick Skip button.
+                        skipOrigin = .toolbarX
+                        showSkipChastise = true
                     } label: {
                         Image(systemName: "xmark")
                             .font(.subheadline.weight(.semibold))
@@ -270,27 +290,26 @@ struct CheckInView: View {
     }
 
     private func frontContent(for q: Question) -> some View {
-        VStack(alignment: .leading, spacing: 18) {
-            // Gold bias pill on dark green
-            Text(q.biasName.uppercased())
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(DS.goldText)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(
-                    Capsule()
-                        .fill(DS.goldBase.opacity(0.2))
-                        .overlay(
-                            Capsule()
-                                .stroke(DS.goldText.opacity(0.4), lineWidth: 0.5)
-                        )
-                )
-
-            // Question text — NO text input
+        VStack(alignment: .leading, spacing: 14) {
+            // Question (lived-experience phrase) leads — biggest, boldest.
             Text(q.question)
-                .font(.title3.weight(.bold))
+                .font(.system(.title2, weight: .black))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
+                .heroTextLegibility()
+
+            // Bias label (academic term) sits underneath as the
+            // smaller "what we're calling this" line.
+            HStack(spacing: 6) {
+                Text("THIS PATTERN ·")
+                    .font(.system(size: 9, weight: .heavy, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundStyle(.white.opacity(0.65))
+                Text(q.biasName.uppercased())
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundStyle(DS.goldText)
+            }
 
             Text("Used in professional financial planning · BFAS framework · Pompian 2012")
                 .font(.system(.caption, weight: .semibold))
@@ -449,6 +468,7 @@ struct CheckInView: View {
             Button {
                 guard !isSaving else { return }
                 if selectedDriver == nil {
+                    skipOrigin = .driverPick
                     showSkipChastise = true
                 } else {
                     Task { await saveCheckIn() }
@@ -469,13 +489,7 @@ struct CheckInView: View {
             .buttonStyle(.plain)
         }
         .padding(.top, 20)
-        .overlay {
-            if showSkipChastise {
-                skipChastiseOverlay
-                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
-            }
-        }
-        .animation(.spring(response: 0.32, dampingFraction: 0.85), value: showSkipChastise)
+        // Top-level body has the overlay now — see line ~110.
     }
 
     /// Same Apple-style modal as MoneyEventView's skip overlay.
@@ -529,7 +543,13 @@ struct CheckInView: View {
 
                     Button {
                         showSkipChastise = false
-                        Task { await saveCheckIn() }
+                        // Different behaviour by origin:
+                        // - toolbarX → abandon entire check-in
+                        // - driverPick → save what's been answered
+                        switch skipOrigin {
+                        case .toolbarX:    dismiss()
+                        case .driverPick:  Task { await saveCheckIn() }
+                        }
                     } label: {
                         Text("Skip anyway")
                             .font(.system(.subheadline, weight: .semibold))

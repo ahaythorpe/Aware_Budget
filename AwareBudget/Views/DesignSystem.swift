@@ -104,6 +104,14 @@ enum DS {
     static let goldBase = Color(hex: "C59430")
     static let goldText = Color(hex: "E8B84B")
 
+    /// Flat matte yellow for confirmation/Yes buttons. Distinct from
+    /// the metallic `nuggetGold` gradient (which is reserved for
+    /// primary CTAs) — this is the calmer "yes that's me" affirm
+    /// colour that doesn't compete with the shimmer treatment.
+    static let matteYellow = Color(hex: "F2D335")
+    /// Dark olive text colour readable on matteYellow background.
+    static let matteYellowForeground = Color(hex: "3A2E00")
+
     // MARK: - Nugget Gold gradient (metallic shiny)
 
     // Matches "Gold Gradient buttons.png" reference — symmetric bronze edges,
