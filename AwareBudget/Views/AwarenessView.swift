@@ -61,6 +61,10 @@ struct AwarenessView: View {
                 )
                 .padding(.horizontal, 18)
 
+                // ── MOST COMMON IN RESEARCH (industry benchmark) ──
+                industryTopBiasesCard
+                    .padding(.horizontal, 18)
+
                 // ── CATEGORIES (with mid-tab BFAS callouts every 2 sections) ──
                 VStack(alignment: .leading, spacing: 18) {
                     ForEach(Array(biasCategories.enumerated()), id: \.element.name) { index, category in
@@ -106,6 +110,77 @@ struct AwarenessView: View {
                     .reduce(into: [:]) { counts, tag in counts[tag, default: 0] += 1 }
             }
         }
+    }
+
+    // MARK: - Industry benchmark
+
+    /// Top biases consistently flagged as most prevalent across behavioural
+    /// finance literature (BFAS + Kahneman + Thaler + Samuelson/Zeckhauser).
+    /// Shown as a benchmark so the user can compare their own triggered
+    /// patterns against what shows up in the population at large.
+    private let industryTopBiases: [(name: String, emoji: String, why: String, cite: String)] = [
+        ("Loss Aversion", "⚖️", "Losses feel ~2× worse than equivalent gains — nearly universal.", "Kahneman & Tversky, 1979"),
+        ("Present Bias", "⏳", "Hyperbolic discounting — choosing now over future-you replicates across markets.", "Laibson, 1997"),
+        ("Mental Accounting", "💰", "Treating money differently based on its label — pervasive in household budgets.", "Thaler, 1985"),
+        ("Status Quo Bias", "🔁", "Defaults win — auto-renewals, subscriptions, inertia.", "Samuelson & Zeckhauser, 1988"),
+        ("Anchoring", "⚓", "Reference prices shape what feels 'fair' — present in every negotiation.", "Tversky & Kahneman, 1974"),
+    ]
+
+    private var industryTopBiasesCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "chart.bar.xaxis")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(DS.goldBase)
+                Text("MOST COMMON IN RESEARCH")
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.5)
+                    .foregroundStyle(DS.goldBase)
+                Spacer()
+            }
+
+            Text("What shows up in the population — not necessarily in you.")
+                .font(.system(.footnote, weight: .medium))
+                .foregroundStyle(DS.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(spacing: 10) {
+                ForEach(Array(industryTopBiases.enumerated()), id: \.element.name) { idx, item in
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("\(idx + 1)")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .foregroundStyle(DS.goldForeground)
+                            .frame(width: 22, height: 22)
+                            .background(DS.nuggetGold, in: Circle())
+                        Text(item.emoji).font(.system(size: 18))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(item.name)
+                                .font(.system(.subheadline, weight: .bold))
+                                .foregroundStyle(DS.textPrimary)
+                            Text(item.why)
+                                .font(.system(.caption, weight: .medium))
+                                .foregroundStyle(DS.textSecondary)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            HStack(spacing: 4) {
+                                Image(systemName: "book.closed.fill")
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(DS.goldBase)
+                                Text(item.cite)
+                                    .font(.system(.caption2, weight: .semibold))
+                                    .foregroundStyle(DS.goldBase)
+                            }
+                        }
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .premiumCardShadow()
     }
 
     // MARK: - Hero
