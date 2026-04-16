@@ -281,9 +281,9 @@ struct AwarenessView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 14))
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
         )
     }
@@ -411,10 +411,10 @@ struct BiasAwarenessCard: View {
         }
         .background(
             DS.cardBg.opacity(isTriggered ? 1.0 : 0.88),
-            in: RoundedRectangle(cornerRadius: 14)
+            in: RoundedRectangle(cornerRadius: DS.cardRadius)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(
                     isTriggered ? DS.goldBase.opacity(0.4) : DS.accent.opacity(0.15),
                     lineWidth: isTriggered ? 1 : 0.5

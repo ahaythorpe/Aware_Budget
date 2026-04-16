@@ -113,8 +113,8 @@ struct ResearchView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-        .shimmeringGoldBorder(cornerRadius: 14)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
     }
 
     // MARK: - BFAS Framework card
@@ -141,8 +141,8 @@ struct ResearchView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(14)
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-            .shimmeringGoldBorder(cornerRadius: 14)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
         }
     }
 
@@ -158,8 +158,8 @@ struct ResearchView: View {
                 bulletRow(4, "Your first BFAS assessment seeds the baseline — daily data overrides it over time.")
             }
             .padding(16)
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-            .shimmeringGoldBorder(cornerRadius: 14)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
         }
     }
 
