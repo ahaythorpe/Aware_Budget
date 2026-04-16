@@ -43,6 +43,7 @@ struct BiasReviewView: View {
     @State private var showAlgoExplainer: Bool = false
     @State private var otherReasonText: String = ""
     @State private var showOtherReasonField: Bool = false
+    @State private var showMoreReasons: Bool = false
     @FocusState private var otherReasonFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
@@ -300,16 +301,19 @@ struct BiasReviewView: View {
     /// pick one or cancel back — not just skip silently. Nudge motivation
     /// line at top to encourage thoughtful pick over trigger-happy escape.
     private func alternativePicker(_ entry: Entry) -> some View {
-        let candidates = allBiasPatterns
+        let allCandidates = allBiasPatterns
             .map(\.name)
             .filter { $0 != entry.suggestedBias }
+        let topContextual = topContextualBiases(for: entry, excluding: entry.suggestedBias, limit: 6)
+        let moreCandidates = allCandidates.filter { !topContextual.contains($0) }
+        let visible = showMoreReasons ? (topContextual + moreCandidates) : topContextual
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 10) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 18))
                     .foregroundStyle(DS.goldBase)
-                Text("Nudge: noticing the real reason matters more than clicking fast. Pick the pattern that actually fit.")
+                Text("Nudge: noticing the real reason matters more than clicking fast. Pick the one that actually fit.")
                     .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
                     .lineSpacing(3)
@@ -319,36 +323,30 @@ struct BiasReviewView: View {
             .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldSurfaceStroke, lineWidth: 0.5))
 
-            Text("PICK THE REAL PATTERN")
+            Text("WHAT WAS THE REAL REASON?")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
                 .foregroundStyle(DS.goldBase)
                 .padding(.top, 4)
 
             VStack(spacing: 8) {
-                ForEach(candidates, id: \.self) { alt in
+                ForEach(visible, id: \.self) { alt in
                     Button {
                         Task { await recordAlternative(entry: entry, newBias: alt) }
                     } label: {
-                        HStack(alignment: .top, spacing: 10) {
+                        HStack(spacing: 12) {
                             Text(biasEmoji(alt))
                                 .font(.system(size: 22))
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(alt)
-                                    .font(.system(.subheadline, weight: .bold))
-                                    .foregroundStyle(DS.textPrimary)
-                                Text(biasHint(alt))
-                                    .font(.system(.caption, weight: .medium))
-                                    .foregroundStyle(DS.textSecondary)
-                                    .lineSpacing(2)
-                                    .multilineTextAlignment(.leading)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
+                            Text(biasHint(alt))
+                                .font(.system(.subheadline, weight: .semibold))
+                                .foregroundStyle(DS.textPrimary)
+                                .lineSpacing(2)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundStyle(DS.textTertiary)
-                                .padding(.top, 4)
                         }
                         .padding(14)
                         .frame(maxWidth: .infinity)
@@ -357,6 +355,23 @@ struct BiasReviewView: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(isWriting)
+                }
+
+                if !moreCandidates.isEmpty {
+                    Button {
+                        withAnimation { showMoreReasons.toggle() }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: showMoreReasons ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 11, weight: .bold))
+                            Text(showMoreReasons ? "Fewer reasons" : "More reasons")
+                                .font(.system(.footnote, weight: .bold))
+                        }
+                        .foregroundStyle(DS.goldBase)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 
@@ -460,6 +475,25 @@ struct BiasReviewView: View {
         try? await service.updateBiasProgress(biasName: newBias, reflected: true)
         pickingAlternativeFor = nil
         withAnimation { index += 1 }
+    }
+
+    /// Rank biases by how plausible they are given this event's category +
+    /// planned status, so the picker shows the most likely reasons first
+    /// (~6) and hides the rest behind "More reasons". Same mapping table
+    /// as `suggestedBiasTag` — we pull the category-aware shortlist and
+    /// extend it with generic-plausibility fallbacks.
+    private func topContextualBiases(for entry: Entry, excluding suggested: String, limit: Int) -> [String] {
+        let status = entry.plannedStatus
+        let base: [String]
+        switch status {
+        case .impulse:
+            base = ["Present Bias", "Scarcity Heuristic", "Social Proof", "Ego Depletion", "Loss Aversion", "Framing Effect"]
+        case .surprise:
+            base = ["Availability Heuristic", "Planning Fallacy", "Ostrich Effect", "Loss Aversion", "Framing Effect", "Overconfidence Bias"]
+        case .planned:
+            base = ["Mental Accounting", "Anchoring", "Sunk Cost Fallacy", "Status Quo Bias", "Moral Licensing", "Denomination Effect"]
+        }
+        return Array(base.filter { $0 != suggested }.prefix(limit))
     }
 
     /// Plain-English one-liner for each of the 16 biases. Shown as the
