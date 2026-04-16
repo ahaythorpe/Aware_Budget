@@ -564,6 +564,105 @@ final class SupabaseService {
         }
     }
 
+    // MARK: - Decision lessons (Layer B + C: pre-spend hint + decision helper)
+
+    struct DecisionLesson: Identifiable, Codable, Hashable {
+        let id: UUID
+        var bias_name: String
+        var category: String?
+        var planned_status: String?
+        var user_note: String?
+        var counter_move: String
+        var times_surfaced: Int
+        var times_useful: Int
+        var times_dismissed: Int
+        var created_at: Date
+        var last_surfaced_at: Date?
+    }
+
+    /// Bank a "Yes, that's me" review outcome as a personal decision
+    /// lesson. Called from BiasReviewView once the user confirms a bias
+    /// AND optionally adds a free-text note. Counter-move is pre-filled
+    /// from BiasLessonsMock.howToCounter — user can edit or accept.
+    func saveDecisionLesson(
+        biasName: String,
+        category: String?,
+        plannedStatus: String?,
+        userNote: String?,
+        counterMove: String
+    ) async throws {
+        guard let uid = await currentUserId else { return }
+        struct NewRow: Encodable {
+            let user_id: String
+            let bias_name: String
+            let category: String?
+            let planned_status: String?
+            let user_note: String?
+            let counter_move: String
+        }
+        let row = NewRow(
+            user_id: uid.uuidString,
+            bias_name: biasName,
+            category: category,
+            planned_status: plannedStatus,
+            user_note: userNote,
+            counter_move: counterMove
+        )
+        try await client.from("decision_lessons")
+            .insert(row)
+            .execute()
+    }
+
+    /// Fetch lessons relevant to a (category, status) pair. Used by the
+    /// pre-spend hint banner (Layer B) and decision helper (Layer C).
+    /// Ranks by usefulness rate then recency. Pass nil status to widen.
+    func fetchLessons(category: String?, plannedStatus: String?) async throws -> [DecisionLesson] {
+        guard let uid = await currentUserId else { return [] }
+        var query = client.from("decision_lessons")
+            .select()
+            .eq("user_id", value: uid.uuidString)
+        if let category { query = query.eq("category", value: category) }
+        if let plannedStatus { query = query.eq("planned_status", value: plannedStatus) }
+        let rows: [DecisionLesson] = try await query
+            .order("created_at", ascending: false)
+            .limit(10)
+            .execute()
+            .value
+        return rows
+    }
+
+    /// Increment `times_surfaced` (called when the hint banner appears)
+    /// or `times_useful` / `times_dismissed` per user action. Drives the
+    /// usefulness-decay logic that demotes stale lessons.
+    enum LessonOutcome { case surfaced, useful, dismissed }
+
+    func recordLessonOutcome(id: UUID, outcome: LessonOutcome) async throws {
+        struct Existing: Decodable {
+            let times_surfaced: Int
+            let times_useful: Int
+            let times_dismissed: Int
+        }
+        let rows: [Existing] = try await client.from("decision_lessons")
+            .select("times_surfaced,times_useful,times_dismissed")
+            .eq("id", value: id.uuidString)
+            .limit(1)
+            .execute()
+            .value
+        guard let row = rows.first else { return }
+        var updates: [String: AnyJSON] = [
+            "last_surfaced_at": .string(ISO8601DateFormatter().string(from: Date()))
+        ]
+        switch outcome {
+        case .surfaced:  updates["times_surfaced"] = .integer(row.times_surfaced + 1)
+        case .useful:    updates["times_useful"] = .integer(row.times_useful + 1)
+        case .dismissed: updates["times_dismissed"] = .integer(row.times_dismissed + 1)
+        }
+        try await client.from("decision_lessons")
+            .update(updates)
+            .eq("id", value: id.uuidString)
+            .execute()
+    }
+
     // MARK: - Bias mapping stats (per-user algorithm self-audit)
 
     /// Increment the per-(category × status × bias) outcome counter for

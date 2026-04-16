@@ -31,6 +31,9 @@ struct MoneyEventView: View {
     @State private var lastReviewOutcome: BiasReviewView.ReviewOutcome? = nil
     @State private var saveRewardMessage: String? = nil
     @State private var rewardCoinBounce: Bool = false
+    /// Lessons banked from prior reviews for the currently-open category
+    /// sheet. Used to show the Layer B pre-spend hint banner.
+    @State private var lessonsForCurrentSheet: [SupabaseService.DecisionLesson] = []
 
     /// Rotating dry-wit chastise when user tries to skip review — see NudgeVoice.
     private var skipChastise: String { NudgeVoice.random(NudgeVoice.skipChastise) }
@@ -87,7 +90,11 @@ struct MoneyEventView: View {
         .sheet(item: $rangeSheetCategory) { cat in
             rangeSheet(for: cat)
                 .presentationDetents([.medium, .large])
-                .onDisappear { pendingRange = nil }
+                .task { await loadLessonsForCategory(cat.name) }
+                .onDisappear {
+                    pendingRange = nil
+                    lessonsForCurrentSheet = []
+                }
         }
         .sheet(isPresented: $showAlgoExplainer) {
             AlgorithmExplainerSheet()
@@ -551,6 +558,14 @@ struct MoneyEventView: View {
                 }
                 .padding(.top, 8)
 
+                // Layer B — pre-spend hint banner (Gollwitzer 1999
+                // implementation intentions). Surfaces the most
+                // relevant past lesson the user banked for this
+                // category. Tappable to mark useful or dismiss.
+                if !lessonsForCurrentSheet.isEmpty {
+                    preSpendHintBanner(lesson: lessonsForCurrentSheet[0])
+                }
+
                 if cat.name == "Other" {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("WHAT WAS IT?")
@@ -704,6 +719,86 @@ struct MoneyEventView: View {
         pendingRange = nil
         rangeSheetCategory = nil
         triggerSaveReward()
+    }
+
+    // MARK: - Layer B: pre-spend hint (Gollwitzer 1999)
+
+    /// Fetch lessons banked for this category. Pre-loads on sheet open
+    /// so the banner is ready when the user lands. Records `surfaced`
+    /// for the top lesson so usefulness rate gets a denominator.
+    @MainActor
+    private func loadLessonsForCategory(_ category: String) async {
+        do {
+            let lessons = try await SupabaseService.shared
+                .fetchLessons(category: category, plannedStatus: nil)
+            lessonsForCurrentSheet = lessons
+            if let top = lessons.first {
+                try? await SupabaseService.shared
+                    .recordLessonOutcome(id: top.id, outcome: .surfaced)
+            }
+        } catch {
+            lessonsForCurrentSheet = []
+        }
+    }
+
+    /// Compact banner above the range picker. "Last time you flagged
+    /// X — try this." One tap to mark useful, swipe to dismiss.
+    /// Implementation intention cue at the moment of decision.
+    private func preSpendHintBanner(lesson: SupabaseService.DecisionLesson) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image("nudge")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 32, height: 32)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("LAST TIME · \(lesson.bias_name.uppercased())")
+                    .font(.system(size: 9, weight: .heavy, design: .rounded))
+                    .tracking(1.0)
+                    .foregroundStyle(DS.goldBase)
+                Text(lesson.counter_move)
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 16) {
+                    Button {
+                        Task {
+                            try? await SupabaseService.shared
+                                .recordLessonOutcome(id: lesson.id, outcome: .useful)
+                            withAnimation { lessonsForCurrentSheet = [] }
+                        }
+                    } label: {
+                        Text("Helpful")
+                            .font(.system(.caption2, weight: .heavy))
+                            .foregroundStyle(DS.goldForeground)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(DS.nuggetGold, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    Button {
+                        Task {
+                            try? await SupabaseService.shared
+                                .recordLessonOutcome(id: lesson.id, outcome: .dismissed)
+                            withAnimation { lessonsForCurrentSheet = [] }
+                        }
+                    } label: {
+                        Text("Dismiss")
+                            .font(.system(.caption2, weight: .semibold))
+                            .foregroundStyle(DS.textSecondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 2)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldSurfaceStroke, lineWidth: 0.75)
+        )
     }
 
     /// Pop a small Nudge celebration after each successful save. Builds

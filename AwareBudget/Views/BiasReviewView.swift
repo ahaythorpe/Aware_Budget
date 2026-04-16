@@ -702,6 +702,10 @@ struct BiasReviewView: View {
             outcome.identifiedCount += 1
             // reflected: true -> adds +1 to times_reflected -> noCount+1 -> -1 to score
             try? await service.updateBiasProgress(biasName: entry.suggestedBias, reflected: true)
+            // Bank a decision lesson — auto-pre-filled with the
+            // bias's howToCounter. Future: prompt for a free-text
+            // note before saving (queue item: optional lesson note).
+            await bankDecisionLesson(for: entry)
         case .notSure:
             outcome.notSureCount += 1
             // no update — tag stays, score keeps the passive event tag
@@ -711,5 +715,24 @@ struct BiasReviewView: View {
         }
 
         withAnimation { index += 1 }
+    }
+
+    /// Bank a decision lesson when the user confirms a bias. Pre-fills
+    /// counter_move from BiasLessonsMock.howToCounter for that bias —
+    /// the user can edit later (queue item) or accept the suggested
+    /// countermove as-is. Fire-and-forget; failure is logged not shown
+    /// (the score update is the user-facing signal).
+    private func bankDecisionLesson(for entry: Entry) async {
+        let counterMove = BiasLessonsMock.seed
+            .first(where: { $0.biasName == entry.suggestedBias })?
+            .howToCounter
+            ?? "Notice the pattern. The act of seeing it is the first step."
+        try? await service.saveDecisionLesson(
+            biasName: entry.suggestedBias,
+            category: entry.category,
+            plannedStatus: entry.plannedStatus.rawValue,
+            userNote: nil,
+            counterMove: counterMove
+        )
     }
 }
