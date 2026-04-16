@@ -283,8 +283,8 @@ struct MoneyEventView: View {
             .goldButtonStyle()
         }
         .padding(14)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
-        .shimmeringGoldBorder(cornerRadius: 12)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
         .premiumCardShadow()
     }
 
@@ -433,9 +433,9 @@ struct MoneyEventView: View {
                 .foregroundStyle(DS.goldBase)
         }
         .padding(12)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
         )
     }
@@ -868,8 +868,8 @@ struct MoneyEventView: View {
             }
             .padding(14)
         }
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shimmeringGoldBorder(cornerRadius: 12)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous))
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
     }
 
     // MARK: - Save

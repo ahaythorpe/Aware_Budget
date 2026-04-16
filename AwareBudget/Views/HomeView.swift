@@ -107,8 +107,12 @@ struct HomeView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
-                    .background(DS.heroGradient)
-                    .cornerRadius(DS.cardRadius)
+                    .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius)
+                            .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+                    )
+                    .premiumCardShadow()
 
                     // Awareness circle (white card)
                     HStack(spacing: 12) {
@@ -164,8 +168,12 @@ struct HomeView: View {
                     .padding(.top, 2)
                 }
                 .padding(14)
-                .background(DS.heroGradient)
-                .cornerRadius(16)
+                .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+                )
+                .premiumCardShadow()
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
 

@@ -84,9 +84,9 @@ struct InsightFeedView: View {
                 .padding(.vertical, 14)
                 .padding(.horizontal, 22)
                 .frame(maxWidth: .infinity)
-                .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 14))
+                .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 14)
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
                         .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
                 )
                 .padding(.horizontal, DS.hPadding)
