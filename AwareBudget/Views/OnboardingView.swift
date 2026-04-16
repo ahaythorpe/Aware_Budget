@@ -49,7 +49,7 @@ struct OnboardingView: View {
                         Image(systemName: "book.closed.fill")
                             .font(.system(size: 10))
                             .foregroundStyle(DS.goldText)
-                        Text("Based on 40+ years of behavioural research")
+                        Text("Based on 50+ years of behavioural research")
                             .font(.system(.caption2, weight: .semibold))
                             .foregroundStyle(.white.opacity(0.85))
                     }

@@ -54,7 +54,7 @@ struct ResearchFootnote: View {
             icon: "chart.bar.doc.horizontal"
         )
         ResearchFootnote(text: "Powered by the BFAS framework · Pompian, 2012", style: .pill)
-        ResearchFootnote(text: "Based on 40+ years of behavioural research", style: .pill)
+        ResearchFootnote(text: "Based on 50+ years of behavioural research", style: .pill)
     }
     .padding(20)
     .background(DS.bg)
