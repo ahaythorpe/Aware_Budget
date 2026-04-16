@@ -221,24 +221,27 @@ enum NudgeEngine {
             )
         }
 
-        // Behaviour tag with pattern
+        // Behaviour tag with pattern. Every line ends with the
+        // research cue so the credibility weight matches BFAS framing —
+        // each bias claim cites a paper.
         if let tag = behaviourTag {
+            let cue = NudgeVoice.researchCueFor(bias: tag)
             if tagCount >= 5 {
                 return .withAction(
-                    "That's \(tag). \(tagCount)th time. Nudge sees a strong pattern.",
+                    "That's \(tag). \(tagCount)th time. Nudge sees a strong pattern.\n\n\(cue)",
                     actionLabel: "See your fix",
                     action: .openLearnBias(tag)
                 )
             }
             if tagCount >= 3 {
                 return .withAction(
-                    "That's \(tag). \(tagCount)\(ordinalSuffix(tagCount)) time this week.",
+                    "That's \(tag). \(tagCount)\(ordinalSuffix(tagCount)) time this week.\n\n\(cue)",
                     actionLabel: "Learn more",
                     action: .openLearnBias(tag)
                 )
             }
             return .text(
-                "That's \(tag). Nudge is keeping count."
+                "That's \(tag). Nudge is keeping count.\n\n\(cue)"
             )
         }
 
