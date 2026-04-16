@@ -374,6 +374,7 @@ final class HomeViewModel {
         }
 
         if isFirstOpen {
+            
             UserDefaults.standard.set(true, forKey: "hasSeenNudge")
         }
     }

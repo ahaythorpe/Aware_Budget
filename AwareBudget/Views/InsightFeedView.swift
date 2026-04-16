@@ -589,7 +589,7 @@ private struct AboutScoreSheet: View {
 
                     // IMPORTANT
                     sectionTitle("IMPORTANT")
-                    Text("This is not a clinical diagnosis. AwareBudget reflects your own patterns back to you \u{2014} nothing more. For financial advice speak to a qualified financial planner.")
+                    Text("This is not a clinical diagnosis. MoneyMind reflects your own patterns back to you \u{2014} nothing more. For financial advice speak to a qualified financial planner.")
                         .font(.subheadline)
                         .foregroundStyle(DS.textSecondary)
 

@@ -157,6 +157,27 @@ final class SupabaseService {
             .execute()
     }
 
+    /// Retag a money event's behaviour_tag. Used when user says "No,
+    /// different reason" in the bias review and picks an alternative bias —
+    /// the original tag was wrong, so we overwrite it.
+    func retagMoneyEvent(id: UUID, newTag: String) async throws {
+        struct Patch: Encodable { let behaviour_tag: String }
+        try await client.from("money_events")
+            .update(Patch(behaviour_tag: newTag))
+            .eq("id", value: id.uuidString)
+            .execute()
+    }
+
+    /// Store the user's free-text reason on a money event (when the alt-picker
+    /// "Other — doesn't fit" path is taken and they typed a reason).
+    func appendEventNote(id: UUID, note: String) async throws {
+        struct Patch: Encodable { let note: String }
+        try await client.from("money_events")
+            .update(Patch(note: note))
+            .eq("id", value: id.uuidString)
+            .execute()
+    }
+
     func fetchMoneyEvents(forMonth month: Date) async throws -> [MoneyEvent] {
         guard let uid = await currentUserId else { return [] }
         let cal = Calendar.current

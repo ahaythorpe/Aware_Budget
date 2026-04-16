@@ -8,7 +8,7 @@ import SwiftUI
 struct ShimmeringGoldBorder: ViewModifier {
     var cornerRadius: CGFloat = 20
     var duration: Double = 3.2
-    var lineWidth: CGFloat = 1
+    var lineWidth: CGFloat = 1.75
 
     func body(content: Content) -> some View {
         content.overlay(
@@ -36,7 +36,7 @@ struct ShimmeringGoldBorder: ViewModifier {
 
 extension View {
     /// Animated gold shimmer border — use on key white cards.
-    func shimmeringGoldBorder(cornerRadius: CGFloat = 20, lineWidth: CGFloat = 1) -> some View {
+    func shimmeringGoldBorder(cornerRadius: CGFloat = 20, lineWidth: CGFloat = 1.75) -> some View {
         modifier(ShimmeringGoldBorder(cornerRadius: cornerRadius, lineWidth: lineWidth))
     }
 }

@@ -37,7 +37,7 @@ struct OnboardingView: View {
                         .font(.largeTitle.weight(.bold))
                         .foregroundStyle(.white)
 
-                    Text("Most budgeting apps track your spending.\nAwareBudget tracks why you spend.")
+                    Text("Most budgeting apps track your spending.\nMoneyMind tracks why you spend.")
                         .font(.body)
                         .foregroundStyle(.white.opacity(0.8))
                         .multilineTextAlignment(.center)
@@ -265,7 +265,7 @@ struct OnboardingView: View {
             Button {
                 withAnimation { currentPage = 3 }
             } label: {
-                Text("That's why AwareBudget exists \u{2192}")
+                Text("That's why MoneyMind exists \u{2192}")
                     .font(.system(size: 15, weight: .bold))
                     .goldButtonStyle()
             }

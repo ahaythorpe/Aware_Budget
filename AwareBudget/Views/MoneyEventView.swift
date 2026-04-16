@@ -11,6 +11,7 @@ struct MoneyEventView: View {
 
     struct SessionEntry: Identifiable {
         let id = UUID()
+        let eventId: UUID?
         let emoji: String
         let category: String
         let amountLabel: String
@@ -22,6 +23,8 @@ struct MoneyEventView: View {
     @State private var isBatchSaving: Bool = false
     /// Tracks which range is currently picked in the popup (before status is picked)
     @State private var pendingRange: AmountRange? = nil
+    @State private var otherNote: String = ""
+    @FocusState private var otherNoteFocused: Bool
     @State private var showAlgoExplainer: Bool = false
     @State private var showBiasReview: Bool = false
     @State private var showSkipAlert: Bool = false
@@ -84,15 +87,7 @@ struct MoneyEventView: View {
         .fullScreenCover(isPresented: $showBiasReview) {
             NavigationStack {
                 BiasReviewView(
-                    entries: sessionLog.map { e in
-                        BiasReviewView.Entry(
-                            emoji: e.emoji,
-                            category: e.category,
-                            amountLabel: e.amountLabel,
-                            plannedStatus: e.plannedStatus,
-                            suggestedBias: e.behaviourTag ?? suggestedBiasTag(category: e.category, status: e.plannedStatus)
-                        )
-                    },
+                    entries: reviewEntriesToppedUp(target: 10),
                     onDone: { outcome in
                         lastReviewOutcome = outcome
                         showBiasReview = false
@@ -296,7 +291,7 @@ struct MoneyEventView: View {
         .background(
             RoundedRectangle(cornerRadius: DS.cardRadius)
                 .fill(DS.goldSurfaceBg)
-                .shimmerOverlay(duration: 5.5, intensity: 0.14)
+                .shimmerOverlay(duration: 5.5, intensity: 0.22)
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
@@ -334,6 +329,62 @@ struct MoneyEventView: View {
         let tags = sessionLog.compactMap(\.behaviourTag)
         let counts = Dictionary(grouping: tags, by: { $0 }).mapValues(\.count)
         return counts.sorted { $0.value > $1.value }.prefix(3).map { ($0.key, $0.value) }
+    }
+
+    /// Build the review entry list:
+    ///   1. One event-anchored card per logged money event (real context)
+    ///   2. Fill the rest up to `target` with pool questions from QuestionPool,
+    ///      prioritising biases not yet covered in the event cards so the user
+    ///      sees rotation across most of the 16 biases.
+    /// Fill entries have `eventId == nil` and `amountLabel == ""` — the
+    /// review view skips the event recap for those and shows the bias
+    /// reflection card only.
+    private func reviewEntriesToppedUp(target: Int) -> [BiasReviewView.Entry] {
+        // Event-anchored cards first.
+        let eventCards: [BiasReviewView.Entry] = sessionLog.map { e in
+            BiasReviewView.Entry(
+                eventId: e.eventId,
+                emoji: e.emoji,
+                category: e.category,
+                amountLabel: e.amountLabel,
+                plannedStatus: e.plannedStatus,
+                suggestedBias: e.behaviourTag ?? suggestedBiasTag(category: e.category, status: e.plannedStatus)
+            )
+        }
+        let needed = max(0, target - eventCards.count)
+        if needed == 0 { return eventCards }
+
+        // Rotation: prefer biases NOT already covered by event cards.
+        let covered = Set(eventCards.map(\.suggestedBias))
+        let emojiFor = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
+
+        var pool = QuestionPool.seed.shuffled()
+        pool.sort { a, b in
+            let aCovered = covered.contains(a.biasName)
+            let bCovered = covered.contains(b.biasName)
+            if aCovered == bCovered { return false }
+            return !aCovered // uncovered first
+        }
+
+        // Dedupe by bias for the first 12 ( = 16 - ~4 session ). Allow repeats after.
+        var seenBias: [String: Int] = [:]
+        var fills: [BiasReviewView.Entry] = []
+        for q in pool {
+            let c = seenBias[q.biasName, default: 0]
+            if fills.count < needed, c < 2 {
+                fills.append(BiasReviewView.Entry(
+                    eventId: nil,
+                    emoji: emojiFor[q.biasName] ?? "🧠",
+                    category: q.question,
+                    amountLabel: "",
+                    plannedStatus: .planned,
+                    suggestedBias: q.biasName
+                ))
+                seenBias[q.biasName] = c + 1
+            }
+            if fills.count == needed { break }
+        }
+        return eventCards + fills
     }
 
     private var sessionNudgeMessage: String {
@@ -407,6 +458,26 @@ struct MoneyEventView: View {
                         .foregroundStyle(DS.textPrimary)
                 }
                 .padding(.top, 8)
+
+                if cat.name == "Other" {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("WHAT WAS IT?")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.2)
+                            .foregroundStyle(DS.goldBase)
+                        TextField("e.g. vet bill, gift, parking fine", text: $otherNote)
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(DS.textPrimary)
+                            .focused($otherNoteFocused)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldBase.opacity(0.35), lineWidth: 0.8))
+                            .submitLabel(.done)
+                            .onSubmit { otherNoteFocused = false }
+                    }
+                    .padding(.horizontal, 20)
+                }
 
                 // Step 1 — pick range
                 VStack(alignment: .leading, spacing: 8) {
@@ -521,12 +592,15 @@ struct MoneyEventView: View {
         viewModel.selectedCategory = cat
         viewModel.selectedRange = range
         viewModel.plannedStatus = status
+        viewModel.customNote = cat.name == "Other" ? otherNote : nil
         viewModel.onPlannedStatusSet()
         await viewModel.save()
         let tag = viewModel.behaviourTag
+        let savedEventId = viewModel.lastSavedEventId
         viewModel.reset()
 
         sessionLog.append(SessionEntry(
+            eventId: savedEventId,
             emoji: cat.emoji,
             category: cat.name,
             amountLabel: range.label,

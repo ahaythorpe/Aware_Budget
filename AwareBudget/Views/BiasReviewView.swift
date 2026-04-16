@@ -14,6 +14,7 @@ struct BiasReviewView: View {
 
     struct Entry: Identifiable {
         let id = UUID()
+        let eventId: UUID?
         let emoji: String
         let category: String
         let amountLabel: String
@@ -39,6 +40,10 @@ struct BiasReviewView: View {
     /// When set, show the alternative-bias picker instead of the default buttons
     /// for this entry. User must pick a different bias before advancing.
     @State private var pickingAlternativeFor: Entry? = nil
+    @State private var showAlgoExplainer: Bool = false
+    @State private var otherReasonText: String = ""
+    @State private var showOtherReasonField: Bool = false
+    @FocusState private var otherReasonFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
     private let service = SupabaseService.shared
@@ -48,7 +53,9 @@ struct BiasReviewView: View {
             VStack(alignment: .leading, spacing: 20) {
                 header
                 if let entry = currentEntry {
-                    eventRecapCard(entry)
+                    if entry.eventId != nil {
+                        eventRecapCard(entry)
+                    }
                     biasExplanationCard(entry)
                     if let picking = pickingAlternativeFor, picking.id == entry.id {
                         alternativePicker(entry)
@@ -131,7 +138,7 @@ struct BiasReviewView: View {
         }
         .padding(16)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .shimmeringGoldBorder(cornerRadius: DS.cardRadius, lineWidth: 2.5)
         .premiumCardShadow()
     }
 
@@ -145,7 +152,7 @@ struct BiasReviewView: View {
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
-                Text("NUDGE SUGGESTS")
+                Text("TAGGED BY THE MODEL")
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .tracking(1.5)
                     .foregroundStyle(Color(hex: "8B6010"))
@@ -168,7 +175,15 @@ struct BiasReviewView: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if let question = biasQuestion(bias: entry.suggestedBias, category: entry.category, status: entry.plannedStatus) {
+            // Fill cards (no eventId) use the pool question stored in entry.category;
+            // event-anchored cards fall back to bias-specific contextual question.
+            if entry.eventId == nil {
+                Text(entry.category)
+                    .font(.system(.subheadline, weight: .bold))
+                    .foregroundStyle(.black)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if let question = biasQuestion(bias: entry.suggestedBias, category: entry.category, status: entry.plannedStatus) {
                 Text(question)
                     .font(.system(.subheadline, weight: .bold))
                     .foregroundStyle(.black)
@@ -204,7 +219,7 @@ struct BiasReviewView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.goldBase.opacity(0.5), lineWidth: 1)
+                .stroke(DS.goldBase.opacity(0.7), lineWidth: 2.5)
         )
         .premiumCardShadow()
     }
@@ -213,10 +228,24 @@ struct BiasReviewView: View {
 
     private func choiceButtons(_ entry: Entry) -> some View {
         VStack(spacing: 10) {
+            HStack {
+                Spacer()
+                Button { showAlgoExplainer = true } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "info.circle.fill")
+                            .font(.system(size: 13))
+                        Text("How scoring works")
+                            .font(.system(.caption, weight: .semibold))
+                    }
+                    .foregroundStyle(DS.goldBase)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 2)
+
             reviewButton(
                 icon: "checkmark.circle.fill",
                 label: "Yes, that's me",
-                detail: "Awareness — lowers this pattern's score",
                 tint: DS.positive
             ) {
                 Task { await record(entry: entry, choice: .identified) }
@@ -224,7 +253,6 @@ struct BiasReviewView: View {
             reviewButton(
                 icon: "questionmark.circle.fill",
                 label: "Not sure",
-                detail: "Blind spot — pattern stays flagged",
                 tint: DS.warning
             ) {
                 Task { await record(entry: entry, choice: .notSure) }
@@ -232,13 +260,38 @@ struct BiasReviewView: View {
             reviewButton(
                 icon: "arrow.triangle.2.circlepath.circle.fill",
                 label: "No, different reason",
-                detail: "Pick the actual pattern on the next screen",
                 tint: DS.textSecondary
             ) {
                 pickingAlternativeFor = entry
             }
         }
         .disabled(isWriting)
+        .sheet(isPresented: $showAlgoExplainer) {
+            AlgorithmExplainerSheet()
+        }
+    }
+
+    private func reviewButton(icon: String, label: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 22))
+                    .foregroundStyle(tint)
+                Text(label)
+                    .font(.system(.headline, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(DS.textTertiary)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .shimmeringGoldBorder(cornerRadius: DS.cardRadius, lineWidth: 2.5)
+            .premiumCardShadow()
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Alternative picker ("No, different reason" branch)
@@ -277,27 +330,93 @@ struct BiasReviewView: View {
                     Button {
                         Task { await recordAlternative(entry: entry, newBias: alt) }
                     } label: {
-                        HStack {
-                            Text(alt)
-                                .font(.system(.subheadline, weight: .semibold))
-                                .foregroundStyle(DS.textPrimary)
+                        HStack(alignment: .top, spacing: 10) {
+                            Text(biasEmoji(alt))
+                                .font(.system(size: 22))
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(alt)
+                                    .font(.system(.subheadline, weight: .bold))
+                                    .foregroundStyle(DS.textPrimary)
+                                Text(biasHint(alt))
+                                    .font(.system(.caption, weight: .medium))
+                                    .foregroundStyle(DS.textSecondary)
+                                    .lineSpacing(2)
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundStyle(DS.textTertiary)
+                                .padding(.top, 4)
                         }
                         .padding(14)
                         .frame(maxWidth: .infinity)
                         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.accent.opacity(0.15), lineWidth: 0.5))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldBase.opacity(0.25), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .disabled(isWriting)
                 }
             }
 
+            // "Other — doesn't fit any of these" expandable row
+            VStack(spacing: 8) {
+                Button {
+                    withAnimation { showOtherReasonField.toggle() }
+                    if showOtherReasonField { otherReasonFocused = true }
+                } label: {
+                    HStack(spacing: 10) {
+                        Text("✏️").font(.system(size: 22))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Other — doesn't fit any of these")
+                                .font(.system(.subheadline, weight: .bold))
+                                .foregroundStyle(DS.textPrimary)
+                            Text("Type what the real reason was")
+                                .font(.system(.caption, weight: .medium))
+                                .foregroundStyle(DS.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: showOtherReasonField ? "chevron.down" : "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(DS.textTertiary)
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity)
+                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldBase.opacity(0.25), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .disabled(isWriting)
+
+                if showOtherReasonField {
+                    VStack(spacing: 10) {
+                        TextField("e.g. I was bored and wanted a treat", text: $otherReasonText, axis: .vertical)
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(DS.textPrimary)
+                            .focused($otherReasonFocused)
+                            .lineLimit(2...4)
+                            .padding(14)
+                            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.goldBase.opacity(0.4), lineWidth: 1))
+
+                        Button {
+                            Task { await recordOtherReason(entry: entry, reason: otherReasonText) }
+                        } label: {
+                            Text("Save reason →")
+                        }
+                        .goldButtonStyle()
+                        .disabled(otherReasonText.trimmingCharacters(in: .whitespaces).isEmpty || isWriting)
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+            .padding(.top, 4)
+
             Button {
                 pickingAlternativeFor = nil
+                showOtherReasonField = false
+                otherReasonText = ""
             } label: {
                 Text("Back to suggestions")
                     .font(.system(.footnote, weight: .semibold))
@@ -309,40 +428,67 @@ struct BiasReviewView: View {
         }
     }
 
+    /// User typed their own reason — save it to the money event's note
+    /// field, don't retag the bias (we don't know what to tag it as).
+    /// Counts as "different" for outcome tracking.
+    @MainActor
+    private func recordOtherReason(entry: Entry, reason: String) async {
+        isWriting = true
+        defer { isWriting = false }
+        let trimmed = reason.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        outcome.differentCount += 1
+        if let eventId = entry.eventId {
+            try? await service.appendEventNote(id: eventId, note: trimmed)
+        }
+        pickingAlternativeFor = nil
+        showOtherReasonField = false
+        otherReasonText = ""
+        withAnimation { index += 1 }
+    }
+
     @MainActor
     private func recordAlternative(entry: Entry, newBias: String) async {
         isWriting = true
         defer { isWriting = false }
         outcome.differentCount += 1
+        // Retag the stored money event so history reflects the corrected bias.
+        if let eventId = entry.eventId {
+            try? await service.retagMoneyEvent(id: eventId, newTag: newBias)
+        }
         // Credit the user's chosen bias as reflected (awareness gained).
         try? await service.updateBiasProgress(biasName: newBias, reflected: true)
         pickingAlternativeFor = nil
         withAnimation { index += 1 }
     }
 
-    private func reviewButton(icon: String, label: String, detail: String, tint: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 22))
-                    .foregroundStyle(tint)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(label)
-                        .font(.system(.headline, weight: .bold))
-                        .foregroundStyle(DS.textPrimary)
-                    Text(detail)
-                        .font(.system(.caption, weight: .medium))
-                        .foregroundStyle(DS.textSecondary)
-                }
-                Spacer()
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-            .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
-            .premiumCardShadow()
+    /// Plain-English one-liner for each of the 16 biases. Shown as the
+    /// subtitle in the alternative-bias picker so the user can pick without
+    /// needing to know the theory.
+    private func biasHint(_ bias: String) -> String {
+        switch bias {
+        case "Social Proof":          return "Others were doing it, so I did too"
+        case "Availability Heuristic": return "A recent vivid memory pulled me in"
+        case "Status Quo Bias":        return "I defaulted — it's just what I do"
+        case "Anchoring":              return "A reference price made it feel fair"
+        case "Scarcity Heuristic":     return "Urgency ('only a few left') pushed me"
+        case "Ego Depletion":          return "I was tired, stressed, or decision-fatigued"
+        case "Mental Accounting":      return "This money felt 'different' — bonus, refund, fun money"
+        case "Moral Licensing":        return "I'd earned it — recent good behaviour justified this"
+        case "Present Bias":           return "Now mattered more than future me"
+        case "Planning Fallacy":       return "It cost way more than I thought it would"
+        case "Loss Aversion":          return "Fear of missing / losing drove it"
+        case "Sunk Cost Fallacy":      return "I'd already spent on this — kept going"
+        case "Overconfidence Bias":    return "I was sure — more sure than I should've been"
+        case "Framing Effect":         return "How it was sold ('save 30%') shaped my choice"
+        case "Denomination Effect":    return "Tap/card felt less real than cash"
+        case "Ostrich Effect":         return "I avoided info that might've stopped me"
+        default:                       return ""
         }
-        .buttonStyle(.plain)
+    }
+
+    private func biasEmoji(_ bias: String) -> String {
+        BiasLessonsMock.seed.first(where: { $0.biasName == bias })?.emoji ?? "🧠"
     }
 
     // MARK: - Per-bias question (context-aware)

@@ -180,7 +180,8 @@ struct MonthCalendarView: View {
         }
         .padding(14)
         .frame(width: 260)
-        .background(DS.cardBg)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
+        .shimmeringGoldBorder(cornerRadius: 14, lineWidth: 2.25)
     }
 
     private var monthGrid: [Date?] {

@@ -204,7 +204,7 @@ struct BFASAssessmentView: View {
             Spacer()
 
             Button { onFinish(answers) } label: {
-                Text("Enter AwareBudget →")
+                Text("Enter MoneyMind →")
             }
             .goldButtonStyle()
             .padding(.horizontal, 30)

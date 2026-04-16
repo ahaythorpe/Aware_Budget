@@ -245,6 +245,8 @@ final class MoneyEventViewModel {
     var didSave = false
     var nudgeResponse: NudgeMessage?
     var biasTimesSeen: Int = 0
+    var customNote: String?
+    var lastSavedEventId: UUID?
 
     private let service = SupabaseService.shared
 
@@ -306,8 +308,9 @@ final class MoneyEventViewModel {
         isSaving = true
         defer { isSaving = false }
 
+        let newEventId = UUID()
         let event = MoneyEvent(
-            id: UUID(),
+            id: newEventId,
             userId: uid,
             date: Date(),
             amount: range.midpoint,
@@ -315,12 +318,16 @@ final class MoneyEventViewModel {
             behaviourTag: behaviourTag,
             lifeEvent: nil,
             lifeArea: cat.name,
-            note: nil,
+            note: {
+                let trimmed = customNote?.trimmingCharacters(in: .whitespaces) ?? ""
+                return trimmed.isEmpty ? nil : trimmed
+            }(),
             createdAt: Date()
         )
 
         do {
             try await service.saveMoneyEvent(event)
+            lastSavedEventId = newEventId
 
             let tagCount: Int
             if let tag = behaviourTag {
