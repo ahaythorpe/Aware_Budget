@@ -5,6 +5,42 @@
 
 ---
 
+## 2026-04-16 — Home check-in works + morphs daily/weekly/monthly + Quick log reward + BiasRotation service (Claude Code)
+
+Two reframes shipped together:
+
+1. Home check-in card was a dead button (`action: {}`). Wired it to
+   present `CheckInView` and made the card morph based on what's due:
+   - Default → "Today's check-in · 5 quick swipes · 30 sec"
+   - Sunday + weekly not done → "Sunday review · Last week's patterns
+     — let's revisit"
+   - Monthly checkpoint due → "Monthly checkpoint · Re-checking the
+     biases you flagged"
+   Priority: monthly > weekly > daily. CheckInView already routes to
+   the right internal flow based on the trackers, so this is just the
+   surface layer that surfaces the right CTA copy + presents the sheet.
+
+2. Quick log saves now pop a small **Nudge reward overlay** at the top
+   of the screen for ~1.6s — bouncing Nudge coin + one-line reward
+   copy. Builds the "every log gets noticed" loop the user wants for
+   motivation. Every 5th log in a session gets a streak-flavoured line
+   ("🔥 N logs this session — outpacing 70% of users"); other saves
+   rotate through `NudgeVoice.postSave`.
+
+3. New `Services/BiasRotation.swift`. Single source of truth for the
+   (category × status) → bias shortlist that previously lived inside
+   BiasReviewView (private) AND was duplicated inside MoneyEventView.
+   Exposes `nextBias(category:status:)` (advances rotation index in
+   UserDefaults so the same purchase pattern probes a different bias
+   each time) and `peekNextBias(...)` for previews. **Not yet wired
+   in** — added so the next commit can drop in rotation at all 3 call
+   sites. Backlog: 14-day neglected-bias boost (needs async
+   bias_progress fetch).
+
+Build verified iPhone 17 Pro / iOS 26.2.
+
+---
+
 ## 2026-04-16 — Onboarding gates + tab refresh + unified review/popup styling (Claude Code)
 
 Session focused on UX consistency, removing the duplicate Quick log entry

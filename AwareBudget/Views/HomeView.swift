@@ -8,8 +8,40 @@ struct HomeView: View {
     @State private var showDevMenu = false
     @State private var previewOnboarding = false
     @State private var previewBFAS = false
+    @State private var showCheckIn = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
+
+    private enum CheckInMode {
+        case daily, weekly, monthly
+        var title: String {
+            switch self {
+            case .daily:   return "Today's check-in"
+            case .weekly:  return "Sunday review"
+            case .monthly: return "Monthly checkpoint"
+            }
+        }
+        var subtitle: String {
+            switch self {
+            case .daily:   return "5 quick swipes · 30 sec"
+            case .weekly:  return "Last week's patterns — let's revisit"
+            case .monthly: return "Re-checking the biases you flagged"
+            }
+        }
+        var cta: String {
+            switch self {
+            case .daily:   return "Start check-in →"
+            case .weekly:  return "Start weekly review →"
+            case .monthly: return "Start monthly checkpoint →"
+            }
+        }
+    }
+
+    private var checkInMode: CheckInMode {
+        if MonthlyReviewTracker.isDueNow() { return .monthly }
+        if WeeklyReviewTracker.isDueNow() { return .weekly }
+        return .daily
+    }
     let totalPatterns = 16
 
     var awarenessPercent: Double {
@@ -113,16 +145,23 @@ struct HomeView: View {
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
 
-                // ── CHECK IN ──
+                // ── CHECK IN (morphs daily / weekly / monthly) ──
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Today's check-in")
+                    Text(checkInMode.title)
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(.white)
                         .shadow(color: DS.deepGreen.opacity(0.7), radius: 3, x: 0, y: 1)
-                    Button(action: {}) {
-                        Text("Start check-in →")
+                    Text(checkInMode.subtitle)
+                        .font(.system(.caption, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .shadow(color: DS.deepGreen.opacity(0.5), radius: 2, x: 0, y: 1)
+                    Button {
+                        showCheckIn = true
+                    } label: {
+                        Text(checkInMode.cta)
                     }
                     .goldButtonStyle()
+                    .padding(.top, 2)
                 }
                 .padding(14)
                 .background(DS.heroGradient)
@@ -173,6 +212,13 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showDevMenu) {
             devMenu
+        }
+        .fullScreenCover(isPresented: $showCheckIn, onDismiss: {
+            Task { await viewModel.load() }
+        }) {
+            NavigationStack {
+                CheckInView(selectedTab: selectedTab)
+            }
         }
         .fullScreenCover(isPresented: $previewOnboarding) {
             OnboardingView(hasCompletedOnboarding: .constant(false))

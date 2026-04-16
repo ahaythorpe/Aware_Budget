@@ -29,6 +29,8 @@ struct MoneyEventView: View {
     @State private var showBiasReview: Bool = false
     @State private var showSkipAlert: Bool = false
     @State private var lastReviewOutcome: BiasReviewView.ReviewOutcome? = nil
+    @State private var saveRewardMessage: String? = nil
+    @State private var rewardCoinBounce: Bool = false
 
     /// Rotating dry-wit chastise when user tries to skip review — see NudgeVoice.
     private var skipChastise: String { NudgeVoice.random(NudgeVoice.skipChastise) }
@@ -65,6 +67,12 @@ struct MoneyEventView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 32)
                 }
+            }
+
+            if let reward = saveRewardMessage {
+                saveRewardOverlay(reward)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(2)
             }
         }
         .navigationBarHidden(true)
@@ -111,6 +119,40 @@ struct MoneyEventView: View {
                 }
                 .animation(.spring(response: 0.32, dampingFraction: 0.85), value: showSkipAlert)
             }
+        }
+    }
+
+    // MARK: - Save reward overlay (Nudge celebration after each Quick log)
+
+    /// Pops down from the top of the screen for ~1.6s with a Nudge coin
+    /// and a one-line reward. Reinforces the logging habit — the user
+    /// gets a small "Nudge noticed" beat instead of silent saves.
+    private func saveRewardOverlay(_ message: String) -> some View {
+        VStack {
+            HStack(spacing: 12) {
+                Image("nudge")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 36, height: 36)
+                    .scaleEffect(rewardCoinBounce ? 1.0 : 0.6)
+                    .rotationEffect(.degrees(rewardCoinBounce ? 0 : -18))
+                    .animation(.spring(response: 0.35, dampingFraction: 0.55), value: rewardCoinBounce)
+
+                Text(message)
+                    .font(.system(.footnote, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(DS.cardBg, in: Capsule())
+            .shimmeringGoldBorder(cornerRadius: 999, lineWidth: 2)
+            .premiumCardShadow()
+            .padding(.horizontal, 24)
+            .padding(.top, 60)
+
+            Spacer()
         }
     }
 
@@ -734,6 +776,33 @@ struct MoneyEventView: View {
 
         pendingRange = nil
         rangeSheetCategory = nil
+        triggerSaveReward()
+    }
+
+    /// Pop a small Nudge celebration after each successful save. Builds
+    /// motivation: every 5th log in a session gets the streak-flavoured
+    /// line, otherwise rotating postSave wit. Auto-dismisses 1.6s.
+    @MainActor
+    private func triggerSaveReward() {
+        let count = sessionLog.count
+        let message: String
+        if count > 0 && count % 5 == 0 {
+            message = "🔥 \(count) logs this session. You're outpacing 70% of users."
+        } else {
+            message = NudgeVoice.random(NudgeVoice.postSave)
+        }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {
+            saveRewardMessage = message
+            rewardCoinBounce.toggle()
+        }
+        Task {
+            try? await Task.sleep(nanoseconds: 1_700_000_000)
+            await MainActor.run {
+                withAnimation(.easeOut(duration: 0.35)) {
+                    saveRewardMessage = nil
+                }
+            }
+        }
     }
 
     // (Previous batch-status-at-end flow removed. Each Log popup now
