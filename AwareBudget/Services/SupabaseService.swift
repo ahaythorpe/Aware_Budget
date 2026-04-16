@@ -8,9 +8,50 @@ final class SupabaseService {
     let client: SupabaseClient
 
     private init() {
+        // Custom JSON decoder that tolerates BOTH ISO8601 timestamps
+        // (Postgres TIMESTAMPTZ columns like created_at) AND bare
+        // YYYY-MM-DD date strings (Postgres DATE columns like
+        // money_events.date and budget_months.month). Without this,
+        // every row containing a DATE column failed to decode silently
+        // → fetchMoneyEvents returned [] → Home showed "0 EVENTS"
+        // even though the rows were sitting in Supabase.
+        let decoder = JSONDecoder()
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let isoFormatterNoFrac = ISO8601DateFormatter()
+        isoFormatterNoFrac.formatOptions = [.withInternetDateTime]
+        let dateOnly = ISO8601DateFormatter()
+        dateOnly.formatOptions = [.withFullDate]
+
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let s = try container.decode(String.self)
+            if let d = isoFormatter.date(from: s) { return d }
+            if let d = isoFormatterNoFrac.date(from: s) { return d }
+            if let d = dateOnly.date(from: s) { return d }
+            // Postgres timestamp without TZ may also come as
+            // "2026-04-16 22:07:41.465+00" — try replacing space with T.
+            let normalized = s.replacingOccurrences(of: " ", with: "T")
+            if let d = isoFormatter.date(from: normalized) { return d }
+            if let d = isoFormatterNoFrac.date(from: normalized) { return d }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Date string '\(s)' didn't match any expected format"
+            )
+        }
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+
         client = SupabaseClient(
             supabaseURL: URL(string: "https://vdnnoezyogbgtiubamze.supabase.co")!,
-            supabaseKey: "sb_publishable_lwuCqoY6jpKRwQRJoqZYFQ_CiavSWwH"
+            supabaseKey: "sb_publishable_lwuCqoY6jpKRwQRJoqZYFQ_CiavSWwH",
+            options: SupabaseClientOptions(
+                db: SupabaseClientOptions.DatabaseOptions(
+                    encoder: encoder,
+                    decoder: decoder
+                )
+            )
         )
     }
 
