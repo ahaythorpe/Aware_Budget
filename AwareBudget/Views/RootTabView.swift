@@ -10,6 +10,7 @@ enum RootTab: Int, Hashable {
 
 struct RootTabView: View {
     @State private var selection: RootTab = .home
+    @Bindable private var router = NotificationRouter.shared
 
     var body: some View {
         TabView(selection: $selection) {
@@ -32,6 +33,13 @@ struct RootTabView: View {
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarBackground(DS.cardBg, for: .tabBar)
         .tint(DS.accent)
+        .onChange(of: router.pendingSlot) { _, slot in
+            guard slot != nil else { return }
+            // Notification tap → jump to Log tab. The slot stays set
+            // so MoneyEventView can read it and pre-highlight tiles.
+            // Cleared by MoneyEventView once acted on.
+            selection = .log
+        }
     }
 }
 

@@ -1,6 +1,28 @@
 import Foundation
 import UserNotifications
 
+/// Time-of-day slots used to deep-link a notification tap into the
+/// matching pre-filtered Quick log surface. Stored in the
+/// notification's `userInfo["slot"]` and read back by
+/// `NotificationRouter` when the user taps the alert.
+enum NotificationSlot: String {
+    case morning   // ~11am — coffee/breakfast
+    case lunch     // ~2pm — lunch
+    case evening   // ~7pm — dinner / after work
+    case chunky    // 9pm — one-off larger purchases
+
+    /// Categories to pre-highlight on the Log tab when this slot's
+    /// notification is tapped. Match cat.name against this list.
+    var highlightedCategories: [String] {
+        switch self {
+        case .morning: return ["Coffee", "Lunch"]   // morning includes early lunch
+        case .lunch:   return ["Lunch", "Coffee", "Eating out"]
+        case .evening: return ["Eating out", "Drinks", "Lunch"]
+        case .chunky:  return ["Shopping", "Travel", "Subscriptions", "Big purchase"]
+        }
+    }
+}
+
 enum NotificationService {
     private static let morningID  = "awarebudget.morning"
     private static let eveningID  = "awarebudget.evening.nudge"
@@ -147,9 +169,9 @@ enum NotificationService {
     /// Copy rotates per slot. Falls back to 11/14/19 defaults if
     /// history is thin. See LogTimeAnalytics.
     static func scheduleSmartNudges(hours: LogTimeAnalytics.SlotHours) {
-        scheduleSmart(id: smartMorningID, hour: hours.morning, bodies: morningBodies)
-        scheduleSmart(id: smartAfternoonID, hour: hours.afternoon, bodies: afternoonBodies)
-        scheduleSmart(id: smartEveningID, hour: hours.evening, bodies: eveningBodies)
+        scheduleSmart(id: smartMorningID, hour: hours.morning, bodies: morningBodies, slot: .morning)
+        scheduleSmart(id: smartAfternoonID, hour: hours.afternoon, bodies: afternoonBodies, slot: .lunch)
+        scheduleSmart(id: smartEveningID, hour: hours.evening, bodies: eveningBodies, slot: .evening)
         scheduleChunkyBuysReminder()
     }
 
@@ -167,6 +189,7 @@ enum NotificationService {
         content.title = "MoneyMind"
         content.body = body
         content.sound = .default
+        content.userInfo["slot"] = NotificationSlot.chunky.rawValue
 
         var components = DateComponents()
         components.hour = 21
@@ -177,7 +200,7 @@ enum NotificationService {
         center.add(request)
     }
 
-    private static func scheduleSmart(id: String, hour: Int, bodies: [String]) {
+    private static func scheduleSmart(id: String, hour: Int, bodies: [String], slot: NotificationSlot? = nil) {
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: [id])
 
@@ -186,6 +209,9 @@ enum NotificationService {
         content.title = "MoneyMind"
         content.body = body
         content.sound = .default
+        if let slot {
+            content.userInfo["slot"] = slot.rawValue
+        }
 
         var components = DateComponents()
         components.hour = hour

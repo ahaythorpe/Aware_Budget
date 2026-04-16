@@ -495,8 +495,17 @@ struct MoneyEventView: View {
 
     private func categoryTile(_ cat: SpendCategory) -> some View {
         let isSelected = viewModel.selectedCategory?.name == cat.name
+        // Highlighted = pre-suggested by the slot the user tapped from
+        // a notification (e.g. lunchtime nudge → Lunch + Coffee +
+        // Eating out get a stronger gold border to draw the eye).
+        let isHighlighted = NotificationRouter.shared.pendingSlot?
+            .highlightedCategories.contains(cat.name) ?? false
         return Button {
             rangeSheetCategory = cat
+            // User acted on the suggestion — clear the deep-link
+            // highlight so it doesn't stay loud through the rest of
+            // the session.
+            NotificationRouter.shared.pendingSlot = nil
         } label: {
             VStack(spacing: 6) {
                 Text(cat.emoji)
@@ -516,7 +525,12 @@ struct MoneyEventView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? DS.goldBase.opacity(0.5) : DS.accent.opacity(0.15), lineWidth: isSelected ? 1 : 0.5)
+                    .stroke(
+                        isSelected ? DS.goldBase.opacity(0.5)
+                            : isHighlighted ? DS.goldBase.opacity(0.7)
+                            : DS.accent.opacity(0.15),
+                        lineWidth: isSelected ? 1 : isHighlighted ? 2 : 0.5
+                    )
             )
         }
         .buttonStyle(.plain)

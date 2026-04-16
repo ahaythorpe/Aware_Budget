@@ -48,6 +48,7 @@ struct AwareBudgetApp: App {
                 #if DEBUG
                 await SupabaseService.shared.ensureDebugSession()
                 #endif
+                NotificationRouter.install()
                 checkingSession = false
             }
         }
