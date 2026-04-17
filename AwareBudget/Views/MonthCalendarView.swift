@@ -40,9 +40,10 @@ struct MonthCalendarView: View {
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
         .premiumCardShadow()
-        .popover(item: $selectedDay) { day in
+        .sheet(item: $selectedDay) { day in
             dayPopover(day.date)
-                .presentationCompactAdaptation(.popover)
+                .presentationDetents([.height(200)])
+                .presentationDragIndicator(.visible)
         }
     }
 
@@ -153,13 +154,9 @@ struct MonthCalendarView: View {
                     .foregroundStyle(DS.textTertiary)
             }
         }
-        .padding(12)
-        .frame(width: 220)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(DS.accent.opacity(0.2), lineWidth: 0.5)
-        )
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(DS.bg)
     }
 
     private var monthGrid: [Date?] {
