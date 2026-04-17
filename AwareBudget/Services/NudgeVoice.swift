@@ -40,11 +40,11 @@ enum NudgeVoice {
         "Every log is a vote for a less surprised future.",
         "Your unexamined habits run a tab.",
         "Small noticed truth beats big forgotten resolution.",
-        "The turtle was onto something.",
+        "Slow and steady builds wealth. Fast and blind burns it.",
         "Slow is smooth. Smooth is rich.",
-        "Rushing is how we miss it.",
+        "Rushing is how we miss the pattern.",
         "Awareness walks. Anxiety runs.",
-        "The snail arrives fully noticed.",
+        "Steady beats clever. Every time.",
         "Small stacks louder than big.",
         "You don't need to run. Just keep walking.",
         "Kahneman called it 'System 1'. You call it Tuesday.",
@@ -117,7 +117,7 @@ enum NudgeVoice {
         case "Sunk Cost Fallacy":
             return "Slow is smooth. Smooth is rich."
         case "Overconfidence Bias":
-            return "The turtle was onto something."
+            return "Slow and steady builds wealth. Fast and blind burns it."
         case "Framing Effect":
             return "Behavioural finance in practice."
         case "Denomination Effect":

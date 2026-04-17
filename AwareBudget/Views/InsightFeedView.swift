@@ -128,7 +128,9 @@ struct InsightFeedView: View {
             balanceSnapshots = (try? await service.fetchBalanceSnapshots(monthsBack: 6)) ?? []
             awarenessTimestamps = (try? await service.fetchLessonTimestamps(monthsBack: 6)) ?? []
             monthlyIncome = (try? await service.fetchMonthlyIncome()) ?? 0
+            print("[Insights] loaded: \(allEvents.count) events, income=\(monthlyIncome), snapshots=\(balanceSnapshots.count)")
         } catch {
+            print("[Insights] load error: \(error)")
             // swallow for now
         }
     }
