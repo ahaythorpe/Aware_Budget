@@ -360,7 +360,6 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showFinanceEditor) {
             financeEditorSheet
-                .presentationDetents([.medium])
         }
     }
 
@@ -377,60 +376,57 @@ struct HomeView: View {
     }
 
     private var financeEditorSheet: some View {
-        ZStack {
-            DS.heroGradient
-                .shimmerOverlay(duration: 4.5, intensity: 0.22)
-                .ignoresSafeArea()
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Your finances")
+                        .font(.system(size: 28, weight: .black))
+                        .foregroundStyle(.white)
+                        .heroTextLegibility()
 
-            VStack(spacing: 20) {
-                HStack {
-                    Spacer()
-                    Button { showFinanceEditor = false } label: {
-                        Image(systemName: "xmark")
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(.white)
-                            .padding(10)
-                            .background(.white.opacity(0.15), in: Circle())
+                    NudgeSaysCard(
+                        message: "All voluntary. No bank connection. Just you and your numbers.",
+                        citation: "Privacy Act 1988 only",
+                        surface: .dark
+                    )
+
+                    VStack(spacing: 14) {
+                        financeField(label: "Monthly take-home", text: $financeIncome, emoji: "💰")
+                        financeField(label: "Savings balance", text: $financeSavings, emoji: "🏦")
+                        financeField(label: "Investment balance", text: $financeInvestment, emoji: "📈")
                     }
-                }
-                .padding(.top, 12)
 
-                Text("Your finances")
-                    .font(.system(size: 28, weight: .black))
-                    .foregroundStyle(.white)
-                    .heroTextLegibility()
-
-                NudgeSaysCard(
-                    message: "All voluntary. No bank connection. Just you and your numbers.",
-                    citation: "Privacy Act 1988 only",
-                    surface: .dark
-                )
-
-                VStack(spacing: 14) {
-                    financeField(label: "Monthly take-home", text: $financeIncome, emoji: "💰")
-                    financeField(label: "Savings balance", text: $financeSavings, emoji: "🏦")
-                    financeField(label: "Investment balance", text: $financeInvestment, emoji: "📈")
-                }
-
-                Spacer()
-
-                Button {
-                    Task {
-                        let inc = Double(financeIncome) ?? 0
-                        let sav = Double(financeSavings) ?? 0
-                        let inv = Double(financeInvestment) ?? 0
-                        try? await SupabaseService.shared.saveMonthlyIncome(inc)
-                        try? await SupabaseService.shared.saveBalanceSnapshot(savings: sav, investment: inv)
-                        await viewModel.load()
-                        showFinanceEditor = false
+                    Button {
+                        Task {
+                            let inc = Double(financeIncome) ?? 0
+                            let sav = Double(financeSavings) ?? 0
+                            let inv = Double(financeInvestment) ?? 0
+                            try? await SupabaseService.shared.saveMonthlyIncome(inc)
+                            try? await SupabaseService.shared.saveBalanceSnapshot(savings: sav, investment: inv)
+                            await viewModel.load()
+                            showFinanceEditor = false
+                        }
+                    } label: {
+                        Text("Save →")
                     }
-                } label: {
-                    Text("Save →")
+                    .goldButtonStyle()
+                    .padding(.top, 8)
                 }
-                .goldButtonStyle()
-                .padding(.bottom, 24)
+                .padding(20)
             }
-            .padding(.horizontal, 20)
+            .background(
+                DS.heroGradient
+                    .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                    .ignoresSafeArea()
+            )
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showFinanceEditor = false }
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(.white)
+                }
+            }
         }
     }
 
