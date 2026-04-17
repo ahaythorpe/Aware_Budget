@@ -223,8 +223,8 @@ struct InsightFeedView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Income vs spending")
 
-            if monthlyIncome <= 0 && allEvents.isEmpty {
-                emptyCard(message: "Set your monthly income in Settings and log events to see this breakdown.")
+            if monthlyIncome <= 0 {
+                emptyCard(message: "Enter your monthly income on the Home screen (Your Finances card) to unlock this breakdown.")
             } else {
                 let totalExpenses = allEvents
                     .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) }
@@ -995,7 +995,7 @@ struct InsightFeedView: View {
                 emptyCard(message: "Log events to see your planned vs unplanned split.")
             } else {
                 let slices: [DonutSlice] = [
-                    DonutSlice(label: "Planned", value: planned, color: DS.primary),
+                    DonutSlice(label: "Planned", value: planned, color: DS.goldBase),
                     DonutSlice(label: "Unplanned", value: max(unplanned, 0.01), color: DS.matteYellow),
                 ]
 
@@ -1012,7 +1012,7 @@ struct InsightFeedView: View {
                     .frame(width: 120, height: 120)
 
                     VStack(alignment: .leading, spacing: 10) {
-                        donutLegend(color: DS.primary, label: "Planned", pct: plannedPct)
+                        donutLegend(color: DS.goldBase, label: "Planned", pct: plannedPct)
                         donutLegend(color: DS.matteYellow, label: "Unplanned", pct: unplannedPct)
                     }
 
