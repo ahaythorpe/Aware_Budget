@@ -121,18 +121,13 @@ struct InsightFeedView: View {
     private func load() async {
         isLoading = true
         defer { isLoading = false }
-        do {
-            weekEvents = try await service.fetchMoneyEventsThisWeek()
-            allEvents = try await service.fetchAllMoneyEvents()
-            recentCheckIns = try await service.fetchRecentCheckIns(limit: 60)
-            balanceSnapshots = (try? await service.fetchBalanceSnapshots(monthsBack: 6)) ?? []
-            awarenessTimestamps = (try? await service.fetchLessonTimestamps(monthsBack: 6)) ?? []
-            monthlyIncome = (try? await service.fetchMonthlyIncome()) ?? 0
-            print("[Insights] loaded: \(allEvents.count) events, income=\(monthlyIncome), snapshots=\(balanceSnapshots.count)")
-        } catch {
-            print("[Insights] load error: \(error)")
-            // swallow for now
-        }
+        weekEvents = (try? await service.fetchMoneyEventsThisWeek()) ?? []
+        allEvents = (try? await service.fetchAllMoneyEvents()) ?? []
+        recentCheckIns = (try? await service.fetchRecentCheckIns(limit: 60)) ?? []
+        balanceSnapshots = (try? await service.fetchBalanceSnapshots(monthsBack: 6)) ?? []
+        awarenessTimestamps = (try? await service.fetchLessonTimestamps(monthsBack: 6)) ?? []
+        monthlyIncome = (try? await service.fetchMonthlyIncome()) ?? 0
+        print("[Insights] loaded: \(allEvents.count) events, income=\(monthlyIncome), snapshots=\(balanceSnapshots.count)")
     }
 
     // MARK: - 1. Weekly hero card (gradient)
