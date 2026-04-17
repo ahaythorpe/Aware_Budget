@@ -398,9 +398,20 @@ struct HomeView: View {
                     )
 
                     VStack(spacing: 14) {
-                        financeField(label: "Monthly take-home", text: $financeIncome, emoji: "💰")
+                        financeField(label: "Monthly take-home (required)", text: $financeIncome, emoji: "💰")
                         financeField(label: "Savings balance", text: $financeSavings, emoji: "🏦")
                         financeField(label: "Investment balance", text: $financeInvestment, emoji: "📈")
+                    }
+
+                    if financeIncome.isEmpty || Double(financeIncome) == 0 {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(DS.warning)
+                            Text("Enter your monthly take-home to unlock spending insights")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.white.opacity(0.8))
+                        }
                     }
 
                     Button {
