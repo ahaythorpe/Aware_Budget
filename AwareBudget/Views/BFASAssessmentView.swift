@@ -134,7 +134,10 @@ struct BFASAssessmentView: View {
         .frame(maxWidth: .infinity)
         .padding(28)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase, lineWidth: 2.5)
+        )
     }
 
     private func yesNoButtons(for q: BFASQuestion) -> some View {
@@ -152,18 +155,28 @@ struct BFASAssessmentView: View {
                 Text(label)
             }
             .font(.headline.weight(.bold))
-            .foregroundStyle(isYes ? DS.matteYellowForeground : .white)
+            .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background(
-                Capsule().fill(isYes ? DS.matteYellow : DS.danger)
+                Capsule().fill(isYes ? DS.goldBase : DS.danger)
             )
         }
         .buttonStyle(.plain)
     }
 
     private var citationFooter: some View {
-        ResearchFootnote(text: "From BFAS · Pompian, 2012")
+        HStack(spacing: 6) {
+            Image(systemName: "book.closed.fill")
+                .font(.system(size: 10))
+                .foregroundStyle(DS.goldText)
+            Text("BFAS · Pompian, 2012")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.7))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(.white.opacity(0.08), in: Capsule())
     }
 
     private func record(_ q: BFASQuestion, yes: Bool) {
@@ -188,11 +201,12 @@ struct BFASAssessmentView: View {
             VStack(spacing: 8) {
                 Text("Your baseline is set")
                     .font(.system(.title2, weight: .bold))
-                    .foregroundStyle(DS.textPrimary)
+                    .foregroundStyle(.white)
+                    .heroTextLegibility()
 
                 Text("Nudge will watch for these patterns in your decisions from here on.")
                     .font(.system(.subheadline, weight: .medium))
-                    .foregroundStyle(DS.textSecondary)
+                    .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
