@@ -35,6 +35,9 @@ struct InsightFeedView: View {
                     VStack(spacing: DS.sectionGap) {
                         weeklyHeroCard
                         financialOverviewSection
+                        highestExpenseCard
+                        financialTrendChart
+                        biasTrendChart
                         netWorthTrendSection
                         categoryTrendSection
                         biasFrequencySection
@@ -327,6 +330,277 @@ struct InsightFeedView: View {
                 surface: .paleGreen
             )
         }
+    }
+
+    // MARK: - Highest Expense card
+
+    private var highestExpenseCard: some View {
+        let monthEvents = allEvents.filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) }
+        let highest = monthEvents.max(by: { $0.amount < $1.amount })
+        let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
+        let counterLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.howToCounter) })
+
+        return Group {
+            if let top = highest {
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(title: "Biggest spend this month")
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(emojiLookup[top.behaviourTag ?? ""] ?? "💸")
+                                .font(.system(size: 28))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("$\(Int(top.amount))")
+                                    .font(.system(size: 24, weight: .black, design: .serif))
+                                    .foregroundStyle(DS.goldBase)
+                                Text(top.lifeArea ?? "Uncategorised")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(DS.textPrimary)
+                            }
+                            Spacer()
+                            Text(top.plannedStatus.rawValue.capitalized)
+                                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(top.plannedStatus == .planned ? DS.accent : DS.warning, in: Capsule())
+                        }
+
+                        if let bias = top.behaviourTag {
+                            Text("Driven by \(bias)")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(DS.textSecondary)
+                            if let counter = counterLookup[bias] {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "lightbulb.fill")
+                                        .font(.caption2)
+                                        .foregroundStyle(DS.goldBase)
+                                    Text(counter.split(separator: ".").first.map { String($0) + "." } ?? counter)
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(DS.accent)
+                                        .lineLimit(2)
+                                }
+                            }
+                        }
+                    }
+                    .padding(14)
+                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius)
+                            .stroke(DS.goldBase, lineWidth: 2)
+                    )
+                    .premiumCardShadow()
+                }
+            }
+        }
+    }
+
+    // MARK: - Financial Trend chart (income vs expenses vs savings over months)
+
+    private struct MonthlyFinance: Identifiable {
+        let id = UUID()
+        let month: String
+        let date: Date
+        let income: Double
+        let expenses: Double
+        let savings: Double
+    }
+
+    private var financialTrendChart: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Monthly trend")
+
+            let data = computeMonthlyFinance()
+            if data.isEmpty {
+                emptyCard(message: "Log events over multiple months to see your financial trend.")
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    Chart {
+                        ForEach(data) { item in
+                            BarMark(
+                                x: .value("Month", item.month),
+                                y: .value("Amount", item.income),
+                                width: .ratio(0.25)
+                            )
+                            .foregroundStyle(DS.goldBase)
+                            .position(by: .value("Type", "Income"))
+
+                            BarMark(
+                                x: .value("Month", item.month),
+                                y: .value("Amount", item.expenses),
+                                width: .ratio(0.25)
+                            )
+                            .foregroundStyle(DS.matteYellow)
+                            .position(by: .value("Type", "Expenses"))
+
+                            BarMark(
+                                x: .value("Month", item.month),
+                                y: .value("Amount", item.savings),
+                                width: .ratio(0.25)
+                            )
+                            .foregroundStyle(DS.accent)
+                            .position(by: .value("Type", "Savings"))
+                        }
+                    }
+                    .frame(height: 180)
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { value in
+                            AxisValueLabel {
+                                if let v = value.as(Double.self) {
+                                    Text(shortAmount(v)).font(.caption2).foregroundStyle(DS.textTertiary)
+                                }
+                            }
+                        }
+                    }
+
+                    HStack(spacing: 14) {
+                        legendDot(color: DS.goldBase, label: "Income")
+                        legendDot(color: DS.matteYellow, label: "Expenses")
+                        legendDot(color: DS.accent, label: "Savings")
+                    }
+                }
+                .padding(16)
+                .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.goldBase, lineWidth: 2)
+                )
+                .premiumCardShadow()
+            }
+        }
+    }
+
+    private func legendDot(color: Color, label: String) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: 8, height: 8)
+            Text(label).font(.caption2.weight(.semibold)).foregroundStyle(DS.textSecondary)
+        }
+    }
+
+    private func computeMonthlyFinance() -> [MonthlyFinance] {
+        let cal = Calendar.current
+        let now = Date()
+        let f = DateFormatter()
+        f.dateFormat = "MMM"
+
+        var results: [MonthlyFinance] = []
+        for monthsAgo in (0..<6).reversed() {
+            guard let monthDate = cal.date(byAdding: .month, value: -monthsAgo, to: now) else { continue }
+            let monthEvents = allEvents.filter { cal.isDate($0.date, equalTo: monthDate, toGranularity: .month) }
+            let expenses = monthEvents.reduce(0.0) { $0 + $1.amount }
+            guard expenses > 0 || monthsAgo == 0 else { continue }
+            let savings = max(monthlyIncome - expenses, 0)
+            results.append(MonthlyFinance(
+                month: f.string(from: monthDate),
+                date: monthDate,
+                income: monthlyIncome,
+                expenses: expenses,
+                savings: savings
+            ))
+        }
+        return results
+    }
+
+    // MARK: - Bias Trend chart (spending per bias over weeks)
+
+    private struct BiasWeekPoint: Identifiable {
+        let id = UUID()
+        let bias: String
+        let weekLabel: String
+        let amount: Double
+    }
+
+    private var biasTrendChart: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Bias spending trend")
+
+            let data = computeBiasTrend()
+            if data.isEmpty {
+                emptyCard(message: "Log events across multiple weeks to see how bias-tagged spending changes.")
+            } else {
+                let biases = Array(Set(data.map(\.bias))).sorted()
+                let palette: [Color] = [DS.goldBase, DS.matteYellow, DS.accent, DS.deepGreen, DS.lightGreen]
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Chart(data) { point in
+                        LineMark(
+                            x: .value("Week", point.weekLabel),
+                            y: .value("Amount", point.amount),
+                            series: .value("Bias", point.bias)
+                        )
+                        .foregroundStyle(by: .value("Bias", point.bias))
+                        .interpolationMethod(.catmullRom)
+                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+
+                        PointMark(
+                            x: .value("Week", point.weekLabel),
+                            y: .value("Amount", point.amount)
+                        )
+                        .foregroundStyle(by: .value("Bias", point.bias))
+                        .symbolSize(30)
+                    }
+                    .chartForegroundStyleScale(domain: biases, range: Array(palette.prefix(biases.count)))
+                    .frame(height: 180)
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { value in
+                            AxisValueLabel {
+                                if let v = value.as(Double.self) {
+                                    Text(shortAmount(v)).font(.caption2).foregroundStyle(DS.textTertiary)
+                                }
+                            }
+                        }
+                    }
+                    .chartLegend(.visible)
+
+                    NudgeSaysCard(
+                        message: "Watch your bias lines trend down as awareness kicks in. Falling lines = awareness working.",
+                        citation: "Debiasing · Fischhoff 1982 · Larrick 2004",
+                        surface: .paleGreen
+                    )
+                }
+                .padding(16)
+                .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.goldBase, lineWidth: 2)
+                )
+                .premiumCardShadow()
+            }
+        }
+    }
+
+    private func computeBiasTrend() -> [BiasWeekPoint] {
+        let cal = Calendar.current
+        let now = Date()
+        let tagged = allEvents.filter { $0.behaviourTag != nil }
+        guard !tagged.isEmpty else { return [] }
+
+        let topBiases = Dictionary(grouping: tagged, by: { $0.behaviourTag! })
+            .mapValues { $0.reduce(0.0) { $0 + $1.amount } }
+            .sorted { $0.value > $1.value }
+            .prefix(5)
+            .map(\.key)
+        let allowed = Set(topBiases)
+
+        var results: [BiasWeekPoint] = []
+        for weeksAgo in (0..<6).reversed() {
+            guard let weekStart = cal.date(byAdding: .weekOfYear, value: -weeksAgo, to: now),
+                  let monday = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: weekStart)),
+                  let sunday = cal.date(byAdding: .day, value: 7, to: monday) else { continue }
+
+            let weekEvents = tagged.filter { $0.date >= monday && $0.date < sunday && allowed.contains($0.behaviourTag!) }
+            let label = weeksAgo == 0 ? "This wk" : "\(weeksAgo)w ago"
+
+            let biasAmounts = Dictionary(grouping: weekEvents, by: { $0.behaviourTag! })
+                .mapValues { $0.reduce(0.0) { $0 + $1.amount } }
+
+            for bias in topBiases {
+                if let amount = biasAmounts[bias], amount > 0 {
+                    results.append(BiasWeekPoint(bias: bias, weekLabel: label, amount: amount))
+                }
+            }
+        }
+        return results
     }
 
     private var incomeVsSpendingSection: some View {
