@@ -40,10 +40,9 @@ struct MonthCalendarView: View {
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
         .premiumCardShadow()
-        .sheet(item: $selectedDay) { day in
+        .popover(item: $selectedDay) { day in
             dayPopover(day.date)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+                .presentationCompactAdaptation(.popover)
         }
     }
 
@@ -114,47 +113,73 @@ struct MonthCalendarView: View {
             .mapValues(\.count)
         let topTags = tagCounts.sorted { $0.value > $1.value }.prefix(3)
         let totalAmount = events.reduce(0.0) { $0 + $1.amount }
-        let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
+        let lessonLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0) })
 
-        return VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(f.string(from: date))
-                    .font(.system(.headline, weight: .bold))
-                    .foregroundStyle(DS.textPrimary)
-                Spacer()
-                Text("\(events.count) \(events.count == 1 ? "event" : "events") · $\(Int(totalAmount))")
-                    .font(.system(.caption, weight: .semibold))
-                    .foregroundStyle(DS.goldBase)
-            }
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(f.string(from: date))
+                        .font(.system(.subheadline, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Spacer()
+                    Text("$\(Int(totalAmount))")
+                        .font(.system(.subheadline, weight: .bold))
+                        .foregroundStyle(DS.goldBase)
+                }
 
-            if !topTags.isEmpty {
-                VStack(spacing: 10) {
-                    ForEach(Array(topTags.enumerated()), id: \.element.key) { _, pair in
-                        HStack(spacing: 10) {
-                            Text(emojiLookup[pair.key] ?? "🧠")
-                                .font(.system(size: 18))
-                            Text(pair.key)
-                                .font(.system(.subheadline, weight: .semibold))
-                                .foregroundStyle(DS.textPrimary)
-                            Spacer()
-                            Text("×\(pair.value)")
-                                .font(.system(.caption, weight: .bold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(DS.accent, in: Capsule())
+                if !topTags.isEmpty {
+                    ForEach(Array(topTags.enumerated()), id: \.element.key) { idx, pair in
+                        if idx > 0 { Divider() }
+                        let lesson = lessonLookup[pair.key]
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 6) {
+                                Text(lesson?.emoji ?? "🧠")
+                                    .font(.system(size: 16))
+                                Text(pair.key)
+                                    .font(.system(.footnote, weight: .bold))
+                                    .foregroundStyle(DS.textPrimary)
+                                Spacer()
+                                Text("×\(pair.value)")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(DS.accent, in: Capsule())
+                            }
+                            if let desc = lesson?.shortDescription {
+                                Text(desc)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(DS.textSecondary)
+                                    .lineLimit(2)
+                            }
+                            if let counter = lesson?.howToCounter {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "lightbulb.fill")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(DS.goldBase)
+                                    Text(popoverFirstSentence(counter))
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(DS.accent)
+                                        .lineLimit(2)
+                                }
+                            }
                         }
                     }
+                } else {
+                    Text("No patterns tagged")
+                        .font(.system(.caption, weight: .medium))
+                        .foregroundStyle(DS.textTertiary)
                 }
-            } else {
-                Text("No patterns tagged yet")
-                    .font(.system(.subheadline, weight: .medium))
-                    .foregroundStyle(DS.textTertiary)
             }
+            .padding(14)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DS.bg)
+        .frame(width: 280, height: min(CGFloat(topTags.count) * 90 + 50, 320))
+        .background(DS.cardBg)
+    }
+
+    private func popoverFirstSentence(_ text: String) -> String {
+        text.split(separator: ".", maxSplits: 1).first
+            .map { String($0).trimmingCharacters(in: .whitespaces) + "." } ?? text
     }
 
     private var monthGrid: [Date?] {
