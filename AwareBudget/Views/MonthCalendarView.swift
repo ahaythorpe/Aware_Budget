@@ -42,7 +42,7 @@ struct MonthCalendarView: View {
         .premiumCardShadow()
         .sheet(item: $selectedDay) { day in
             dayPopover(day.date)
-                .presentationDetents([.height(200)])
+                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
     }
