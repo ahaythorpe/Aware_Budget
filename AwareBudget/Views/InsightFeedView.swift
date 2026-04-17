@@ -34,8 +34,7 @@ struct InsightFeedView: View {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
                         weeklyHeroCard
-                        incomeVsSpendingSection
-                        biasImpactSection
+                        financialOverviewSection
                         netWorthTrendSection
                         categoryTrendSection
                         biasFrequencySection
@@ -212,9 +211,123 @@ struct InsightFeedView: View {
             .background(Capsule().fill(.white.opacity(0.18)))
     }
 
-    // MARK: - 1.3 Income vs Spending (derived from events + manual income)
+    // MARK: - 1.3 Financial Overview (income, spending, savings, bias impact)
 
     @State private var showIncomePopup = false
+
+    private var financialOverviewSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Financial overview")
+
+            let totalExpenses = allEvents
+                .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) }
+                .reduce(0.0) { $0 + $1.amount }
+            let impulseTotal = allEvents
+                .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) && $0.plannedStatus == .impulse }
+                .reduce(0.0) { $0 + $1.amount }
+            let plannedTotal = allEvents
+                .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) && $0.plannedStatus == .planned }
+                .reduce(0.0) { $0 + $1.amount }
+            let savings = monthlyIncome > 0 ? max(monthlyIncome - totalExpenses, 0) : 0
+            let latestSnapshot = balanceSnapshots.last
+
+            VStack(alignment: .leading, spacing: 16) {
+                financeOverviewRow(emoji: "💰", label: "Income", value: monthlyIncome, note: monthlyIncome > 0 ? nil : "Not set — update on Home")
+                financeOverviewRow(emoji: "🛒", label: "Spent this month", value: totalExpenses, note: "\(allEvents.filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) }.count) events")
+                financeOverviewRow(emoji: "⚡", label: "Impulse spending", value: impulseTotal, note: totalExpenses > 0 ? "\(Int((impulseTotal / totalExpenses) * 100))% of total" : nil)
+                financeOverviewRow(emoji: "📋", label: "Planned spending", value: plannedTotal, note: nil)
+                if monthlyIncome > 0 {
+                    financeOverviewRow(emoji: "💎", label: "Estimated savings", value: savings, note: "\(Int((savings / monthlyIncome) * 100))% of income")
+                }
+                if let snap = latestSnapshot {
+                    financeOverviewRow(emoji: "🏦", label: "Savings balance", value: snap.savings_balance, note: nil)
+                    financeOverviewRow(emoji: "📈", label: "Invested", value: snap.investment_balance, note: nil)
+                }
+
+                Divider()
+
+                biasSpendingBreakdown(expenses: totalExpenses)
+
+                ResearchFootnote(text: "Voluntary manual entry · Privacy Act 1988 only", style: .inline)
+            }
+            .padding(16)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(DS.goldBase, lineWidth: 2)
+            )
+            .premiumCardShadow()
+        }
+    }
+
+    private func financeOverviewRow(emoji: String, label: String, value: Double, note: String?) -> some View {
+        HStack(spacing: 10) {
+            Text(emoji)
+                .font(.system(size: 18))
+                .frame(width: 26)
+            Text(label)
+                .font(.system(.subheadline, weight: .medium))
+                .foregroundStyle(DS.textPrimary)
+            Spacer()
+            VStack(alignment: .trailing, spacing: 1) {
+                Text("$\(Int(value))")
+                    .font(.system(size: 15, weight: .bold, design: .serif))
+                    .foregroundStyle(DS.goldBase)
+                if let note {
+                    Text(note)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(DS.textTertiary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func biasSpendingBreakdown(expenses: Double) -> some View {
+        let taggedEvents = allEvents.filter {
+            Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) && $0.behaviourTag != nil
+        }
+        let biasSpend = Dictionary(grouping: taggedEvents, by: { $0.behaviourTag! })
+            .mapValues { $0.reduce(0.0) { $0 + $1.amount } }
+            .sorted { $0.value > $1.value }
+        let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
+
+        if !biasSpend.isEmpty {
+            Text("SPENDING BY BIAS")
+                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                .tracking(1.5)
+                .foregroundStyle(DS.goldBase)
+
+            ForEach(biasSpend.prefix(5), id: \.key) { bias, amount in
+                HStack(spacing: 8) {
+                    Text(emojiLookup[bias] ?? "🧠")
+                        .font(.system(size: 14))
+                    Text(bias)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineLimit(1)
+                    Spacer()
+                    Text("$\(Int(amount))")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(DS.goldBase)
+                    if expenses > 0 {
+                        Text("\(Int((amount / expenses) * 100))%")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(DS.accent, in: Capsule())
+                    }
+                }
+            }
+
+            NudgeSaysCard(
+                message: "Each dollar is tagged with the bias driving the spend. This is behavioural finance in action — awareness precedes change.",
+                citation: "Kahneman 2011 · Thaler & Sunstein 2008",
+                surface: .paleGreen
+            )
+        }
+    }
 
     private var incomeVsSpendingSection: some View {
         VStack(alignment: .leading, spacing: 12) {
