@@ -377,33 +377,18 @@ struct HomeView: View {
     }
 
     private var financeEditorSheet: some View {
-        NavigationStack {
+        ZStack {
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
+
             VStack(spacing: 20) {
-                NudgeSaysCard(
-                    message: "All voluntary. No bank connection. Just you and your numbers.",
-                    citation: "Privacy Act 1988 only",
-                    surface: .paleGreen
-                )
-
-                VStack(spacing: 14) {
-                    financeField(label: "Monthly take-home", text: $financeIncome, icon: "dollarsign.circle")
-                    financeField(label: "Savings balance", text: $financeSavings, icon: "leaf")
-                    financeField(label: "Investment balance", text: $financeInvestment, icon: "chart.line.uptrend.xyaxis")
-                }
-
-                Spacer()
-            }
-            .padding(20)
-            .background(DS.bg)
-            .navigationTitle("Your finances")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                HStack {
                     Button("Cancel") { showFinanceEditor = false }
-                        .foregroundStyle(DS.textSecondary)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.7))
+                    Spacer()
+                    Button {
                         Task {
                             let inc = Double(financeIncome) ?? 0
                             let sav = Double(financeSavings) ?? 0
@@ -413,20 +398,45 @@ struct HomeView: View {
                             await viewModel.load()
                             showFinanceEditor = false
                         }
+                    } label: {
+                        Text("Save")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(DS.goldForeground)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 8)
+                            .background(DS.matteYellow, in: Capsule())
                     }
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(DS.goldBase)
                 }
+                .padding(.top, 16)
+
+                Text("Your finances")
+                    .font(.system(size: 28, weight: .black))
+                    .foregroundStyle(.white)
+                    .heroTextLegibility()
+
+                NudgeSaysCard(
+                    message: "All voluntary. No bank connection. Just you and your numbers.",
+                    citation: "Privacy Act 1988 only",
+                    surface: .dark
+                )
+
+                VStack(spacing: 14) {
+                    financeField(label: "Monthly take-home", text: $financeIncome, emoji: "💰")
+                    financeField(label: "Savings balance", text: $financeSavings, emoji: "🏦")
+                    financeField(label: "Investment balance", text: $financeInvestment, emoji: "📈")
+                }
+
+                Spacer()
             }
+            .padding(.horizontal, 20)
         }
     }
 
-    private func financeField(label: String, text: Binding<String>, icon: String) -> some View {
+    private func financeField(label: String, text: Binding<String>, emoji: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(DS.goldBase)
-                .frame(width: 28)
+            Text(emoji)
+                .font(.system(size: 28))
+                .frame(width: 36)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.caption.weight(.semibold))
@@ -438,10 +448,10 @@ struct HomeView: View {
             }
         }
         .padding(14)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(DS.goldBase.opacity(0.3), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(DS.goldBase, lineWidth: 1.5)
         )
     }
 
