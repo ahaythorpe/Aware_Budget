@@ -542,25 +542,20 @@ struct CheckInView: View {
                     .font(.system(size: 24))
                 Text(driver.shortDescription)
                     .font(.subheadline.weight(.bold))
-                    .foregroundStyle(isSelected ? .white : DS.textPrimary)
+                    .foregroundStyle(isSelected ? DS.goldBase : DS.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 Text(driver.label)
                     .font(.caption2.weight(.medium))
-                    .foregroundStyle(isSelected ? .white.opacity(0.7) : DS.textSecondary)
+                    .foregroundStyle(isSelected ? DS.goldBase.opacity(0.7) : DS.textSecondary)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .padding(.horizontal, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(isSelected ? DS.goldBase : DS.cardBg)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(isSelected ? DS.goldBase : DS.goldBase.opacity(0.3), lineWidth: isSelected ? 2 : 1)
-            )
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .shimmeringGoldBorder(cornerRadius: 14, lineWidth: isSelected ? 3 : 1.5)
+            .shadow(color: isSelected ? DS.goldBase.opacity(0.3) : .clear, radius: 6, x: 0, y: 2)
         }
         .buttonStyle(.plain)
     }
