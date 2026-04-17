@@ -372,8 +372,7 @@ struct CheckInView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(.white.opacity(0.15), in: Capsule())
-                    .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 0.5))
+                    .background(DS.danger, in: Capsule())
                 }
                 .buttonStyle(.plain)
             }

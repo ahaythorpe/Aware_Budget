@@ -168,21 +168,25 @@ struct OnboardingView: View {
 
     private var quizPage: some View {
         ZStack {
-            DS.bg.ignoresSafeArea()
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 24) {
-                    NudgeAvatar(size: 44)
-                        .padding(.top, 48)
+                VStack(spacing: 28) {
+                    NudgeAvatar(size: 56)
+                        .padding(.top, 56)
 
                     Text("Quick reality check")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(DS.textPrimary)
+                        .font(.system(size: 28, weight: .black))
+                        .foregroundStyle(.white)
+                        .heroTextLegibility()
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Your last budget lasted…")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(DS.textSecondary)
+                        Text("YOUR LAST BUDGET LASTED…")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(DS.goldText)
                             .padding(.horizontal, 4)
 
                         quizPill("Less than a week", selected: budgetHistory == "week", action: { budgetHistory = "week" })
@@ -194,9 +198,10 @@ struct OnboardingView: View {
 
                     if budgetHistory != nil && budgetHistory != "never_tried" && budgetHistory != "never_budgeted" {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("What went wrong?")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(DS.textSecondary)
+                            Text("WHAT WENT WRONG?")
+                                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                .tracking(1.5)
+                                .foregroundStyle(DS.goldText)
                                 .padding(.horizontal, 4)
 
                             quizPill("Too much work", selected: quitReason == "work", action: { quitReason = "work" })
@@ -213,7 +218,7 @@ struct OnboardingView: View {
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
 
-                    progressDots(current: 2, total: 4)
+                    progressDots(current: 2, total: 4, light: true)
                         .padding(.bottom, 32)
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: budgetHistory)
@@ -225,52 +230,47 @@ struct OnboardingView: View {
     private var nudgeResponse: some View {
         VStack(spacing: 16) {
             NudgeSaysCard(
-                message: "You're not broken. The method is. 70% quit budgeting apps within 30 days — not laziness, shame-based design.",
+                message: "You're not broken. The method is. 70% quit budgeting apps within 30 days.",
                 citation: "Soman 2001 · Thaler 1999",
-                surface: .gold
+                surface: .dark
             )
 
             Button {
                 withAnimation { currentPage = 3 }
             } label: {
                 Text("That's why MoneyMind exists \u{2192}")
-                    .font(.system(size: 15, weight: .bold))
-                    .goldButtonStyle()
             }
-            .buttonStyle(.plain)
+            .goldButtonStyle()
+            .padding(.horizontal, 4)
         }
         .padding(.horizontal, DS.hPadding)
     }
 
     private func quizPill(_ text: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(text)
-                .font(.system(size: 16, weight: selected ? .bold : .semibold))
-                .foregroundStyle(selected ? .white : DS.textPrimary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    selected ? AnyShapeStyle(DS.deepGreen) : AnyShapeStyle(DS.cardBg),
-                    in: Capsule()
-                )
-                .modifier(QuizPillBorderModifier(selected: selected))
-                .premiumCardShadow()
+            HStack {
+                Text(text)
+                    .font(.system(.subheadline, weight: selected ? .bold : .medium))
+                    .foregroundStyle(.white)
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.body)
+                        .foregroundStyle(DS.goldText)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(
+                selected ? Color.white.opacity(0.20) : Color.white.opacity(0.08),
+                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(selected ? DS.goldText.opacity(0.5) : .white.opacity(0.15), lineWidth: selected ? 1.5 : 0.5)
+            )
         }
         .buttonStyle(.plain)
-    }
-
-    /// Selected pill gets the green hero with no extra border;
-    /// unselected pill gets the canonical shimmering gold capsule
-    /// border so it matches the in-app card spec.
-    private struct QuizPillBorderModifier: ViewModifier {
-        let selected: Bool
-        func body(content: Content) -> some View {
-            if selected {
-                content
-            } else {
-                content.shimmeringGoldBorder(cornerRadius: 999, lineWidth: 2)
-            }
-        }
     }
 
     // MARK: - Screen 4: Sign Up

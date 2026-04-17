@@ -14,7 +14,9 @@ struct BFASAssessmentView: View {
 
     var body: some View {
         ZStack {
-            DS.bg.ignoresSafeArea()
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
             switch stage {
             case .intro: introView
             case .quiz:  quizView
@@ -38,12 +40,13 @@ struct BFASAssessmentView: View {
             VStack(spacing: 8) {
                 Text("Let's set your baseline")
                     .font(.system(.title2, weight: .bold))
-                    .foregroundStyle(DS.textPrimary)
+                    .foregroundStyle(.white)
+                    .heroTextLegibility()
                     .multilineTextAlignment(.center)
 
                 Text("16 quick questions · about 3 minutes")
                     .font(.system(.subheadline, weight: .medium))
-                    .foregroundStyle(DS.textSecondary)
+                    .foregroundStyle(.white.opacity(0.8))
             }
             .padding(.horizontal, 30)
 
@@ -59,7 +62,7 @@ struct BFASAssessmentView: View {
 
                 Text("No right or wrong answers. This is just about you.")
                     .font(.system(.caption2, weight: .medium))
-                    .foregroundStyle(DS.textTertiary)
+                    .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 30)
@@ -104,7 +107,7 @@ struct BFASAssessmentView: View {
             HStack(spacing: 4) {
                 ForEach(0..<questions.count, id: \.self) { i in
                     Capsule()
-                        .fill(i <= index ? DS.accent : DS.textTertiary.opacity(0.2))
+                        .fill(i <= index ? DS.goldText : .white.opacity(0.2))
                         .frame(height: 4)
                 }
             }
@@ -113,7 +116,7 @@ struct BFASAssessmentView: View {
             Text("QUESTION \(index + 1) OF \(questions.count)")
                 .font(.system(size: 10, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(DS.accent)
+                .foregroundStyle(DS.goldText)
         }
     }
 
@@ -136,8 +139,8 @@ struct BFASAssessmentView: View {
 
     private func yesNoButtons(for q: BFASQuestion) -> some View {
         HStack(spacing: 12) {
-            answerButton(label: "No", isYes: false) { record(q, yes: false) }
             answerButton(label: "Yes", isYes: true)  { record(q, yes: true) }
+            answerButton(label: "No", isYes: false) { record(q, yes: false) }
         }
     }
 
@@ -149,20 +152,11 @@ struct BFASAssessmentView: View {
                 Text(label)
             }
             .font(.headline.weight(.bold))
-            .foregroundStyle(isYes ? DS.matteYellowForeground : DS.textPrimary)
+            .foregroundStyle(isYes ? DS.matteYellowForeground : .white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background(
-                Group {
-                    if isYes {
-                        Capsule().fill(DS.matteYellow)
-                    } else {
-                        Capsule().fill(DS.paleGreen)
-                    }
-                }
-            )
-            .overlay(
-                Capsule().stroke(isYes ? Color.clear : DS.deepGreen.opacity(0.25), lineWidth: 0.5)
+                Capsule().fill(isYes ? DS.matteYellow : DS.danger)
             )
         }
         .buttonStyle(.plain)
