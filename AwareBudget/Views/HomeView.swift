@@ -121,7 +121,7 @@ struct HomeView: View {
                                 .stroke(DS.mintBg, lineWidth: 5)
                             Circle()
                                 .trim(from: 0, to: CGFloat(awarenessPercent))
-                                .stroke(DS.nuggetGold, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                                .stroke(DS.goldBase, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                                 .rotationEffect(.degrees(-90))
                                 .animation(.easeInOut(duration: 1.2), value: awarenessPercent)
                             Text("\(viewModel.biasesSeenCount)/\(totalPatterns)")
@@ -132,18 +132,20 @@ struct HomeView: View {
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text("\(Int(awarenessPercent * 100))%")
-                                .font(.system(size: 22, weight: .black, design: .serif))
+                                .font(.system(size: 26, weight: .black, design: .serif))
                                 .foregroundStyle(DS.goldBase)
                             Text("Patterns\nidentified")
-                                .font(.system(.caption, weight: .medium))
+                                .font(.system(.subheadline, weight: .semibold))
                                 .foregroundStyle(DS.textSecondary)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(14)
                     .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-                    .overlay(RoundedRectangle(cornerRadius: DS.cardRadius)
-                        .stroke(DS.accent.opacity(0.15), lineWidth: 0.5))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius)
+                            .stroke(DS.goldBase, lineWidth: 2)
+                    )
                     .premiumCardShadow()
                 }
                 .padding(.horizontal, 18)
