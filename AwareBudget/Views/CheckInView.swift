@@ -398,55 +398,55 @@ struct CheckInView: View {
     // MARK: - Driver pick
 
     private var driverPickView: some View {
-        VStack(spacing: 28) {
-            VStack(spacing: 8) {
-                Text("What drove this")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(DS.textPrimary)
-                Text("No wrong answers. Just noticing")
-                    .font(.subheadline)
-                    .foregroundStyle(DS.textSecondary)
-            }
+        ZStack {
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
 
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                ForEach(CheckIn.SpendingDriver.allCases) { driver in
-                    driverPill(driver)
-                }
-            }
-            .padding(.horizontal, DS.hPadding)
+            ScrollView {
+                VStack(spacing: 22) {
+                    Text("What drove this?")
+                        .font(.system(size: 24, weight: .black))
+                        .foregroundStyle(.white)
+                        .heroTextLegibility()
 
-            Button {
-                guard !isSaving else { return }
-                if selectedDriver == nil {
-                    skipOrigin = .driverPick
-                    showSkipChastise = true
-                } else {
-                    Task { await saveCheckIn() }
+                    Text("No wrong answers. Just noticing.")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.7))
+
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                        ForEach(CheckIn.SpendingDriver.allCases) { driver in
+                            driverPill(driver)
+                        }
+                    }
+
+                    Button {
+                        guard !isSaving else { return }
+                        if selectedDriver == nil {
+                            skipOrigin = .driverPick
+                            showSkipChastise = true
+                        } else {
+                            Task { await saveCheckIn() }
+                        }
+                    } label: {
+                        if isSaving {
+                            ProgressView()
+                                .controlSize(.small)
+                                .tint(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                        } else {
+                            Text(selectedDriver != nil ? "Continue →" : "Skip for now")
+                        }
+                    }
+                    .goldButtonStyle()
+                    .padding(.top, 8)
                 }
-            } label: {
-                if isSaving {
-                    ProgressView()
-                        .controlSize(.small)
-                        .tint(DS.goldTint)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 11)
-                } else {
-                    Text(selectedDriver != nil ? "Continue →" : "Skip")
-                        .font(.system(.footnote, weight: .bold))
-                        .foregroundStyle(selectedDriver != nil ? DS.goldForeground : .white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 10)
-                        .background(
-                            selectedDriver != nil
-                                ? AnyShapeStyle(DS.matteYellow)
-                                : AnyShapeStyle(Color.white.opacity(0.15)),
-                            in: Capsule()
-                        )
-                }
+                .padding(.horizontal, DS.hPadding)
+                .padding(.top, 24)
+                .padding(.bottom, 40)
             }
-            .buttonStyle(.plain)
         }
-        .padding(.top, 20)
         // Top-level body has the overlay now — see line ~110.
     }
 
@@ -537,27 +537,29 @@ struct CheckInView: View {
                 selectedDriver = isSelected ? nil : driver
             }
         } label: {
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 Text(driver.emoji)
-                    .font(.system(size: 28))
-                Text(driver.label)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(isSelected ? DS.darkGreen : DS.textPrimary)
+                    .font(.system(size: 24))
                 Text(driver.shortDescription)
-                    .font(.caption2)
-                    .foregroundStyle(DS.textSecondary)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(isSelected ? .white : DS.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Text(driver.label)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(isSelected ? .white.opacity(0.7) : DS.textSecondary)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
             .padding(.horizontal, 8)
             .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isSelected ? DS.paleGreen : DS.cardBg)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(isSelected ? DS.goldBase : DS.cardBg)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(isSelected ? DS.accent : DS.accent.opacity(0.15), lineWidth: isSelected ? 1.5 : 0.5)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(isSelected ? DS.goldBase : DS.goldBase.opacity(0.3), lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(.plain)
