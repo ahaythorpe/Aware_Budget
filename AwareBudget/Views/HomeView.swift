@@ -10,6 +10,7 @@ struct HomeView: View {
     @State private var previewBFAS = false
     @State private var showCheckIn = false
     @State private var showFinanceEditor = false
+    @State private var showPatternsDetail = false
     @State private var financeIncome: String = ""
     @State private var financeSavings: String = ""
     @State private var financeInvestment: String = ""
@@ -118,43 +119,48 @@ struct HomeView: View {
                     )
                     .premiumCardShadow()
 
-                    // Awareness circle (white card)
-                    HStack(spacing: 12) {
-                        ZStack {
-                            Circle()
-                                .stroke(DS.mintBg, lineWidth: 5)
-                            Circle()
-                                .trim(from: 0, to: CGFloat(awarenessPercent))
-                                .stroke(DS.goldBase, style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                                .rotationEffect(.degrees(-90))
-                                .animation(.easeInOut(duration: 1.2), value: awarenessPercent)
-                            Text("\(viewModel.biasesSeenCount)/\(totalPatterns)")
-                                .font(.system(size: 10, weight: .black, design: .serif))
-                                .foregroundStyle(DS.goldBase)
-                        }
-                        .frame(width: 54, height: 54)
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            HStack(spacing: 6) {
-                                Text("\(Int(awarenessPercent * 100))%")
-                                    .font(.system(size: 26, weight: .black, design: .serif))
+                    Button { showPatternsDetail = true } label: {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .stroke(DS.mintBg, lineWidth: 5)
+                                Circle()
+                                    .trim(from: 0, to: CGFloat(awarenessPercent))
+                                    .stroke(DS.goldBase, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                                    .rotationEffect(.degrees(-90))
+                                    .animation(.easeInOut(duration: 1.2), value: awarenessPercent)
+                                Text("\(viewModel.biasesSeenCount)/\(totalPatterns)")
+                                    .font(.system(size: 10, weight: .black, design: .serif))
                                     .foregroundStyle(DS.goldBase)
-                                Text("🧩")
-                                    .font(.system(size: 20))
                             }
-                            Text("Patterns\nidentified")
-                                .font(.system(.subheadline, weight: .semibold))
-                                .foregroundStyle(DS.textSecondary)
+                            .frame(width: 54, height: 54)
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                HStack(spacing: 6) {
+                                    Text("\(Int(awarenessPercent * 100))%")
+                                        .font(.system(size: 26, weight: .black, design: .serif))
+                                        .foregroundStyle(DS.goldBase)
+                                    Text("🧩")
+                                        .font(.system(size: 20))
+                                }
+                                Text("Patterns\nidentified")
+                                    .font(.system(.subheadline, weight: .semibold))
+                                    .foregroundStyle(DS.textSecondary)
+                            }
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding(14)
+                        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DS.cardRadius)
+                                .stroke(DS.goldBase, lineWidth: 2)
+                        )
+                        .premiumCardShadow()
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(14)
-                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DS.cardRadius)
-                            .stroke(DS.goldBase, lineWidth: 2)
-                    )
-                    .premiumCardShadow()
+                    .buttonStyle(.plain)
+                    .sheet(isPresented: $showPatternsDetail) {
+                        patternsDetailSheet
+                    }
                 }
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
@@ -272,6 +278,20 @@ struct HomeView: View {
     }
 
     // MARK: - Your Finances card
+
+    // MARK: - Patterns detail sheet
+
+    private var patternsDetailSheet: some View {
+        PatternsDetailView(
+            patterns: viewModel.dailyPatterns,
+            dismiss: { showPatternsDetail = false }
+        )
+    }
+
+    private func firstSentence(_ text: String) -> String {
+        text.split(separator: ".", maxSplits: 1).first
+            .map { String($0).trimmingCharacters(in: .whitespaces) + "." } ?? text
+    }
 
     private var yourFinancesCard: some View {
         let income = viewModel.monthlyIncome
