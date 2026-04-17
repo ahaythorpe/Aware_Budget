@@ -10,7 +10,7 @@ struct TopBiasesCard: View {
     var onInfoTap: (() -> Void)? = nil
 
     private var topFour: [HomeViewModel.DailyPattern] {
-        Array(patterns.prefix(1))
+        Array(patterns.filter { $0.stage != .unseen }.prefix(4))
     }
 
     var body: some View {

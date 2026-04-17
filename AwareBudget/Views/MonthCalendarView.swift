@@ -116,46 +116,44 @@ struct MonthCalendarView: View {
         let totalAmount = events.reduce(0.0) { $0 + $1.amount }
         let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
 
-        return VStack(alignment: .leading, spacing: 0) {
-            HStack {
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
                 Text(f.string(from: date))
-                    .font(.system(.footnote, weight: .semibold))
-                    .foregroundStyle(DS.textSecondary)
+                    .font(.system(.headline, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
                 Spacer()
-                Text("$\(Int(totalAmount))")
-                    .font(.system(.footnote, weight: .bold))
+                Text("\(events.count) \(events.count == 1 ? "event" : "events") · $\(Int(totalAmount))")
+                    .font(.system(.caption, weight: .semibold))
                     .foregroundStyle(DS.goldBase)
             }
-            .padding(.bottom, 8)
 
-            ForEach(Array(topTags.enumerated()), id: \.element.key) { idx, pair in
-                if idx > 0 {
-                    Divider().padding(.vertical, 5)
+            if !topTags.isEmpty {
+                VStack(spacing: 10) {
+                    ForEach(Array(topTags.enumerated()), id: \.element.key) { _, pair in
+                        HStack(spacing: 10) {
+                            Text(emojiLookup[pair.key] ?? "🧠")
+                                .font(.system(size: 18))
+                            Text(pair.key)
+                                .font(.system(.subheadline, weight: .semibold))
+                                .foregroundStyle(DS.textPrimary)
+                            Spacer()
+                            Text("×\(pair.value)")
+                                .font(.system(.caption, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(DS.accent, in: Capsule())
+                        }
+                    }
                 }
-                HStack(spacing: 8) {
-                    Text(emojiLookup[pair.key] ?? "🧠")
-                        .font(.system(size: 15))
-                    Text(pair.key)
-                        .font(.system(.subheadline, weight: .semibold))
-                        .foregroundStyle(DS.textPrimary)
-                        .lineLimit(1)
-                    Spacer()
-                    Text("\(pair.value)")
-                        .font(.system(.caption2, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 20, height: 20)
-                        .background(DS.accent, in: Circle())
-                }
-            }
-
-            if topTags.isEmpty {
-                Text("No patterns tagged")
-                    .font(.system(.caption, weight: .medium))
+            } else {
+                Text("No patterns tagged yet")
+                    .font(.system(.subheadline, weight: .medium))
                     .foregroundStyle(DS.textTertiary)
             }
         }
         .padding(20)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(DS.bg)
     }
 
