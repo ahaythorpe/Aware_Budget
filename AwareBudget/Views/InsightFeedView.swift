@@ -458,6 +458,13 @@ struct InsightFeedView: View {
                         legendDot(color: DS.matteYellow, label: "Expenses")
                         legendDot(color: DS.accent, label: "Savings")
                     }
+
+                    if data.count < 2 {
+                        NudgeSaysCard(
+                            message: "This is your first month. As months pass, bars appear side by side showing how your spending and savings trend over time.",
+                            surface: .paleGreen
+                        )
+                    }
                 }
                 .padding(16)
                 .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
@@ -520,27 +527,30 @@ struct InsightFeedView: View {
             } else {
                 let biases = Array(Set(data.map(\.bias))).sorted()
                 let palette: [Color] = [DS.goldBase, DS.matteYellow, DS.accent, DS.deepGreen, DS.lightGreen]
+                let weekCount = Set(data.map(\.weekLabel)).count
 
                 VStack(alignment: .leading, spacing: 10) {
                     Chart(data) { point in
-                        LineMark(
-                            x: .value("Week", point.weekLabel),
-                            y: .value("Amount", point.amount),
-                            series: .value("Bias", point.bias)
-                        )
-                        .foregroundStyle(by: .value("Bias", point.bias))
-                        .interpolationMethod(.catmullRom)
-                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        if weekCount > 1 {
+                            LineMark(
+                                x: .value("Week", point.weekLabel),
+                                y: .value("Amount", point.amount),
+                                series: .value("Bias", point.bias)
+                            )
+                            .foregroundStyle(by: .value("Bias", point.bias))
+                            .interpolationMethod(.catmullRom)
+                            .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        }
 
-                        PointMark(
-                            x: .value("Week", point.weekLabel),
+                        BarMark(
+                            x: .value("Bias", point.bias),
                             y: .value("Amount", point.amount)
                         )
                         .foregroundStyle(by: .value("Bias", point.bias))
-                        .symbolSize(30)
+                        .cornerRadius(6)
                     }
                     .chartForegroundStyleScale(domain: biases, range: Array(palette.prefix(biases.count)))
-                    .frame(height: 180)
+                    .frame(height: 200)
                     .chartYAxis {
                         AxisMarks(position: .leading) { value in
                             AxisValueLabel {
@@ -553,7 +563,9 @@ struct InsightFeedView: View {
                     .chartLegend(.visible)
 
                     NudgeSaysCard(
-                        message: "Watch your bias lines trend down as awareness kicks in. Falling lines = awareness working.",
+                        message: weekCount > 1
+                            ? "Watch your bias lines trend down as awareness kicks in. Falling lines = awareness working."
+                            : "This shows spending per bias this week. As you log over more weeks, this becomes a trend line showing how awareness changes your spending.",
                         citation: "Debiasing · Fischhoff 1982 · Larrick 2004",
                         surface: .paleGreen
                     )
