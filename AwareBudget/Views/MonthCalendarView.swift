@@ -9,7 +9,7 @@ struct MonthCalendarView: View {
 
     struct DayKey: Identifiable, Hashable {
         let date: Date
-        var id: String { ISO8601DateFormatter.dateOnly.string(from: date) }
+        var id: String { DateFormatter.localDateOnly.string(from: date) }
     }
 
     var body: some View {
@@ -65,7 +65,7 @@ struct MonthCalendarView: View {
 
     private func dayCell(_ date: Date) -> some View {
         let cal = Calendar.current
-        let key = ISO8601DateFormatter.dateOnly.string(from: date)
+        let key = DateFormatter.localDateOnly.string(from: date)
         let events = eventsByDay[key] ?? []
         let hasEvents = !events.isEmpty
         let isToday = cal.isDateInToday(date)
@@ -74,26 +74,31 @@ struct MonthCalendarView: View {
         return Button {
             if hasEvents { selectedDay = DayKey(date: date) }
         } label: {
-            Text("\(day)")
-                .font(.system(.footnote, weight: hasEvents ? .bold : .medium))
-                .foregroundStyle(
-                    hasEvents ? DS.goldForeground :
-                    isToday ? DS.textPrimary : DS.textSecondary
-                )
-                .frame(maxWidth: .infinity)
-                .frame(height: 32)
-                .background(
-                    ZStack {
-                        if hasEvents {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(DS.nuggetGold)
+            VStack(spacing: 2) {
+                Text("\(day)")
+                    .font(.system(.footnote, weight: hasEvents ? .bold : .medium))
+                    .foregroundStyle(
+                        hasEvents ? DS.goldForeground :
+                        isToday ? DS.textPrimary : DS.textSecondary
+                    )
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 28)
+                    .background(
+                        ZStack {
+                            if hasEvents {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(DS.nuggetGold)
+                            }
+                            if isToday {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(DS.goldBase, lineWidth: 1.5)
+                            }
                         }
-                        if isToday {
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(DS.goldBase, lineWidth: 1.5)
-                        }
-                    }
-                )
+                    )
+                Circle()
+                    .fill(hasEvents ? DS.accent : .clear)
+                    .frame(width: 4, height: 4)
+            }
         }
         .buttonStyle(.plain)
         .disabled(!hasEvents)
@@ -101,104 +106,60 @@ struct MonthCalendarView: View {
 
     private func dayPopover(_ date: Date) -> some View {
         let f = DateFormatter()
-        f.dateFormat = "EEE · d MMMM"
-        let key = ISO8601DateFormatter.dateOnly.string(from: date)
+        f.dateFormat = "EEE d MMM"
+        let key = DateFormatter.localDateOnly.string(from: date)
         let events = eventsByDay[key] ?? []
         let tagCounts = Dictionary(grouping: events.compactMap(\.behaviourTag), by: { $0 })
             .mapValues(\.count)
         let topTags = tagCounts.sorted { $0.value > $1.value }.prefix(3)
         let totalAmount = events.reduce(0.0) { $0 + $1.amount }
         let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
-        let counterLookup: [String: String] = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { lesson in
-            let firstSentence = lesson.howToCounter
-                .split(separator: ".", maxSplits: 1, omittingEmptySubsequences: true)
-                .first
-                .map { String($0).trimmingCharacters(in: .whitespaces) + "." } ?? lesson.howToCounter
-            return (lesson.biasName, firstSentence)
-        })
 
-        return VStack(alignment: .leading, spacing: 14) {
-            // Date header
-            Text(f.string(from: date))
-                .font(.system(.headline, weight: .bold))
-                .foregroundStyle(DS.textPrimary)
-
-            // Stats row
-            HStack(spacing: 14) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(events.count)")
-                        .font(.system(size: 22, weight: .black, design: .serif))
-                        .foregroundStyle(DS.deepGreen)
-                    Text(events.count == 1 ? "EVENT" : "EVENTS")
-                        .font(.system(size: 9, weight: .heavy, design: .rounded))
-                        .tracking(1.2)
-                        .foregroundStyle(DS.textTertiary)
-                }
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text(f.string(from: date))
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textSecondary)
                 Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("$\(Int(totalAmount))")
-                        .font(.system(size: 22, weight: .black, design: .serif))
-                        .foregroundStyle(DS.goldBase)
-                    Text("SPENT")
-                        .font(.system(size: 9, weight: .heavy, design: .rounded))
-                        .tracking(1.2)
-                        .foregroundStyle(DS.textTertiary)
+                Text("$\(Int(totalAmount))")
+                    .font(.system(.footnote, weight: .bold))
+                    .foregroundStyle(DS.goldBase)
+            }
+            .padding(.bottom, 8)
+
+            ForEach(Array(topTags.enumerated()), id: \.element.key) { idx, pair in
+                if idx > 0 {
+                    Divider().padding(.vertical, 5)
+                }
+                HStack(spacing: 8) {
+                    Text(emojiLookup[pair.key] ?? "🧠")
+                        .font(.system(size: 15))
+                    Text(pair.key)
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineLimit(1)
+                    Spacer()
+                    Text("\(pair.value)")
+                        .font(.system(.caption2, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 20, height: 20)
+                        .background(DS.accent, in: Circle())
                 }
             }
-            .padding(.horizontal, 4)
 
-            // Top 3 biases
-            if !topTags.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("TOP 3 BIASES")
-                        .font(.system(size: 10, weight: .heavy, design: .rounded))
-                        .tracking(1.5)
-                        .foregroundStyle(DS.goldBase)
-
-                    VStack(spacing: 10) {
-                        ForEach(Array(topTags.enumerated()), id: \.element.key) { idx, pair in
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 10) {
-                                    Text("\(idx + 1)")
-                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                        .foregroundStyle(DS.goldForeground)
-                                        .frame(width: 20, height: 20)
-                                        .background(DS.nuggetGold, in: Circle())
-                                    Text(emojiLookup[pair.key] ?? "🧠")
-                                        .font(.system(size: 16))
-                                    Text(pair.key)
-                                        .font(.system(.footnote, weight: .bold))
-                                        .foregroundStyle(DS.textPrimary)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.85)
-                                    Spacer()
-                                    Text("×\(pair.value)")
-                                        .font(.system(.caption, weight: .heavy))
-                                        .foregroundStyle(DS.deepGreen)
-                                }
-                                if let counter = counterLookup[pair.key] {
-                                    Text(counter)
-                                        .font(.system(.caption2, weight: .medium))
-                                        .foregroundStyle(DS.textSecondary)
-                                        .lineSpacing(1.5)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                        .padding(.leading, 30)
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                Text("No bias tags that day")
-                    .font(.system(.footnote, weight: .medium))
+            if topTags.isEmpty {
+                Text("No patterns tagged")
+                    .font(.system(.caption, weight: .medium))
                     .foregroundStyle(DS.textTertiary)
-                    .italic()
             }
         }
-        .padding(14)
-        .frame(width: 260)
-        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
-        .shimmeringGoldBorder(cornerRadius: 14, lineWidth: 2.25)
+        .padding(12)
+        .frame(width: 220)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DS.accent.opacity(0.2), lineWidth: 0.5)
+        )
     }
 
     private var monthGrid: [Date?] {

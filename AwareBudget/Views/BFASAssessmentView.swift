@@ -143,23 +143,27 @@ struct BFASAssessmentView: View {
 
     private func answerButton(label: String, isYes: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(label)
-                .font(.system(.headline, weight: .bold))
-                .foregroundStyle(isYes ? DS.goldForeground : DS.textPrimary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(
-                    Group {
-                        if isYes {
-                            Capsule().fill(DS.nuggetGold)
-                        } else {
-                            Capsule().fill(DS.paleGreen)
-                        }
+            HStack(spacing: 6) {
+                Image(systemName: isYes ? "checkmark" : "xmark")
+                    .font(.headline.weight(.bold))
+                Text(label)
+            }
+            .font(.headline.weight(.bold))
+            .foregroundStyle(isYes ? DS.matteYellowForeground : DS.textPrimary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                Group {
+                    if isYes {
+                        Capsule().fill(DS.matteYellow)
+                    } else {
+                        Capsule().fill(DS.paleGreen)
                     }
-                )
-                .overlay(
-                    Capsule().stroke(isYes ? Color.clear : DS.deepGreen.opacity(0.25), lineWidth: 0.5)
-                )
+                }
+            )
+            .overlay(
+                Capsule().stroke(isYes ? Color.clear : DS.deepGreen.opacity(0.25), lineWidth: 0.5)
+            )
         }
         .buttonStyle(.plain)
     }

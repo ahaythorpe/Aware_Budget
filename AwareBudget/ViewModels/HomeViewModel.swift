@@ -121,16 +121,17 @@ final class HomeViewModel {
             incomeTarget = month.incomeTarget
 
             let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now) ?? now
+            var checkInStreak = 0
             if let today = todaysCheckIn {
-                streak = today.streakCount
+                checkInStreak = today.streakCount
                 alignmentPct = today.alignmentPct
             } else if let y = try await service.fetchCheckIn(on: yesterday) {
-                streak = y.streakCount
+                checkInStreak = y.streakCount
                 alignmentPct = try await computeAlignment(month: month)
             } else {
-                streak = 0
                 alignmentPct = try await computeAlignment(month: month)
             }
+            streak = checkInStreak
 
             if todaysCheckIn == nil {
                 let next = try? await service.fetchNextQuestion()
@@ -224,9 +225,10 @@ final class HomeViewModel {
             }
 
             // Today's events + days since last event
-            let todayStr = ISO8601DateFormatter.dateOnly.string(from: Date())
+            let fmt = DateFormatter.localDateOnly
+            let todayStr = fmt.string(from: Date())
             hasLoggedEventToday = recentEvents.contains { event in
-                ISO8601DateFormatter.dateOnly.string(from: event.date) == todayStr
+                fmt.string(from: event.date) == todayStr
             }
 
             // Days since last event
@@ -242,16 +244,20 @@ final class HomeViewModel {
             // Event logging streak (consecutive days with events)
             let allEvents = try await service.fetchMoneyEvents(forMonth: Date())
             monthEventsByDay = Dictionary(grouping: allEvents, by: {
-                ISO8601DateFormatter.dateOnly.string(from: $0.date)
+                fmt.string(from: $0.date)
             })
-            let eventDates = Set(allEvents.map { ISO8601DateFormatter.dateOnly.string(from: $0.date) })
+            let eventDates = Set(allEvents.map { fmt.string(from: $0.date) })
             var eStreak = 0
             var checkDate = Date()
-            while eventDates.contains(ISO8601DateFormatter.dateOnly.string(from: checkDate)) {
+            if !eventDates.contains(fmt.string(from: checkDate)) {
+                checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
+            }
+            while eventDates.contains(fmt.string(from: checkDate)) {
                 eStreak += 1
                 checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
             }
             eventLoggingStreak = eStreak
+            streak = max(streak, eventLoggingStreak)
 
             // Build Nudge context and get message
             buildNudge(recentCheckIns: weekHistory, weekEvents: weekEvents, daysSinceLastEvent: daysSinceLastEvent)

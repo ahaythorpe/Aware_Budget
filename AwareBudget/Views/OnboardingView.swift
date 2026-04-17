@@ -167,85 +167,67 @@ struct OnboardingView: View {
     // MARK: - Screen 3: Budget Reality Check
 
     private var quizPage: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                VStack(spacing: 8) {
-                    Text("BUDGET REALITY CHECK")
-                        .font(.system(size: 12, weight: .heavy))
-                        .foregroundStyle(DS.accent)
-                        .textCase(.uppercase)
-                        .tracking(1.5)
+        ZStack {
+            DS.bg.ignoresSafeArea()
 
-                    NudgeAvatar(size: 52)
-                }
-                .padding(.top, 48)
+            ScrollView {
+                VStack(spacing: 24) {
+                    NudgeAvatar(size: 44)
+                        .padding(.top, 48)
 
-                // Q1
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("How long did your last budget last?")
-                        .font(.title3.weight(.bold))
+                    Text("Quick reality check")
+                        .font(.title2.weight(.bold))
                         .foregroundStyle(DS.textPrimary)
 
-                    quizPill("Less than a week", selected: budgetHistory == "week", action: { budgetHistory = "week" })
-                    quizPill("About a month", selected: budgetHistory == "month", action: { budgetHistory = "month" })
-                    quizPill("Never tried", selected: budgetHistory == "never_tried", action: { budgetHistory = "never_tried" })
-                    quizPill("Never budgeted", selected: budgetHistory == "never_budgeted", action: { budgetHistory = "never_budgeted" })
-                }
-                .padding(.horizontal, DS.hPadding)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Your last budget lasted…")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(DS.textSecondary)
+                            .padding(.horizontal, 4)
 
-                // Q2
-                if budgetHistory != nil && budgetHistory != "never_tried" && budgetHistory != "never_budgeted" {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Why did you stop?")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(DS.textPrimary)
-
-                        quizPill("Too much work", selected: quitReason == "work", action: { quitReason = "work" })
-                        quizPill("Made me feel bad", selected: quitReason == "guilt", action: { quitReason = "guilt" })
-                        quizPill("Life got in the way", selected: quitReason == "life", action: { quitReason = "life" })
-                        quizPill("It just failed", selected: quitReason == "failed", action: { quitReason = "failed" })
+                        quizPill("Less than a week", selected: budgetHistory == "week", action: { budgetHistory = "week" })
+                        quizPill("About a month", selected: budgetHistory == "month", action: { budgetHistory = "month" })
+                        quizPill("Never tried", selected: budgetHistory == "never_tried", action: { budgetHistory = "never_tried" })
+                        quizPill("Never budgeted", selected: budgetHistory == "never_budgeted", action: { budgetHistory = "never_budgeted" })
                     }
                     .padding(.horizontal, DS.hPadding)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
 
-                // Nudge response + continue
-                if budgetHistory != nil && (budgetHistory == "never_tried" || budgetHistory == "never_budgeted" || quitReason != nil) {
-                    nudgeResponse
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
+                    if budgetHistory != nil && budgetHistory != "never_tried" && budgetHistory != "never_budgeted" {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("What went wrong?")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(DS.textSecondary)
+                                .padding(.horizontal, 4)
 
-                progressDots(current: 2, total: 4)
-                    .padding(.bottom, 32)
+                            quizPill("Too much work", selected: quitReason == "work", action: { quitReason = "work" })
+                            quizPill("Guilt spiral", selected: quitReason == "guilt", action: { quitReason = "guilt" })
+                            quizPill("Life happened", selected: quitReason == "life", action: { quitReason = "life" })
+                            quizPill("Just didn't stick", selected: quitReason == "failed", action: { quitReason = "failed" })
+                        }
+                        .padding(.horizontal, DS.hPadding)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
+
+                    if budgetHistory != nil && (budgetHistory == "never_tried" || budgetHistory == "never_budgeted" || quitReason != nil) {
+                        nudgeResponse
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+
+                    progressDots(current: 2, total: 4)
+                        .padding(.bottom, 32)
+                }
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: budgetHistory)
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: quitReason)
             }
-            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: budgetHistory)
-            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: quitReason)
         }
     }
 
     private var nudgeResponse: some View {
-        VStack(spacing: 20) {
-            VStack(spacing: 0) {
-                HStack(alignment: .top, spacing: 14) {
-                    NudgeAvatar(size: 44)
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("You're not broken. The method is.")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(.white)
-
-                        Text("70% abandon budgeting apps within 30 days.\nNot laziness \u{2014} shame-based design.")
-                            .font(.body)
-                            .foregroundStyle(.white.opacity(0.75))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .padding(20)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                    .fill(DS.heroGradient)
+        VStack(spacing: 16) {
+            NudgeSaysCard(
+                message: "You're not broken. The method is. 70% quit budgeting apps within 30 days — not laziness, shame-based design.",
+                citation: "Soman 2001 · Thaler 1999",
+                surface: .gold
             )
 
             Button {

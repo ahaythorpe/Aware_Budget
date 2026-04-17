@@ -9,6 +9,7 @@ struct InsightFeedView: View {
     @State private var recentCheckIns: [CheckIn] = []
     @State private var balanceSnapshots: [SupabaseService.BalanceSnapshot] = []
     @State private var awarenessTimestamps: [Date] = []
+    @State private var monthlyIncome: Double = 0
     /// Selected category to drill into on the expandable trend chart.
     /// nil = overlaid view of top 5 categories. Setting a value
     /// expands that category's line full-screen with daily breakdown.
@@ -33,6 +34,8 @@ struct InsightFeedView: View {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
                         weeklyHeroCard
+                        incomeVsSpendingSection
+                        biasImpactSection
                         netWorthTrendSection
                         categoryTrendSection
                         biasFrequencySection
@@ -124,6 +127,7 @@ struct InsightFeedView: View {
             recentCheckIns = try await service.fetchRecentCheckIns(limit: 60)
             balanceSnapshots = (try? await service.fetchBalanceSnapshots(monthsBack: 6)) ?? []
             awarenessTimestamps = (try? await service.fetchLessonTimestamps(monthsBack: 6)) ?? []
+            monthlyIncome = (try? await service.fetchMonthlyIncome()) ?? 0
         } catch {
             // swallow for now
         }
@@ -209,6 +213,298 @@ struct InsightFeedView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(Capsule().fill(.white.opacity(0.18)))
+    }
+
+    // MARK: - 1.3 Income vs Spending (derived from events + manual income)
+
+    @State private var showIncomePopup = false
+
+    private var incomeVsSpendingSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Income vs spending")
+
+            if monthlyIncome <= 0 && allEvents.isEmpty {
+                emptyCard(message: "Set your monthly income in Settings and log events to see this breakdown.")
+            } else {
+                let totalExpenses = allEvents
+                    .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) }
+                    .reduce(0.0) { $0 + $1.amount }
+                let savings = max(monthlyIncome - totalExpenses, 0)
+                let savingsRate = monthlyIncome > 0 ? Int((savings / monthlyIncome) * 100) : 0
+                let impulseTotal = allEvents
+                    .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) && $0.plannedStatus == .impulse }
+                    .reduce(0.0) { $0 + $1.amount }
+                let impulsePct = totalExpenses > 0 ? Int((impulseTotal / totalExpenses) * 100) : 0
+
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("$\(Int(savings))")
+                                .font(.system(size: 28, weight: .black, design: .serif))
+                                .foregroundStyle(DS.goldBase)
+                            Text("estimated savings")
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(DS.textSecondary)
+                        }
+                        Spacer()
+                        Button { showIncomePopup = true } label: {
+                            Image(systemName: "info.circle")
+                                .font(.subheadline)
+                                .foregroundStyle(DS.goldBase)
+                        }
+                    }
+
+                    HStack(spacing: 0) {
+                        let incomeFrac = monthlyIncome > 0 ? min(1, monthlyIncome / max(monthlyIncome, totalExpenses)) : 0.5
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(DS.accent)
+                            .frame(width: max(4, CGFloat(incomeFrac) * (UIScreen.main.bounds.width - 64)), height: 8)
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(DS.matteYellow)
+                            .frame(height: 8)
+                    }
+                    .clipShape(Capsule())
+
+                    HStack(spacing: 16) {
+                        HStack(spacing: 5) {
+                            Circle().fill(DS.accent).frame(width: 8, height: 8)
+                            Text("Income $\(Int(monthlyIncome))")
+                                .font(.system(.caption2, weight: .semibold))
+                                .foregroundStyle(DS.textSecondary)
+                        }
+                        HStack(spacing: 5) {
+                            Circle().fill(DS.matteYellow).frame(width: 8, height: 8)
+                            Text("Spent $\(Int(totalExpenses))")
+                                .font(.system(.caption2, weight: .semibold))
+                                .foregroundStyle(DS.textSecondary)
+                        }
+                        Spacer()
+                        Text("\(savingsRate)% saved")
+                            .font(.system(.caption2, weight: .bold))
+                            .foregroundStyle(savingsRate >= 20 ? DS.accent : DS.warning)
+                    }
+
+                    if impulsePct > 0 {
+                        NudgeSaysCard(
+                            message: "\(impulsePct)% of this month's spending was impulse. That's $\(Int(impulseTotal)) your future self didn't plan for.",
+                            citation: "Impulse spending correlates with present bias · O'Donoghue & Rabin 1999",
+                            surface: .gold
+                        )
+                    }
+                }
+                .padding(16)
+                .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+                .premiumCardShadow()
+            }
+        }
+        .sheet(isPresented: $showIncomePopup) {
+            incomeMethodPopup
+                .presentationDetents([.medium])
+        }
+    }
+
+    private var incomeMethodPopup: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    NudgeSaysCard(
+                        message: "Your expenses are calculated automatically from your logged events. Savings = income minus expenses. No bank connection needed.",
+                        citation: "Manual entry keeps you outside CDR/AFSL regulation · Privacy Act 1988 only",
+                        surface: .paleGreen
+                    )
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("HOW IT WORKS")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(DS.accent)
+
+                        calculationRow(icon: "dollarsign.circle", label: "Income", detail: "You enter monthly take-home in Settings")
+                        calculationRow(icon: "cart", label: "Expenses", detail: "Auto-summed from your logged events")
+                        calculationRow(icon: "leaf", label: "Savings", detail: "Income − Expenses (derived)")
+                    }
+
+                    ResearchFootnote(text: "Thaler's Mental Accounting (1999) shows people who track categories save 15–20% more", style: .inline)
+                }
+                .padding(20)
+            }
+            .background(DS.bg)
+            .navigationTitle("How this works")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showIncomePopup = false }
+                        .foregroundStyle(DS.goldBase)
+                }
+            }
+        }
+    }
+
+    private func calculationRow(icon: String, label: String, detail: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(DS.accent)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(DS.textPrimary)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(DS.textSecondary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    // MARK: - 1.4 Bias Impact Analysis
+
+    @State private var showBiasImpactPopup = false
+
+    private var biasImpactSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Bias impact")
+
+            let impacts = computeBiasImpacts()
+            if impacts.isEmpty {
+                emptyCard(message: "Tag events with biases to see how awareness changes your spending.")
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(impacts, id: \.bias) { impact in
+                        HStack(spacing: 12) {
+                            Text(impact.emoji)
+                                .font(.title3)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(impact.bias)
+                                    .font(.system(.subheadline, weight: .bold))
+                                    .foregroundStyle(DS.textPrimary)
+                                Text(impact.insight)
+                                    .font(.system(.caption, weight: .medium))
+                                    .foregroundStyle(impact.improving ? DS.accent : DS.textSecondary)
+                            }
+                            Spacer()
+                            if impact.improving {
+                                Image(systemName: "arrow.down.right")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(DS.accent)
+                            }
+                        }
+                        .padding(12)
+                        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.smallCardRadius))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DS.smallCardRadius)
+                                .stroke(impact.improving ? DS.accent.opacity(0.3) : DS.accent.opacity(0.1), lineWidth: 0.5)
+                        )
+                    }
+
+                    Button { showBiasImpactPopup = true } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "book.closed")
+                            Text("How this is calculated")
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(DS.goldBase)
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(16)
+                .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+                .premiumCardShadow()
+            }
+        }
+        .sheet(isPresented: $showBiasImpactPopup) {
+            biasImpactMethodPopup
+                .presentationDetents([.medium])
+        }
+    }
+
+    private var biasImpactMethodPopup: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    NudgeSaysCard(
+                        message: "After you identify a bias, Nudge tracks whether your spending pattern shifts. This is the core of behavioural finance — awareness precedes change.",
+                        citation: "Kahneman 2011 · Thaler & Sunstein 2008",
+                        surface: .paleGreen
+                    )
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("THE METHOD")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.5)
+                            .foregroundStyle(DS.accent)
+
+                        calculationRow(icon: "1.circle", label: "Before", detail: "Average weekly spend tagged with this bias before you confirmed it in a check-in")
+                        calculationRow(icon: "2.circle", label: "After", detail: "Average weekly spend since confirmation")
+                        calculationRow(icon: "arrow.triangle.2.circlepath", label: "Impact", detail: "% change — positive = spending dropped")
+                    }
+
+                    ResearchFootnote(text: "Debiasing through awareness · Fischhoff 1982 · Larrick 2004", style: .inline)
+                }
+                .padding(20)
+            }
+            .background(DS.bg)
+            .navigationTitle("Bias impact method")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showBiasImpactPopup = false }
+                        .foregroundStyle(DS.goldBase)
+                }
+            }
+        }
+    }
+
+    struct BiasImpact {
+        let bias: String
+        let emoji: String
+        let insight: String
+        let improving: Bool
+    }
+
+    private func computeBiasImpacts() -> [BiasImpact] {
+        let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
+        let taggedEvents = allEvents.filter { $0.behaviourTag != nil }
+        guard !taggedEvents.isEmpty else { return [] }
+
+        let biases = Set(taggedEvents.compactMap(\.behaviourTag))
+        let cal = Calendar.current
+        var results: [BiasImpact] = []
+
+        for bias in biases {
+            let events = taggedEvents.filter { $0.behaviourTag == bias }.sorted { $0.date < $1.date }
+            guard events.count >= 2 else { continue }
+
+            let midpoint = events.count / 2
+            let firstHalf = events.prefix(midpoint)
+            let secondHalf = events.suffix(from: midpoint)
+
+            let firstDays = max(1, (cal.dateComponents([.day], from: firstHalf.first!.date, to: firstHalf.last!.date).day ?? 0) + 1)
+            let secondDays = max(1, (cal.dateComponents([.day], from: secondHalf.first!.date, to: secondHalf.last!.date).day ?? 0) + 1)
+
+            let firstRate = firstHalf.reduce(0.0) { $0 + $1.amount } / Double(firstDays) * 7
+            let secondRate = secondHalf.reduce(0.0) { $0 + $1.amount } / Double(secondDays) * 7
+
+            let change = firstRate > 0 ? ((secondRate - firstRate) / firstRate) * 100 : 0
+            let improving = change < -5
+            let emoji = emojiLookup[bias] ?? "🧠"
+
+            let insight: String
+            if improving {
+                insight = "Down \(abs(Int(change)))% per week since awareness"
+            } else if change > 5 {
+                insight = "Up \(Int(change))% — pattern still active"
+            } else {
+                insight = "Holding steady"
+            }
+
+            results.append(BiasImpact(bias: bias, emoji: emoji, insight: insight, improving: improving))
+        }
+
+        return results.sorted { $0.improving && !$1.improving }
     }
 
     // MARK: - 1.5 Net worth trend (manual snapshots + bias overlay)

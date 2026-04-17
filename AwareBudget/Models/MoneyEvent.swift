@@ -120,6 +120,27 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         self.createdAt = createdAt
     }
 
+    private static let localDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(userId, forKey: .userId)
+        try c.encode(Self.localDateFormatter.string(from: date), forKey: .date)
+        try c.encode(amount, forKey: .amount)
+        try c.encode(plannedStatus, forKey: .plannedStatus)
+        try c.encodeIfPresent(behaviourTag, forKey: .behaviourTag)
+        try c.encodeIfPresent(lifeEvent, forKey: .lifeEvent)
+        try c.encodeIfPresent(lifeArea, forKey: .lifeArea)
+        try c.encodeIfPresent(note, forKey: .note)
+        try c.encode(createdAt, forKey: .createdAt)
+    }
+
     /// Per-model tolerant decoder — safety net in case the global
     /// SupabaseClient JSONDecoder isn't actually respected by the
     /// Postgrest Swift SDK (it uses its own internal decoder for

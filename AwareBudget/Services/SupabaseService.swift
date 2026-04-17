@@ -1011,3 +1011,12 @@ extension ISO8601DateFormatter {
         return f
     }()
 }
+
+extension DateFormatter {
+    static let localDateOnly: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+}

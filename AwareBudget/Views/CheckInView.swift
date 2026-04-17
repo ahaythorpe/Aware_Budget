@@ -337,77 +337,43 @@ struct CheckInView: View {
             .buttonStyle(.plain)
 
             if showWhy {
-                // Mini Nudge Says card — same brand voice (Nudge coin
-                // + NUDGE label) as the white NudgeSaysCard elsewhere,
-                // but recoloured for legibility on the dark green
-                // check-in surface. Copy is hard-coded per question
-                // (q.whyExplanation + per-bias research cue).
-                HStack(alignment: .top, spacing: 12) {
-                    Image("nudge")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 36, height: 36)
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("NUDGE SAYS")
-                            .font(.system(size: 10, weight: .heavy, design: .rounded))
-                            .tracking(1.5)
-                            .foregroundStyle(DS.goldText)
-
-                        Text(q.whyExplanation)
-                            .font(.system(.subheadline, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .lineSpacing(3)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        Text(NudgeVoice.researchCueFor(bias: q.biasName))
-                            .font(.system(.caption2, weight: .semibold))
-                            .foregroundStyle(.white.opacity(0.85))
-                            .lineSpacing(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.top, 2)
-                    }
-                }
-                .padding(14)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: DS.cardRadius)
-                        .stroke(DS.goldText.opacity(0.4), lineWidth: 0.75)
+                NudgeSaysCard(
+                    message: q.whyExplanation,
+                    citation: NudgeVoice.researchCueFor(bias: q.biasName),
+                    surface: .dark
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             Spacer(minLength: 0)
 
-            // YES (left) / NO (right) buttons inside card
             HStack(spacing: 12) {
                 Button { swipeYes() } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark")
-                            .font(.subheadline.weight(.bold))
+                            .font(.headline.weight(.bold))
                         Text("Yes")
                     }
-                    .font(.subheadline.weight(.bold))
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(DS.matteYellowForeground)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(DS.matteYellow)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(DS.matteYellow, in: Capsule())
                 }
                 .buttonStyle(.plain)
 
                 Button { swipeNo() } label: {
                     HStack(spacing: 6) {
-                        Text("No")
                         Image(systemName: "xmark")
-                            .font(.subheadline.weight(.bold))
+                            .font(.headline.weight(.bold))
+                        Text("No")
                     }
-                    .font(.subheadline.weight(.bold))
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(DS.danger)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(.white.opacity(0.15), in: Capsule())
+                    .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 0.5))
                 }
                 .buttonStyle(.plain)
             }
