@@ -316,11 +316,10 @@ struct HomeView: View {
         return VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Your finances")
 
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 12) {
                 if isEmpty {
                     NudgeSaysCard(
                         message: nudgeLine,
-                        citation: "Voluntary · no bank connection",
                         surface: .gold
                     )
                 } else {
@@ -339,19 +338,17 @@ struct HomeView: View {
                     )
                 }
 
+                ResearchFootnote(text: "Voluntary manual entry · no bank connection · Privacy Act only", style: .pill)
+
                 Button {
                     financeIncome = income > 0 ? "\(Int(income))" : ""
                     financeSavings = savings > 0 ? "\(Int(savings))" : ""
                     financeInvestment = investment > 0 ? "\(Int(investment))" : ""
                     showFinanceEditor = true
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: isEmpty ? "plus.circle.fill" : "pencil.circle.fill")
-                        Text(isEmpty ? "Add your numbers" : "Update")
-                    }
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(DS.goldBase)
+                    Text(isEmpty ? "Add your numbers →" : "Update numbers →")
                 }
+                .goldButtonStyle()
             }
             .padding(16)
             .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
