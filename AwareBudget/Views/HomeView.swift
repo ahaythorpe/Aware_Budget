@@ -9,6 +9,10 @@ struct HomeView: View {
     @State private var previewOnboarding = false
     @State private var previewBFAS = false
     @State private var showCheckIn = false
+    @State private var showFinanceEditor = false
+    @State private var financeIncome: String = ""
+    @State private var financeSavings: String = ""
+    @State private var financeInvestment: String = ""
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
 
@@ -131,9 +135,13 @@ struct HomeView: View {
                         .frame(width: 54, height: 54)
 
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("\(Int(awarenessPercent * 100))%")
-                                .font(.system(size: 26, weight: .black, design: .serif))
-                                .foregroundStyle(DS.goldBase)
+                            HStack(spacing: 6) {
+                                Text("\(Int(awarenessPercent * 100))%")
+                                    .font(.system(size: 26, weight: .black, design: .serif))
+                                    .foregroundStyle(DS.goldBase)
+                                Text("🧩")
+                                    .font(.system(size: 20))
+                            }
                             Text("Patterns\nidentified")
                                 .font(.system(.subheadline, weight: .semibold))
                                 .foregroundStyle(DS.textSecondary)
@@ -181,6 +189,11 @@ struct HomeView: View {
 
                 // ── MONTH CALENDAR ──
                 MonthCalendarView(eventsByDay: viewModel.monthEventsByDay)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 12)
+
+                // ── YOUR FINANCES ──
+                yourFinancesCard
                     .padding(.horizontal, 18)
                     .padding(.bottom, 12)
 
@@ -256,6 +269,163 @@ struct HomeView: View {
                         .padding(.trailing, 16)
                 }
         }
+    }
+
+    // MARK: - Your Finances card
+
+    private var yourFinancesCard: some View {
+        let income = viewModel.monthlyIncome
+        let savings = viewModel.latestSavings
+        let investment = viewModel.latestInvestment
+        let isEmpty = income == 0 && savings == 0 && investment == 0
+        let lastUpdated = viewModel.financeLastUpdated
+
+        let nudgeLine: String = {
+            if isEmpty {
+                return "Track your income and savings — Nudge connects the dots to your spending patterns."
+            }
+            if let last = lastUpdated {
+                let days = Calendar.current.dateComponents([.day], from: last, to: Date()).day ?? 0
+                if days > 30 {
+                    return "It's been \(days) days since you updated. A quick refresh keeps the picture honest."
+                }
+            }
+            return NudgeVoice.random(NudgeVoice.motto)
+        }()
+
+        return VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Your finances")
+
+            VStack(alignment: .leading, spacing: 10) {
+                if isEmpty {
+                    NudgeSaysCard(
+                        message: nudgeLine,
+                        citation: "Voluntary · no bank connection",
+                        surface: .gold
+                    )
+                } else {
+                    HStack(spacing: 0) {
+                        financeStatItem(label: "INCOME", value: "$\(Int(income))")
+                        Spacer()
+                        financeStatItem(label: "SAVINGS", value: "$\(Int(savings))")
+                        Spacer()
+                        financeStatItem(label: "INVESTED", value: "$\(Int(investment))")
+                    }
+
+                    NudgeSaysCard(
+                        message: nudgeLine,
+                        showCoin: false,
+                        surface: .paleGreen
+                    )
+                }
+
+                Button {
+                    financeIncome = income > 0 ? "\(Int(income))" : ""
+                    financeSavings = savings > 0 ? "\(Int(savings))" : ""
+                    financeInvestment = investment > 0 ? "\(Int(investment))" : ""
+                    showFinanceEditor = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: isEmpty ? "plus.circle.fill" : "pencil.circle.fill")
+                        Text(isEmpty ? "Add your numbers" : "Update")
+                    }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(DS.goldBase)
+                }
+            }
+            .padding(16)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(DS.goldBase, lineWidth: 2)
+            )
+            .premiumCardShadow()
+        }
+        .sheet(isPresented: $showFinanceEditor) {
+            financeEditorSheet
+                .presentationDetents([.medium])
+        }
+    }
+
+    private func financeStatItem(label: String, value: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(size: 18, weight: .black, design: .serif))
+                .foregroundStyle(DS.goldBase)
+            Text(label)
+                .font(.system(size: 9, weight: .heavy, design: .rounded))
+                .tracking(1.0)
+                .foregroundStyle(DS.textTertiary)
+        }
+    }
+
+    private var financeEditorSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                NudgeSaysCard(
+                    message: "All voluntary. No bank connection. Just you and your numbers.",
+                    citation: "Privacy Act 1988 only",
+                    surface: .paleGreen
+                )
+
+                VStack(spacing: 14) {
+                    financeField(label: "Monthly take-home", text: $financeIncome, icon: "dollarsign.circle")
+                    financeField(label: "Savings balance", text: $financeSavings, icon: "leaf")
+                    financeField(label: "Investment balance", text: $financeInvestment, icon: "chart.line.uptrend.xyaxis")
+                }
+
+                Spacer()
+            }
+            .padding(20)
+            .background(DS.bg)
+            .navigationTitle("Your finances")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { showFinanceEditor = false }
+                        .foregroundStyle(DS.textSecondary)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        Task {
+                            let inc = Double(financeIncome) ?? 0
+                            let sav = Double(financeSavings) ?? 0
+                            let inv = Double(financeInvestment) ?? 0
+                            try? await SupabaseService.shared.saveMonthlyIncome(inc)
+                            try? await SupabaseService.shared.saveBalanceSnapshot(savings: sav, investment: inv)
+                            await viewModel.load()
+                            showFinanceEditor = false
+                        }
+                    }
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(DS.goldBase)
+                }
+            }
+        }
+    }
+
+    private func financeField(label: String, text: Binding<String>, icon: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(DS.goldBase)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(DS.textSecondary)
+                TextField("$0", text: text)
+                    .font(.system(.title3, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                    .keyboardType(.numberPad)
+            }
+        }
+        .padding(14)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DS.goldBase.opacity(0.3), lineWidth: 1)
+        )
     }
 
     #if DEBUG

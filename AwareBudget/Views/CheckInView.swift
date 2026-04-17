@@ -290,49 +290,26 @@ struct CheckInView: View {
     }
 
     private func frontContent(for q: Question) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Question (lived-experience phrase) leads — biggest, boldest.
+        VStack(alignment: .leading, spacing: 12) {
             Text(q.question)
-                .font(.system(.title2, weight: .black))
+                .font(.system(.title3, weight: .black))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
                 .heroTextLegibility()
 
-            // Bias label (academic term) sits underneath as the
-            // smaller "what we're calling this" line.
-            HStack(spacing: 6) {
-                Text("THIS PATTERN ·")
-                    .font(.system(size: 9, weight: .heavy, design: .rounded))
-                    .tracking(1.2)
-                    .foregroundStyle(.white.opacity(0.65))
-                Text(q.biasName.uppercased())
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .tracking(1.4)
-                    .foregroundStyle(DS.goldText)
-            }
-
-            Text("Used in professional financial planning · BFAS framework · Pompian 2012")
-                .font(.system(.caption, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.85))
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .heroTextLegibility()
-
-            // Why section (collapsed by default)
             Button {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     showWhy.toggle()
                 }
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.bold))
-                        .rotationEffect(.degrees(showWhy ? 90 : 0))
+                    Image(systemName: showWhy ? "chevron.down" : "chevron.right")
+                        .font(.caption.weight(.bold))
                     Text("Why this matters")
-                        .font(.footnote.weight(.semibold))
+                        .font(.subheadline.weight(.semibold))
                     Spacer()
                 }
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(DS.goldText)
             }
             .buttonStyle(.plain)
 
@@ -345,19 +322,29 @@ struct CheckInView: View {
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
+            HStack(spacing: 6) {
+                Text(q.biasName.uppercased())
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundStyle(DS.goldText)
+                Text("· BFAS · Pompian 2012")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.5))
+            }
+
             Spacer(minLength: 0)
 
             HStack(spacing: 12) {
                 Button { swipeYes() } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark")
-                            .font(.headline.weight(.bold))
+                            .font(.title3.weight(.bold))
                         Text("Yes")
                     }
-                    .font(.headline.weight(.bold))
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(DS.matteYellowForeground)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                    .padding(.vertical, 16)
                     .background(DS.matteYellow, in: Capsule())
                 }
                 .buttonStyle(.plain)
@@ -365,18 +352,18 @@ struct CheckInView: View {
                 Button { swipeNo() } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "xmark")
-                            .font(.headline.weight(.bold))
+                            .font(.title3.weight(.bold))
                         Text("No")
                     }
-                    .font(.headline.weight(.bold))
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                    .padding(.vertical, 16)
                     .background(DS.danger, in: Capsule())
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.top, 16)
+            .padding(.top, 8)
         }
     }
 

@@ -21,6 +21,10 @@ final class HomeViewModel {
     var eventLoggingStreak: Int = 0
     var patternAlerts: [PatternAlert] = []
     var dailyPatterns: [DailyPattern] = []
+    var monthlyIncome: Double = 0
+    var latestSavings: Double = 0
+    var latestInvestment: Double = 0
+    var financeLastUpdated: Date?
     var isLoading = false
     var errorMessage: String?
 
@@ -258,6 +262,15 @@ final class HomeViewModel {
             }
             eventLoggingStreak = eStreak
             streak = max(streak, eventLoggingStreak)
+
+            // Finance data
+            monthlyIncome = (try? await service.fetchMonthlyIncome()) ?? 0
+            let snapshots = (try? await service.fetchBalanceSnapshots(monthsBack: 1)) ?? []
+            if let latest = snapshots.last {
+                latestSavings = latest.savings_balance
+                latestInvestment = latest.investment_balance
+                financeLastUpdated = latest.recorded_at
+            }
 
             // Build Nudge context and get message
             buildNudge(recentCheckIns: weekHistory, weekEvents: weekEvents, daysSinceLastEvent: daysSinceLastEvent)
