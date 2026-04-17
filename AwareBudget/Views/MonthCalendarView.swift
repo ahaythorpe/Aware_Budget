@@ -128,10 +128,9 @@ struct MonthCalendarView: View {
                 }
 
                 if !topTags.isEmpty {
-                    ForEach(Array(topTags.enumerated()), id: \.element.key) { idx, pair in
-                        if idx > 0 { Divider() }
+                    ForEach(Array(topTags.enumerated()), id: \.element.key) { _, pair in
                         let lesson = lessonLookup[pair.key]
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 5) {
                             HStack(spacing: 6) {
                                 Text(lesson?.emoji ?? "🧠")
                                     .font(.system(size: 16))
@@ -164,6 +163,12 @@ struct MonthCalendarView: View {
                                 }
                             }
                         }
+                        .padding(10)
+                        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(DS.goldBase, lineWidth: 1.5)
+                        )
                     }
                 } else {
                     Text("No patterns tagged")
