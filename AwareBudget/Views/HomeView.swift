@@ -375,18 +375,25 @@ struct HomeView: View {
         }
     }
 
+    @State private var showFinanceSkipNudge = false
+
     private var financeEditorSheet: some View {
-        NavigationStack {
+        ZStack {
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
+
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 18) {
                     Text("Your finances")
                         .font(.system(size: 28, weight: .black))
                         .foregroundStyle(.white)
                         .heroTextLegibility()
+                        .padding(.top, 20)
 
                     NudgeSaysCard(
-                        message: "All voluntary. No bank connection. Just you and your numbers.",
-                        citation: "Privacy Act 1988 only",
+                        message: "This is 100% voluntary. MoneyMind never connects to your bank — you type your own numbers. Under Australian law, that means only the Privacy Act 1988 applies. No financial licence, no CDR, no regulation beyond basic data privacy.",
+                        citation: "Privacy Act 1988 (Cth) · no AFSL · no CDR",
                         surface: .dark
                     )
 
@@ -410,23 +417,56 @@ struct HomeView: View {
                         Text("Save →")
                     }
                     .goldButtonStyle()
-                    .padding(.top, 8)
+                    .padding(.top, 4)
+
+                    Button {
+                        showFinanceSkipNudge = true
+                    } label: {
+                        Text("Skip for now")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+                    .padding(.bottom, 32)
                 }
-                .padding(20)
+                .padding(.horizontal, 20)
             }
-            .background(
-                DS.heroGradient
-                    .shimmerOverlay(duration: 4.5, intensity: 0.22)
-                    .ignoresSafeArea()
-            )
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { showFinanceEditor = false }
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.white)
+
+            if showFinanceSkipNudge {
+                financeSkipNudge
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: showFinanceSkipNudge)
+    }
+
+    private var financeSkipNudge: some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture { showFinanceSkipNudge = false }
+
+            VStack(spacing: 16) {
+                NudgeSaysCard(
+                    message: "The trend graph only works when it has numbers to compare. Without income and savings, Nudge can't show you how awareness changes your finances. It takes 30 seconds.",
+                    citation: "Thaler 1999 · tracking categories = 15–20% more saved",
+                    surface: .gold
+                )
+
+                Button { showFinanceSkipNudge = false } label: {
+                    Text("OK, I'll add them")
                 }
+                .goldButtonStyle()
+
+                Button {
+                    showFinanceSkipNudge = false
+                    showFinanceEditor = false
+                } label: {
+                    Text("Skip anyway")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(DS.warning)
+                }
+                .padding(.bottom, 8)
             }
+            .padding(24)
         }
     }
 

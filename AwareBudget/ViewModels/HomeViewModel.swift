@@ -228,25 +228,23 @@ final class HomeViewModel {
                 weekSpendTrendUp = nil
             }
 
-            // Today's events + days since last event
+            // Event logging streak (consecutive days with events)
+            let allEvents = try await service.fetchMoneyEvents(forMonth: Date())
+
+            // Today's events + days since last event (use allEvents — proven reliable)
             let fmt = DateFormatter.localDateOnly
             let todayStr = fmt.string(from: Date())
-            hasLoggedEventToday = recentEvents.contains { event in
-                fmt.string(from: event.date) == todayStr
-            }
+            let allSorted = allEvents.sorted { $0.date > $1.date }
+            hasLoggedEventToday = allSorted.contains { fmt.string(from: $0.date) == todayStr }
 
-            // Days since last event
             let daysSinceLastEvent: Int
             if hasLoggedEventToday {
                 daysSinceLastEvent = 0
-            } else if let latestEvent = recentEvents.sorted(by: { $0.date > $1.date }).first {
+            } else if let latestEvent = allSorted.first {
                 daysSinceLastEvent = max(0, Calendar.current.dateComponents([.day], from: latestEvent.date, to: Date()).day ?? 0)
             } else {
                 daysSinceLastEvent = 999
             }
-
-            // Event logging streak (consecutive days with events)
-            let allEvents = try await service.fetchMoneyEvents(forMonth: Date())
             monthEventsByDay = Dictionary(grouping: allEvents, by: {
                 fmt.string(from: $0.date)
             })
