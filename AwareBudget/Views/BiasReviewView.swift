@@ -336,26 +336,49 @@ struct BiasReviewView: View {
     }
 
     private func reviewButton(icon: String, label: String, tint: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        // The Yes row gets the full matte-yellow background per the
+        // brand spec (Yes = matte yellow everywhere). Other rows
+        // (Not sure / Different) stay white card with shimmer border.
+        let isYes = (tint == DS.matteYellow)
+        return Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 22))
-                    .foregroundStyle(tint)
+                    .foregroundStyle(isYes ? DS.matteYellowForeground : tint)
                 Text(label)
                     .font(.system(.headline, weight: .bold))
-                    .foregroundStyle(DS.textPrimary)
+                    .foregroundStyle(isYes ? DS.matteYellowForeground : DS.textPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(DS.textTertiary)
+                    .foregroundStyle(isYes ? DS.matteYellowForeground.opacity(0.6) : DS.textTertiary)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-            .shimmeringGoldBorder(cornerRadius: DS.cardRadius, lineWidth: 2.5)
+            .background(
+                isYes ? AnyShapeStyle(DS.matteYellow) : AnyShapeStyle(DS.cardBg),
+                in: RoundedRectangle(cornerRadius: DS.cardRadius)
+            )
+            .modifier(YesRowBorder(isYes: isYes))
             .premiumCardShadow()
         }
         .buttonStyle(.plain)
+    }
+
+    /// Yes row gets a thin matte-yellow-darker stroke instead of the
+    /// shimmer gold border (which would clash with the yellow fill).
+    private struct YesRowBorder: ViewModifier {
+        let isYes: Bool
+        func body(content: Content) -> some View {
+            if isYes {
+                content.overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.matteYellowForeground.opacity(0.25), lineWidth: 1)
+                )
+            } else {
+                content.shimmeringGoldBorder(cornerRadius: DS.cardRadius, lineWidth: 2.5)
+            }
+        }
     }
 
     // MARK: - Alternative picker ("No, different reason" branch)
