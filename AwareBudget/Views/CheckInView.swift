@@ -290,26 +290,35 @@ struct CheckInView: View {
     }
 
     private func frontContent(for q: Question) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(q.question)
-                .font(.system(.title3, weight: .black))
+                .font(.system(size: 22, weight: .black))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
                 .heroTextLegibility()
+                .padding(.bottom, 2)
+
+            Text(q.biasName)
+                .font(.system(.subheadline, weight: .medium))
+                .foregroundStyle(.white.opacity(0.7))
+            + Text(" · Pompian 2012")
+                .font(.system(.caption, weight: .regular))
+                .foregroundStyle(.white.opacity(0.4))
 
             Button {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     showWhy.toggle()
                 }
             } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     Image(systemName: showWhy ? "chevron.down" : "chevron.right")
-                        .font(.caption.weight(.bold))
+                        .font(.caption2.weight(.bold))
                     Text("Why this matters")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.footnote.weight(.semibold))
                     Spacer()
                 }
                 .foregroundStyle(DS.goldText)
+                .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
 
@@ -322,29 +331,19 @@ struct CheckInView: View {
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
-            HStack(spacing: 6) {
-                Text(q.biasName.uppercased())
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .tracking(1.4)
-                    .foregroundStyle(DS.goldText)
-                Text("· BFAS · Pompian 2012")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.5))
-            }
-
             Spacer(minLength: 0)
 
             HStack(spacing: 12) {
                 Button { swipeYes() } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark")
-                            .font(.title3.weight(.bold))
+                            .font(.headline.weight(.bold))
                         Text("Yes")
                     }
-                    .font(.title3.weight(.bold))
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(DS.matteYellowForeground)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 14)
                     .background(DS.matteYellow, in: Capsule())
                 }
                 .buttonStyle(.plain)
@@ -352,18 +351,17 @@ struct CheckInView: View {
                 Button { swipeNo() } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "xmark")
-                            .font(.title3.weight(.bold))
+                            .font(.headline.weight(.bold))
                         Text("No")
                     }
-                    .font(.title3.weight(.bold))
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 14)
                     .background(DS.danger, in: Capsule())
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.top, 8)
         }
     }
 
@@ -433,9 +431,17 @@ struct CheckInView: View {
                         .padding(.horizontal, 20)
                         .padding(.vertical, 11)
                 } else {
-                    Text(selectedDriver != nil ? "Continue" : "Skip")
-                        .font(.system(size: 13, weight: .bold))
-                        .goldButtonStyle()
+                    Text(selectedDriver != nil ? "Continue →" : "Skip")
+                        .font(.system(.footnote, weight: .bold))
+                        .foregroundStyle(selectedDriver != nil ? DS.goldForeground : .white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 10)
+                        .background(
+                            selectedDriver != nil
+                                ? AnyShapeStyle(DS.matteYellow)
+                                : AnyShapeStyle(Color.white.opacity(0.15)),
+                            in: Capsule()
+                        )
                 }
             }
             .buttonStyle(.plain)
