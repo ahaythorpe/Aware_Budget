@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-04-17 (session 2) — Streak fix, date bug, Insights expansion, UI polish (Claude Code)
+
+**Critical fixes:**
+- UTC date encoding bug: events saved as wrong day in AEST (ISO8601 UTC
+  truncation). Now encodes local date string for DATE columns.
+- Streak counted only check-ins, not event logging. Now uses max of both.
+- Date comparisons across app switched to local timezone formatter.
+- Onboarding quiz had transparent background (Home bled through). Fixed
+  with opaque DS.bg / heroGradient.
+
+**New Insights sections:**
+- Income vs Spending: auto-calculates expenses from logged events, derives
+  savings = income − expenses. NudgeSaysCard with O'Donoghue & Rabin 1999
+  citation. Info popup explains methodology.
+- Bias Impact Analysis: before/after spending comparison per identified bias.
+  Literature popup with Kahneman 2011, Fischhoff 1982 citations.
+
+**UI/UX design system updates:**
+- Button rules locked: Yes = matteYellow (left), No = red/danger (right).
+  NuggetGold gradient reserved for primary CTAs only.
+- All full-screen flows (onboarding, BFAS) get heroGradient metallic green
+  background with shimmer overlay.
+- BFAS: thick goldBase 2.5pt card border, goldBase Yes button, white
+  heroTextLegibility header, frosted gold citation footer.
+- Onboarding quiz: hero gradient + compact white-on-dark pills with checkmark.
+- CheckIn "Why this matters" → canonical NudgeSaysCard(surface: .dark).
+- Calendar popup: compact Apple-style (no counter sentences, dot indicators).
+- NudgeSaysCard: new .dark surface variant for dark green backgrounds.
+
+---
+
 ## 2026-04-17 — Big day: rigour foundation + B/C layers + finance trend (Claude Code)
 
 Long session that landed the algorithm-rigour foundation, the

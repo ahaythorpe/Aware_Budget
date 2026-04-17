@@ -114,9 +114,10 @@ struct BFASAssessmentView: View {
             .padding(.horizontal, 18)
 
             Text("QUESTION \(index + 1) OF \(questions.count)")
-                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(DS.goldText)
+                .foregroundStyle(.white)
+                .heroTextLegibility()
         }
     }
 
