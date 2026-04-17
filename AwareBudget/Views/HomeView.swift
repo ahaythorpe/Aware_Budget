@@ -384,30 +384,16 @@ struct HomeView: View {
 
             VStack(spacing: 20) {
                 HStack {
-                    Button("Cancel") { showFinanceEditor = false }
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.white.opacity(0.7))
                     Spacer()
-                    Button {
-                        Task {
-                            let inc = Double(financeIncome) ?? 0
-                            let sav = Double(financeSavings) ?? 0
-                            let inv = Double(financeInvestment) ?? 0
-                            try? await SupabaseService.shared.saveMonthlyIncome(inc)
-                            try? await SupabaseService.shared.saveBalanceSnapshot(savings: sav, investment: inv)
-                            await viewModel.load()
-                            showFinanceEditor = false
-                        }
-                    } label: {
-                        Text("Save")
+                    Button { showFinanceEditor = false } label: {
+                        Image(systemName: "xmark")
                             .font(.subheadline.weight(.bold))
-                            .foregroundStyle(DS.goldForeground)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 8)
-                            .background(DS.matteYellow, in: Capsule())
+                            .foregroundStyle(.white)
+                            .padding(10)
+                            .background(.white.opacity(0.15), in: Circle())
                     }
                 }
-                .padding(.top, 16)
+                .padding(.top, 12)
 
                 Text("Your finances")
                     .font(.system(size: 28, weight: .black))
@@ -427,6 +413,22 @@ struct HomeView: View {
                 }
 
                 Spacer()
+
+                Button {
+                    Task {
+                        let inc = Double(financeIncome) ?? 0
+                        let sav = Double(financeSavings) ?? 0
+                        let inv = Double(financeInvestment) ?? 0
+                        try? await SupabaseService.shared.saveMonthlyIncome(inc)
+                        try? await SupabaseService.shared.saveBalanceSnapshot(savings: sav, investment: inv)
+                        await viewModel.load()
+                        showFinanceEditor = false
+                    }
+                } label: {
+                    Text("Save →")
+                }
+                .goldButtonStyle()
+                .padding(.bottom, 24)
             }
             .padding(.horizontal, 20)
         }
