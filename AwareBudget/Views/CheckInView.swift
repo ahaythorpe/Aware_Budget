@@ -130,11 +130,20 @@ struct CheckInView: View {
         }
         .animation(.spring(response: 0.32, dampingFraction: 0.85), value: showSkipChastise)
         .toolbar {
-            if selectedTab == nil {
+            if alreadyCheckedIn != nil || phase == .done {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        if let selectedTab { selectedTab.wrappedValue = .home } else { dismiss() }
+                    } label: {
+                        Text("Done")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(alreadyCheckedIn != nil || phase == .done ? DS.goldBase : .white)
+                    }
+                }
+            }
+            if selectedTab == nil && alreadyCheckedIn == nil && phase != .done {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
-                        // Chastise instead of immediate dismiss — same
-                        // Nudge popup as the driver-pick Skip button.
                         skipOrigin = .toolbarX
                         showSkipChastise = true
                     } label: {
