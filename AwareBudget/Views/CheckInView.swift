@@ -133,7 +133,7 @@ struct CheckInView: View {
             if alreadyCheckedIn != nil || phase == .done {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        if let selectedTab { selectedTab.wrappedValue = .home } else { dismiss() }
+                        dismiss()
                     } label: {
                         Text("Done")
                             .font(.subheadline.weight(.bold))
@@ -613,8 +613,6 @@ struct CheckInView: View {
 
                 Button {
                     if let selectedTab {
-                        selectedTab.wrappedValue = .home
-                    } else {
                         dismiss()
                     }
                 } label: {
@@ -660,8 +658,6 @@ struct CheckInView: View {
 
                 Button {
                     if let selectedTab {
-                        selectedTab.wrappedValue = .home
-                    } else {
                         dismiss()
                     }
                 } label: {
