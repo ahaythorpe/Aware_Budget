@@ -63,7 +63,11 @@ struct CheckInView: View {
 
     var body: some View {
         ZStack {
-            DS.bg.ignoresSafeArea()
+            if alreadyCheckedIn != nil || phase == .done {
+                Color.clear
+            } else {
+                DS.bg.ignoresSafeArea()
+            }
 
             VStack(spacing: 16) {
                 if let existing = alreadyCheckedIn {
