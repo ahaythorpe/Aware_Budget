@@ -563,84 +563,102 @@ struct CheckInView: View {
     // MARK: - Completion
 
     private var completionView: some View {
-        VStack(spacing: 24) {
-            ZStack {
-                Circle()
-                    .fill(DS.paleGreen)
-                    .frame(width: 120, height: 120)
-                Image(systemName: "checkmark")
-                    .font(.system(size: 56, weight: .bold))
-                    .foregroundStyle(DS.darkGreen)
-            }
-            .sensoryFeedback(.success, trigger: phase == .done)
+        ZStack {
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
 
-            VStack(spacing: 6) {
-                Text("Day \(savedStreak)")
-                    .font(.title.weight(.bold))
-                    .foregroundStyle(DS.textPrimary)
-                Text("\(attemptedCount) question\(attemptedCount == 1 ? "" : "s") reflected on")
-                    .font(.subheadline)
-                    .foregroundStyle(DS.textSecondary)
-                    .multilineTextAlignment(.center)
+            VStack(spacing: 24) {
+                Spacer()
 
-                if let driver = selectedDriver {
-                    Text("Driver: \(driver.emoji) \(driver.label)")
-                        .font(.footnote.weight(.medium))
-                        .foregroundStyle(DS.accent)
-                        .padding(.top, 4)
+                NudgeAvatar(size: 80)
+                    .sensoryFeedback(.success, trigger: phase == .done)
+
+                VStack(spacing: 8) {
+                    Text("Day \(savedStreak)")
+                        .font(.system(size: 42, weight: .black, design: .rounded))
+                        .foregroundStyle(DS.goldText)
+
+                    Text("\(attemptedCount) question\(attemptedCount == 1 ? "" : "s") reflected on")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.8))
+
+                    if let driver = selectedDriver {
+                        Text("\(driver.emoji) \(driver.shortDescription)")
+                            .font(.footnote.weight(.bold))
+                            .foregroundStyle(DS.goldText)
+                            .padding(.top, 4)
+                    }
                 }
-            }
 
-            if let nudge = nudgeCompletionMessage {
-                NudgeCardView(message: nudge)
-            }
-
-            Button("Done") {
-                if let selectedTab {
-                    selectedTab.wrappedValue = .home
-                } else {
-                    dismiss()
+                if let nudge = nudgeCompletionMessage {
+                    NudgeCardView(message: nudge)
+                        .padding(.horizontal, DS.hPadding)
                 }
+
+                Spacer()
+
+                Button {
+                    if let selectedTab {
+                        selectedTab.wrappedValue = .home
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    Text("Done →")
+                }
+                .goldButtonStyle()
+                .padding(.horizontal, DS.hPadding)
+                .padding(.bottom, 40)
             }
-            .buttonStyle(PrimaryButtonStyle())
-            .padding(.horizontal, DS.hPadding)
-            .padding(.top, 8)
         }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Already checked in today
 
     private func alreadyDoneView(_ checkIn: CheckIn) -> some View {
-        VStack(spacing: 24) {
-            Spacer()
+        ZStack {
+            DS.heroGradient
+                .shimmerOverlay(duration: 4.5, intensity: 0.22)
+                .ignoresSafeArea()
 
-            NudgeAvatar(size: 72)
+            VStack(spacing: 24) {
+                Spacer()
 
-            VStack(spacing: 8) {
-                Text("You checked in today.")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(DS.textPrimary)
+                NudgeAvatar(size: 72)
 
-                Text("Day \(checkIn.streakCount)")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundStyle(DS.accent)
+                VStack(spacing: 8) {
+                    Text("You checked in today.")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .heroTextLegibility()
 
-                if checkIn.questionId != nil {
-                    Text("Bias reflected on today")
-                        .font(.caption)
-                        .foregroundStyle(DS.textTertiary)
+                    Text("Day \(checkIn.streakCount)")
+                        .font(.system(size: 42, weight: .black, design: .rounded))
+                        .foregroundStyle(DS.goldText)
+
+                    Text("Come back tomorrow")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .padding(.top, 4)
                 }
 
-                Text("Come back tomorrow")
-                    .font(.subheadline)
-                    .foregroundStyle(DS.textSecondary)
-                    .padding(.top, 4)
-            }
+                Spacer()
 
-            Spacer()
+                Button {
+                    if let selectedTab {
+                        selectedTab.wrappedValue = .home
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    Text("Done →")
+                }
+                .goldButtonStyle()
+                .padding(.horizontal, DS.hPadding)
+                .padding(.bottom, 40)
+            }
         }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Load questions from Supabase (fallback to local mock)
