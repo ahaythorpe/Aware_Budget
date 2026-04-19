@@ -345,6 +345,20 @@ struct BiasAwarenessCard: View {
                         .foregroundStyle(DS.textSecondary)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
+
+                    if let lesson = BiasLessonsMock.seed.first(where: { $0.biasName == pattern.name }) {
+                        HStack(alignment: .top, spacing: 5) {
+                            Image(systemName: "lightbulb.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(DS.goldBase)
+                                .padding(.top, 2)
+                            Text(lesson.howToCounter.split(separator: ".").first.map { String($0) + "." } ?? lesson.howToCounter)
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(DS.accent)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+
                     ResearchFootnote(text: pattern.keyRef)
                         .padding(.top, 2)
                 }
