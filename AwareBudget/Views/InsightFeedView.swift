@@ -1185,27 +1185,42 @@ struct InsightFeedView: View {
     @ViewBuilder
     private func categoryTrendChart(series: [CategoryTrendPoint]) -> some View {
         let categories = Array(Set(series.map(\.category))).sorted()
-        let palette: [Color] = [DS.matteYellow, DS.primary, DS.accent, DS.deepGreen, DS.lightGreen]
+        let palette: [Color] = [DS.goldBase, DS.matteYellow, DS.accent, DS.deepGreen, DS.lightGreen]
+        let weekCount = Set(series.map(\.weekStart)).count
 
         VStack(alignment: .leading, spacing: 10) {
             Chart(series) { point in
                 let isExpanded = expandedCategory == nil || expandedCategory == point.category
-                LineMark(
-                    x: .value("Week", point.weekStart),
-                    y: .value("Amount", point.amount),
-                    series: .value("Category", point.category)
-                )
-                .foregroundStyle(by: .value("Category", point.category))
-                .interpolationMethod(.catmullRom)
-                .lineStyle(StrokeStyle(
-                    lineWidth: expandedCategory == point.category ? 3 : 2,
-                    lineCap: .round
-                ))
-                .opacity(isExpanded ? 1.0 : 0.18)
+                if weekCount > 1 {
+                    LineMark(
+                        x: .value("Week", point.weekStart),
+                        y: .value("Amount", point.amount),
+                        series: .value("Category", point.category)
+                    )
+                    .foregroundStyle(by: .value("Category", point.category))
+                    .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: expandedCategory == point.category ? 3 : 2, lineCap: .round))
+                    .opacity(isExpanded ? 1.0 : 0.18)
+
+                    PointMark(
+                        x: .value("Week", point.weekStart),
+                        y: .value("Amount", point.amount)
+                    )
+                    .foregroundStyle(by: .value("Category", point.category))
+                    .opacity(isExpanded ? 1.0 : 0.18)
+                } else {
+                    BarMark(
+                        x: .value("Category", point.category),
+                        y: .value("Amount", point.amount)
+                    )
+                    .foregroundStyle(by: .value("Category", point.category))
+                    .cornerRadius(6)
+                    .opacity(isExpanded ? 1.0 : 0.18)
+                }
             }
             .chartForegroundStyleScale(domain: categories, range: Array(palette.prefix(categories.count)))
             .chartLegend(.hidden)
-            .frame(height: 180)
+            .frame(height: 200)
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
                     AxisValueLabel {
@@ -1217,18 +1232,15 @@ struct InsightFeedView: View {
                     }
                 }
             }
-            // Tappable legend doubles as the expand/collapse control.
             categoryLegend(categories: categories, palette: palette)
 
-            if let expanded = expandedCategory {
-                Text("Showing \(expanded) only — tap again to see all.")
-                    .font(.system(.caption, weight: .medium))
-                    .foregroundStyle(DS.textSecondary)
-            } else {
-                Text("Tap a category to focus its trend.")
-                    .font(.system(.caption, weight: .medium))
-                    .foregroundStyle(DS.textTertiary)
-            }
+            NudgeSaysCard(
+                message: weekCount > 1
+                    ? "Tap a category to focus its trend."
+                    : "This shows spending per category this week. Lines appear as you log across more weeks.",
+                showCoin: false,
+                surface: .paleGreen
+            )
         }
         .padding(16)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
