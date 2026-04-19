@@ -99,8 +99,7 @@ struct HomeView: View {
                     VStack(spacing: 5) {
                         Text("\(viewModel.streak)")
                             .font(.system(size: 40, weight: .black, design: .serif))
-                            .foregroundStyle(DS.nuggetGold)
-                            .shimmerOverlay(duration: 5.0, intensity: 0.14)
+                            .foregroundStyle(DS.goldText)
                         Text("🔥 DAY STREAK")
                             .font(.system(size: 10, weight: .heavy, design: .rounded))
                             .tracking(1.0)

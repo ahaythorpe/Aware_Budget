@@ -36,6 +36,7 @@ struct ResearchView: View {
                 frameworkSection
                 howRankingWorks
                 allBiasesSection
+                spotAndOvercomeSection
                 Spacer(minLength: 32)
             }
             .padding(.horizontal, DS.hPadding)
@@ -218,6 +219,79 @@ struct ResearchView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Spot & Overcome
+
+    private var spotAndOvercomeSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("HOW TO SPOT & OVERCOME")
+
+            NudgeSaysCard(
+                message: "Awareness is the first step. Below are practical, research-backed strategies for each bias.",
+                citation: "Fischhoff 1982 · Larrick 2004 · Soll et al. 2015",
+                surface: .gold
+            )
+
+            ForEach(BiasLessonsMock.seed, id: \.id) { lesson in
+                overcomeCard(lesson)
+            }
+        }
+    }
+
+    private func overcomeCard(_ lesson: BiasLesson) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Text(lesson.emoji)
+                    .font(.system(size: 22))
+                Text(lesson.biasName)
+                    .font(.system(.subheadline, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top, spacing: 6) {
+                    Image(systemName: "eye.fill")
+                        .font(.caption)
+                        .foregroundStyle(DS.goldBase)
+                        .frame(width: 16)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("HOW TO SPOT IT")
+                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                            .tracking(1.0)
+                            .foregroundStyle(DS.goldBase)
+                        Text(lesson.shortDescription)
+                            .font(.caption)
+                            .foregroundStyle(DS.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                HStack(alignment: .top, spacing: 6) {
+                    Image(systemName: "lightbulb.fill")
+                        .font(.caption)
+                        .foregroundStyle(DS.accent)
+                        .frame(width: 16)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("HOW TO OVERCOME IT")
+                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                            .tracking(1.0)
+                            .foregroundStyle(DS.accent)
+                        Text(lesson.howToCounter)
+                            .font(.caption)
+                            .foregroundStyle(DS.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase, lineWidth: 1.5)
         )
     }
 
