@@ -141,7 +141,7 @@ struct GoldButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.system(.headline, weight: .bold))
-            .foregroundStyle(DS.goldForeground)
+            .foregroundStyle(Color.white)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
