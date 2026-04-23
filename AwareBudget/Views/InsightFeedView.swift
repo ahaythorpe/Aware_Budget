@@ -37,6 +37,7 @@ struct InsightFeedView: View {
                         financialOverviewSection
                         highestExpenseCard
                         financialTrendChart
+                        wealthSnapshotSection
                         biasTrendChart
                         netWorthTrendSection
                         categoryTrendSection
@@ -405,6 +406,134 @@ struct InsightFeedView: View {
         let expenses: Double
         let savings: Double
     }
+
+    // MARK: - Wealth Snapshot (savings + investment lines)
+
+    @State private var wealthRange: WealthRange = .threeMonths
+    enum WealthRange: String, CaseIterable { case threeMonths = "3M", sixMonths = "6M", all = "All" }
+
+    private var wealthSnapshotSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Wealth snapshot")
+
+            if balanceSnapshots.count < 2 {
+                NudgeSaysCard(
+                    message: "Log your balances monthly in Your Finances to see your wealth story here.",
+                    citation: "Manual snapshots only · no bank connection",
+                    surface: .gold
+                )
+            } else {
+                let filtered = filteredSnapshots()
+                let savingsPoints = filtered.map { $0.savings_balance }
+                let investPoints = filtered.map { $0.investment_balance }
+                let allValues = savingsPoints + investPoints
+                let floor = (allValues.min() ?? 0) * 0.9
+                let ceiling = Swift.max((allValues.max() ?? 10) * 1.1, floor + 10)
+                let domain = floor...ceiling
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Picker("Range", selection: $wealthRange) {
+                        ForEach(WealthRange.allCases, id: \.self) { r in
+                            Text(r.rawValue).tag(r)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 4)
+
+                    let monthFmt: DateFormatter = {
+                        let f = DateFormatter()
+                        f.dateFormat = "MMM yy"
+                        return f
+                    }()
+
+                    Chart {
+                        ForEach(filtered, id: \.id) { snap in
+                            LineMark(
+                                x: .value("Date", snap.recorded_at),
+                                y: .value("Savings", snap.savings_balance),
+                                series: .value("Type", "Savings")
+                            )
+                            .foregroundStyle(DS.accent)
+                            .interpolationMethod(.catmullRom)
+                            .lineStyle(StrokeStyle(lineWidth: 2.5))
+
+                            PointMark(
+                                x: .value("Date", snap.recorded_at),
+                                y: .value("Savings", snap.savings_balance)
+                            )
+                            .foregroundStyle(DS.accent)
+                            .symbolSize(25)
+
+                            LineMark(
+                                x: .value("Date", snap.recorded_at),
+                                y: .value("Investments", snap.investment_balance),
+                                series: .value("Type", "Investments")
+                            )
+                            .foregroundStyle(DS.goldBase)
+                            .interpolationMethod(.catmullRom)
+                            .lineStyle(StrokeStyle(lineWidth: 2.5))
+
+                            PointMark(
+                                x: .value("Date", snap.recorded_at),
+                                y: .value("Investments", snap.investment_balance)
+                            )
+                            .foregroundStyle(DS.goldBase)
+                            .symbolSize(25)
+                        }
+                    }
+                    .chartYScale(domain: domain)
+                    .frame(height: 180)
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { value in
+                            AxisValueLabel {
+                                if let v = value.as(Double.self) {
+                                    Text(ChartScaling.dollarLabel(v))
+                                        .font(.caption2)
+                                        .foregroundStyle(DS.textTertiary)
+                                }
+                            }
+                        }
+                    }
+                    .animation(.easeInOut, value: wealthRange)
+
+                    HStack(spacing: 14) {
+                        legendDot(color: DS.accent, label: "Savings")
+                        legendDot(color: DS.goldBase, label: "Investments")
+                    }
+
+                    NudgeSaysCard(
+                        message: "Manual snapshots only. No bank connection. Your numbers, your story.",
+                        showCoin: false,
+                        surface: .paleGreen
+                    )
+                }
+                .padding(16)
+                .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.goldBase, lineWidth: 2)
+                )
+                .premiumCardShadow()
+            }
+        }
+    }
+
+    private func filteredSnapshots() -> [SupabaseService.BalanceSnapshot] {
+        let cal = Calendar.current
+        let now = Date()
+        switch wealthRange {
+        case .threeMonths:
+            let cutoff = cal.date(byAdding: .month, value: -3, to: now) ?? now
+            return balanceSnapshots.filter { $0.recorded_at >= cutoff }
+        case .sixMonths:
+            let cutoff = cal.date(byAdding: .month, value: -6, to: now) ?? now
+            return balanceSnapshots.filter { $0.recorded_at >= cutoff }
+        case .all:
+            return balanceSnapshots
+        }
+    }
+
+    // MARK: - Monthly Trend chart
 
     private var financialTrendChart: some View {
         VStack(alignment: .leading, spacing: 12) {
