@@ -414,6 +414,7 @@ struct InsightFeedView: View {
             if data.isEmpty {
                 emptyCard(message: "Log events over multiple months to see your financial trend.")
             } else {
+                let finValues = data.flatMap { [$0.income, $0.expenses, $0.savings] }
                 VStack(alignment: .leading, spacing: 10) {
                     Chart {
                         ForEach(data) { item in
@@ -442,12 +443,13 @@ struct InsightFeedView: View {
                             .position(by: .value("Type", "Savings"))
                         }
                     }
+                    .chartYScale(domain: ChartScaling.yDomain(for: finValues))
                     .frame(height: 180)
                     .chartYAxis {
-                        AxisMarks(position: .leading) { value in
+                        AxisMarks(values: .stride(by: ChartScaling.yStride(for: finValues))) { value in
                             AxisValueLabel {
                                 if let v = value.as(Double.self) {
-                                    Text(shortAmount(v)).font(.caption2).foregroundStyle(DS.textTertiary)
+                                    Text(ChartScaling.dollarLabel(v)).font(.caption2).foregroundStyle(DS.textTertiary)
                                 }
                             }
                         }
@@ -529,6 +531,7 @@ struct InsightFeedView: View {
                 let palette: [Color] = [DS.goldBase, DS.matteYellow, DS.accent, DS.deepGreen, DS.lightGreen]
                 let weekCount = Set(data.map(\.weekLabel)).count
 
+                let biasValues = data.map(\.amount)
                 VStack(alignment: .leading, spacing: 10) {
                     Chart(data) { point in
                         if weekCount > 1 {
@@ -550,12 +553,13 @@ struct InsightFeedView: View {
                         .cornerRadius(6)
                     }
                     .chartForegroundStyleScale(domain: biases, range: Array(palette.prefix(biases.count)))
+                    .chartYScale(domain: ChartScaling.yDomain(for: biasValues))
                     .frame(height: 200)
                     .chartYAxis {
-                        AxisMarks(position: .leading) { value in
+                        AxisMarks(values: .stride(by: ChartScaling.yStride(for: biasValues))) { value in
                             AxisValueLabel {
                                 if let v = value.as(Double.self) {
-                                    Text(shortAmount(v)).font(.caption2).foregroundStyle(DS.textTertiary)
+                                    Text(ChartScaling.dollarLabel(v)).font(.caption2).foregroundStyle(DS.textTertiary)
                                 }
                             }
                         }
@@ -955,6 +959,7 @@ struct InsightFeedView: View {
         // the user actively identified a bias. Normalised to the same
         // y-range as net worth so the two read on one chart.
         let awareness = cumulativeAwareness(timestamps: awarenessTimestamps, normaliseTo: maxNet)
+        let nwValues = netWorth.map(\.value) + awareness.map(\.value)
         let trendInsight = computeTrendInsight(netWorth: netWorth, awareness: awarenessTimestamps)
 
         VStack(alignment: .leading, spacing: 10) {
@@ -1004,12 +1009,13 @@ struct InsightFeedView: View {
                     .interpolationMethod(.catmullRom)
                 }
             }
+            .chartYScale(domain: ChartScaling.yDomain(for: nwValues))
             .frame(height: 160)
             .chartYAxis {
-                AxisMarks(position: .leading) { value in
+                AxisMarks(values: .stride(by: ChartScaling.yStride(for: nwValues))) { value in
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
-                            Text(shortAmount(v))
+                            Text(ChartScaling.dollarLabel(v))
                                 .font(.caption2)
                                 .foregroundStyle(DS.textTertiary)
                         }
@@ -1187,6 +1193,12 @@ struct InsightFeedView: View {
         let categories = Array(Set(series.map(\.category))).sorted()
         let palette: [Color] = [DS.goldBase, DS.matteYellow, DS.accent, DS.deepGreen, DS.lightGreen]
         let weekCount = Set(series.map(\.weekStart)).count
+        let catValues: [Double] = {
+            if let focused = expandedCategory {
+                return series.filter { $0.category == focused }.map(\.amount)
+            }
+            return series.map(\.amount)
+        }()
 
         VStack(alignment: .leading, spacing: 10) {
             Chart(series) { point in
@@ -1219,19 +1231,21 @@ struct InsightFeedView: View {
                 }
             }
             .chartForegroundStyleScale(domain: categories, range: Array(palette.prefix(categories.count)))
+            .chartYScale(domain: ChartScaling.yDomain(for: catValues))
             .chartLegend(.hidden)
             .frame(height: 200)
             .chartYAxis {
-                AxisMarks(position: .leading) { value in
+                AxisMarks(values: .stride(by: ChartScaling.yStride(for: catValues))) { value in
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
-                            Text(shortAmount(v))
+                            Text(ChartScaling.dollarLabel(v))
                                 .font(.caption2)
                                 .foregroundStyle(DS.textTertiary)
                         }
                     }
                 }
             }
+            .animation(.easeInOut, value: expandedCategory)
             categoryLegend(categories: categories, palette: palette)
 
             NudgeSaysCard(
@@ -1346,6 +1360,7 @@ struct InsightFeedView: View {
             if patterns.isEmpty {
                 emptyCard(message: "Check in and log events to see bias patterns.")
             } else {
+                let freqValues = patterns.map { Double($0.count) }
                 Chart(patterns) { item in
                     BarMark(
                         x: .value("Count", item.count),
@@ -1365,6 +1380,7 @@ struct InsightFeedView: View {
                             .foregroundStyle(DS.textSecondary)
                     }
                 }
+                .chartXScale(domain: ChartScaling.yDomain(for: freqValues))
                 .frame(height: CGFloat(max(patterns.count, 1)) * 36)
                 .chartXAxis(.hidden)
                 .chartYAxis {
