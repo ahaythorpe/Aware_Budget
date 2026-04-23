@@ -69,6 +69,46 @@ struct AlgorithmExplainerSheet: View {
                     }
                 }
             }
+
+            let flaggedQuestions = MappingConfirmationStats.lowConfirmationQuestions()
+            if !flaggedQuestions.isEmpty {
+                sectionCard(title: "QUESTIONS UNDERPERFORMING") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("These specific bias×category questions are confirmed less than 30% of the time. The question wording may need refining.")
+                            .font(.system(.footnote, weight: .semibold))
+                            .foregroundStyle(DS.textSecondary)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                        ForEach(flaggedQuestions.prefix(5), id: \.questionKey) { row in
+                            HStack(alignment: .top, spacing: 10) {
+                                Image(systemName: "text.bubble.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(DS.warning)
+                                    .padding(.top, 2)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(row.questionKey.replacingOccurrences(of: "_", with: " × "))
+                                        .font(.system(.subheadline, weight: .bold))
+                                        .foregroundStyle(DS.textPrimary)
+                                    Text("\(Int(row.stats.confirmationRate * 100))% confirmed · \(row.stats.sampleSize) reviews")
+                                        .font(.system(.caption, weight: .semibold))
+                                        .foregroundStyle(DS.textSecondary)
+                                    Text("Q: \"\(BiasQuestionMatrix.question(for: row.questionKey.components(separatedBy: "_").first ?? "", category: row.questionKey.components(separatedBy: "_").last ?? ""))\"")
+                                        .font(.system(.caption2, weight: .medium))
+                                        .foregroundStyle(DS.textTertiary)
+                                        .italic()
+                                }
+                                Spacer()
+                            }
+                            .padding(10)
+                            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DS.cardRadius)
+                                    .stroke(DS.warning.opacity(0.3), lineWidth: 0.75)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 

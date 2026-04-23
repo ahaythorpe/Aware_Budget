@@ -611,25 +611,7 @@ struct BiasReviewView: View {
     /// One-line contextual question per bias — asked as the lead question
     /// on the review card, tailored to how that bias usually shows up.
     private func biasQuestion(bias: String, category: String, status: MoneyEvent.PlannedStatus) -> String? {
-        switch bias {
-        case "Social Proof":          return "Was this influenced by what others do?"
-        case "Availability Heuristic": return "Did a vivid recent memory drive this?"
-        case "Status Quo Bias":        return "Did you default to this out of habit?"
-        case "Anchoring":              return "Did a reference price shape your sense of 'fair'?"
-        case "Scarcity Heuristic":     return "Did urgency (\"only a few left\", \"sale ends\") push the buy?"
-        case "Ego Depletion":          return "Were you tired, stressed, or drained when you decided?"
-        case "Mental Accounting":      return "Did the money's label (bonus, refund, 'fun money', rent) make you treat it differently than ordinary income?"
-        case "Moral Licensing":        return "Did a recent good behaviour justify this spend?"
-        case "Present Bias":           return "Did you choose now over future you?"
-        case "Planning Fallacy":       return "Did this cost more than you expected it to?"
-        case "Loss Aversion":          return "Did the fear of losing weigh heavier than the chance of gaining?"
-        case "Sunk Cost Fallacy":      return "Did past spending on this pull you in further?"
-        case "Overconfidence Bias":    return "Were you more sure about this than evidence warranted?"
-        case "Framing Effect":         return "Did how it was presented ('save 30%' vs 'pay 70%') shape the choice?"
-        case "Denomination Effect":    return "Did paying by tap or card feel different to cash?"
-        case "Ostrich Effect":         return "Did you avoid info that might have stopped this?"
-        default:                       return nil
-        }
+        BiasQuestionMatrix.question(for: bias, category: category)
     }
 
     // MARK: - Completion screen

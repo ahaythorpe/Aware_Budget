@@ -56,7 +56,6 @@ enum MappingConfirmationStats {
         bias: String,
         outcome: Outcome
     ) {
-        // Local UserDefaults — fast, offline-safe, survives session.
         var all = loadAll()
         let key = MappingKey(category: category, status: status.rawValue, bias: bias)
         var stats = all[key.storageKey] ?? Stats()
@@ -67,6 +66,9 @@ enum MappingConfirmationStats {
         }
         all[key.storageKey] = stats
         save(all)
+
+        let questionKey = "\(bias)_\(category)"
+        recordQuestionKey(questionKey, outcome: outcome)
 
         // Push to Supabase fire-and-forget — survives reinstall AND
         // enables cross-user aggregation for the research deliverable.
@@ -145,5 +147,45 @@ enum MappingConfirmationStats {
     private static func save(_ all: [String: Stats]) {
         guard let data = try? JSONEncoder().encode(all) else { return }
         UserDefaults.standard.set(data, forKey: key)
+    }
+
+    // MARK: - Per-question tracking
+
+    private static let questionKey = "biasQuestionConfirmation.v1"
+
+    static func recordQuestionKey(_ qKey: String, outcome: Outcome) {
+        var all = loadQuestionStats()
+        var stats = all[qKey] ?? Stats()
+        switch outcome {
+        case .yes:       stats.yesCount += 1
+        case .notSure:   stats.notSureCount += 1
+        case .different: stats.differentCount += 1
+        }
+        all[qKey] = stats
+        saveQuestionStats(all)
+    }
+
+    static func questionStats(for qKey: String) -> Stats {
+        loadQuestionStats()[qKey] ?? Stats()
+    }
+
+    static func lowConfirmationQuestions(threshold: Double = 0.30, minSamples: Int = 20)
+    -> [(questionKey: String, stats: Stats)] {
+        loadQuestionStats()
+            .filter { $0.value.sampleSize >= minSamples && $0.value.confirmationRate < threshold }
+            .map { (questionKey: $0.key, stats: $0.value) }
+            .sorted { $0.stats.sampleSize > $1.stats.sampleSize }
+    }
+
+    private static func loadQuestionStats() -> [String: Stats] {
+        guard let data = UserDefaults.standard.data(forKey: questionKey),
+              let decoded = try? JSONDecoder().decode([String: Stats].self, from: data)
+        else { return [:] }
+        return decoded
+    }
+
+    private static func saveQuestionStats(_ all: [String: Stats]) {
+        guard let data = try? JSONEncoder().encode(all) else { return }
+        UserDefaults.standard.set(data, forKey: questionKey)
     }
 }
