@@ -101,6 +101,19 @@ final class SupabaseService {
         try await client.auth.signIn(email: email, password: password)
     }
 
+    func fetchFirstName() async -> String {
+        guard let session = try? await client.auth.session else { return "there" }
+        if let fullName = session.user.userMetadata["full_name"]?.value as? String,
+           let first = fullName.split(separator: " ").first {
+            return String(first)
+        }
+        if let email = session.user.email {
+            let local = String(email.split(separator: "@").first ?? "there")
+            return local.prefix(1).uppercased() + local.dropFirst()
+        }
+        return "there"
+    }
+
     /// DEBUG-only — ensures there's a valid Supabase session on every launch.
     /// Uses a persistent per-device test user stored in UserDefaults so saves
     /// and fetches actually have a user_id to associate with. In release

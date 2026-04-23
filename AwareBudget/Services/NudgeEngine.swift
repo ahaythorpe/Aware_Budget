@@ -51,17 +51,19 @@ enum NudgeEngine {
         isFirstOpen: Bool,
         streak: Int,
         checkedInToday: Bool,
-        loggedEventToday: Bool
+        loggedEventToday: Bool,
+        firstName: String = "there"
     ) -> String {
         if isFirstOpen {
             return "Hi, I'm Nudge. Ready to understand your money mind?"
         }
 
+        let name = firstName
         let timeGreeting: String
         switch hour {
-        case 0..<12:  timeGreeting = "Good morning"
-        case 12..<18: timeGreeting = "Good afternoon"
-        default:      timeGreeting = "Good evening"
+        case 0..<12:  timeGreeting = "Good morning, \(name)"
+        case 12..<18: timeGreeting = "Good afternoon, \(name)"
+        default:      timeGreeting = "Good evening, \(name)"
         }
 
         switch hour {

@@ -25,6 +25,7 @@ final class HomeViewModel {
     var latestSavings: Double = 0
     var latestInvestment: Double = 0
     var financeLastUpdated: Date?
+    var firstName: String = "there"
     var isLoading = false
     var errorMessage: String?
 
@@ -72,7 +73,8 @@ final class HomeViewModel {
             isFirstOpen: isFirstOpen,
             streak: streak,
             checkedInToday: todaysCheckIn != nil,
-            loggedEventToday: hasLoggedEventToday
+            loggedEventToday: hasLoggedEventToday,
+            firstName: firstName
         )
     }
 
@@ -113,6 +115,9 @@ final class HomeViewModel {
     func load() async {
         isLoading = true
         defer { isLoading = false }
+
+        firstName = await service.fetchFirstName()
+
         do {
             todaysCheckIn = try await service.fetchTodaysCheckIn()
             recentEvents = try await service.fetchRecentMoneyEvents(limit: 3)
@@ -243,7 +248,7 @@ final class HomeViewModel {
             } else if let latestEvent = allSorted.first {
                 daysSinceLastEvent = max(0, Calendar.current.dateComponents([.day], from: latestEvent.date, to: Date()).day ?? 0)
             } else {
-                daysSinceLastEvent = 999
+                daysSinceLastEvent = 0
             }
             monthEventsByDay = Dictionary(grouping: allEvents, by: {
                 fmt.string(from: $0.date)
@@ -316,7 +321,7 @@ final class HomeViewModel {
 
     // MARK: - Nudge
 
-    private func buildNudge(recentCheckIns: [CheckIn], weekEvents: [MoneyEvent], daysSinceLastEvent: Int = 999) {
+    private func buildNudge(recentCheckIns: [CheckIn], weekEvents: [MoneyEvent], daysSinceLastEvent: Int = 0) {
         guard !NudgeDismissStore.isDismissed else {
             nudgeMessage = nil
             return
@@ -331,7 +336,7 @@ final class HomeViewModel {
         } else if let latest = recentCheckIns.sorted(by: { $0.date > $1.date }).first {
             daysSinceLast = max(0, Calendar.current.dateComponents([.day], from: latest.date, to: Date()).day ?? 0)
         } else {
-            daysSinceLast = 999
+            daysSinceLast = 0
         }
 
         // Top behaviour tag from money events (more meaningful than check-in drivers)
