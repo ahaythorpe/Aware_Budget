@@ -7,12 +7,14 @@
 ## ABSOLUTE RULES — NEVER SKIP
 
 ### 1. SCREENSHOT AFTER EVERY VISUAL CHANGE
-After any UI change run:
+After every visual change, run the simulator, take a screenshot, and paste
+it into the response. If the screenshot does not show the expected result,
+the task is NOT done. Do not mark any task complete without a screenshot
+proving it works.
 ```
 xcrun simctl io booted screenshot /tmp/verify.png
 ```
-Display screenshot before marking done.
-No screenshot = task not complete.
+Then Read the screenshot file to display it. No screenshot = task not complete.
 
 ### 2. NEVER SAY DONE WITHOUT PROOF
 If claiming something exists run grep first.
