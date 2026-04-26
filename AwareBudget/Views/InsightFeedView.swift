@@ -84,7 +84,7 @@ struct InsightFeedView: View {
 
             NudgeSaysCard(
                 message: "Your insights appear after you log an event. Start logging now.",
-                surface: .gold
+                surface: .whiteShimmer
             )
             .padding(.horizontal, DS.hPadding)
 
@@ -328,7 +328,7 @@ struct InsightFeedView: View {
             NudgeSaysCard(
                 message: "Each dollar is tagged with the bias driving the spend. This is behavioural finance in action — awareness precedes change.",
                 citation: "Kahneman 2011 · Thaler & Sunstein 2008",
-                surface: .paleGreen
+                surface: .whiteShimmer
             )
         }
     }
@@ -410,6 +410,7 @@ struct InsightFeedView: View {
     // MARK: - Wealth Snapshot (savings + investment lines)
 
     @State private var wealthRange: WealthRange = .threeMonths
+    @State private var netWorthRange: WealthRange = .threeMonths
     enum WealthRange: String, CaseIterable { case threeMonths = "3M", sixMonths = "6M", all = "All" }
 
     private var wealthSnapshotSection: some View {
@@ -420,7 +421,7 @@ struct InsightFeedView: View {
                 NudgeSaysCard(
                     message: "Log your balances monthly in Your Finances to see your wealth story here.",
                     citation: "Manual snapshots only · no bank connection",
-                    surface: .gold
+                    surface: .whiteShimmer
                 )
             } else {
                 let filtered = filteredSnapshots()
@@ -504,7 +505,7 @@ struct InsightFeedView: View {
                     NudgeSaysCard(
                         message: "Manual snapshots only. No bank connection. Your numbers, your story.",
                         showCoin: false,
-                        surface: .paleGreen
+                        surface: .whiteShimmer
                     )
                 }
                 .padding(16)
@@ -593,7 +594,7 @@ struct InsightFeedView: View {
                     if data.count < 2 {
                         NudgeSaysCard(
                             message: "This is your first month. As months pass, bars appear side by side showing how your spending and savings trend over time.",
-                            surface: .paleGreen
+                            surface: .whiteShimmer
                         )
                     }
                 }
@@ -700,7 +701,7 @@ struct InsightFeedView: View {
                             ? "Watch your bias lines trend down as awareness kicks in. Falling lines = awareness working."
                             : "This shows spending per bias this week. As you log over more weeks, this becomes a trend line showing how awareness changes your spending.",
                         citation: "Debiasing · Fischhoff 1982 · Larrick 2004",
-                        surface: .paleGreen
+                        surface: .whiteShimmer
                     )
                 }
                 .padding(16)
@@ -817,7 +818,7 @@ struct InsightFeedView: View {
                         NudgeSaysCard(
                             message: "\(impulsePct)% of this month's spending was impulse. That's $\(Int(impulseTotal)) your future self didn't plan for.",
                             citation: "Impulse spending correlates with present bias · O'Donoghue & Rabin 1999",
-                            surface: .gold
+                            surface: .whiteShimmer
                         )
                     }
                 }
@@ -840,7 +841,7 @@ struct InsightFeedView: View {
                     NudgeSaysCard(
                         message: "Your expenses are calculated automatically from your logged events. Savings = income minus expenses. No bank connection needed.",
                         citation: "Manual entry keeps you outside CDR/AFSL regulation · Privacy Act 1988 only",
-                        surface: .paleGreen
+                        surface: .whiteShimmer
                     )
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -957,7 +958,7 @@ struct InsightFeedView: View {
                     NudgeSaysCard(
                         message: "After you identify a bias, Nudge tracks whether your spending pattern shifts. This is the core of behavioural finance — awareness precedes change.",
                         citation: "Kahneman 2011 · Thaler & Sunstein 2008",
-                        surface: .paleGreen
+                        surface: .whiteShimmer
                     )
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -1051,7 +1052,7 @@ struct InsightFeedView: View {
     private var netWorthTrendSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Net worth trend")
-            if balanceSnapshots.count < 2 {
+            if balanceSnapshots.count < 3 {
                 netWorthEmptyCard
             } else {
                 netWorthChart
@@ -1060,11 +1061,19 @@ struct InsightFeedView: View {
     }
 
     private var netWorthEmptyCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Track your net worth over time.")
+        let snapsSoFar = balanceSnapshots.count
+        let leadCopy: String = {
+            switch snapsSoFar {
+            case 0: return "Track your net worth over time."
+            case 1: return "You've started — one more snapshot and the trend appears."
+            default: return "Almost there — log one more snapshot to see your trend."
+            }
+        }()
+        return VStack(alignment: .leading, spacing: 8) {
+            Text(leadCopy)
                 .font(.system(.subheadline, weight: .bold))
                 .foregroundStyle(DS.textPrimary)
-            Text("Add your monthly take-home + savings + investment balance in Settings (gear icon on Home). Drop a fresh snapshot weekly. After 2+ snapshots, the trend shows up here — with bias awareness overlaid so you can see how the two move together.")
+            Text("Add your monthly take-home + savings + investment balance in Settings (gear icon on Home). Drop a fresh snapshot weekly. After 3+ snapshots, the trend shows up here — with bias awareness overlaid so you can see how the two move together.")
                 .font(.system(.footnote, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .lineSpacing(2)
@@ -1081,14 +1090,32 @@ struct InsightFeedView: View {
 
     @ViewBuilder
     private var netWorthChart: some View {
-        let netWorth = balanceSnapshots.map { (date: $0.recorded_at, value: $0.savings_balance + $0.investment_balance) }
-        let latest = netWorth.last?.value ?? 0
-        let maxNet = max(netWorth.map(\.value).max() ?? 1, 1)
-        // Cumulative awareness curve — each banked lesson is a moment
-        // the user actively identified a bias. Normalised to the same
-        // y-range as net worth so the two read on one chart.
-        let awareness = cumulativeAwareness(timestamps: awarenessTimestamps, normaliseTo: maxNet)
-        let nwValues = netWorth.map(\.value) + awareness.map(\.value)
+        let cutoff: Date? = {
+            let cal = Calendar.current
+            switch netWorthRange {
+            case .threeMonths: return cal.date(byAdding: .month, value: -3, to: Date())
+            case .sixMonths:   return cal.date(byAdding: .month, value: -6, to: Date())
+            case .all:         return nil
+            }
+        }()
+        let allNetWorth = balanceSnapshots.map { (date: $0.recorded_at, value: $0.savings_balance + $0.investment_balance) }
+        let netWorth = cutoff.map { c in allNetWorth.filter { $0.date >= c } } ?? allNetWorth
+        let filteredAwareness = cutoff.map { c in awarenessTimestamps.filter { $0 >= c } } ?? awarenessTimestamps
+        let latest = allNetWorth.last?.value ?? 0
+        let nwOnly = netWorth.map(\.value)
+        let nwMin = nwOnly.min() ?? 0
+        let nwMax = nwOnly.max() ?? 1
+        let isFlat = (nwMax - nwMin) < 1
+        // Each awareness timestamp becomes a green dot on the gold line
+        // at that date — same x-axis, y-value interpolated from the
+        // adjacent net-worth snapshots. No scale-mixing.
+        let awarenessMarkers = filteredAwareness.compactMap { ts -> (date: Date, value: Double)? in
+            guard let v = interpolatedNetWorth(at: ts, in: netWorth) else { return nil }
+            return (date: ts, value: v)
+        }
+        let yDomain: ClosedRange<Double> = isFlat
+            ? (nwMax * 0.9)...(nwMax * 1.1 + 1)
+            : (nwMin * 0.95)...(nwMax * 1.05)
         let trendInsight = computeTrendInsight(netWorth: netWorth, awareness: awarenessTimestamps)
 
         VStack(alignment: .leading, spacing: 10) {
@@ -1101,22 +1128,18 @@ struct InsightFeedView: View {
                     .foregroundStyle(DS.textSecondary)
                 Spacer()
             }
+            Picker("Range", selection: $netWorthRange) {
+                ForEach(WealthRange.allCases, id: \.self) { r in
+                    Text(r.rawValue).tag(r)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 4)
             if let insight = trendInsight {
                 trendInsightNudge(insight)
             }
             Chart {
-                // Awareness line (faint green, behind)
-                ForEach(awareness, id: \.date) { point in
-                    LineMark(
-                        x: .value("Date", point.date),
-                        y: .value("Awareness", point.value),
-                        series: .value("Series", "Awareness")
-                    )
-                    .foregroundStyle(DS.accent.opacity(0.55))
-                    .interpolationMethod(.catmullRom)
-                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [3, 3]))
-                }
-                // Net worth line (gold, foreground)
+                // Net worth line (gold) + snapshot dots
                 ForEach(netWorth, id: \.date) { point in
                     LineMark(
                         x: .value("Date", point.date),
@@ -1124,24 +1147,45 @@ struct InsightFeedView: View {
                         series: .value("Series", "Net worth")
                     )
                     .foregroundStyle(DS.matteYellow)
-                    .interpolationMethod(.catmullRom)
+                    .interpolationMethod(.linear)
                     .lineStyle(StrokeStyle(lineWidth: 2.5))
-                    AreaMark(
+
+                    PointMark(
                         x: .value("Date", point.date),
-                        y: .value("Net worth", point.value),
-                        series: .value("Series", "Net worth")
+                        y: .value("Net worth", point.value)
                     )
-                    .foregroundStyle(LinearGradient(
-                        colors: [DS.matteYellow.opacity(0.25), DS.matteYellow.opacity(0.0)],
-                        startPoint: .top, endPoint: .bottom
-                    ))
-                    .interpolationMethod(.catmullRom)
+                    .foregroundStyle(DS.matteYellow)
+                    .symbolSize(30)
+
+                    if !isFlat {
+                        AreaMark(
+                            x: .value("Date", point.date),
+                            y: .value("Net worth", point.value),
+                            series: .value("Series", "Net worth")
+                        )
+                        .foregroundStyle(LinearGradient(
+                            colors: [DS.matteYellow.opacity(0.25), DS.matteYellow.opacity(0.0)],
+                            startPoint: .top, endPoint: .bottom
+                        ))
+                        .interpolationMethod(.linear)
+                    }
+                }
+                // Awareness moments — green dots on the gold line at the
+                // date the user identified a bias. Same axis, real story.
+                ForEach(awarenessMarkers, id: \.date) { marker in
+                    PointMark(
+                        x: .value("Date", marker.date),
+                        y: .value("Net worth", marker.value)
+                    )
+                    .foregroundStyle(DS.accent)
+                    .symbolSize(60)
+                    .symbol(.circle)
                 }
             }
-            .chartYScale(domain: ChartScaling.yDomain(for: nwValues))
+            .chartYScale(domain: yDomain)
             .frame(height: 160)
             .chartYAxis {
-                AxisMarks(values: .stride(by: ChartScaling.yStride(for: nwValues))) { value in
+                AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
                             Text(ChartScaling.dollarLabel(v))
@@ -1151,7 +1195,14 @@ struct InsightFeedView: View {
                     }
                 }
             }
-            // Tiny legend for the two series
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                    AxisGridLine()
+                    AxisValueLabel().font(.caption2).foregroundStyle(DS.textTertiary)
+                }
+            }
+            .animation(.easeInOut, value: netWorthRange)
+            // Tiny legend: gold line for net worth, green dot per awareness moment
             HStack(spacing: 14) {
                 HStack(spacing: 5) {
                     Capsule().fill(DS.matteYellow).frame(width: 14, height: 3)
@@ -1160,8 +1211,8 @@ struct InsightFeedView: View {
                         .foregroundStyle(DS.textSecondary)
                 }
                 HStack(spacing: 5) {
-                    Capsule().fill(DS.accent.opacity(0.55)).frame(width: 14, height: 3)
-                    Text("Awareness moments")
+                    Circle().fill(DS.accent).frame(width: 8, height: 8)
+                    Text("Awareness moment")
                         .font(.system(.caption2, weight: .semibold))
                         .foregroundStyle(DS.textSecondary)
                 }
@@ -1177,18 +1228,23 @@ struct InsightFeedView: View {
         .premiumCardShadow()
     }
 
-    /// Build a cumulative-count awareness series scaled to share the
-    /// y-axis with net worth. Each timestamp = +1 to a running total;
-    /// the final total is normalised to the chart's max net-worth value
-    /// so the curve reads alongside the line without a secondary axis.
-    private func cumulativeAwareness(timestamps: [Date], normaliseTo maxValue: Double) -> [(date: Date, value: Double)] {
-        guard !timestamps.isEmpty else { return [] }
-        let total = Double(timestamps.count)
-        guard total > 0 else { return [] }
-        let scale = maxValue / total
-        return timestamps.enumerated().map { idx, date in
-            (date: date, value: Double(idx + 1) * scale)
+    /// Linear-interpolate the net-worth value at an arbitrary date so
+    /// awareness markers can sit ON the gold line. Clamps to the
+    /// nearest snapshot before the first / after the last entry.
+    private func interpolatedNetWorth(at date: Date, in series: [(date: Date, value: Double)]) -> Double? {
+        guard !series.isEmpty else { return nil }
+        let sorted = series.sorted { $0.date < $1.date }
+        if date <= sorted.first!.date { return sorted.first!.value }
+        if date >= sorted.last!.date { return sorted.last!.value }
+        guard let nextIdx = sorted.firstIndex(where: { $0.date > date }), nextIdx > 0 else {
+            return sorted.last!.value
         }
+        let before = sorted[nextIdx - 1]
+        let after = sorted[nextIdx]
+        let span = after.date.timeIntervalSince(before.date)
+        guard span > 0 else { return before.value }
+        let t = date.timeIntervalSince(before.date) / span
+        return before.value + (after.value - before.value) * t
     }
 
     /// Compute a celebratory or neutral one-liner about how net worth
@@ -1382,7 +1438,7 @@ struct InsightFeedView: View {
                     ? "Tap a category to focus its trend."
                     : "This shows spending per category this week. Lines appear as you log across more weeks.",
                 showCoin: false,
-                surface: .paleGreen
+                surface: .whiteShimmer
             )
         }
         .padding(16)
