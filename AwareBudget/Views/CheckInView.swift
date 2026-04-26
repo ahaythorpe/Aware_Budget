@@ -63,7 +63,7 @@ struct CheckInView: View {
 
     var body: some View {
         ZStack {
-            if alreadyCheckedIn != nil || phase == .done {
+            if alreadyCheckedIn != nil || phase == .done || phase == .driverPick {
                 Color.clear
             } else {
                 DS.bg.ignoresSafeArea()
@@ -84,11 +84,13 @@ struct CheckInView: View {
                         }
                     )
                 } else {
-                    progressDots
-                        .padding(.horizontal, DS.hPadding)
-                        .padding(.top, 8)
+                    if phase == .questions {
+                        progressDots
+                            .padding(.horizontal, DS.hPadding)
+                            .padding(.top, 8)
 
-                    Spacer(minLength: 0)
+                        Spacer(minLength: 0)
+                    }
 
                     switch phase {
                     case .questions:
@@ -97,7 +99,7 @@ struct CheckInView: View {
                         } else {
                             VStack(spacing: 12) {
                                 cardStack
-                                Text("70% abandon budgeting apps within 30 days. Awareness drives change.")
+                                Text("Most people abandon budgeting apps within 90 days. Awareness drives change.")
                                     .font(.caption2)
                                     .foregroundStyle(DS.textTertiary)
                                     .multilineTextAlignment(.center)
@@ -112,7 +114,9 @@ struct CheckInView: View {
                             .transition(.opacity)
                     }
 
-                    Spacer(minLength: 0)
+                    if phase == .questions {
+                        Spacer(minLength: 0)
+                    }
                 }
             }
         }
@@ -418,6 +422,10 @@ struct CheckInView: View {
 
             ScrollView {
                 VStack(spacing: 22) {
+                    progressDots
+                        .padding(.horizontal, DS.hPadding)
+                        .padding(.top, 8)
+
                     Text("What drove this?")
                         .font(.system(size: 24, weight: .black))
                         .foregroundStyle(.white)
@@ -605,17 +613,13 @@ struct CheckInView: View {
                 }
 
                 if let nudge = nudgeCompletionMessage {
-                    NudgeCardView(message: nudge)
+                    NudgeSaysCard(message: nudge.body, surface: .dark)
                         .padding(.horizontal, DS.hPadding)
                 }
 
                 Spacer()
 
-                Button {
-                    if let selectedTab {
-                        dismiss()
-                    }
-                } label: {
+                Button { dismiss() } label: {
                     Text("Done →")
                 }
                 .goldButtonStyle()
@@ -656,11 +660,7 @@ struct CheckInView: View {
 
                 Spacer()
 
-                Button {
-                    if let selectedTab {
-                        dismiss()
-                    }
-                } label: {
+                Button { dismiss() } label: {
                     Text("Done →")
                 }
                 .goldButtonStyle()

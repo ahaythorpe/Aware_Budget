@@ -312,7 +312,7 @@ struct CredibilitySheet: View {
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
 
-            Text("70% of people abandon budgeting apps within 30 days. Not from laziness — from apps that create shame, not awareness.")
+            Text("96% of people have made a budget at some point. More than half check it once a month at most. Not from laziness — from apps that create shame, not awareness.")
                 .font(.system(.footnote, weight: .regular))
                 .foregroundStyle(.white.opacity(0.85))
                 .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 1)

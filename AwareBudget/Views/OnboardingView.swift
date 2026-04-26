@@ -173,14 +173,17 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: 20) {
+                    Spacer().frame(height: 20)
+
                     NudgeAvatar(size: 56)
-                        .padding(.top, 56)
 
                     Text("Quick reality check")
                         .font(.system(size: 28, weight: .black))
                         .foregroundStyle(.white)
                         .heroTextLegibility()
+
+                    Spacer().frame(height: 4)
 
                     VStack(alignment: .leading, spacing: 10) {
                         Text("YOUR LAST BUDGET LASTED…")
@@ -213,10 +216,14 @@ struct OnboardingView: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
 
+                    Spacer().frame(height: 8)
+
                     if budgetHistory != nil && (budgetHistory == "never_tried" || budgetHistory == "never_budgeted" || quitReason != nil) {
                         nudgeResponse
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
+
+                    Spacer()
 
                     progressDots(current: 2, total: 4, light: true)
                         .padding(.bottom, 32)
@@ -230,8 +237,8 @@ struct OnboardingView: View {
     private var nudgeResponse: some View {
         VStack(spacing: 16) {
             NudgeSaysCard(
-                message: "You're not broken. The method is. 70% quit budgeting apps within 30 days.",
-                citation: "Soman 2001 · Thaler 1999",
+                message: "You're not broken. The method is. 96% of people have made a budget — but most check it once a month at most.",
+                citation: "CFPB · Consumer Financial Protection Bureau",
                 surface: .dark
             )
 
@@ -251,23 +258,20 @@ struct OnboardingView: View {
             HStack {
                 Text(text)
                     .font(.system(.subheadline, weight: selected ? .bold : .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(DS.textPrimary)
                 Spacer()
                 if selected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.body)
-                        .foregroundStyle(DS.goldText)
+                        .foregroundStyle(DS.goldBase)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(
-                selected ? Color.white.opacity(0.20) : Color.white.opacity(0.08),
-                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-            )
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(selected ? DS.goldText.opacity(0.5) : .white.opacity(0.15), lineWidth: selected ? 1.5 : 0.5)
+                RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                    .stroke(selected ? DS.goldBase : Color.gray.opacity(0.2), lineWidth: selected ? 2 : 0.5)
             )
         }
         .buttonStyle(.plain)

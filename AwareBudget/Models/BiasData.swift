@@ -3,6 +3,7 @@ import Foundation
 struct BiasPattern: Identifiable {
     let id = UUID()
     let name: String
+    var displayName: String { name.replacingOccurrences(of: "Heuristic", with: "Shortcut") }
     let oneLiner: String
     let sfSymbol: String
     let iconBg: String
@@ -55,7 +56,7 @@ let allBiasPatterns: [BiasPattern] = [
     BiasPattern(
         name: "Anchoring",
         oneLiner: "The first number you see becomes your reference point",
-        sfSymbol: "anchor.circle",
+        sfSymbol: "anchor",
         iconBg: "#E3F2FD", iconColor: "#1565C0",
         nudgeSays: "When a price tag says 'was $200, now $80' your brain anchors to $200 not $80. The question worth asking: would you have paid $80 without the anchor?",
         keyRef: "Tversky & Kahneman, 1974",
@@ -80,8 +81,8 @@ let allBiasPatterns: [BiasPattern] = [
         sfSymbol: "star.bubble.fill",
         iconBg: "#FFF8E1", iconColor: "#F57F17",
         nudgeSays: "93% of drivers rate themselves above average. The same effect applies to investing — most people believe they can beat the market. The data disagrees.",
-        keyRef: "Svenson, 1981",
-        citation: "Svenson, O. (1981). Are We All Less Risky and More Skillful Than Our Fellow Drivers? Acta Psychologica, 47(2), 143–148.",
+        keyRef: "Barber & Odean, 2001",
+        citation: "Barber, B.M. & Odean, T. (2001). Boys Will Be Boys: Gender, Overconfidence, and Common Stock Investment. Quarterly Journal of Economics, 116(1), 261–292.",
         category: "Decision Making",
         triggerCount: 0
     ),
@@ -161,26 +162,26 @@ let allBiasPatterns: [BiasPattern] = [
         sfSymbol: "calendar.badge.exclamationmark",
         iconBg: "#E3F2FD", iconColor: "#0D47A1",
         nudgeSays: "The Sydney Opera House was budgeted at $7M and cost $102M. Your renovation, holiday or side project estimate probably has the same optimism baked in.",
-        keyRef: "Kahneman & Tversky, 1979",
-        citation: "Kahneman, D. & Tversky, A. (1979). Intuitive Prediction: Biases and Corrective Procedures. TIMS Studies in Management Science, 12, 313–327.",
+        keyRef: "Buehler, Griffin & Ross, 1994",
+        citation: "Buehler, R., Griffin, D. & Ross, M. (1994). Exploring the 'Planning Fallacy': Why People Underestimate Their Task Completion Times. Journal of Personality and Social Psychology, 67(3), 366–381.",
         category: "Time Perception",
         triggerCount: 0
     ),
 
     // ── SOCIAL ──
     BiasPattern(
-        name: "Social Comparison",
+        name: "Social Proof",
         oneLiner: "We measure our wealth relative to others, not our own goals",
         sfSymbol: "person.2.wave.2.fill",
         iconBg: "#F3E5F5", iconColor: "#7B1FA2",
         nudgeSays: "Keeping up with people around you is evolutionarily wired — in tribes, relative status mattered for survival. The Joneses are probably in debt. You're building awareness instead.",
-        keyRef: "Festinger, 1954",
-        citation: "Festinger, L. (1954). A Theory of Social Comparison Processes. Human Relations, 7(2), 117–140.",
+        keyRef: "Cialdini, 2001",
+        citation: "Cialdini, R.B. (2001). Influence: Science and Practice (4th ed.). Allyn & Bacon.",
         category: "Social",
         triggerCount: 0
     ),
     BiasPattern(
-        name: "Herding",
+        name: "Scarcity Heuristic",
         oneLiner: "We follow the crowd even when we privately know better",
         sfSymbol: "figure.walk.motion",
         iconBg: "#E8F5E9", iconColor: "#33691E",
@@ -209,8 +210,8 @@ let allBiasPatterns: [BiasPattern] = [
         sfSymbol: "checkmark.seal.fill",
         iconBg: "#E8EAF6", iconColor: "#283593",
         nudgeSays: "Going to the gym makes you feel like you earned the Uber Eats. One good financial decision can unconsciously license several bad ones that follow it.",
-        keyRef: "Khan & Dhar, 2006",
-        citation: "Khan, U. & Dhar, R. (2006). Licensing Effect in Consumer Choice. Journal of Marketing Research, 43(2), 259–266.",
+        keyRef: "Monin & Miller, 2001",
+        citation: "Monin, B. & Miller, D.T. (2001). Moral Credentials and the Expression of Prejudice. Journal of Personality and Social Psychology, 81(1), 33–43.",
         category: "Defaults & Habits",
         triggerCount: 0
     ),

@@ -530,27 +530,24 @@ struct MoneyEventView: View {
         } label: {
             VStack(spacing: 6) {
                 Text(cat.emoji)
-                    .font(.system(size: 30))
+                    .font(.system(size: 34))
                 Text(cat.name)
                     .font(.system(.caption, weight: .heavy))
-                    .foregroundStyle(isSelected ? DS.goldForeground : DS.textPrimary)
+                    .foregroundStyle(DS.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 104)
             .padding(.vertical, 4)
-            .background(
-                isSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.cardBg),
-                in: RoundedRectangle(cornerRadius: 16)
-            )
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(
-                        isSelected ? DS.goldBase.opacity(0.5)
+                        isSelected ? DS.goldBase
                             : isHighlighted ? DS.goldBase.opacity(0.7)
                             : DS.accent.opacity(0.15),
-                        lineWidth: isSelected ? 1 : isHighlighted ? 2 : 0.5
+                        lineWidth: isSelected ? 2 : isHighlighted ? 2 : 0.5
                     )
             )
         }
@@ -826,13 +823,7 @@ struct MoneyEventView: View {
     /// line, otherwise rotating postSave wit. Auto-dismisses 1.6s.
     @MainActor
     private func triggerSaveReward() {
-        let count = sessionLog.count
-        let message: String
-        if count > 0 && count % 5 == 0 {
-            message = "🔥 \(count) logs this session. You're outpacing 70% of users."
-        } else {
-            message = NudgeVoice.random(NudgeVoice.postSave)
-        }
+        let message = NudgeVoice.random(NudgeVoice.postSave)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.65)) {
             saveRewardMessage = message
             rewardCoinBounce.toggle()
@@ -1038,10 +1029,9 @@ struct MoneyEventView: View {
         case "Availability Heuristic": return "Tversky & Kahneman, 1973"
         case "Denomination Effect": return "Raghubir & Srivastava, 2009"
         case "Framing Effect": return "Tversky & Kahneman, 1981"
-        case "Planning Fallacy": return "Kahneman & Tversky, 1979"
-        case "Scarcity Heuristic": return "Cialdini, 1984"
-        case "Moral Licensing": return "Merritt et al., 2010"
-        case "Herd Behaviour": return "Banerjee, 1992"
+        case "Planning Fallacy": return "Buehler, Griffin & Ross, 1994"
+        case "Scarcity Heuristic": return "Cialdini, 2001"
+        case "Moral Licensing": return "Monin & Miller, 2001"
         default: return "Pompian, 2012"
         }
     }

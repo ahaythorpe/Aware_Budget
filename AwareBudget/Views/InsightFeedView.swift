@@ -854,7 +854,7 @@ struct InsightFeedView: View {
                         calculationRow(icon: "leaf", label: "Savings", detail: "Income − Expenses (derived)")
                     }
 
-                    ResearchFootnote(text: "Thaler's Mental Accounting (1999) shows people who track categories save 15–20% more", style: .inline)
+                    ResearchFootnote(text: "Thaler's Mental Accounting (1985) — categorising spending changes how we value it.", style: .inline)
                 }
                 .padding(20)
             }

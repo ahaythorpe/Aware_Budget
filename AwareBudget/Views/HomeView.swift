@@ -57,10 +57,6 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
 
-                #if DEBUG
-                debugAuthBanner
-                #endif
-
                 // ── GREETING (white card on metallic green bg) ──
                 HStack(alignment: .center, spacing: 14) {
                     Image("nudge")
@@ -457,7 +453,7 @@ struct HomeView: View {
             VStack(spacing: 16) {
                 NudgeSaysCard(
                     message: "The trend graph only works when it has numbers to compare. Without income and savings, Nudge can't show you how awareness changes your finances. It takes 30 seconds.",
-                    citation: "Thaler 1999 · tracking categories = 15–20% more saved",
+                    citation: "Thaler 1985 · Mental Accounting",
                     surface: .gold
                 )
 
@@ -502,12 +498,6 @@ struct HomeView: View {
                 .stroke(DS.goldBase, lineWidth: 1.5)
         )
     }
-
-    #if DEBUG
-    private var debugAuthBanner: some View {
-        DebugAuthBanner()
-    }
-    #endif
 
     /// Nudge Says body for Home bottom. Combines the engine-generated
     /// contextual message (if any) with a bias-matched motto when a top
