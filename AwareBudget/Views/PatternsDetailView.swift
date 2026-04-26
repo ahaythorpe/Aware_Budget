@@ -36,7 +36,7 @@ struct PatternsDetailView: View {
         NudgeSaysCard(
             message: "Patterns are identified when your check-in answers and spending tags converge on the same bias. The more you log, the sharper the picture.",
             citation: "BFAS scoring · Pompian 2012 · 5:1 active vs passive weighting",
-            surface: .paleGreen
+            surface: .whiteShimmer
         )
     }
 

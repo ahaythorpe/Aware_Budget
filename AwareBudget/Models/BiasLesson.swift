@@ -3,11 +3,13 @@ import Foundation
 struct BiasLesson: Identifiable, Codable, Hashable {
     let id: UUID
     var biasName: String
+    var displayName: String { biasName.replacingOccurrences(of: "Heuristic", with: "Shortcut") }
     var category: String
     var shortDescription: String
     var fullExplanation: String
     var realWorldExample: String
     var howToCounter: String
+
     var emoji: String
     var sortOrder: Int
 
@@ -21,3 +23,15 @@ struct BiasLesson: Identifiable, Codable, Hashable {
         case sortOrder = "sort_order"
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+

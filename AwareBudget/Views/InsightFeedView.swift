@@ -25,9 +25,7 @@ struct InsightFeedView: View {
     }
 
     var body: some View {
-        ZStack {
-            DS.bg.ignoresSafeArea()
-
+        Group {
             if hasNoData {
                 insightsEmptyState
             } else {
@@ -45,12 +43,15 @@ struct InsightFeedView: View {
                         donutChartSection
                         nudgeInsightCard
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.horizontal, DS.hPadding)
                     .padding(.top, 8)
                     .padding(.bottom, 40)
                 }
+                .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
             }
         }
+        .background(DS.bg.ignoresSafeArea())
         .navigationTitle("Insights")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -1843,37 +1844,51 @@ private struct AboutScoreSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 20) {
                     // THE SCIENCE
-                    sectionTitle("THE SCIENCE")
-                    Text("Each question surfaces a specific cognitive bias documented in peer-reviewed behavioural economics research.")
-                        .font(.subheadline)
-                        .foregroundStyle(DS.textSecondary)
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionTitle("THE SCIENCE")
+                        Text("Each question surfaces a specific cognitive bias documented in peer-reviewed behavioural economics research.")
+                            .font(.subheadline)
+                            .foregroundStyle(DS.textSecondary)
+                    }
+
+                    sheetDivider
 
                     // THE SCORING
-                    sectionTitle("THE SCORING")
-                    VStack(spacing: 12) {
-                        scoreRow(icon: "\u{2726}", label: "Yes answer", detail: "+2 to that bias score")
-                        scoreRow(icon: "○", label: "No answer", detail: "-1 (awareness working)")
-                        scoreRow(icon: "💰", label: "Tagged spend", detail: "+3 (behaviour evidence)")
+                    VStack(alignment: .leading, spacing: 12) {
+                        sectionTitle("THE SCORING")
+                        VStack(spacing: 12) {
+                            scoreRow(icon: "\u{2726}", label: "Yes answer", detail: "+2 to that bias score")
+                            scoreRow(icon: "○", label: "No answer", detail: "-1 (awareness working)")
+                            scoreRow(icon: "💰", label: "Tagged spend", detail: "+3 (behaviour evidence)")
+                        }
                     }
+
+                    sheetDivider
 
                     // YOUR STAGES
-                    sectionTitle("YOUR STAGES")
-                    VStack(alignment: .leading, spacing: 10) {
-                        stageRow("🔍", "Unseen", "not yet encountered")
-                        stageRow("👁", "Noticed", "seen 1\u{2013}2 times")
-                        stageRow("🔄", "Emerging", "pattern forming (3\u{2013}5\u{00D7})")
-                        stageRow("⚡", "Active", "strong pattern (6\u{00D7}+)")
-                        stageRow("📉", "Improving", "last 3 answers were No")
-                        stageRow("✅", "Aware", "sustained awareness (3 weeks)")
+                    VStack(alignment: .leading, spacing: 12) {
+                        sectionTitle("YOUR STAGES")
+                        VStack(alignment: .leading, spacing: 10) {
+                            stageRow("🔍", "Unseen", "not yet encountered")
+                            stageRow("👁", "Noticed", "seen 1\u{2013}2 times")
+                            stageRow("🔄", "Emerging", "pattern forming (3\u{2013}5\u{00D7})")
+                            stageRow("⚡", "Active", "strong pattern (6\u{00D7}+)")
+                            stageRow("📉", "Improving", "last 3 answers were No")
+                            stageRow("✅", "Aware", "sustained awareness (3 weeks)")
+                        }
                     }
 
+                    sheetDivider
+
                     // IMPORTANT
-                    sectionTitle("IMPORTANT")
-                    Text("This is not a clinical diagnosis. MoneyMind reflects your own patterns back to you \u{2014} nothing more. For financial advice speak to a qualified financial planner.")
-                        .font(.subheadline)
-                        .foregroundStyle(DS.textSecondary)
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionTitle("IMPORTANT")
+                        Text("This is not a clinical diagnosis. MoneyMind reflects your own patterns back to you \u{2014} nothing more. For financial advice speak to a qualified financial planner.")
+                            .font(.subheadline)
+                            .foregroundStyle(DS.textSecondary)
+                    }
 
                     Button {
                         dismiss()
@@ -1883,7 +1898,7 @@ private struct AboutScoreSheet: View {
                             .goldButtonStyle()
                     }
                     .buttonStyle(.plain)
-                    .padding(.top, 8)
+                    .padding(.top, 12)
                 }
                 .padding(.horizontal, DS.hPadding)
                 .padding(.top, 16)
@@ -1903,9 +1918,14 @@ private struct AboutScoreSheet: View {
 
     private func sectionTitle(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 12, weight: .heavy))
+            .font(.system(size: 11, weight: .semibold))
             .foregroundStyle(DS.accent)
-            .tracking(1.5)
+            .tracking(1.2)
+    }
+
+    private var sheetDivider: some View {
+        Divider()
+            .background(DS.accent.opacity(0.15))
     }
 
     private func scoreRow(icon: String, label: String, detail: String) -> some View {

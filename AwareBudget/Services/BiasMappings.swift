@@ -131,7 +131,7 @@ enum BiasMappings {
               citation: "Samuelson & Zeckhauser 1988 (commute defaults rarely revisited)",
               confidence: .high),
 
-        // MARK: Subscriptions (the canonical Status-Quo / Sunk-Cost domain)
+        // MARK: Subscriptions
         .init(category: "Subscriptions", status: .planned, bias: "Status Quo Bias",
               citation: "Samuelson & Zeckhauser 1988 (default-subscription persistence — the textbook case)",
               confidence: .high),

@@ -142,9 +142,14 @@ struct BFASAssessmentView: View {
     }
 
     private func yesNoButtons(for q: BFASQuestion) -> some View {
-        HStack(spacing: 12) {
-            answerButton(label: "Yes", isYes: true)  { record(q, yes: true) }
-            answerButton(label: "No", isYes: false) { record(q, yes: false) }
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                answerButton(label: "Yes", isYes: true)  { record(q, yes: true) }
+                answerButton(label: "No", isYes: false) { record(q, yes: false) }
+            }
+            Text("There are no wrong answers.")
+                .font(.system(.caption, weight: .medium))
+                .foregroundStyle(.white.opacity(0.5))
         }
     }
 

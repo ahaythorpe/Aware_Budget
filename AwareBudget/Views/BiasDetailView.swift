@@ -27,7 +27,7 @@ struct BiasDetailView: View {
                 .padding(.bottom, 32)
             }
         }
-        .navigationTitle(lesson.biasName)
+        .navigationTitle(lesson.displayName)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -37,7 +37,7 @@ struct BiasDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(lesson.emoji)
                 .font(.system(size: 72))
-            Text(lesson.biasName)
+            Text(lesson.displayName)
                 .font(.largeTitle.weight(.bold))
                 .foregroundStyle(DS.textPrimary)
             categoryPill

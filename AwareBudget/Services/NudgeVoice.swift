@@ -153,7 +153,7 @@ enum NudgeVoice {
         case "Social Proof":
             return "We copy peers as a shortcut to 'safe.' · Cialdini 2001 + Berger & Heath 2007"
         case "Moral Licensing":
-            return "Past good behaviour gives us permission for slips. · Merritt et al. 2010"
+            return "Past good behaviour gives us permission for slips. · Monin & Miller 2001"
         case "Scarcity Heuristic":
             return "Limited availability raises perceived value. · Cialdini 2001"
         case "Sunk Cost Fallacy":

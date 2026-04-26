@@ -15,7 +15,7 @@ enum NotificationSlot: String {
     /// notification is tapped. Match cat.name against this list.
     var highlightedCategories: [String] {
         switch self {
-        case .morning: return ["Coffee", "Lunch"]   // morning includes early lunch
+        case .morning: return ["Coffee", "Lunch"]
         case .lunch:   return ["Lunch", "Coffee", "Eating out"]
         case .evening: return ["Eating out", "Drinks", "Lunch"]
         case .chunky:  return ["Shopping", "Travel", "Subscriptions", "Big purchase"]

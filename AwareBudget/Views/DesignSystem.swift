@@ -148,8 +148,18 @@ struct GoldButtonStyle: ViewModifier {
             .background(
                 Capsule()
                     .fill(DS.nuggetGold)
-                    .shimmerOverlay()
-                    .clipShape(Capsule())
+            )
+            .overlay(
+                LinearGradient(
+                    stops: [
+                        .init(color: .white.opacity(0.25), location: 0),
+                        .init(color: .clear, location: 0.3),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .clipShape(Capsule())
+                .allowsHitTesting(false)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 999)

@@ -106,7 +106,7 @@ struct LearnView: View {
                                     Text(lesson.emoji)
                                         .font(.title3)
                                         .frame(width: 28)
-                                    Text(lesson.biasName)
+                                    Text(lesson.displayName)
                                         .font(.subheadline.weight(.medium))
                                         .foregroundStyle(DS.textPrimary)
                                     Spacer()
@@ -261,9 +261,9 @@ struct LearnView: View {
         case "Availability Heuristic": return "Tversky & Kahneman, 1973"
         case "Denomination Effect": return "Raghubir & Srivastava, 2009"
         case "Framing Effect": return "Tversky & Kahneman, 1981"
-        case "Planning Fallacy": return "Kahneman & Tversky, 1979"
-        case "Scarcity Heuristic": return "Cialdini, 1984"
-        case "Moral Licensing": return "Merritt et al., 2010"
+        case "Planning Fallacy": return "Buehler, Griffin & Ross, 1994"
+        case "Scarcity Heuristic": return "Cialdini, 2001"
+        case "Moral Licensing": return "Monin & Miller, 2001"
         case "Social Proof": return "Cialdini, 1984"
         default: return "Pompian, 2012"
         }
@@ -354,7 +354,7 @@ struct LearnView: View {
                                     .font(.title3)
                                     .frame(width: 32)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(lesson.biasName)
+                                    Text(lesson.displayName)
                                         .font(.subheadline.weight(.semibold))
                                         .foregroundStyle(DS.textPrimary)
                                     Text(lesson.shortDescription)
@@ -506,7 +506,7 @@ struct LearnView: View {
                     .padding(.top, 10)
 
                 // Bias name
-                Text(lesson.biasName)
+                Text(lesson.displayName)
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(DS.darkGreen)
                     .multilineTextAlignment(.center)

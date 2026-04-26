@@ -41,17 +41,16 @@ struct AwarenessView: View {
     }
 
     var body: some View {
+        GeometryReader { geo in
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
 
                 // ── HERO ──
                 hero
                     .padding(.top, 16)
-                    .padding(.horizontal, 18)
 
                 // ── SCORE CARD (frosted dark) ──
                 scoreCard
-                    .padding(.horizontal, 18)
 
                 // ── NUDGE SAYS (gold) ──
                 NudgeSaysCard(
@@ -59,21 +58,17 @@ struct AwarenessView: View {
                     citation: "BFAS · Behavioural Finance Assessment Score",
                     surface: .whiteShimmer
                 )
-                .padding(.horizontal, 18)
 
                 // ── MOST COMMON IN RESEARCH (industry benchmark) ──
                 industryTopBiasesCard
-                    .padding(.horizontal, 18)
 
                 // ── CATEGORIES (with mid-tab BFAS callouts every 2 sections) ──
                 VStack(alignment: .leading, spacing: 18) {
                     ForEach(Array(biasCategories.enumerated()), id: \.element.name) { index, category in
                         VStack(alignment: .leading, spacing: 8) {
                             categoryHeader(category.name)
-                                .padding(.horizontal, 18)
                             ForEach(category.patterns) { pattern in
                                 BiasAwarenessCard(pattern: pattern, triggerCount: triggerCount(for: pattern))
-                                    .padding(.horizontal, 18)
                             }
                         }
 
@@ -83,7 +78,6 @@ struct AwarenessView: View {
                                 "These 16 patterns come from the Behavioural Finance Assessment Score — the same framework used by professional financial planners.",
                                 cite: "Pompian, 2012"
                             )
-                            .padding(.horizontal, 18)
                             .padding(.top, 6)
                         }
                         if index == 3 {
@@ -91,16 +85,20 @@ struct AwarenessView: View {
                                 "Noticing a pattern is the first step. The algorithm tracks what you recognise — not what you avoid.",
                                 cite: "Kahneman & Tversky, 1979"
                             )
-                            .padding(.horizontal, 18)
                             .padding(.top, 6)
                         }
                     }
                 }
                 .padding(.bottom, 40)
             }
+            .frame(width: geo.size.width - 36, alignment: .leading)
+            .padding(.horizontal, 18)
+        }
+        .frame(width: geo.size.width)
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             if let progress = try? await SupabaseService.shared.fetchBiasProgress() {
                 biasProgress = progress
@@ -234,16 +232,17 @@ struct AwarenessView: View {
                     .foregroundStyle(DS.goldBase)
             }
 
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(DS.mintBg).frame(height: 8)
-                    Capsule()
-                        .fill(DS.nuggetGold)
-                        .frame(
-                            width: geo.size.width * CGFloat(awarenessScore) / CGFloat(patterns.count),
-                            height: 8)
-                        .animation(.easeInOut(duration: 1.0), value: awarenessScore)
-                }
+            // Proportional progress bar via containerRelativeFrame —
+            // GeometryReader's greedy width-claim was triggering iOS 26
+            // ScrollView's horizontal-pan rubber-band on this tab.
+            ZStack(alignment: .leading) {
+                Capsule().fill(DS.mintBg)
+                Capsule()
+                    .fill(DS.nuggetGold)
+                    .containerRelativeFrame(.horizontal) { width, _ in
+                        width * CGFloat(awarenessScore) / CGFloat(max(patterns.count, 1))
+                    }
+                    .animation(.easeInOut(duration: 1.0), value: awarenessScore)
             }
             .frame(height: 8)
 
@@ -337,7 +336,7 @@ struct BiasAwarenessCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(pattern.name)
+                    Text(pattern.displayName)
                         .font(.system(.headline, weight: .semibold))
                         .foregroundStyle(DS.textPrimary)
                     Text(pattern.oneLiner)
@@ -429,10 +428,7 @@ struct BiasAwarenessCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(
-                    isTriggered ? DS.goldBase.opacity(0.4) : DS.accent.opacity(0.15),
-                    lineWidth: isTriggered ? 1 : 0.5
-                )
+                .stroke(DS.goldBase, lineWidth: 1.5)
         )
     }
 }

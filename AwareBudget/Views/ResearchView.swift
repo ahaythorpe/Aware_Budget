@@ -201,7 +201,7 @@ struct ResearchView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(DS.goldBase)
                     .frame(width: 24)
-                Text(p.name)
+                Text(p.displayName)
                     .font(.system(.subheadline, weight: .heavy))
                     .foregroundStyle(DS.textPrimary)
             }
@@ -218,7 +218,7 @@ struct ResearchView: View {
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(DS.accent.opacity(0.15), lineWidth: 0.5)
+                .stroke(DS.goldBase, lineWidth: 1.5)
         )
     }
 
@@ -231,7 +231,7 @@ struct ResearchView: View {
             NudgeSaysCard(
                 message: "Awareness is the first step. Below are practical, research-backed strategies for each bias.",
                 citation: "Fischhoff 1982 · Larrick 2004 · Soll et al. 2015",
-                surface: .gold
+                surface: .whiteShimmer
             )
 
             ForEach(BiasLessonsMock.seed, id: \.id) { lesson in
@@ -246,7 +246,7 @@ struct ResearchView: View {
                 Text(lesson.emoji)
                     .font(.system(size: 22))
                 Text(lesson.biasName)
-                    .font(.system(.subheadline, weight: .bold))
+                    .font(.system(size: 19, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
             }
 
@@ -258,11 +258,11 @@ struct ResearchView: View {
                         .frame(width: 16)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("HOW TO SPOT IT")
-                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
                             .tracking(1.0)
                             .foregroundStyle(DS.goldBase)
                         Text(lesson.shortDescription)
-                            .font(.caption)
+                            .font(.system(size: 17, weight: .regular))
                             .foregroundStyle(DS.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -275,11 +275,11 @@ struct ResearchView: View {
                         .frame(width: 16)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("HOW TO OVERCOME IT")
-                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
                             .tracking(1.0)
                             .foregroundStyle(DS.accent)
                         Text(lesson.howToCounter)
-                            .font(.caption)
+                            .font(.system(size: 17, weight: .regular))
                             .foregroundStyle(DS.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
                     }

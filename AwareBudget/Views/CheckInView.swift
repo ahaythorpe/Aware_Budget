@@ -343,7 +343,7 @@ struct CheckInView: View {
                 NudgeSaysCard(
                     message: q.whyExplanation,
                     citation: NudgeVoice.researchCueFor(bias: q.biasName),
-                    surface: .dark
+                    surface: .whiteShimmer
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
@@ -613,7 +613,7 @@ struct CheckInView: View {
                 }
 
                 if let nudge = nudgeCompletionMessage {
-                    NudgeSaysCard(message: nudge.body, surface: .dark)
+                    NudgeSaysCard(message: nudge.body, surface: .whiteShimmer)
                         .padding(.horizontal, DS.hPadding)
                 }
 

@@ -167,7 +167,7 @@ struct BiasReviewView: View {
                 Spacer()
             }
 
-            Text(entry.suggestedBias)
+            Text(entry.suggestedBias.replacingOccurrences(of: "Heuristic", with: "Shortcut"))
                 .font(.system(.title2, weight: .black))
                 .foregroundStyle(.black)
                 .minimumScaleFactor(0.7)

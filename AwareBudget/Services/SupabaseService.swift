@@ -102,13 +102,16 @@ final class SupabaseService {
     }
 
     func fetchFirstName() async -> String {
+        _ = try? await client.auth.refreshSession()
         guard let session = try? await client.auth.session else { return "there" }
-        if let fullName = session.user.userMetadata["full_name"]?.value as? String,
-           let first = fullName.split(separator: " ").first {
-            return String(first)
+        if let raw = session.user.userMetadata["full_name"],
+           case .string(let fullName) = raw,
+           let first = fullName.split(separator: " ").first, !first.isEmpty {
+            return first.prefix(1).uppercased() + first.dropFirst().lowercased()
         }
         if let email = session.user.email {
             let local = String(email.split(separator: "@").first ?? "there")
+            if local.contains("-") || local.contains("debug") { return "there" }
             return local.prefix(1).uppercased() + local.dropFirst()
         }
         return "there"
@@ -119,16 +122,8 @@ final class SupabaseService {
     /// and fetches actually have a user_id to associate with. In release
     /// builds the user signs in via the normal flow (OTP / OAuth).
     #if DEBUG
-    /// Published DEBUG auth status so views can show a diagnostic banner.
-    /// Uses a singleton @Observable so SwiftUI refreshes live as it updates.
-    @MainActor static var debugAuthStatus: String {
-        get { DebugAuthStatus.shared.status }
-        set { DebugAuthStatus.shared.status = newValue }
-    }
-
     func ensureDebugSession() async {
         if let uid = await currentUserId {
-            await MainActor.run { Self.debugAuthStatus = "signed in · \(String(uid.uuidString.prefix(8)))" }
             print("[DEBUG AUTH] already signed in: \(uid)")
             return
         }
@@ -142,7 +137,7 @@ final class SupabaseService {
             do {
                 try await client.auth.signIn(email: e, password: p)
                 if let uid = await currentUserId {
-                    await MainActor.run { Self.debugAuthStatus = "signed in via saved creds · \(String(uid.uuidString.prefix(8)))" }
+
                     print("[DEBUG AUTH] signed in via saved creds: \(uid)")
                     return
                 }
@@ -163,18 +158,15 @@ final class SupabaseService {
         do {
             try await client.auth.signUp(email: String(email), password: String(password))
             if let uid = await currentUserId {
-                await MainActor.run { Self.debugAuthStatus = "signed up · \(String(uid.uuidString.prefix(8)))" }
                 print("[DEBUG AUTH] signed up: \(uid)")
             } else {
                 // signUp returned but no session — try sign-in fallback.
                 do {
                     try await client.auth.signIn(email: String(email), password: String(password))
                     if let uid = await currentUserId {
-                        await MainActor.run { Self.debugAuthStatus = "signed up + signed in · \(String(uid.uuidString.prefix(8)))" }
                         print("[DEBUG AUTH] signed up + signed in: \(uid)")
                     }
                 } catch {
-                    await MainActor.run { Self.debugAuthStatus = "signup OK but sign-in failed (email confirmation?)" }
                     print("[DEBUG AUTH] signup returned but sign-in failed — email confirmation likely required")
                 }
             }
@@ -186,14 +178,12 @@ final class SupabaseService {
             do {
                 try await client.auth.signIn(email: String(email), password: String(password))
                 if let uid = await currentUserId {
-                    await MainActor.run { Self.debugAuthStatus = "signup err, signed in · \(String(uid.uuidString.prefix(8)))" }
                     print("[DEBUG AUTH] recovered via sign-in: \(uid)")
                 }
             } catch {
                 // Both failed — clear the bad creds so next launch tries fresh.
                 defaults.removeObject(forKey: "debugEmail")
                 defaults.removeObject(forKey: "debugPassword")
-                await MainActor.run { Self.debugAuthStatus = "signup + signin FAILED: \(error.localizedDescription)" }
                 print("[DEBUG AUTH] signup + sign-in both failed: \(error)")
             }
         }

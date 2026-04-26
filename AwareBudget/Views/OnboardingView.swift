@@ -239,7 +239,7 @@ struct OnboardingView: View {
             NudgeSaysCard(
                 message: "You're not broken. The method is. 96% of people have made a budget — but most check it once a month at most.",
                 citation: "CFPB · Consumer Financial Protection Bureau",
-                surface: .dark
+                surface: .whiteShimmer
             )
 
             Button {
@@ -405,6 +405,19 @@ private struct AuthFormView: View {
                             .foregroundStyle(.white.opacity(0.7))
                     }
                     .buttonStyle(.plain)
+
+                    #if DEBUG
+                    Button {
+                        UserDefaults.standard.set(true, forKey: "hasSeenNudge")
+                        hasCompletedOnboarding = true
+                    } label: {
+                        Text("Skip for now (DEBUG)")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(DS.goldText)
+                            .underline()
+                    }
+                    .buttonStyle(.plain)
+                    #endif
 
                     Spacer(minLength: 32)
                 }

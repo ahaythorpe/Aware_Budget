@@ -154,10 +154,7 @@ let absMonthlyAverage: [String: Int] = [
 // MARK: - Auto-suggest bias tag
 
 func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> String {
-    // Expanded mapping across all 16 categories × 3 statuses. Each combo
-    // points at the behavioural pattern most often driving that decision.
     switch (category, status) {
-    // Habitual / low-friction daily spends
     case ("Coffee", .impulse):        return "Status Quo Bias"
     case ("Coffee", .surprise):       return "Availability Heuristic"
     case ("Coffee", .planned):        return "Mental Accounting"
@@ -174,7 +171,6 @@ func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> Str
     case ("Eating out", .surprise):   return "Social Proof"
     case ("Eating out", .planned):    return "Moral Licensing"
 
-    // Discretionary shopping
     case ("Shopping", .impulse):      return "Anchoring"
     case ("Shopping", .surprise):     return "Scarcity Heuristic"
     case ("Shopping", .planned):      return "Overconfidence Bias"
@@ -187,7 +183,6 @@ func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> Str
     case ("Gift", .surprise):         return "Social Proof"
     case ("Gift", .planned):          return "Mental Accounting"
 
-    // Transport / utility
     case ("Transport", .impulse):     return "Present Bias"
     case ("Transport", .surprise):    return "Planning Fallacy"
     case ("Transport", .planned):     return "Mental Accounting"
@@ -196,12 +191,10 @@ func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> Str
     case ("Pharmacy", .surprise):     return "Availability Heuristic"
     case ("Pharmacy", .planned):      return "Present Bias"
 
-    // Subscriptions / defaults
     case ("Subscriptions", .impulse): return "Framing Effect"
     case ("Subscriptions", .surprise):return "Status Quo Bias"
     case ("Subscriptions", .planned): return "Status Quo Bias"
 
-    // Experiential
     case ("Entertainment", .impulse): return "Present Bias"
     case ("Entertainment", .surprise):return "Social Proof"
     case ("Entertainment", .planned): return "Moral Licensing"
@@ -214,7 +207,6 @@ func suggestedBiasTag(category: String, status: MoneyEvent.PlannedStatus) -> Str
     case ("Fitness", .surprise):      return "Social Proof"
     case ("Fitness", .planned):       return "Overconfidence Bias"
 
-    // Home / major
     case ("Home", .impulse):          return "Anchoring"
     case ("Home", .surprise):         return "Planning Fallacy"
     case ("Home", .planned):          return "Sunk Cost Fallacy"

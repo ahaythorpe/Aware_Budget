@@ -56,7 +56,7 @@ let allBiasPatterns: [BiasPattern] = [
     BiasPattern(
         name: "Anchoring",
         oneLiner: "The first number you see becomes your reference point",
-        sfSymbol: "anchor",
+        sfSymbol: "tag.fill",
         iconBg: "#E3F2FD", iconColor: "#1565C0",
         nudgeSays: "When a price tag says 'was $200, now $80' your brain anchors to $200 not $80. The question worth asking: would you have paid $80 without the anchor?",
         keyRef: "Tversky & Kahneman, 1974",

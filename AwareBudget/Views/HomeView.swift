@@ -315,7 +315,7 @@ struct HomeView: View {
                 if isEmpty {
                     NudgeSaysCard(
                         message: nudgeLine,
-                        surface: .gold
+                        surface: .whiteShimmer
                     )
                 } else {
                     HStack(spacing: 0) {
@@ -328,8 +328,7 @@ struct HomeView: View {
 
                     NudgeSaysCard(
                         message: nudgeLine,
-                        showCoin: false,
-                        surface: .paleGreen
+                        surface: .whiteShimmer
                     )
                 }
 
@@ -389,7 +388,7 @@ struct HomeView: View {
                     NudgeSaysCard(
                         message: "This is 100% voluntary. MoneyMind never connects to your bank — you type your own numbers. Under Australian law, that means only the Privacy Act 1988 applies. No financial licence, no CDR, no regulation beyond basic data privacy.",
                         citation: "Privacy Act 1988 (Cth) · no AFSL · no CDR",
-                        surface: .dark
+                        surface: .whiteShimmer
                     )
 
                     VStack(spacing: 14) {
@@ -454,7 +453,7 @@ struct HomeView: View {
                 NudgeSaysCard(
                     message: "The trend graph only works when it has numbers to compare. Without income and savings, Nudge can't show you how awareness changes your finances. It takes 30 seconds.",
                     citation: "Thaler 1985 · Mental Accounting",
-                    surface: .gold
+                    surface: .whiteShimmer
                 )
 
                 Button { showFinanceSkipNudge = false } label: {
