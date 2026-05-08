@@ -24,6 +24,13 @@ struct InsightFeedView: View {
         allEvents.isEmpty && recentCheckIns.isEmpty && !isLoading
     }
 
+    private var monthlySpend30d: Double {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        return allEvents
+            .filter { $0.createdAt >= cutoff }
+            .reduce(0.0) { $0 + abs($1.amount) }
+    }
+
     var body: some View {
         Group {
             if hasNoData {
@@ -42,6 +49,11 @@ struct InsightFeedView: View {
                         biasFrequencySection
                         donutChartSection
                         nudgeInsightCard
+
+                        // MARK: — Compound Growth Card
+                        CompoundGrowthCard(monthlySpend: monthlySpend30d)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 8)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, DS.hPadding)
@@ -1885,7 +1897,7 @@ private struct AboutScoreSheet: View {
                     // IMPORTANT
                     VStack(alignment: .leading, spacing: 10) {
                         sectionTitle("IMPORTANT")
-                        Text("This is not a clinical diagnosis. MoneyMind reflects your own patterns back to you \u{2014} nothing more. For financial advice speak to a qualified financial planner.")
+                        Text("This is not a clinical diagnosis. GoldMind reflects your own patterns back to you \u{2014} nothing more. For financial advice speak to a qualified financial planner.")
                             .font(.subheadline)
                             .foregroundStyle(DS.textSecondary)
                     }

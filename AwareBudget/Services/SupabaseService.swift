@@ -86,7 +86,7 @@ final class SupabaseService {
                     return
                 } catch {
                     throw NSError(
-                        domain: "MoneyMind.Auth",
+                        domain: "GoldMind.Auth",
                         code: 1,
                         userInfo: [NSLocalizedDescriptionKey:
                             "Account created, but email verification is unavailable right now. Try signing in instead."]
@@ -192,6 +192,42 @@ final class SupabaseService {
 
     func signOut() async throws {
         try await client.auth.signOut()
+    }
+
+    /// Whether a Supabase session currently exists. AuthStore polls this
+    /// at launch and after sign-in/out events to drive the gate.
+    func hasSession() async -> Bool {
+        (try? await client.auth.session) != nil
+    }
+
+    /// Exchanges a Sign in with Apple identity token for a Supabase session.
+    /// `idToken` is the JWT from `ASAuthorizationAppleIDCredential.identityToken`;
+    /// `nonce` is the *raw* (un-hashed) nonce that was hashed and sent to Apple
+    /// — Supabase needs the raw value to verify Apple's signature.
+    func signInWithApple(idToken: String, nonce: String) async throws {
+        try await client.auth.signInWithIdToken(
+            credentials: .init(provider: .apple, idToken: idToken, nonce: nonce)
+        )
+    }
+
+    /// Returns the signed-in user's email and account creation date,
+    /// or `nil` if there's no session. Used by Settings → Account.
+    func fetchAccountInfo() async -> (email: String, createdAt: Date)? {
+        guard let session = try? await client.auth.session else { return nil }
+        return (session.user.email ?? "—", session.user.createdAt)
+    }
+
+    /// Apple Guideline 5.1.1(v) — permanently delete the user's account
+    /// and all their data. Calls the `delete_account` RPC defined in
+    /// migration 0001_delete_account.sql, then signs out locally so the
+    /// JWT (now invalid) is purged from the keychain.
+    ///
+    /// The RPC runs as `SECURITY DEFINER` and uses `auth.uid()` server-side
+    /// — users can only delete themselves, not other accounts.
+    func deleteAccount() async throws {
+        struct EmptyParams: Encodable {}
+        try await client.rpc("delete_account", params: EmptyParams()).execute()
+        try? await client.auth.signOut()
     }
 
     func resetUserData() async throws {

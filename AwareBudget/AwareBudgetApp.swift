@@ -1,10 +1,19 @@
 import SwiftUI
+import RevenueCat
+import RevenueCatUI
 
 @main
 struct AwareBudgetApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
     @State private var checkingSession = true
+    @State private var paywall = PaywallStore.shared
+    @State private var auth = AuthStore.shared
+
+    init() {
+        Purchases.logLevel = .warn
+        Purchases.configure(withAPIKey: "test_zfwMbyEKcHHZVCcrjRwRpNoDoGR")
+    }
 
     /// Pulls last 30 days of events, computes user's median log hour per
     /// slot, schedules smart nudges at those hours. See F / LogTimeAnalytics.
@@ -24,6 +33,13 @@ struct AwareBudgetApp: App {
                     }
                 } else if !hasCompletedOnboarding {
                     OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
+                } else if !auth.hasLoaded {
+                    ZStack {
+                        DS.bg.ignoresSafeArea()
+                        ProgressView()
+                    }
+                } else if !auth.isAuthenticated {
+                    SignInView()
                 } else if !hasCompletedBFAS {
                     BFASAssessmentView { answers in
                         Task {
@@ -31,6 +47,13 @@ struct AwareBudgetApp: App {
                             await MainActor.run { hasCompletedBFAS = true }
                         }
                     }
+                } else if !paywall.hasLoaded {
+                    ZStack {
+                        DS.bg.ignoresSafeArea()
+                        ProgressView()
+                    }
+                } else if !paywall.isPro {
+                    PaywallView(displayCloseButton: false)
                 } else {
                     RootTabView()
                         .task {
@@ -49,9 +72,10 @@ struct AwareBudgetApp: App {
                 await SupabaseService.shared.ensureDebugSession()
                 #endif
                 NotificationRouter.install()
+                auth.start()
+                paywall.start()
                 checkingSession = false
             }
         }
     }
 }
-

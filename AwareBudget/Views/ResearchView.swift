@@ -8,7 +8,7 @@ struct ResearchView: View {
     private let papers: [Paper] = [
         .init(author: "Pompian", year: "2012",
               title: "Behavioral Finance and Wealth Management",
-              detail: "Codifies the BFAS framework MoneyMind uses — 16 patterns, behavioural investor types, used by professional financial planners."),
+              detail: "Codifies the BFAS framework GoldMind uses — 16 patterns, behavioural investor types, used by professional financial planners."),
         .init(author: "Kahneman & Tversky", year: "1979",
               title: "Prospect Theory",
               detail: "The original behavioural-economics paper. Loss aversion, framing, reference points. Econometrica 47(2):263–291."),
@@ -61,7 +61,7 @@ struct ResearchView: View {
                 .foregroundStyle(.white)
                 .shadow(color: DS.deepGreen.opacity(0.7), radius: 4, x: 0, y: 1)
 
-            Text("Where MoneyMind's patterns come from, and how the ranking works.")
+            Text("Where GoldMind's patterns come from, and how the ranking works.")
                 .font(.system(.subheadline, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .shadow(color: DS.deepGreen.opacity(0.6), radius: 3, x: 0, y: 1)
@@ -135,7 +135,7 @@ struct ResearchView: View {
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(DS.textPrimary)
                 }
-                Text("Behavioural Finance Assessment Score is the framework professional financial planners use to assess client behaviour before giving advice. MoneyMind brings the same 16 patterns to everyday spending — adapted from a one-off assessment into a daily awareness practice.")
+                Text("Behavioural Finance Assessment Score is the framework professional financial planners use to assess client behaviour before giving advice. GoldMind brings the same 16 patterns to everyday spending — adapted from a one-off assessment into a daily awareness practice.")
                     .font(.system(.subheadline, weight: .regular))
                     .foregroundStyle(DS.textPrimary)
                     .lineSpacing(3)

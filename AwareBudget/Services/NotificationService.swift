@@ -84,7 +84,7 @@ enum NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: [morningID])
 
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = "One question. 60 seconds. Nudge is waiting."
         content.sound = .default
 
@@ -104,7 +104,7 @@ enum NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: [eveningID])
 
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = "Nudge noticed."
         content.sound = .default
 
@@ -124,7 +124,7 @@ enum NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: [noEventsID])
 
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = "Nudge has no data. That's also information."
         content.sound = .default
 
@@ -141,7 +141,7 @@ enum NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: [id])
 
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = "\(biasName) appeared \(count) times. Nudge has something."
         content.sound = .default
 
@@ -186,7 +186,7 @@ enum NotificationService {
 
         let body = chunkyBuysBodies.randomElement() ?? chunkyBuysBodies[0]
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = body
         content.sound = .default
         content.userInfo["slot"] = NotificationSlot.chunky.rawValue
@@ -206,7 +206,7 @@ enum NotificationService {
 
         let body = bodies.randomElement() ?? bodies[0]
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = body
         content.sound = .default
         if let slot {
@@ -229,7 +229,7 @@ enum NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: [weeklyReviewID])
 
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = ["Your week, without the story.",
                         "A week richer in insights.",
                         "Seven days, laid bare.",
@@ -253,7 +253,7 @@ enum NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: [monthlyCheckpointID])
 
         let content = UNMutableNotificationContent()
-        content.title = "MoneyMind"
+        content.title = "GoldMind"
         content.body = ["A month in. Let's see what moved.",
                         "Thirty days of small truths.",
                         "Still yes? Still no?",

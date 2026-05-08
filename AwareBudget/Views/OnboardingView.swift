@@ -40,7 +40,7 @@ struct OnboardingView: View {
                         .foregroundStyle(.white)
                         .heroTextLegibility()
 
-                    Text("Most budgeting apps track your spending.\nMoneyMind tracks why you spend.")
+                    Text("Most budgeting apps track your spending.\nGoldMind tracks why you spend.")
                         .font(.system(.title3, weight: .semibold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -245,7 +245,7 @@ struct OnboardingView: View {
             Button {
                 withAnimation { currentPage = 3 }
             } label: {
-                Text("That's why MoneyMind exists \u{2192}")
+                Text("That's why GoldMind exists \u{2192}")
             }
             .goldButtonStyle()
             .padding(.horizontal, 4)

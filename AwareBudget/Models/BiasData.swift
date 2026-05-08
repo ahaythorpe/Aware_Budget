@@ -34,7 +34,7 @@ let allBiasPatterns: [BiasPattern] = [
         oneLiner: "We avoid financial information that feels threatening",
         sfSymbol: "eye.slash.circle",
         iconBg: "#FFF3E0", iconColor: "#E65100",
-        nudgeSays: "Opening MoneyMind 12 days straight already beats the avoidance pattern. Most people look away. You're looking.",
+        nudgeSays: "Opening GoldMind 12 days straight already beats the avoidance pattern. Most people look away. You're looking.",
         keyRef: "Galai & Sade, 2006",
         citation: "Galai, D. & Sade, O. (2006). The Ostrich Effect and the Relationship Between the Liquidity and the Yields of Financial Assets. Journal of Business.",
         category: "Avoidance",

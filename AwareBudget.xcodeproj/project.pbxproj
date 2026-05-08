@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		28B83BB22FA6FC2D00F6FFA0 /* ReceiptParser in Frameworks */ = {isa = PBXBuildFile; productRef = 28B83BB12FA6FC2D00F6FFA0 /* ReceiptParser */; };
+		28B83BB42FA6FC2D00F6FFA0 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 28B83BB32FA6FC2D00F6FFA0 /* RevenueCat */; };
+		28B83BB62FA6FC2D00F6FFA0 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 28B83BB52FA6FC2D00F6FFA0 /* RevenueCatUI */; };
 		28BA62502F8AEB78006A2426 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 28BA62522F8AEB78006A2426 /* Supabase */; };
 /* End PBXBuildFile section */
 
@@ -27,7 +30,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				28B83BB62FA6FC2D00F6FFA0 /* RevenueCatUI in Frameworks */,
+				28B83BB22FA6FC2D00F6FFA0 /* ReceiptParser in Frameworks */,
 				28BA62502F8AEB78006A2426 /* Supabase in Frameworks */,
+				28B83BB42FA6FC2D00F6FFA0 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +77,9 @@
 			name = AwareBudget;
 			packageProductDependencies = (
 				28BA62522F8AEB78006A2426 /* Supabase */,
+				28B83BB12FA6FC2D00F6FFA0 /* ReceiptParser */,
+				28B83BB32FA6FC2D00F6FFA0 /* RevenueCat */,
+				28B83BB52FA6FC2D00F6FFA0 /* RevenueCatUI */,
 			);
 			productName = AwareBudget;
 			productReference = 28BA621D2F8AEB76006A2426 /* AwareBudget.app */;
@@ -102,6 +111,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				28BA62512F8AEB78006A2426 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				28B83BB02FA6FC2D00F6FFA0 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 28BA621E2F8AEB76006A2426 /* Products */;
@@ -169,7 +179,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 74589Q7278;
+				DEVELOPMENT_TEAM = RCRK696XMD;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -231,7 +241,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 74589Q7278;
+				DEVELOPMENT_TEAM = RCRK696XMD;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -255,16 +265,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AwareBudget/AwareBudget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 74589Q7278;
+				DEVELOPMENT_TEAM = RCRK696XMD;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = MoneyMind;
-				INFOPLIST_KEY_CFBundleName = MoneyMind;
+				INFOPLIST_KEY_CFBundleDisplayName = GoldMind;
+				INFOPLIST_KEY_CFBundleName = GoldMind;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -280,7 +292,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Arabella.AwareBudget;
+				PRODUCT_BUNDLE_IDENTIFIER = moneymind.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -301,16 +313,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AwareBudget/AwareBudget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 74589Q7278;
+				DEVELOPMENT_TEAM = RCRK696XMD;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = MoneyMind;
-				INFOPLIST_KEY_CFBundleName = MoneyMind;
+				INFOPLIST_KEY_CFBundleDisplayName = GoldMind;
+				INFOPLIST_KEY_CFBundleName = GoldMind;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -326,7 +340,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Arabella.AwareBudget;
+				PRODUCT_BUNDLE_IDENTIFIER = moneymind.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -366,6 +380,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		28B83BB02FA6FC2D00F6FFA0 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.70.0;
+			};
+		};
 		28BA62512F8AEB78006A2426 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift";
@@ -377,6 +399,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		28B83BB12FA6FC2D00F6FFA0 /* ReceiptParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 28B83BB02FA6FC2D00F6FFA0 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = ReceiptParser;
+		};
+		28B83BB32FA6FC2D00F6FFA0 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 28B83BB02FA6FC2D00F6FFA0 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		28B83BB52FA6FC2D00F6FFA0 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 28B83BB02FA6FC2D00F6FFA0 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
+		};
 		28BA62522F8AEB78006A2426 /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 28BA62512F8AEB78006A2426 /* XCRemoteSwiftPackageReference "supabase-swift" */;

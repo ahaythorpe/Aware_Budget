@@ -61,7 +61,7 @@ struct CredibilitySheet: View {
                 .shadow(color: DS.deepGreen.opacity(0.7), radius: 4, x: 0, y: 1)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("How MoneyMind ranks your patterns")
+            Text("How GoldMind ranks your patterns")
                 .font(.system(.subheadline, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .shadow(color: DS.deepGreen.opacity(0.6), radius: 3, x: 0, y: 1)
@@ -83,7 +83,7 @@ struct CredibilitySheet: View {
 
     private var theIdea: some View {
         goldCard(label: "THE IDEA") {
-            Text("Most budgets track the wrong thing. MoneyMind tracks how you decide, not what you bought.")
+            Text("Most budgets track the wrong thing. GoldMind tracks how you decide, not what you bought.")
                 .font(.system(.body, weight: .semibold))
                 .foregroundStyle(DS.textPrimary)
                 .lineSpacing(4)
@@ -106,7 +106,7 @@ struct CredibilitySheet: View {
                         .tracking(0.8)
                         .foregroundStyle(DS.textTertiary)
                         .frame(width: 96, alignment: .center)
-                    Text("MoneyMind")
+                    Text("GoldMind")
                         .font(.system(.caption2, weight: .heavy))
                         .tracking(0.8)
                         .foregroundStyle(DS.goldBase)
@@ -246,7 +246,7 @@ struct CredibilitySheet: View {
                         .foregroundStyle(DS.textPrimary)
                 }
 
-                Text("The Behavioural Finance Assessment Score is used by professional financial planners before giving advice. MoneyMind brings the same framework to everyday spending — the same 16 patterns, adapted for daily life.")
+                Text("The Behavioural Finance Assessment Score is used by professional financial planners before giving advice. GoldMind brings the same framework to everyday spending — the same 16 patterns, adapted for daily life.")
                     .font(.system(.subheadline, weight: .regular))
                     .foregroundStyle(DS.textPrimary)
                     .lineSpacing(3)

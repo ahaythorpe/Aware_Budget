@@ -222,7 +222,7 @@ struct BFASAssessmentView: View {
             Spacer()
 
             Button { onFinish(answers) } label: {
-                Text("Enter MoneyMind →")
+                Text("Enter GoldMind →")
             }
             .goldButtonStyle()
             .padding(.horizontal, 30)

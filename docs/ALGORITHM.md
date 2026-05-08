@@ -1,9 +1,9 @@
-# MoneyMind Algorithm — Methodology
+# GoldMind Algorithm — Methodology
 
 > A 1-pager for advisors, co-founders, partners, or future agents.
 > Last updated: 2026-04-17
 
-This document explains how the MoneyMind bias-tagging and learning
+This document explains how the GoldMind bias-tagging and learning
 loop works under the hood. It cites the literature each design choice
 is grounded in and flags known limitations so the system can be
 audited rather than trusted blind.
@@ -12,7 +12,7 @@ audited rather than trusted blind.
 
 ## 1. The 60-second summary
 
-MoneyMind helps users notice the behavioural-finance biases driving
+GoldMind helps users notice the behavioural-finance biases driving
 their spending. The loop:
 
 ```
