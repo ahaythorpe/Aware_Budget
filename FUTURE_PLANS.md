@@ -1,4 +1,4 @@
-# FUTURE_PLANS — AwareBudget
+# FUTURE_PLANS — GoldMind
 
 > Deferred ideas, v1.1+ scope, and "nice to haves".
 > Move items up to `STATUS.md` → "Next up" when they become active.

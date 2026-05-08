@@ -1,5 +1,5 @@
 import XCTest
-@testable import AwareBudget
+@testable import GoldMind
 
 /// Tests for the score weights + stage transitions. These guard the
 /// 5:1 active-vs-passive ratio that's the entire scoring rationale

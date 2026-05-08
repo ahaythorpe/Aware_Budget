@@ -1,4 +1,4 @@
-# AwareBudget Design Handbook
+# GoldMind Design Handbook
 
 > Master visual language. Applied consistently across every tab, screen, and component.
 
@@ -375,9 +375,9 @@ On the `TopBiasesCard` header, insert a small `info.circle.fill` icon (14pt, `DS
 
 **CredibilitySheet sections (top to bottom) — absorbs all content from the deprecated Why tab:**
 
-1. **Hero** — Nudge 56pt coin · "Backed by research" `.largeTitle` bold · subtitle "How AwareBudget ranks your patterns" `.subheadline` `DS.textSecondary`.
-2. **THE IDEA** — 3 lines: "Most budgets track the wrong thing. AwareBudget tracks how you decide, not what you bought."
-3. **THE DIFFERENCE** — comparison table (2 columns, Traditional × vs AwareBudget ✓), 5 rows (Focuses on / Feels like / Based on / When wrong / Result). Absorbed from Why.
+1. **Hero** — Nudge 56pt coin · "Backed by research" `.largeTitle` bold · subtitle "How GoldMind ranks your patterns" `.subheadline` `DS.textSecondary`.
+2. **THE IDEA** — 3 lines: "Most budgets track the wrong thing. GoldMind tracks how you decide, not what you bought."
+3. **THE DIFFERENCE** — comparison table (2 columns, Traditional × vs GoldMind ✓), 5 rows (Focuses on / Feels like / Based on / When wrong / Result). Absorbed from Why.
 4. **HOW THE RANKING WORKS** — 3 plain-English bullets. Never show formula.
 5. **WHAT THE STAGES MEAN** — 5-row stage legend with pill colors + descriptions.
 6. **THE FRAMEWORK** — "Built on the BFAS framework" expanded card. Absorbed from Why's BFAS panel.

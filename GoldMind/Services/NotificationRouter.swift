@@ -17,7 +17,7 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
     var pendingSlot: NotificationSlot?
 
     /// Wire as the system-wide notification delegate. Call once at
-    /// app launch from `AwareBudgetApp.task`.
+    /// app launch from `GoldMindApp.task`.
     static func install() {
         UNUserNotificationCenter.current().delegate = shared
     }

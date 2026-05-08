@@ -1,4 +1,4 @@
-# AwareBudget
+# GoldMind
 
 > Stay aware. Adjust early. No shame.
 
@@ -9,14 +9,14 @@ measured in awareness streaks and alignment percentages, not budget adherence.
 ## Quick start
 
 ```bash
-open AwareBudget.xcodeproj
+open GoldMind.xcodeproj
 ```
 
 1. In Xcode: **File → Add Package Dependencies** →
    `https://github.com/supabase/supabase-swift`
 2. In the Supabase dashboard, run `supabase/schema.sql` then
    `supabase/seed.sql`.
-3. Open `AwareBudget/Services/SupabaseService.swift` and fill in
+3. Open `GoldMind/Services/SupabaseService.swift` and fill in
    `supabaseURL` / `supabaseAnonKey` from Settings → API.
 4. Build & run on the iPhone 15 Pro simulator (iOS 17+).
 
@@ -26,8 +26,8 @@ usable but nothing persists across launches.
 ## Project layout
 
 ```
-AwareBudget/                 ← Swift sources (auto-synced to Xcode)
-├── AwareBudgetApp.swift
+GoldMind/                 ← Swift sources (auto-synced to Xcode)
+├── GoldMindApp.swift
 ├── Models/                  ← Codable structs
 ├── Views/                   ← SwiftUI screens
 ├── ViewModels/              ← @Observable view models

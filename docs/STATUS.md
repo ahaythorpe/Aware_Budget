@@ -1,4 +1,4 @@
-# STATUS — AwareBudget
+# STATUS — GoldMind
 
 > Single source of truth for where the build currently stands.
 > Update this file whenever you finish a unit of work.
@@ -11,13 +11,13 @@
 ## ✅ Done
 
 ### Project structure
-- Xcode project (`AwareBudget.xcodeproj`) is wired to a
-  `PBXFileSystemSynchronizedRootGroup` at `AwareBudget/`. Any file added to
+- Xcode project (`GoldMind.xcodeproj`) is wired to a
+  `PBXFileSystemSynchronizedRootGroup` at `GoldMind/`. Any file added to
   that folder is compiled automatically.
 - Folder layout matches PRD: `Models/`, `Views/`, `ViewModels/`, `Services/`.
 - `supabase/schema.sql` and `supabase/seed.sql` ready to run.
 
-### Models (`AwareBudget/Models/`)
+### Models (`GoldMind/Models/`)
 - `CheckIn.swift` — `EmotionalTone` enum with emoji updated to PRD v1.1
   set: calm=😌 · neutral=😐 · anxious=😟
 - `MoneyEvent.swift` — **rebuilt**: `PlannedStatus` (planned/surprise/impulse),
@@ -32,7 +32,7 @@
 - `QuestionPool.swift` stub seed updated so all 15 hard-coded rows pass
   the new required `biasCategory` + `difficulty` initialiser args
 
-### Services (`AwareBudget/Services/`)
+### Services (`GoldMind/Services/`)
 - `SupabaseService.swift` — **LIVE Supabase client** (supabase-swift 2.43.1).
   All methods now hit the real Supabase backend. Auth via `client.auth`,
   CRUD via `client.from(...)`. Methods: signUp/signIn/signOut, check-ins
@@ -51,13 +51,13 @@
   (3) 48h no events: "Nudge has no data. That's also information."
   (4) Bias hits 5x: "[Bias] appeared 5 times. Nudge has something."
   Legacy wrappers `scheduleDailyReminder()` / `cancelIfCheckedIn()` kept
-  for existing callers. All scheduled on app launch via AwareBudgetApp.
+  for existing callers. All scheduled on app launch via GoldMindApp.
 - `BiasScoreService.swift` — **NEW** (2026-04-13). Bias scoring system with
   MasteryStage (unseen/noticed/emerging/active/improving/aware), BiasTrend,
   BiasScore struct, scoring weights (+2 yes, -1 no, +3 tagged spend),
   calculateStage(), calculateTrend(), weeklyNet(), computeScore().
 
-### ViewModels (`AwareBudget/ViewModels/`)
+### ViewModels (`GoldMind/ViewModels/`)
 - `HomeViewModel.swift` — streak + alignment logic, colour + message
   computed properties, loads recent events. `buildNudge()` computes full
   `NudgeContext` from live data: behaviour tag patterns from money events,
@@ -69,7 +69,7 @@
   builds Nudge response via `NudgeEngine.moneyEventResponse()` based on
   behaviour tag count, life event, and planned status.
 
-### Views (`AwareBudget/Views/`)
+### Views (`GoldMind/Views/`)
 - `OnboardingView.swift` — **rebuilt** 4-screen swipeable TabView onboarding:
   (1) Nudge 120pt welcome on heroGradient + gold "Get started →",
   (2) "The 7 patterns that cost people most" — 7 white cards on
@@ -204,7 +204,7 @@
 - `MonthView.swift` — kept in codebase but no longer mounted in tab bar.
 
 ### App entry
-- `AwareBudgetApp.swift` — root switches between `OnboardingView` and
+- `GoldMindApp.swift` — root switches between `OnboardingView` and
   `HomeView` based on `@AppStorage("hasCompletedOnboarding")`.
 
 ---
@@ -276,7 +276,7 @@
 
 ## ✅ Supabase Swift package — DONE
 
-- **supabase-swift 2.43.1** added to `AwareBudget.xcodeproj` as SPM
+- **supabase-swift 2.43.1** added to `GoldMind.xcodeproj` as SPM
   dependency via pbxproj edit + `xcodebuild -resolvePackageDependencies`.
 - `import Supabase` active in `SupabaseService.swift`.
 - `SupabaseClient` initialised with real URL + anon key.
@@ -325,7 +325,7 @@ Features" and "Navigation". Specifies:
 4. Backfill `bias_category` on the original 15 `question_pool` rows.
 5. Verify sign-up → first check-in → streak = 1 flow on device/simulator.
 6. Verify notification permission prompt fires after first check-in
-   (permission request already wired in `AwareBudgetApp.task`).
+   (permission request already wired in `GoldMindApp.task`).
 7. TestFlight build.
 
 ## 🧭 Beta scope reminder (from PRD)

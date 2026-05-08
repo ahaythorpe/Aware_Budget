@@ -1,4 +1,4 @@
-# MEMORY — AwareBudget
+# MEMORY — GoldMind
 
 > Durable facts about this project and the person building it.
 > Distinct from `STATUS.md`: memory is *slow-changing*, status is *fast-changing*.
@@ -20,7 +20,7 @@
 
 ## Owner / intended audience
 
-- The app is being built by **Arabella** (bundle id `Arabella.AwareBudget`).
+- The app is being built by **Arabella** (bundle id `goldmind.app`).
 - Sole dev, working with Claude Code. Jay (boyfriend) is busy with ScrollPaper.
 - Target platforms: iPhone, iPad (iOS 26.2 / Xcode 26).
 - Beta distribution channel: TestFlight.
@@ -32,7 +32,7 @@
 - **Supabase** is the only backend. supabase-swift 2.43.1 is live and wired.
 - **Xcode synchronized groups** (`PBXFileSystemSynchronizedRootGroup`, Xcode 16+)
   are used for the source folder — do **not** add files via `project.pbxproj`
-  edits. Drop Swift files into `AwareBudget/<subfolder>/` and they compile.
+  edits. Drop Swift files into `GoldMind/<subfolder>/` and they compile.
 
 ## Design system — Money Green + Nugget Gold (decided 2026-04-12)
 

@@ -34,5 +34,5 @@ All 3 products show "Missing Metadata" — needs:
 
 - `Services/Paywall.swift` — RevenueCat config, `PaywallStore` (`@Observable`), entitlement check
 - `Views/PaywallView.swift` — three SKU cards, "Start 14-day free trial" CTA, restore button
-- `AwareBudgetApp.swift` — gate: onboarding complete && no `pro` → PaywallView; else HomeView
+- `GoldMindApp.swift` — gate: onboarding complete && no `pro` → PaywallView; else HomeView
 - Settings → "Manage subscription" deep-link to App Store sub management

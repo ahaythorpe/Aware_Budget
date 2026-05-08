@@ -1,4 +1,4 @@
--- AwareBudget — Supabase schema
+-- GoldMind — Supabase schema
 -- Run in Supabase SQL editor before launching the app.
 
 -- 5. Question pool (defined first so daily_checkins can reference it)

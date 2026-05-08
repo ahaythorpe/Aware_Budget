@@ -1,5 +1,5 @@
 import XCTest
-@testable import AwareBudget
+@testable import GoldMind
 
 /// Tests the citation-grounded mapping data. These guard the
 /// research-rigour story — if a mapping disappears or loses its

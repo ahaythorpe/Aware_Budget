@@ -1,4 +1,4 @@
-# AwareBudget — Product Requirements Document
+# GoldMind — Product Requirements Document
 
 **For:** Claude Code (iOS/SwiftUI Build)
 **Version:** 1.0 Beta
@@ -7,7 +7,7 @@
 
 ## Overview
 
-AwareBudget is an awareness-based personal finance iOS app grounded in
+GoldMind is an awareness-based personal finance iOS app grounded in
 behavioural economics. It does NOT sync to banks. Users manually log their
 financial activity. The core philosophy is: **Stay aware. Adjust early. No
 shame.**
@@ -33,8 +33,8 @@ by awareness streaks and alignment percentages, not perfect budget adherence.
 ## Project Structure
 
 ```
-AwareBudget/
-├── AwareBudgetApp.swift
+GoldMind/
+├── GoldMindApp.swift
 ├── ContentView.swift
 ├── Models/
 │   ├── CheckIn.swift
@@ -84,7 +84,7 @@ See `supabase/seed.sql` for the 15 behavioural question rows.
 
 ### 2. Home Dashboard
 
-- Title "AwareBudget" + settings gear
+- Title "GoldMind" + settings gear
 - **Streak card**: flame, day count, motivational one-liner
   - 0 → "Start your streak today"
   - 1–6 → "Keep showing up"
@@ -191,7 +191,7 @@ Supabase dashboard → Settings → API.
 ## Push Notifications
 
 `UserNotifications` framework. Daily reminder at **8 PM**:
-- Title: "AwareBudget check-in"
+- Title: "GoldMind check-in"
 - Body rotates: "60 seconds. That's all it takes." /
   "How's your awareness today?" / "Your streak is waiting."
 - Request permission on first check-in completion, not on launch.
@@ -241,7 +241,7 @@ Ship for TestFlight:
 
 ## Environment Setup Notes
 
-1. Xcode project already created: iOS App, SwiftUI, Swift, `AwareBudget`.
+1. Xcode project already created: iOS App, SwiftUI, Swift, `GoldMind`.
 2. Add Supabase Swift package via `File → Add Package Dependencies`.
 3. Folder structure is already in place.
 4. Build order: Models → Services → ViewModels → Views.

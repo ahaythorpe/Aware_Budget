@@ -1,4 +1,4 @@
-# AwareBudget — Session Handoff
+# GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
 > Updated: 2026-04-12
@@ -12,7 +12,7 @@ Philosophy: "Stay aware. Adjust early. No shame."
 NOT a budgeting app. NO bank sync. NO categories.
 Success = awareness streaks + behaviour trends improving.
 
-Owner: Arabella (bundle id `Arabella.AwareBudget`).
+Owner: Arabella (bundle id `goldmind.app`).
 Solo dev with Claude Code. Xcode 26, iOS 26.2.
 
 ---
@@ -41,7 +41,7 @@ Solo dev with Claude Code. Xcode 26, iOS 26.2.
 - `MoneyEventViewModel.swift` — @Observable. Amount validation, save, nudgeResponse. Uses `await service.currentUserId`.
 
 ### Views/ (14 files)
-- `AwareBudgetApp.swift` — @main. Onboarding gate. RootTabView after onboarding.
+- `GoldMindApp.swift` — @main. Onboarding gate. RootTabView after onboarding.
 - `RootTabView.swift` — 4 tabs: Home / Log / Insights / Library. Tint DS.primary. MoneyEventView is Log tab (direct). CheckInView opens as sheet from HomeView.
 - `DesignSystem.swift` — DS enum with all colour tokens + Card, PrimaryButtonStyle, SecondaryButtonStyle, SectionHeader, NudgeAvatar, GoldButton, GoldRingModifier.
 - `HomeView.swift` — Greeting header, NudgeCardView, **pattern alert cards** (biases 3+ times → emoji + count + trend, tappable → Insights), hero gradient check-in card (shows "Checked in · Day [streak]" with gold checkmark when done, opens CheckInView sheet), StreakRingView, **3 stat cards** (Alignment %, Biases Seen gold, This Week spend), **Daily Missions** (check-in/log event with completion state), alignment card, recent activity. Settings gear icon opens SettingsView sheet.
@@ -99,7 +99,7 @@ App bg        = #F5F7F5 (used in CheckInView, InsightFeedView)
 ## Nudge mascot
 
 - Name: Nudge. Gold metallic coin, thinking pose.
-- Source: `/Users/bella/Aware Budget/images/Nudge_Asset.png`
+- Source: `/Users/bella/GoldMind/images/Nudge_Asset.png`
 - Asset: `Assets.xcassets/nudge.imageset/nudge.png` (wired at 2x scale)
 - Display: NudgeAvatar wraps in green Circle to mask black PNG bg
 - Sizes: 44pt in NudgeCardView, 100pt onboarding, 72pt completion

@@ -151,7 +151,7 @@ final class SupabaseService {
         // SMTP configured), the user row is STILL created in Supabase.
         // Saving the creds first means next launch's saved-creds path
         // can sign in instead of creating yet another orphan user.
-        let email = "debug-\(UUID().uuidString.prefix(8))@awarebudget.test"
+        let email = "debug-\(UUID().uuidString.prefix(8))@goldmind.test"
         let password = "Dbg-\(UUID().uuidString.prefix(12))"
         defaults.set(email, forKey: "debugEmail")
         defaults.set(password, forKey: "debugPassword")

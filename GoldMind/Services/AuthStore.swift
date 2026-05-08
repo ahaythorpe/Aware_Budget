@@ -2,7 +2,7 @@ import Foundation
 import Supabase
 
 /// Single source of truth for whether a user is signed in. The app gate in
-/// `AwareBudgetApp.swift` reads `isAuthenticated` to decide between
+/// `GoldMindApp.swift` reads `isAuthenticated` to decide between
 /// `SignInView` and the rest of the flow. Mirrors the pattern of
 /// `PaywallStore` for consistency.
 @Observable

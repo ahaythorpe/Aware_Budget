@@ -3,7 +3,7 @@ import RevenueCat
 import RevenueCatUI
 
 @main
-struct AwareBudgetApp: App {
+struct GoldMindApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
     @State private var checkingSession = true

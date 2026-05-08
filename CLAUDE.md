@@ -1,4 +1,4 @@
-# CLAUDE.md — AwareBudget Agent Rules
+# CLAUDE.md — GoldMind Agent Rules
 
 > Read this file first on every session.
 
@@ -48,12 +48,12 @@ Show the response.
 
 | Key             | Value                                                    |
 |-----------------|----------------------------------------------------------|
-| Path            | `/Users/bella/Aware Budget/AwareBudget`                  |
+| Path            | `/Users/bella/GoldMind/GoldMind`                  |
 | Supabase URL    | `https://vdnnoezyogbgtiubamze.supabase.co`               |
 | Anon key        | `sb_publishable_lwuCqoY6jpKRwQRJoqZYFQ_CiavSWwH`        |
 | Nudge image     | `Assets.xcassets/nudge.imageset/nudge.png`                |
 | Currency        | AUD                                                      |
-| Bundle ID       | `Arabella.AwareBudget`                                   |
+| Bundle ID       | `goldmind.app`                                   |
 | Stack           | Swift + SwiftUI + Supabase (supabase-swift 2.43.1)       |
 | Architecture    | MVVM with `@Observable` view models, async/await          |
 | Target          | iOS 17+, Xcode 26, iPhone 17 Pro simulator (iOS 26.2)   |
@@ -103,7 +103,7 @@ Arabella is sole dev on `main`. Agents commit + push directly to `main`.
 
 To update files use terminal `cp` command:
 ```
-cp ~/Downloads/[filename] "/Users/bella/Aware Budget/AwareBudget/AwareBudget/Views/[filename]"
+cp ~/Downloads/[filename] "/Users/bella/GoldMind/GoldMind/GoldMind/Views/[filename]"
 ```
 Never use Finder drag to replace Swift files.
 Always use `cp` from terminal after downloading from Claude.
@@ -112,15 +112,15 @@ Always use `cp` from terminal after downloading from Claude.
 
 ## IMPLEMENTATION GUIDE WORKFLOW
 
-When implementing from an implementation guide (e.g. `Implementation_Guide/awarebudget_implementation.md`):
+When implementing from an implementation guide (e.g. `Implementation_Guide/goldmind_implementation.md`):
 
 ```
 # Start session
-cd "/Users/bella/Aware Budget/AwareBudget"
+cd "/Users/bella/GoldMind/GoldMind"
 claude
 
 # Agent auto-reads CLAUDE.md, then you say:
-"Read awarebudget_implementation.md and implement File 3"
+"Read goldmind_implementation.md and implement File 3"
 
 # After Xcode build passes:
 "build passed"

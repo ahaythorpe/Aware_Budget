@@ -24,23 +24,23 @@ enum NotificationSlot: String {
 }
 
 enum NotificationService {
-    private static let morningID  = "awarebudget.morning"
-    private static let eveningID  = "awarebudget.evening.nudge"
-    private static let noEventsID = "awarebudget.no.events"
-    private static let biasHitID  = "awarebudget.bias.hit"
+    private static let morningID  = "goldmind.morning"
+    private static let eveningID  = "goldmind.evening.nudge"
+    private static let noEventsID = "goldmind.no.events"
+    private static let biasHitID  = "goldmind.bias.hit"
 
     // Smart time-of-day nudges (F — personalised to user's log hours)
-    private static let smartMorningID   = "awarebudget.smart.morning"
-    private static let smartAfternoonID = "awarebudget.smart.afternoon"
-    private static let smartEveningID   = "awarebudget.smart.evening"
+    private static let smartMorningID   = "goldmind.smart.morning"
+    private static let smartAfternoonID = "goldmind.smart.afternoon"
+    private static let smartEveningID   = "goldmind.smart.evening"
     /// 9pm end-of-day prompt for one-off chunky buys (Shopping, Travel,
     /// Subscriptions, Big purchase) the user might've missed during the
     /// day. Surface-level reminder so the day's data isn't incomplete.
-    private static let chunkyBuysID     = "awarebudget.chunky.buys"
+    private static let chunkyBuysID     = "goldmind.chunky.buys"
 
     // Weekly + monthly review pushes
-    private static let weeklyReviewID  = "awarebudget.weekly"
-    private static let monthlyCheckpointID = "awarebudget.monthly"
+    private static let weeklyReviewID  = "goldmind.weekly"
+    private static let monthlyCheckpointID = "goldmind.monthly"
 
     // Meal-anchored copy. Default fire times are 11/14/19, refined by
     // LogTimeAnalytics once the user has 30 days of logs.

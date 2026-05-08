@@ -1,5 +1,5 @@
 #!/bin/bash
-# AwareBudget → TestFlight automated upload.
+# GoldMind → TestFlight automated upload.
 #
 # Reads App Store Connect API credentials from .secrets/asc-api.env:
 #   ASC_KEY_ID=ABCDE12345
@@ -32,12 +32,12 @@ if [[ ! -f "$ASC_KEY_PATH" ]]; then
     exit 1
 fi
 
-SCHEME="AwareBudget"
-PROJECT="AwareBudget.xcodeproj"
+SCHEME="GoldMind"
+PROJECT="GoldMind.xcodeproj"
 BUILD_DIR="$PROJECT_DIR/build/testflight"
-ARCHIVE_PATH="$BUILD_DIR/AwareBudget.xcarchive"
+ARCHIVE_PATH="$BUILD_DIR/GoldMind.xcarchive"
 EXPORT_PATH="$BUILD_DIR/export"
-IPA_PATH="$EXPORT_PATH/AwareBudget.ipa"
+IPA_PATH="$EXPORT_PATH/GoldMind.ipa"
 
 mkdir -p "$BUILD_DIR"
 
@@ -55,9 +55,13 @@ xcodebuild archive \
     -configuration Release \
     -destination "generic/platform=iOS" \
     -archivePath "$ARCHIVE_PATH" \
+    -allowProvisioningUpdates \
+    -authenticationKeyID "$ASC_KEY_ID" \
+    -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+    -authenticationKeyPath "$PROJECT_DIR/$ASC_KEY_PATH" \
     DEVELOPMENT_TEAM="$TEAM_ID" \
     CODE_SIGN_STYLE=Automatic \
-    | xcbeautify --quiet 2>/dev/null || true
+    2>&1 | tail -50
 test -d "$ARCHIVE_PATH" || { echo "✗ Archive failed"; exit 1; }
 
 echo "▸ Exporting IPA…"
@@ -69,8 +73,11 @@ xcodebuild -exportArchive \
     -authenticationKeyID "$ASC_KEY_ID" \
     -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
     -authenticationKeyPath "$PROJECT_DIR/$ASC_KEY_PATH" \
-    | xcbeautify --quiet 2>/dev/null || true
+    2>&1 | tail -50
 test -f "$IPA_PATH" || { echo "✗ Export failed — no IPA at $IPA_PATH"; exit 1; }
+
+# altool searches standard dirs for the .p8; point it at .secrets/
+export API_PRIVATE_KEYS_DIR="$PROJECT_DIR/.secrets"
 
 echo "▸ Validating with altool…"
 xcrun altool --validate-app \

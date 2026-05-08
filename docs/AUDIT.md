@@ -21,7 +21,7 @@ BiasData.swift has 14 biases with 2 wrong entries. BiasLessonsMock.swift has the
 ### 1. Planning Fallacy — WRONG PAPER in BiasData.swift
 
 ```
-File: AwareBudget/Services/BiasData.swift
+File: GoldMind/Services/BiasData.swift
 Line: 163-165
 Current: "Kahneman, D. & Tversky, A. (1979). Intuitive Prediction..."
 Correct: "Buehler, R., Griffin, D. & Ross, M. (1994). Exploring the Planning Fallacy. JPSP, 67(3), 366-381."
@@ -31,16 +31,16 @@ Reason: K&T 1979 is Prospect Theory (Loss Aversion). Planning Fallacy foundation
 ### 2. Moral Licensing — THREE DIFFERENT PAPERS across files
 
 ```
-File: AwareBudget/Services/BiasLessonsMock.swift:179
+File: GoldMind/Services/BiasLessonsMock.swift:179
 Current: Monin & Miller 2001
 Status: CORRECT (seminal paper) — use this everywhere
 
-File: AwareBudget/Services/BiasData.swift:213
+File: GoldMind/Services/BiasData.swift:213
 Current: Khan & Dhar 2006
 Correct: Monin & Miller 2001
 Reason: Khan & Dhar is consumer choice specific; Monin & Miller is the foundational work
 
-File: AwareBudget/Services/NudgeVoice.swift:156
+File: GoldMind/Services/NudgeVoice.swift:156
 Current: Merritt et al. 2010
 Correct: Monin & Miller 2001
 Reason: Merritt is a review article, not the original research
@@ -49,11 +49,11 @@ Reason: Merritt is a review article, not the original research
 ### 3. Overconfidence Bias — TWO DIFFERENT PAPERS
 
 ```
-File: AwareBudget/Services/NudgeVoice.swift:166
+File: GoldMind/Services/NudgeVoice.swift:166
 Current: Barber & Odean 2001
 Status: Correct for financial context
 
-File: AwareBudget/Services/BiasData.swift:84
+File: GoldMind/Services/BiasData.swift:84
 Current: Svenson 1981
 Correct: Barber & Odean 2001
 Reason: Svenson is about driving confidence, not finance. Barber & Odean is the financial overconfidence paper.
@@ -62,7 +62,7 @@ Reason: Svenson is about driving confidence, not finance. Barber & Odean is the 
 ### 4. AwarenessView.swift — Cialdini edition year
 
 ```
-File: AwareBudget/Views/AwarenessView.swift
+File: GoldMind/Views/AwarenessView.swift
 Line: 37
 Current: "Cialdini 1984 · Influence"
 Correct: "Cialdini 2001 · Influence" (preferred edition) OR keep 1984 (first edition — technically valid)

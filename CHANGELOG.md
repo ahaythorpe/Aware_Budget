@@ -1,4 +1,4 @@
-# CHANGELOG — AwareBudget
+# CHANGELOG — GoldMind
 
 > Append-only log of every agent/Claude Code session.
 > Newest entries at the top. Each entry: date, agent, summary, links.
@@ -214,7 +214,7 @@ Build verified iPhone 17 Pro / iOS 26.2.
 Session focused on UX consistency, removing the duplicate Quick log entry
 point, and making logs actually flow through to Home + Insights.
 
-- `AwareBudgetApp.swift`: removed the DEBUG bypass that mounted RootTabView
+- `GoldMindApp.swift`: removed the DEBUG bypass that mounted RootTabView
   directly. Onboarding + BFAS gates now run in DEBUG too — `Reset onboarding
   + BFAS` in the dev menu now actually shows the flow on next launch. Buggy
   release-mode `if currentUserId != nil { hasCompletedOnboarding = true }`
@@ -500,7 +500,7 @@ reached from Home Top Biases ⓘ. Why tab removed entirely. Tab bar now has
 CredibilitySheet rewritten with 10 sections:
 1. Hero — Nudge 64pt + "Backed by research" .largeTitle
 2. THE IDEA
-3. THE DIFFERENCE — 5-row comparison table (Traditional × vs AwareBudget ✓)
+3. THE DIFFERENCE — 5-row comparison table (Traditional × vs GoldMind ✓)
 4. HOW THE RANKING WORKS — 3 plain-English bullets
 5. WHAT THE STAGES MEAN — 5-row legend
 6. THE FRAMEWORK — "Built on BFAS" card (absorbed from Why)
@@ -516,11 +516,11 @@ DS.paleGreen zebra. No hardcoded hex in views (only #FFF8E1 citation bg
 which is a handbook-designated value).
 
 File changes:
-- AwareBudget/Views/WhyView.swift DELETED
-- AwareBudget/Views/CredibilitySheet.swift rewritten
-- AwareBudget/Views/RootTabView.swift — Why tab removed, RootTab enum
+- GoldMind/Views/WhyView.swift DELETED
+- GoldMind/Views/CredibilitySheet.swift rewritten
+- GoldMind/Views/RootTabView.swift — Why tab removed, RootTab enum
   reindexed (home=0, log=1, insights=2, awareness=3)
-- AwareBudget/Views/HomeView.swift — selectedTab param dropped (no longer
+- GoldMind/Views/HomeView.swift — selectedTab param dropped (no longer
   needed to route to Why); sheet presents CredibilitySheet with no args
 - docs/PRD.md bumped to v1.3
 - docs/DESIGN_HANDBOOK.md §5 updated (4 tabs); §8.1 rewritten for new
@@ -614,7 +614,7 @@ Build verified on iPhone 17 Pro / iOS 26.2 — BUILD SUCCEEDED.
 - 7pm evening (no check-in): "Nudge noticed."
 - 48h no events: "Nudge has no data. That's also information."
 - Bias hits 5x: "[Bias] appeared 5 times. Nudge has something."
-- All scheduled on app launch in AwareBudgetApp
+- All scheduled on app launch in GoldMindApp
 - Evening nudge cancelled on check-in, no-events timer reset on money event
 - Bias alert triggered in MoneyEventViewModel when tagCount == 5
 
@@ -632,7 +632,7 @@ Build verified on iPhone 17 Pro / iOS 26.2 — BUILD SUCCEEDED.
 - Screen 3: Budget Reality Check — white background, lime caps label,
   NudgeAvatar 52pt, sequential quiz (Q1: budget duration, Q2: why stopped),
   capsule pills, Nudge response card (heroGradient, "You're not broken.
-  The method is.", 70% stat), gold "That's why AwareBudget exists →"
+  The method is.", 70% stat), gold "That's why GoldMind exists →"
 - Screen 4: Sign up — NudgeAvatar 100pt, email/password fields, gold
   "Create account" button, "Already have an account? Sign in" toggle
 - Removed old "How it works" 3-card explainer screen
@@ -1016,7 +1016,7 @@ audit all files and create HANDOFF.md.
 the real Supabase backend.
 
 **Package added:**
-- supabase-swift 2.43.1 added to AwareBudget.xcodeproj via pbxproj edit
+- supabase-swift 2.43.1 added to GoldMind.xcodeproj via pbxproj edit
   (XCRemoteSwiftPackageReference + XCSwiftPackageProductDependency).
 - Resolved via `xcodebuild -resolvePackageDependencies` (also pulled
   swift-crypto, swift-http-types, swift-concurrency-extras, etc.).
@@ -1251,7 +1251,7 @@ notifications, (5) 4-tab root.
 - `Views/RootTabView.swift` — 4-tab root (Home · Check in · Learn ·
   Month). `@State selection: RootTab` passed down to HomeView +
   CheckInView so cards can switch tabs. Active tint `DS.accent`
-  (`#7F77DD`). Wrapped in `AwareBudgetApp.swift` as the root scene,
+  (`#7F77DD`). Wrapped in `GoldMindApp.swift` as the root scene,
   which also fires `NotificationService.requestPermission()` on
   launch.
 - `Views/StreakRingView.swift` — coral 180pt circular ring with
@@ -1289,7 +1289,7 @@ notifications, (5) 4-tab root.
 - `NotificationService.scheduleDailyReminder()` was already wired
   with a `UNCalendarNotificationTrigger` at `hour=20, minute=0,
   repeats: true` — verified, no change needed. Permission request
-  now happens on app launch from `AwareBudgetApp.task`.
+  now happens on app launch from `GoldMindApp.task`.
 
 **Blocked / pending:**
 - Supabase Swift package still needs to be added via Xcode UI
@@ -1384,7 +1384,7 @@ rendering because the nav bar region + the scroll view's default
 background were both white-on-white, with no visible bounds.
 
 **Fix:**
-- Removed the `RootView` wrapper struct. `AwareBudgetApp` now returns
+- Removed the `RootView` wrapper struct. `GoldMindApp` now returns
   `OnboardingView` directly at first launch, or `NavigationStack {
   HomeView() }` once `hasCompletedOnboarding` is true. Onboarding
   doesn't need navigation so it has no `NavigationStack` at all.
@@ -1400,7 +1400,7 @@ background were both white-on-white, with no visible bounds.
 
 **If the screen is still blank after this build:** the simulator may
 have `hasCompletedOnboarding = true` stored in UserDefaults from a
-previous run. Delete the AwareBudget app from the simulator
+previous run. Delete the GoldMind app from the simulator
 (long-press → Remove App) and relaunch.
 
 ---
@@ -1478,7 +1478,7 @@ package in Xcode, then replace the in-memory stub in
 **Goal:** Bootstrap the project from the PRD the user wrote in Claude online.
 
 **Added:**
-- Full folder structure under `AwareBudget/` matching the PRD layout
+- Full folder structure under `GoldMind/` matching the PRD layout
   (`Models/`, `Views/`, `ViewModels/`, `Services/`).
 - Xcode project wired via `PBXFileSystemSynchronizedRootGroup` so new Swift
   files compile without `.pbxproj` edits.

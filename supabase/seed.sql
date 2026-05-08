@@ -1,4 +1,4 @@
--- AwareBudget — Question pool seed data
+-- GoldMind — Question pool seed data
 -- Run AFTER schema.sql.
 
 insert into question_pool (question, why_explanation, bias_name) values

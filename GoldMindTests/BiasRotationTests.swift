@@ -1,5 +1,5 @@
 import XCTest
-@testable import AwareBudget
+@testable import GoldMind
 
 /// Unit tests for the bias-tagging math. These guard the algorithm
 /// rigour story: if any of these fail in CI later, the algorithm has
@@ -7,7 +7,7 @@ import XCTest
 ///
 /// **Activation:** there's no test target yet. To run these:
 /// 1. In Xcode → File → New → Target → Unit Testing Bundle
-/// 2. Name it `AwareBudgetTests` (matches this folder)
+/// 2. Name it `GoldMindTests` (matches this folder)
 /// 3. The PBXFileSystemSynchronizedRootGroup setup picks these up
 ///    automatically — no manual project.pbxproj edit needed.
 final class BiasRotationTests: XCTestCase {

@@ -1,4 +1,4 @@
-# AwareBudget — Product Requirements Document
+# GoldMind — Product Requirements Document
 ### For: Claude Code (iOS/SwiftUI Build)
 ### Version: 1.3 — 4-tab app + absorbed Why into CredibilitySheet
 
@@ -83,12 +83,12 @@ Stage: unseen → noticed → emerging → active → aware.
 
 ## Overview
 
-AwareBudget is an awareness-based personal finance iOS app grounded in behavioural economics. It does NOT sync to banks. Users manually log their financial activity. Core philosophy: **Stay aware. Adjust early. No shame.**
+GoldMind is an awareness-based personal finance iOS app grounded in behavioural economics. It does NOT sync to banks. Users manually log their financial activity. Core philosophy: **Stay aware. Adjust early. No shame.**
 
 The app addresses the "Ostrich Effect" — the tendency people have to avoid looking at their finances when things feel overwhelming. Success is measured by awareness streaks and alignment percentages, not perfect budget adherence.
 
-**What makes AwareBudget different:**
-Every competitor (YNAB, Copilot, Monarch) solves the tracking problem. Nobody solves the awareness and avoidance problem at the behavioural level. AwareBudget is built for the 70% of people who download budgeting apps and quit within 30 days.
+**What makes GoldMind different:**
+Every competitor (YNAB, Copilot, Monarch) solves the tracking problem. Nobody solves the awareness and avoidance problem at the behavioural level. GoldMind is built for the 70% of people who download budgeting apps and quit within 30 days.
 
 ---
 
@@ -107,8 +107,8 @@ Every competitor (YNAB, Copilot, Monarch) solves the tracking problem. Nobody so
 ## Project Structure
 
 ```
-AwareBudget/
-├── AwareBudgetApp.swift
+GoldMind/
+├── GoldMindApp.swift
 ├── ContentView.swift
 ├── Models/
 │   ├── CheckIn.swift
