@@ -1,4 +1,6 @@
 import SwiftUI
+import AuthenticationServices
+import CryptoKit
 
 struct OnboardingView: View {
     @Binding var hasCompletedOnboarding: Bool
@@ -308,6 +310,7 @@ private struct AuthFormView: View {
     @State private var password = ""
     @State private var isSubmitting = false
     @State private var errorMessage: String?
+    @State private var nonce: String = ""
 
     var body: some View {
         ZStack {
@@ -335,6 +338,30 @@ private struct AuthFormView: View {
                             .padding(.horizontal, 24)
                             .heroTextLegibility()
                     }
+
+                    SignInWithAppleButton(.continue) { request in
+                        let raw = Self.makeNonce()
+                        nonce = raw
+                        request.requestedScopes = [.email, .fullName]
+                        request.nonce = Self.sha256(raw)
+                    } onCompletion: { result in
+                        Task { await handleApple(result) }
+                    }
+                    .signInWithAppleButtonStyle(.white)
+                    .frame(height: 50)
+                    .clipShape(Capsule())
+                    .padding(.horizontal, DS.hPadding)
+                    .disabled(isSubmitting)
+                    .opacity(isSubmitting ? 0.6 : 1)
+
+                    HStack(spacing: 12) {
+                        Rectangle().fill(Color.white.opacity(0.3)).frame(height: 1)
+                        Text("or")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.7))
+                        Rectangle().fill(Color.white.opacity(0.3)).frame(height: 1)
+                    }
+                    .padding(.horizontal, DS.hPadding)
 
                     VStack(spacing: 12) {
                         TextField("Email", text: $email, prompt: Text("Email").foregroundStyle(.white.opacity(0.5)))
@@ -441,6 +468,48 @@ private struct AuthFormView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func handleApple(_ result: Result<ASAuthorization, Error>) async {
+        errorMessage = nil
+        isSubmitting = true
+        defer { isSubmitting = false }
+
+        switch result {
+        case .success(let auth):
+            guard
+                let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                let tokenData = credential.identityToken,
+                let token = String(data: tokenData, encoding: .utf8)
+            else {
+                errorMessage = "Apple didn't return a valid identity token. Please try again."
+                return
+            }
+            do {
+                try await SupabaseService.shared.signInWithApple(idToken: token, nonce: nonce)
+                _ = try? await SupabaseService.shared.fetchOrCreateBudgetMonth(for: Date())
+                UserDefaults.standard.set(true, forKey: "hasSeenNudge")
+                hasCompletedOnboarding = true
+            } catch {
+                errorMessage = "Sign in failed: \(error.localizedDescription)"
+            }
+        case .failure(let error):
+            if (error as? ASAuthorizationError)?.code == .canceled { return }
+            errorMessage = "Sign in failed: \(error.localizedDescription)"
+        }
+    }
+
+    private static func makeNonce(length: Int = 32) -> String {
+        let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._")
+        var bytes = [UInt8](repeating: 0, count: length)
+        let status = SecRandomCopyBytes(kSecRandomDefault, length, &bytes)
+        precondition(status == errSecSuccess, "SecRandomCopyBytes failed: \(status)")
+        return String(bytes.map { charset[Int($0) % charset.count] })
+    }
+
+    private static func sha256(_ input: String) -> String {
+        let digest = SHA256.hash(data: Data(input.utf8))
+        return digest.map { String(format: "%02x", $0) }.joined()
     }
 }
 

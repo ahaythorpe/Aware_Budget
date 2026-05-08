@@ -12,7 +12,7 @@ struct GoldMindApp: App {
 
     init() {
         Purchases.logLevel = .warn
-        Purchases.configure(withAPIKey: "test_zfwMbyEKcHHZVCcrjRwRpNoDoGR")
+        Purchases.configure(withAPIKey: "appl_XFOSSZlyhbOaxldNVLKSAZnkJmg")
     }
 
     /// Pulls last 30 days of events, computes user's median log hour per
