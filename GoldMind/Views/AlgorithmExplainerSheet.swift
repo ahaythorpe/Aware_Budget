@@ -93,7 +93,7 @@ struct AlgorithmExplainerSheet: View {
                                         .font(.system(.caption, weight: .semibold))
                                         .foregroundStyle(DS.textSecondary)
                                     Text("Q: \"\(BiasQuestionMatrix.question(for: row.questionKey.components(separatedBy: "_").first ?? "", category: row.questionKey.components(separatedBy: "_").last ?? ""))\"")
-                                        .font(.system(.caption2, weight: .medium))
+                                        .font(.system(.footnote, weight: .medium))
                                         .foregroundStyle(DS.textTertiary)
                                         .italic()
                                 }

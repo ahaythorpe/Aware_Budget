@@ -289,8 +289,12 @@ final class HomeViewModel {
             }
         }
 
-        // Auto-seed demo data on first open when nothing exists
-        // Runs outside the main do/catch so auth failures don't block it
+        // Auto-seed demo data on first open when nothing exists.
+        // DEBUG-only: TestFlight + App Store builds must show a truly empty
+        // state for new users (no ghost streak, no phantom "patterns
+        // identified" inflation from leftover user_bias_progress rows).
+        // Removing the #if DEBUG gate is enough to revert.
+        #if DEBUG
         if streak == 0 && recentEvents.isEmpty && !UserDefaults.standard.bool(forKey: "demoDataSeeded") {
             if await service.currentUserId != nil {
                 UserDefaults.standard.set(true, forKey: "demoDataSeeded")
@@ -302,6 +306,7 @@ final class HomeViewModel {
                 }
             }
         }
+        #endif
     }
 
     func dismissNudge() {

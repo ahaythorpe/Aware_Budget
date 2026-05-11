@@ -329,37 +329,38 @@ struct ResearchView: View {
                 .frame(width: 32, height: 32)
                 .padding(.top, 1)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
                         Text(pattern.displayName)
-                            .font(.system(.subheadline, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(DS.textPrimary)
                         Spacer(minLength: 0)
                         Image(systemName: isRevealed ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 11, weight: .heavy))
+                            .font(.system(size: 12, weight: .heavy))
                             .foregroundStyle(DS.goldBase)
                     }
                     if isRevealed {
                         Text(pattern.nudgeSays)
-                            .font(.system(.footnote, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(DS.textPrimary)
-                            .lineSpacing(2)
+                            .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
                             .transition(.opacity.combined(with: .move(edge: .top)))
                     } else {
                         Text(pattern.oneLiner)
-                            .font(.system(.footnote, weight: .regular))
+                            .font(.system(size: 14, weight: .regular))
                             .foregroundStyle(DS.textSecondary)
+                            .lineSpacing(2)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Text(pattern.keyRef)
-                        .font(.system(size: 10, weight: .heavy, design: .rounded))
-                        .tracking(0.8)
-                        .foregroundStyle(DS.goldBase)
-                        .padding(.top, 1)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .tracking(0.4)
+                        .foregroundStyle(DS.goldBase.opacity(0.85))
+                        .padding(.top, 2)
                 }
             }
-            .padding(10)
+            .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 10)

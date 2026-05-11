@@ -359,11 +359,19 @@ final class MoneyEventViewModel {
                 tagCount = 0
             }
 
+            // Detect "first event ever" so NudgeEngine can give a
+            // celebratory message instead of the standard pattern line.
+            // We just saved one, so totalCount == 1 means this was the
+            // user's very first event across the app's lifetime.
+            let totalEventCount = (try? await service.countAllMoneyEvents()) ?? 0
+            let isFirstEver = totalEventCount == 1
+
             nudgeResponse = NudgeEngine.moneyEventResponse(
                 behaviourTag: behaviourTag,
                 tagCount: tagCount,
                 lifeEvent: nil,
-                plannedStatus: status
+                plannedStatus: status,
+                isFirstEver: isFirstEver
             )
 
             // Reset 48h no-events timer

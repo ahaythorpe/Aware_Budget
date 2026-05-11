@@ -259,6 +259,7 @@ struct MoneyEventView: View {
                 .font(.system(.largeTitle, weight: .bold))
                 .foregroundStyle(DS.textPrimary)
             Text("Tap what you spent on. Log at your own pace. Patterns show up over time.")
+                .font(.system(size: 15, weight: .medium))
                 .font(.system(.subheadline, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -445,7 +446,7 @@ struct MoneyEventView: View {
                     .font(.system(.subheadline, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
                 Text("\(entry.plannedStatus.emoji) \(entry.plannedStatus.label)")
-                    .font(.system(.caption, weight: .medium))
+                    .font(.system(.subheadline, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
             }
             Spacer()
@@ -532,7 +533,7 @@ struct MoneyEventView: View {
                 Text(cat.emoji)
                     .font(.system(size: 34))
                 Text(cat.name)
-                    .font(.system(.caption, weight: .heavy))
+                    .font(.system(.subheadline, weight: .bold))
                     .foregroundStyle(DS.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -773,7 +774,7 @@ struct MoneyEventView: View {
                     .tracking(1.0)
                     .foregroundStyle(DS.goldBase)
                 Text(lesson.counter_move)
-                    .font(.system(.footnote, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -786,7 +787,7 @@ struct MoneyEventView: View {
                         }
                     } label: {
                         Text("Helpful")
-                            .font(.system(.caption2, weight: .heavy))
+                            .font(.system(.caption, weight: .heavy))
                             .foregroundStyle(DS.goldForeground)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
@@ -801,7 +802,7 @@ struct MoneyEventView: View {
                         }
                     } label: {
                         Text("Dismiss")
-                            .font(.system(.caption2, weight: .semibold))
+                            .font(.system(.caption, weight: .semibold))
                             .foregroundStyle(DS.textSecondary)
                     }
                     .buttonStyle(.plain)

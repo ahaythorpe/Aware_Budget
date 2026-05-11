@@ -214,8 +214,23 @@ enum NudgeEngine {
         behaviourTag: String?,
         tagCount: Int,
         lifeEvent: MoneyEvent.LifeEvent?,
-        plannedStatus: MoneyEvent.PlannedStatus
+        plannedStatus: MoneyEvent.PlannedStatus,
+        isFirstEver: Bool = false
     ) -> NudgeMessage {
+        // First-ever event — special acknowledgement before any other branch.
+        // Catches the new-user "I just took my first action" moment, which
+        // is the highest-stakes engagement signal in onboarding.
+        if isFirstEver {
+            if let tag = behaviourTag {
+                return .text(
+                    "First event logged \u{2014} and Nudge already spotted \(tag). Most people never see the pattern. You just did."
+                )
+            }
+            return .text(
+                "First event logged. Nudge remembers everyone's first one. Keep going."
+            )
+        }
+
         // Life event takes priority
         if let life = lifeEvent {
             return .text(

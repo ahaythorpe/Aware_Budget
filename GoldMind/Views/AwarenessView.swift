@@ -156,7 +156,7 @@ struct AwarenessView: View {
                                 .font(.system(.subheadline, weight: .bold))
                                 .foregroundStyle(DS.textPrimary)
                             Text(item.why)
-                                .font(.system(.caption, weight: .medium))
+                                .font(.system(.subheadline, weight: .medium))
                                 .foregroundStyle(DS.textSecondary)
                                 .lineSpacing(2)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -352,7 +352,7 @@ struct BiasAwarenessCard: View {
                                 .foregroundStyle(DS.goldBase)
                                 .padding(.top, 2)
                             Text(lesson.howToCounter.split(separator: ".").first.map { String($0) + "." } ?? lesson.howToCounter)
-                                .font(.system(.caption, weight: .semibold))
+                                .font(.system(.footnote, weight: .semibold))
                                 .foregroundStyle(DS.accent)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

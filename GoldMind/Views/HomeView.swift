@@ -35,7 +35,7 @@ struct HomeView: View {
         var subtitle: String {
             switch self {
             case .daily:   return "5 quick swipes · 30 sec"
-            case .weekly:  return "Last week's patterns — let's revisit"
+            case .weekly:  return "Last week's patterns. Let's revisit."
             case .monthly: return "Re-checking the biases you flagged"
             }
         }

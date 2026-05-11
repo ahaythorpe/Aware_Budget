@@ -27,7 +27,7 @@ struct RootTabView: View {
                 .tabItem { Label("Awareness", systemImage: "brain.head.profile") }
                 .tag(RootTab.awareness)
             NavigationStack { ResearchView() }
-                .tabItem { Label("Research", systemImage: "book.closed.fill") }
+                .tabItem { Label("Education", systemImage: "book.closed.fill") }
                 .tag(RootTab.research)
         }
         .toolbarBackground(.visible, for: .tabBar)
