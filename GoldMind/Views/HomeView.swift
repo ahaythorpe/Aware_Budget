@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var showCredibility = false
     @State private var showSettings = false
     @State private var showDevMenu = false
+    @State private var showNudgeHello = false
     @Bindable private var router = NotificationRouter.shared
     @State private var previewOnboarding = false
     @State private var previewBFAS = false
@@ -116,6 +117,35 @@ struct HomeView: View {
                         }
                     }
                     Spacer(minLength: 8)
+                    // Nudge avatar — the friendly welcomer. Tap to see a
+                    // rotating hello from Nudge. Keeps Nudge present in
+                    // the daily glance without taking up the main greeting
+                    // line.
+                    Button { showNudgeHello = true } label: {
+                        Image("nudge")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 38, height: 38)
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $showNudgeHello,
+                             attachmentAnchor: .point(.bottom),
+                             arrowEdge: .top) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("NUDGE SAYS")
+                                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                .tracking(1.2)
+                                .foregroundStyle(DS.accent)
+                            Text(nudgeHelloLine)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(DS.textPrimary)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: 260, alignment: .leading)
+                        .presentationCompactAdaptation(.popover)
+                    }
                     // Gear -> Settings. Kept as a secondary entry point so
                     // tap targets work for users who don't realise the
                     // avatar is interactive. Dev menu lives behind a
@@ -395,6 +425,26 @@ struct HomeView: View {
                         .padding(.top, 60)
                         .padding(.trailing, 16)
                 }
+        }
+    }
+
+    // MARK: - Nudge hello (popover from greeting card)
+
+    /// Rotating Nudge welcome line for the avatar-tap popover. Time-of-day
+    /// aware + streak-aware so the hello feels alive instead of canned.
+    private var nudgeHelloLine: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let name = viewModel.firstName
+        let nameSnippet = (name.isEmpty || name == "there") ? "there" : name
+        let streak = viewModel.streak
+
+        if streak > 0 {
+            return "Day \(streak), \(nameSnippet). I'm here when you log."
+        }
+        switch hour {
+        case 0..<12:  return "Morning, \(nameSnippet). Coffee logged yet?"
+        case 12..<18: return "Afternoon, \(nameSnippet). One tap when you're ready."
+        default:      return "Evening, \(nameSnippet). Last log of the day?"
         }
     }
 
