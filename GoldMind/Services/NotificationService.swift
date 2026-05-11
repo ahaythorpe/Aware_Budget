@@ -42,6 +42,11 @@ enum NotificationService {
     private static let weeklyReviewID  = "goldmind.weekly"
     private static let monthlyCheckpointID = "goldmind.monthly"
 
+    /// "Add your numbers" first-week reminder. Fires 48h after install if
+    /// the user has not yet entered any finance numbers. Tap routes to
+    /// the Home finance editor via NotificationRoute.openFinanceEditor.
+    private static let addNumbersReminderID = "goldmind.add.numbers"
+
     // Meal-anchored copy. Default fire times are 11/14/19, refined by
     // LogTimeAnalytics once the user has 30 days of logs.
     private static let morningBodies = [
@@ -87,6 +92,7 @@ enum NotificationService {
         content.title = "GoldMind"
         content.body = "One question. 60 seconds. Nudge is waiting."
         content.sound = .default
+        content.userInfo["slot"] = NotificationSlot.morning.rawValue
 
         var components = DateComponents()
         components.hour = 8
@@ -107,6 +113,7 @@ enum NotificationService {
         content.title = "GoldMind"
         content.body = "Nudge noticed."
         content.sound = .default
+        content.userInfo["slot"] = NotificationSlot.evening.rawValue
 
         var components = DateComponents()
         components.hour = 19
@@ -127,6 +134,9 @@ enum NotificationService {
         content.title = "GoldMind"
         content.body = "Nudge has no data. That's also information."
         content.sound = .default
+        // Default to morning slot so the tap still lands in Quick Log
+        // pre-filtered for breakfast / coffee.
+        content.userInfo["slot"] = NotificationSlot.morning.rawValue
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 48 * 60 * 60, repeats: false)
         let request = UNNotificationRequest(identifier: noEventsID, content: content, trigger: trigger)
@@ -148,6 +158,34 @@ enum NotificationService {
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
         center.add(request)
+    }
+
+    // MARK: - "Add your numbers" first-week reminder
+
+    /// Schedules a one-shot reminder 48h after install nudging the user
+    /// to add their income/savings/investment numbers. Tap deep-links to
+    /// the Home finance editor (NotificationRoute.openFinanceEditor).
+    /// Idempotent — calling it again replaces the pending request.
+    static func scheduleAddNumbersReminder() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [addNumbersReminderID])
+
+        let content = UNMutableNotificationContent()
+        content.title = "GoldMind"
+        content.body = "Two minutes. Add your income and savings so Nudge can see the picture."
+        content.sound = .default
+        content.userInfo["route"] = NotificationRoute.openFinanceEditor.rawValue
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 48 * 60 * 60, repeats: false)
+        let request = UNNotificationRequest(identifier: addNumbersReminderID, content: content, trigger: trigger)
+        center.add(request)
+    }
+
+    /// Cancel the pending "add your numbers" reminder once the user
+    /// has actually entered numbers — call from finance save path.
+    static func cancelAddNumbersReminder() {
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: [addNumbersReminderID])
     }
 
     // MARK: - Cancel evening nudge (user checked in)

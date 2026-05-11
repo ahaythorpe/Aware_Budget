@@ -7,6 +7,7 @@ struct HomeView: View {
     @State private var showCredibility = false
     @State private var showSettings = false
     @State private var showDevMenu = false
+    @Bindable private var router = NotificationRouter.shared
     @State private var previewOnboarding = false
     @State private var previewBFAS = false
     @State private var showCheckIn = false
@@ -278,6 +279,18 @@ struct HomeView: View {
                     await viewModel.load()
                     await loadArchetype()
                 }
+            }
+        }
+        // Notification tap -> openFinanceEditor: route arrives from
+        // NotificationRouter, open the finance editor sheet and clear
+        // the route so it doesn't re-fire on the next render.
+        .onChange(of: router.pendingRoute) { _, route in
+            if route == .openFinanceEditor {
+                financeIncome = ""
+                financeSavings = ""
+                financeInvestment = ""
+                showFinanceEditor = true
+                router.pendingRoute = nil
             }
         }
         .fullScreenCover(isPresented: $showMoneyMindQuiz, onDismiss: {
@@ -620,6 +633,11 @@ struct HomeView: View {
                             let inv = Double(financeInvestment) ?? 0
                             try? await SupabaseService.shared.saveMonthlyIncome(inc)
                             try? await SupabaseService.shared.saveBalanceSnapshot(savings: sav, investment: inv)
+                            // User entered numbers -> cancel the pending
+                            // 48h "Add your numbers" reminder.
+                            if inc > 0 || sav > 0 || inv > 0 {
+                                NotificationService.cancelAddNumbersReminder()
+                            }
                             await viewModel.load()
                             showFinanceEditor = false
                         }

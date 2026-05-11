@@ -13,6 +13,14 @@ struct GoldMindApp: App {
     init() {
         Purchases.logLevel = .warn
         Purchases.configure(withAPIKey: "appl_XFOSSZlyhbOaxldNVLKSAZnkJmg")
+        // Install the UNUserNotificationCenter delegate synchronously at
+        // launch — BEFORE any async work in .task — so the delegate is
+        // already in place if iOS cold-launches the app from a notification
+        // tap (Apple calls didReceive on launch in that flow). Previously
+        // the install happened after `ensureDebugSession()` which could
+        // race the OS callback in DEBUG. Required for reliable deep-link
+        // routing in all build configs.
+        NotificationRouter.install()
     }
 
     /// Pulls last 30 days of events, computes user's median log hour per
@@ -63,6 +71,7 @@ struct GoldMindApp: App {
                             NotificationService.scheduleNoEventsReminder()
                             NotificationService.scheduleWeeklyReview()
                             NotificationService.scheduleMonthlyCheckpoint()
+                            NotificationService.scheduleAddNumbersReminder()
                             await scheduleSmartNudgesFromHistory()
                         }
                 }
@@ -71,7 +80,8 @@ struct GoldMindApp: App {
                 #if DEBUG
                 await SupabaseService.shared.ensureDebugSession()
                 #endif
-                NotificationRouter.install()
+                // NotificationRouter.install() moved to init() so it
+                // runs synchronously at launch — see comment there.
                 auth.start()
                 paywall.start()
                 checkingSession = false
