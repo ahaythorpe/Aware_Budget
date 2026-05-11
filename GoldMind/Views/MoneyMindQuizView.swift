@@ -23,12 +23,23 @@ struct MoneyMindQuizView: View {
     private var hasAnswer: Bool { answers[currentIndex] != nil }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             DS.bg.ignoresSafeArea()
+            // Soft hero halo behind the header so the screen has lift
+            // without competing with the question card itself.
+            LinearGradient(
+                colors: [DS.accent.opacity(0.22), DS.bg],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 220)
+            .ignoresSafeArea(edges: .top)
+
             VStack(spacing: 0) {
                 header
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 18) {
+                        nudgeFramerCard
                         questionCard
                         if let err = saveError {
                             Text(err)
@@ -38,7 +49,8 @@ struct MoneyMindQuizView: View {
                                 .padding(.horizontal, 20)
                         }
                     }
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 14)
+                    .padding(.bottom, 24)
                 }
                 footer
             }
@@ -60,52 +72,89 @@ struct MoneyMindQuizView: View {
     // MARK: - Sections
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("MONEY MIND QUIZ")
-                    .font(.system(size: 12, weight: .heavy))
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .tracking(1.5)
                     .foregroundStyle(DS.accent)
                 Spacer()
                 Text("\(currentIndex + 1) of \(MoneyMindQuiz.questions.count)")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(DS.textSecondary)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .tracking(0.8)
+                    .foregroundStyle(DS.goldBase)
             }
             ProgressView(value: progress)
                 .progressViewStyle(.linear)
                 .tint(DS.accent)
+                .frame(height: 4)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 12)
+        .padding(.top, 8)
         .padding(.bottom, 8)
     }
 
+    /// Calming framer with Nudge's voice so the user knows there's no
+    /// "right" answer. Uses the same NudgeSaysCard treatment as Home so
+    /// the quiz feels native, not like a different surface.
+    private var nudgeFramerCard: some View {
+        NudgeSaysCard(
+            message: nudgeFramerLine,
+            surface: .whiteShimmer
+        )
+        .padding(.horizontal, 20)
+    }
+
+    /// One short Nudge line per question so the framer stays fresh and
+    /// each question feels narrated rather than tested.
+    private var nudgeFramerLine: String {
+        switch currentIndex {
+        case 0: return "No right answer. Just notice what you actually do."
+        case 1: return "Be honest. The pattern is the point."
+        case 2: return "Where the money lands matters less than how it feels when it lands."
+        case 3: return "Now-you and future-you are both on this list."
+        case 4: return "The crowd is data, not destiny."
+        default: return "Defaults run quietly. Notice yours."
+        }
+    }
+
     private var questionCard: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 18) {
             Text(question.prompt)
-                .font(.system(size: 22, weight: .bold, design: .serif))
+                .font(.system(size: 24, weight: .black, design: .serif))
                 .foregroundStyle(DS.textPrimary)
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 20)
 
             VStack(spacing: 10) {
                 ForEach(Array(question.options.enumerated()), id: \.offset) { idx, opt in
                     optionRow(idx: idx, option: opt)
                 }
             }
-            .padding(.horizontal, 20)
         }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.35), lineWidth: 1)
+        )
+        .premiumCardShadow()
+        .padding(.horizontal, 20)
     }
 
     private func optionRow(idx: Int, option: QuizOption) -> some View {
         let selected = answers[currentIndex] == idx
         return Button {
-            answers[currentIndex] = idx
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+                answers[currentIndex] = idx
+            }
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: 13) {
                 ZStack {
                     Circle()
-                        .strokeBorder(selected ? DS.accent : DS.textSecondary.opacity(0.35), lineWidth: 2)
+                        .strokeBorder(selected ? DS.accent : DS.textSecondary.opacity(0.35),
+                                      lineWidth: 2)
                         .frame(width: 22, height: 22)
                     if selected {
                         Circle()
@@ -114,64 +163,82 @@ struct MoneyMindQuizView: View {
                     }
                 }
                 Text(option.label)
-                    .font(.system(size: 16, weight: selected ? .semibold : .regular))
+                    .font(.system(size: 16, weight: selected ? .bold : .medium))
                     .foregroundStyle(DS.textPrimary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
             }
-            .padding(.vertical, 14)
-            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+            .padding(.horizontal, 14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(DS.cardBg)
-                    .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(selected ? DS.paleGreen : DS.bg)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(selected ? DS.accent : Color.black.opacity(0.04), lineWidth: selected ? 1.5 : 1)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(selected ? DS.accent : DS.goldBase.opacity(0.18),
+                                  lineWidth: selected ? 1.5 : 1)
             )
         }
         .buttonStyle(.plain)
     }
 
     private var footer: some View {
-        HStack(spacing: 12) {
-            if currentIndex > 0 {
-                Button("Back") { withAnimation { currentIndex -= 1 } }
-                    .font(.system(size: 16, weight: .semibold))
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                if currentIndex > 0 {
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                            currentIndex -= 1
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 12, weight: .bold))
+                            Text("Back")
+                        }
+                    }
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
                     .padding(.vertical, 14)
-                    .padding(.horizontal, 22)
+                    .padding(.horizontal, 18)
                     .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        Capsule()
                             .strokeBorder(DS.textSecondary.opacity(0.25), lineWidth: 1)
                     )
-            }
-            Spacer()
-            Button {
-                handleNext()
-            } label: {
-                HStack(spacing: 6) {
-                    if isSaving { ProgressView().tint(.white) }
-                    Text(isLast ? "See my result" : "Next")
                 }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(.white)
-                .padding(.vertical, 14)
-                .padding(.horizontal, 28)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(DS.heroGradient)
-                )
-                .opacity(hasAnswer && !isSaving ? 1.0 : 0.45)
+                Button {
+                    handleNext()
+                } label: {
+                    HStack(spacing: 8) {
+                        if isSaving {
+                            ProgressView().tint(.white)
+                        }
+                        Text(isLast ? "See my result" : "Next")
+                        if !isSaving {
+                            Image(systemName: isLast ? "sparkles" : "arrow.right")
+                                .font(.system(size: 13, weight: .bold))
+                        }
+                    }
+                }
+                .goldButtonStyle()
+                .opacity(hasAnswer && !isSaving ? 1.0 : 0.55)
+                .disabled(!hasAnswer || isSaving)
             }
-            .disabled(!hasAnswer || isSaving)
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+
+            ResearchFootnote(text: "BFAS framework · Pompian, 2012", style: .pill)
+                .padding(.bottom, 16)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(DS.bg)
+        .background(
+            LinearGradient(
+                colors: [DS.bg.opacity(0), DS.bg],
+                startPoint: .top, endPoint: .center
+            )
+        )
     }
 
     private func handleNext() {
@@ -179,7 +246,9 @@ struct MoneyMindQuizView: View {
         if isLast {
             Task { await submit() }
         } else {
-            withAnimation { currentIndex += 1 }
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
+                currentIndex += 1
+            }
         }
     }
 
