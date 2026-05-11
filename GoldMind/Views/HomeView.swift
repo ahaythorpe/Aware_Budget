@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct HomeView: View {
     var selectedTab: Binding<RootTab>? = nil
@@ -790,6 +791,28 @@ struct HomeView: View {
                     Button("Reset demo data seed flag") {
                         UserDefaults.standard.removeObject(forKey: "demoDataSeeded")
                         showDevMenu = false
+                    }
+                }
+                Section("Notifications (DEBUG)") {
+                    Button {
+                        // Fires the same "Add your numbers" notification in
+                        // 10s so we can verify the deep-link route to the
+                        // finance editor without waiting 48h.
+                        let c = UNMutableNotificationContent()
+                        c.title = "GoldMind"
+                        c.body = "Two minutes. Add your income and savings so Nudge can see the picture."
+                        c.sound = .default
+                        c.userInfo["route"] = NotificationRoute.openFinanceEditor.rawValue
+                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+                        let req = UNNotificationRequest(
+                            identifier: "goldmind.debug.add.numbers",
+                            content: c,
+                            trigger: trigger
+                        )
+                        UNUserNotificationCenter.current().add(req)
+                        showDevMenu = false
+                    } label: {
+                        Label("Fire 'Add numbers' in 10s", systemImage: "bell.badge.fill")
                     }
                 }
                 Section("State") {
