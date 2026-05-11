@@ -32,6 +32,7 @@ struct ResearchView: View {
     /// "Take the quiz" CTA. Loaded once on appear.
     @State private var userArchetype: String? = nil
     @State private var showQuiz: Bool = false
+    @State private var showMindMap: Bool = false
 
     /// Bias IDs the user has tapped open inside an expanded category card.
     /// Used for the "Tap to see Nudge's take" interaction so each bias
@@ -82,6 +83,7 @@ struct ResearchView: View {
                 hero
                 if mode == .learn {
                     quizCTA
+                    mindMapCard
                     categoriesSection
                     yourProgressSection
                 } else {
@@ -104,6 +106,9 @@ struct ResearchView: View {
             if mode == .learn {
                 await loadProgress()
             }
+        }
+        .fullScreenCover(isPresented: $showMindMap) {
+            MindMapView(userArchetype: userArchetype)
         }
         .fullScreenCover(isPresented: $showQuiz, onDismiss: {
             Task { await loadArchetype() }
@@ -392,6 +397,46 @@ struct ResearchView: View {
             RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(DS.goldBase, lineWidth: 1)
         )
+    }
+
+    // MARK: - Mind map entry card
+
+    /// Prominent card on the Education tab that launches the full-screen
+    /// bias mind map. Sits above the spending personalities list so the
+    /// visual explore mode is the first thing users see after the quiz CTA.
+    @ViewBuilder private var mindMapCard: some View {
+        Button { showMindMap = true } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle().fill(DS.heroGradient)
+                    Image(systemName: "circle.hexagongrid.fill")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 52, height: 52)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Explore the bias map")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Text("See how the 16 patterns connect. Your cluster glows.")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(DS.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(DS.goldBase)
+            }
+            .padding(14)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+            )
+            .premiumCardShadow()
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - The 6 spending personalities (clickable bias map)
