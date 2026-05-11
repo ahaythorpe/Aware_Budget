@@ -5,7 +5,20 @@
 
 ---
 
-## 2026-05-11 — Builds 11–18 + mind map + muted theme (Claude Code, Opus 4.7 1M)
+## 2026-05-12 — Build 20 — UX cleanup + notification gate (Claude Code, Opus 4.7 1M)
+
+Nine commits sweeping the rough edges Bella surfaced during Build 18 TestFlight testing.
+
+- **Home greeting:** Nudge avatar is now a cut-out coin (no gold disc behind it), matching popovers and bias cards. `e07effb`.
+- **Insights empty state:** dropped the `!isLoading` clause from `hasNoData` so blank charts no longer flash before the "Log your first event" CTA. `fe59eb2`.
+- **Mind map canvas:** removed the tinted personality-lane rectangles; grouping is now conveyed by node placement + lane header chip only. `c5eb1d7`.
+- **Mind map node sheet:** full redesign — compact hero row, "Seen N× in your logs" stat chip, gold Nudge speech card, HOW TO COUNTERACT as a check-list bulleted from sentence splits, REAL EXAMPLE disclosure surfacing the previously-unused `BiasLesson.realWorldExample`, RELATED PATTERNS chips driven by `BiasRelationships` (tap re-targets the sheet to that bias). `ec90d5f`.
+- **Mind map canvas:** pinned NudgeSays purpose card under the BIAS MAP header explaining what the map is. `3d6afa6`.
+- **Notifications:** `requestPermission()` now returns Bool; all scheduling call sites (GoldMindApp launch, HomeView banner, CheckInViewModel) gate on the grant. New `scheduleAll()` / `cancelAll()` helpers. Banner tap now schedules immediately so reminders work without a relaunch. Closes the "ghost notification" App Store risk where pending requests would auto-fire if the user later flipped permission via Settings. `4f9a88e`.
+- **Insights editorial pass:** 11 verbose Nudge cards / info popovers / empty states compressed. Same meaning, fewer words. `0aef7d1`.
+- **Docs:** audited #27 (already done before Build 11 — `biasCategories` grouping was shipped). Added #29 monthly checkpoint screen + #30 concept-graph mind map to live follow-ups. `18f078d`, `6b9a3fb`.
+
+
 
 ### Build 11 — Bias Mind Map v1
 - New `Views/MindMapView.swift` — full-screen visual canvas inside Education tab. Six horizontal lanes (Drifter / Reactor / Bookkeeper / Now / Bandwagon / Autopilot), each containing the personality's biases as 44pt SF Symbol discs.

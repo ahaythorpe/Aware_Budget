@@ -1,7 +1,7 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-05-11 (Build 18 on TestFlight)
+> Updated: 2026-05-12 (Build 20 staged, not yet uploaded)
 
 ---
 
@@ -19,6 +19,7 @@
 | 16 | Gold-coin Nudge avatar · quieter mind map (no green halo, softer heat, no pulse) |
 | 17 | Em-dash sweep round 5 (9 user-facing strings) |
 | 18 | Muted/sophisticated colour theme — `accent #3F7A47`, `goldBase #A87E2A`, `goldText #D4A745`, supporting greens softened |
+| 20 | UX cleanup: Nudge coin cut-out on Home · Insights empty-state no longer flashes blank charts · mind-map lane rectangles removed · node sheet redesigned (stat chip, bullet counters, real-example disclosure, related chips) · NudgeSays purpose card pinned on mind-map canvas · notification scheduling gated on permission grant · 11 verbose Insights blurbs compressed |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 
