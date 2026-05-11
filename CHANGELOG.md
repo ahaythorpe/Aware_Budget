@@ -5,6 +5,193 @@
 
 ---
 
+## 2026-05-11 — Build 7 + post-7 polish (Claude Code, Opus 4.7 1M)
+
+**Shipped in Build 7** (uploaded 2026-05-11, state VALID, Internal Test group):
+
+- **Money Mind Quiz (Build 7 hero feature):**
+  - New Supabase table `money_mind_quiz_responses` + `profiles.archetype` and `profiles.top_biases` columns (migration `20260511120000_add_money_mind_quiz.sql`).
+  - `Models/Archetype.swift` defines 6 archetypes (Drifter / Reactor / Bookkeeper / Now / Bandwagon / Autopilot) mapped 1:1 to BiasCategory + scoring logic with stable tie-break.
+  - `Views/MoneyMindQuizView.swift` — 6 multi-choice questions with progress bar, weighted per option, ~2 min.
+  - `Views/ArchetypeRevealView.swift` — animated reveal with top biases from the matching category + BFAS citation footer.
+  - Home tile + Education tab CTA, hidden once an archetype is saved.
+  - "← You" tag + accent border on the user's matching category card in Education.
+- **Gear icon now opens Settings** (was Dev menu). Dev menu surfaced via DEBUG-only long-press.
+- **Gold buttons muted:** nuggetGold specular peak `#FFFDF0 → #EFD080`, inner highlight 0.25→0.18, ring colour shifted to goldBase. Applied to all 11 `goldButtonStyle()` call sites.
+- **Empty-state labels** clearer: "Add your numbers" → "Add income, savings & investments" + "Takes 30 seconds · manual entry only" subtitle.
+- **Em-dash sweep (round 1):** 10 files. MoneyEventView Planned/Surprise/Impulse status detail, DecisionHelperSheet buttons, CredibilitySheet, SettingsView, SignInView, OnboardingView, BiasReviewView (16 bias hints + related-bias prompt), ResearchView, HomeView, NudgeVoice.
+
+**Done post-Build-7 (next build):**
+
+- **NamePromptSheet** (`Views/NamePromptSheet.swift`) — prompts for display name on first Home load if profiles.display_name is empty and `hasPromptedForName` is false. Save → patches profile; Skip → flag set so we don't ask again.
+- **Notification deep-link unification (#39):**
+  - New `NotificationRoute` enum + `NotificationRouter.pendingRoute` channel (additive, slot-based routing unchanged).
+  - `NotificationService.scheduleAddNumbersReminder()` — fires 48h after app launch, deep-links to the Home finance editor.
+  - `cancelAddNumbersReminder()` auto-called when the user actually saves finance numbers.
+- **Em-dash sweep (round 2):** Insights, Awareness, AlgorithmExplainerSheet, ResearchView papers/ranking. ~20 more user-facing em-dashes removed.
+
+**Memory updates:**
+- `feedback_em_dash_overuse.md` — Bella reads em-dashes as AI-tell noise. Grep ` — ` before shipping user copy.
+- `feedback_gold_button_legibility.md` — Saturated gold pills too heavy. Mute saturation, audit all `goldButtonStyle()` callers.
+- `project_goldmind_archetypes.md` — Canonical 6-archetype framework (Klontz × Pompian × BFAS).
+- `project_goldmind.md` — Reaffirmed: no App Store / RevenueCat changes until Bella explicitly says.
+
+**Outstanding:**
+- #40 — "Start check-in disappears after adding numbers" — code investigation found no gating logic; need a fresh screenshot to repro.
+- #26 — Paywall discount badge (parked: RevenueCat dashboard work).
+- #28 — Editorial pass on dense screens (partial; em-dash sweep covered most popups).
+
+---
+
+## 2026-05-11 — Build 6 Education tab restructure (Claude Code, Opus 4.7 1M)
+
+Additive only — existing screens untouched. New entry point for the bias
+catalog using the 6-archetype framework approved earlier today.
+
+**Tab rename:**
+- `RootTabView.swift` — "Research" → "Education" (label only; struct stays
+  `ResearchView` per micro-fix policy to avoid rename churn across imports
+  and previews).
+
+**Hero copy:**
+- `ResearchView.swift` — title "The science behind it" → "Your money mind";
+  tagline replaced to lead with the 6-families framing.
+- `navigationTitle("Research")` → `navigationTitle("Education")`.
+
+**New section — categoriesSection (clickable bias families):**
+- Added between hero and papersSection. Renders the 6 BiasCategory rows
+  (already defined in `BiasData.swift`) as expandable cards.
+- Each card header: category emoji + archetype name (Drifter/Reactor/
+  Bookkeeper/Now/Bandwagon/Autopilot) + category subtitle + tagline +
+  pattern count + chevron.
+- Tap toggles inline expansion via `expandedCategories: Set<String>`.
+  Multiple cards can be open simultaneously for comparison.
+- Expanded body lists each `BiasPattern` in the family with SF Symbol +
+  `displayName` + `oneLiner` + `keyRef` citation. No navigation away —
+  self-contained map.
+- New private `archetype(for:)` helper maps category name → (archetype,
+  tagline). Source of truth: `project_goldmind_archetypes.md` in memory.
+
+**Preserved:**
+- All 5 existing sections (papersSection, frameworkSection, howRankingWorks,
+  allBiasesSection, spotAndOvercomeSection) untouched. The new categories
+  section is purely additive at the top.
+
+Reversible: delete the `categoriesSection` var + helpers + the call site
+in body VStack; revert tab label string in RootTabView.
+
+---
+
+## 2026-05-11 — Build 5 micro-edits (Claude Code, Opus 4.7 1M)
+
+Scope intentionally tight per Bella's "micro fixes, no rewrites" rule.
+
+**Notification cold-launch safety:**
+- `GoldMindApp.swift` — moved `NotificationRouter.install()` from the
+  WindowGroup `.task` block to `init()` so the delegate is set
+  synchronously at launch, before any async work. Prevents a DEBUG-only
+  race where the OS could deliver `didReceive(:)` before the delegate
+  was installed (after `ensureDebugSession()`). Reversible: move the
+  call back into `.task`.
+
+**Type scale (extends 2026-05-10 #22):**
+- `InsightFeedView.swift:313` — "SPENDING BY BIAS" header bumped from
+  10pt to 12pt; tracking 1.5 → 1.6.
+- `InsightFeedView.swift:1299` — inline "NUDGE" label bumped from 10pt
+  to 12pt; tracking 1.4 → 1.6.
+
+**Verified (no code change needed):**
+- Notification deep-link to Log tab: full wiring trace confirmed correct.
+- InsightFeedView empty state already complete (Nudge image + card +
+  tagline + Log CTA at line 87-onwards).
+- AwarenessView shows all 16 patterns always (greyed when not
+  triggered) — design intent; no empty-state Nudge needed.
+- ResearchView has no sub-11pt labels — nothing to bump.
+
+Build 5 = build 4 contents + above. No DB changes this session.
+
+---
+
+## 2026-05-09 — TestFlight bug audit (Claude Code, Opus 4.7 1M)
+
+**Context:** Bella vs friend's TestFlight builds showed two visible bugs
+(ghost "18% patterns identified" with 0 events; friend's name greeting
+showing "Xfbsmt9rs4" — raw email local-part). Plus 1 CRITICAL + 11 WARN
+flagged by Supabase Advisor. Fix queue tracked in TaskList #1–12.
+
+**Step 1 — Kill demo seed in production builds:**
+- `HomeViewModel.swift:294` — wrapped `DemoDataService.seed()` block in
+  `#if DEBUG`. Production builds (TestFlight + App Store) now show a
+  truly empty state for new users.
+- Root cause of "ghost 18%": `DemoDataService` writes `user_bias_progress`
+  rows that survive forever; events age out of "this month" but the
+  bias_progress rows still inflate `biasesSeenCount`.
+- Reversible: remove the `#if DEBUG` / `#endif` lines to restore.
+
+**Steps 3-5 + advisor cleanup — Database migrations:**
+- `20260509120000_add_profiles_table.sql` — new `public.profiles` table
+  with `id` PK referencing `auth.users` ON DELETE CASCADE. Auto-create
+  trigger on auth.users INSERT. Backfilled 13 existing users.
+- `20260509121000_add_cascade_to_user_fks.sql` — added ON DELETE CASCADE
+  to budget_months, daily_checkins, money_events, monthly_decisions,
+  user_bias_progress (Apple 5.1.1(v) prerequisite).
+- `20260509122000_replace_delete_account_rpc.sql` — fixed bogus
+  `DELETE FROM public.question_pool` (no user_id column) and tracked
+  the function as a proper migration (was dashboard-drift before).
+- `20260509123000_rls_perf_select_auth_uid.sql` — converted 15 RLS
+  policies across 9 tables to `(select auth.uid())` form.
+- `20260509124000_fix_security_definer_view.sql` — set
+  `bias_mapping_aggregate` view to `security_invoker = true`. Closes
+  CRITICAL Supabase Advisor warning.
+- `20260509125000_advisor_followup_cleanup.sql` — fixed 4 INSERT
+  policies that were missed (use `with_check`, not `qual`) and the
+  search_path on `set_profiles_updated_at`. Revoked anon EXECUTE on
+  `handle_new_user`.
+
+**Steps 6-8 — Name capture + Profile editor:**
+- `Models/Profile.swift` — new `Profile` and `ProfileUpdate` types
+  matching the new public.profiles schema.
+- `Services/SupabaseService.swift` — added `fetchProfile()`,
+  `updateProfile()`, `captureAppleDisplayName()`. Rewrote
+  `fetchFirstName()` to read `profiles.display_name` first, drop the
+  email-prefix fallback that printed "Xfbsmt9rs4" for Apple Hide-My-
+  Email users. Returns "there" if `hide_name = true` or no name set.
+- `Views/SignInView.swift` — captures `credential.fullName` from Apple
+  on first sign-in (only available once) and immediately persists to
+  profiles.display_name.
+- `Views/SettingsView.swift` — new Profile section with display name
+  TextField + "Hide my name" + "Hide my email" toggles + Save button.
+  Email row now respects `hideEmail` for masked display.
+
+Builds clean (verified `xcodebuild ... build` after each Swift change).
+
+**Step 11 — Test data wipe (Bella + 12 other testers):**
+- Bulk transactional wipe of all user-scoped tables for all 13 users.
+- Cleared `raw_user_meta_data.full_name` from auth.users so cached names
+  don't leak through `fetchFirstName()` fallback chain.
+- Re-inserted empty profile rows for every auth user (1:1 with auth.users).
+- All 13 testers now in identical fully-fresh state. The single
+  `budget_months` row remaining is Bella's auto-created on app reload
+  (expected — `fetchOrCreateBudgetMonth(now)` runs on home load).
+
+**Step 12 — Final advisor cleanup migration:**
+- `20260509130000_db_cleanup_indexes_and_legacy_funcs.sql`
+- Set search_path on legacy `bias_mapping_stats_touch_updated()`.
+- Revoked anon + authenticated EXECUTE on `rls_auto_enable()`.
+- Added 4 missing FK indexes (budget_months.user_id,
+  daily_checkins.question_id, money_events.user_id,
+  monthly_decisions.user_id).
+
+**Final advisor state (was 1 CRITICAL + 11 WARN at session start):**
+- 0 CRITICAL.
+- 2 WARN remaining: (a) `delete_account` callable by authenticated —
+  by design, Apple 5.1.1(v); (b) leaked-password-protection disabled —
+  dashboard toggle, deferred to Bella.
+- 5 INFO "unused index" — expected, DB is post-wipe empty; resolve
+  themselves on first user activity.
+
+---
+
 ## 2026-04-17 (session 2) — Streak fix, date bug, Insights expansion, UI polish (Claude Code)
 
 **Critical fixes:**
