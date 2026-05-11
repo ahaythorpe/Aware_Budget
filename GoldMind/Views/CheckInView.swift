@@ -100,7 +100,7 @@ struct CheckInView: View {
                             VStack(spacing: 12) {
                                 cardStack
                                 Text("Most people abandon budgeting apps within 90 days. Awareness drives change.")
-                                    .font(.caption2)
+                                    .font(.system(.subheadline, weight: .medium))
                                     .foregroundStyle(DS.textTertiary)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, DS.hPadding)

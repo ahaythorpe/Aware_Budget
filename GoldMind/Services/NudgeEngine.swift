@@ -98,7 +98,7 @@ enum NudgeEngine {
         // 2. Missed 2+ days
         if ctx.daysSinceLastCheckin >= 2 {
             return .withAction(
-                "You were gone \(ctx.daysSinceLastCheckin) days. Nudge noticed. No lecture \u{2014} your streak starts fresh today.",
+                "You were gone \(ctx.daysSinceLastCheckin) days. Nudge noticed. No lecture. Your streak starts fresh today.",
                 actionLabel: "Check in now",
                 action: .startCheckIn
             )
@@ -223,7 +223,7 @@ enum NudgeEngine {
         if isFirstEver {
             if let tag = behaviourTag {
                 return .text(
-                    "First event logged \u{2014} and Nudge already spotted \(tag). Most people never see the pattern. You just did."
+                    "First event logged. Nudge already spotted \(tag). Most people never see the pattern. You just did."
                 )
             }
             return .text(
@@ -234,7 +234,7 @@ enum NudgeEngine {
         // Life event takes priority
         if let life = lifeEvent {
             return .text(
-                "That's significant \u{2014} \(life.label.lowercased()). Trends will adjust. One thing: awareness stays the lever."
+                "That's significant: \(life.label.lowercased()). Trends will adjust. One thing: awareness stays the lever."
             )
         }
 
@@ -271,7 +271,7 @@ enum NudgeEngine {
 
         // Unplanned without tag
         return .text(
-            "Logged. Awareness is the first step \u{2014} even for the unplanned ones."
+            "Logged. Awareness is the first step, even for the unplanned ones."
         )
     }
 

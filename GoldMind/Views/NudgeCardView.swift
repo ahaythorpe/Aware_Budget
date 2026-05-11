@@ -107,7 +107,7 @@ enum NudgeDedup {
         Spacer()
         NudgeCardView(
             message: .withAction(
-                "You were gone 3 days. Nudge noticed. No lecture \u{2014} your streak starts fresh today.",
+                "You were gone 3 days. Nudge noticed. No lecture. Your streak starts fresh today.",
                 actionLabel: "Check in now",
                 action: .startCheckIn
             )
