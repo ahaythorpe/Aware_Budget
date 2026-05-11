@@ -155,14 +155,20 @@ struct HomeView: View {
                         Text("\(viewModel.streak)")
                             .font(.system(size: 40, weight: .black, design: .serif))
                             .foregroundStyle(DS.goldText)
-                        Text("🔥 DAY STREAK")
-                            .font(.system(size: 12, weight: .heavy, design: .rounded))
-                            .tracking(1.2)
-                            .foregroundStyle(.white.opacity(0.9))
-                            .shadow(color: DS.deepGreen.opacity(0.7), radius: 2, x: 0, y: 1)
-                            .minimumScaleFactor(0.85)
-                            .lineLimit(1)
-                            .padding(.horizontal, 4)
+                        HStack(spacing: 6) {
+                            Text("🔥 DAY STREAK")
+                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                .tracking(1.2)
+                                .foregroundStyle(.white.opacity(0.9))
+                                .shadow(color: DS.deepGreen.opacity(0.7), radius: 2, x: 0, y: 1)
+                                .minimumScaleFactor(0.85)
+                                .lineLimit(1)
+                            InfoPopover(
+                                "Days in a row you opened the app and completed your check-in.",
+                                title: "DAY STREAK"
+                            )
+                        }
+                        .padding(.horizontal, 4)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
@@ -197,9 +203,15 @@ struct HomeView: View {
                                     Text("🧩")
                                         .font(.system(size: 20))
                                 }
-                                Text("Patterns\nidentified")
-                                    .font(.system(.subheadline, weight: .semibold))
-                                    .foregroundStyle(DS.textSecondary)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Patterns\nidentified")
+                                        .font(.system(.subheadline, weight: .semibold))
+                                        .foregroundStyle(DS.textSecondary)
+                                    InfoPopover(
+                                        "Patterns are the 16 biases tracked from your tagged spending. Each log moves the count.",
+                                        title: "PATTERNS"
+                                    )
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity)

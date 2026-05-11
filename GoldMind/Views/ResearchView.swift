@@ -128,6 +128,90 @@ struct ResearchView: View {
         }
     }
 
+    // MARK: - Bias chip fold-ups (Patterns A + C)
+
+    /// Maps a category name to the matching Archetype rawValue so the
+    /// "Why this fits" lookup hits the ArchetypeBiasExplanation table.
+    /// Returns nil for unknown categories.
+    private func archetypeRawValueForExplanation(category: String) -> String? {
+        switch category {
+        case "Avoidance":         return "Drifter"
+        case "Decision Making":   return "Reactor"
+        case "Money Psychology":  return "Bookkeeper"
+        case "Time Perception":   return "Now"
+        case "Social":            return "Bandwagon"
+        case "Defaults & Habits": return "Autopilot"
+        default:                  return nil
+        }
+    }
+
+    /// 2nd-level fold-up explaining why this bias fits the parent
+    /// personality. Shows under the Nudge note when the user has tapped
+    /// the bias open inside an expanded personality card.
+    private func whyFitsRow(archetype: String, text: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("WHY THIS FITS \(archetype.uppercased())S")
+                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                .tracking(1.2)
+                .foregroundStyle(DS.goldBase)
+            Text(text)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(DS.textPrimary)
+                .lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(DS.heroGradient.opacity(0.08))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(DS.accent.opacity(0.25), lineWidth: 1)
+        )
+    }
+
+    /// Horizontally-scrolling row of sibling-bias chips. Tap a chip to
+    /// expand that bias inline (it appears below the current row in the
+    /// parent VStack since they share `revealedBiases`).
+    private func relatedRow(_ siblings: [BiasPattern]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("RELATED")
+                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                .tracking(1.2)
+                .foregroundStyle(DS.textSecondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(siblings) { sib in
+                        Button {
+                            let anim: Animation = .spring(response: 0.32, dampingFraction: 0.85)
+                            withAnimation(anim) {
+                                revealedBiases.insert(sib.id)
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: sib.sfSymbol)
+                                    .font(.system(size: 10, weight: .bold))
+                                Text(sib.displayName)
+                                    .font(.system(size: 12, weight: .bold))
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 9, weight: .heavy))
+                            }
+                            .foregroundStyle(DS.goldBase)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(
+                                Capsule().stroke(DS.goldBase.opacity(0.5), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Your Progress (folded in from AwarenessView)
 
     /// Returns the user's triggered biases — those with any check-in
@@ -421,7 +505,7 @@ struct ResearchView: View {
                 Divider().padding(.horizontal, 14)
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(category.patterns) { pattern in
-                        biasMiniRow(pattern)
+                        biasMiniRow(pattern, categoryName: category.name)
                     }
                 }
                 .padding(14)
@@ -440,7 +524,7 @@ struct ResearchView: View {
     /// flip between the one-line definition and Nudge's longer
     /// contextual note (from BiasPattern.nudgeSays). Keeps Education
     /// self-contained — no navigation away.
-    private func biasMiniRow(_ pattern: BiasPattern) -> some View {
+    private func biasMiniRow(_ pattern: BiasPattern, categoryName: String = "") -> some View {
         let isRevealed = revealedBiases.contains(pattern.id)
         return Button {
             withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
@@ -476,6 +560,24 @@ struct ResearchView: View {
                             .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
                             .transition(.opacity.combined(with: .move(edge: .top)))
+
+                        // Pattern C — "Why this fits [archetype]" 2nd-level
+                        // fold-up. Only shows when we have explanation copy
+                        // for this archetype × bias pair AND we know the
+                        // current category context.
+                        if let arch = archetypeRawValueForExplanation(category: categoryName),
+                           let why = ArchetypeBiasExplanation.text(forArchetype: arch, bias: pattern.name) {
+                            whyFitsRow(archetype: arch, text: why)
+                                .padding(.top, 4)
+                        }
+
+                        // Pattern A — RELATED chips. Tap a sibling to
+                        // expand it inline below the current row.
+                        let siblings = BiasRelationships.relatedBiases(for: pattern.name)
+                        if !siblings.isEmpty {
+                            relatedRow(siblings)
+                                .padding(.top, 6)
+                        }
                     } else {
                         Text(pattern.oneLiner)
                             .font(.system(size: 14, weight: .regular))
