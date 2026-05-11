@@ -140,6 +140,8 @@ enum DS {
 // MARK: - Gold Button modifier
 
 struct GoldButtonStyle: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     func body(content: Content) -> some View {
         content
             .font(.system(.headline, weight: .bold))
@@ -154,6 +156,7 @@ struct GoldButtonStyle: ViewModifier {
                 Capsule()
                     .fill(DS.nuggetGold)
             )
+            // Top-down sheen — kept low-opacity to preserve text contrast.
             .overlay(
                 LinearGradient(
                     stops: [
@@ -165,6 +168,34 @@ struct GoldButtonStyle: ViewModifier {
                 )
                 .clipShape(Capsule())
                 .allowsHitTesting(false)
+            )
+            // Slow specular shimmer band travelling across the button.
+            // Brightness peak capped at warm champagne (#F5DC9C, ~0.28
+            // opacity) so it can never push toward pure white and trample
+            // the white text. Cycle is 4.5s — gentle, premium, not loud.
+            // Falls back to static fill on Reduce Motion.
+            .overlay(
+                Group {
+                    if !reduceMotion {
+                        TimelineView(.animation) { ctx in
+                            let t = ctx.date.timeIntervalSinceReferenceDate
+                            let cycle = 4.5
+                            let phase = (t.truncatingRemainder(dividingBy: cycle)) / cycle
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .clear, location: max(0, phase - 0.18)),
+                                    .init(color: Color(hex: "F5DC9C").opacity(0.28), location: phase),
+                                    .init(color: .clear, location: min(1, phase + 0.18)),
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            .clipShape(Capsule())
+                            .allowsHitTesting(false)
+                            .blendMode(.plusLighter)
+                        }
+                    }
+                }
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 999)
