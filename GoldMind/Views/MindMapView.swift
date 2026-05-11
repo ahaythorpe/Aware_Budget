@@ -15,9 +15,19 @@ struct MindMapView: View {
     let userArchetype: String?
 
     @State private var selectedBias: BiasPattern? = nil
+    @State private var highlightedBias: BiasPattern? = nil  // stays after sheet closes for neighbour highlight
+    @State private var filter: Filter = .all
     @State private var pulse: Bool = false
     @State private var biasProgress: [BiasProgress] = []
     @State private var eventTagCounts: [String: Int] = [:]
+
+    enum Filter: String, CaseIterable, Identifiable {
+        case all        = "All"
+        case topThree   = "My top 3"
+        case triggered  = "Triggered"
+        case untouched  = "Untouched"
+        var id: String { rawValue }
+    }
 
     // MARK: - Layout constants
 
@@ -85,6 +95,13 @@ struct MindMapView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+        // Tap empty canvas (anywhere outside a node button) clears the
+        // highlight so the user can reset without picking another bias.
+        .onTapGesture {
+            withAnimation(.easeOut(duration: 0.2)) {
+                highlightedBias = nil
+            }
+        }
     }
 
     // MARK: - Header
@@ -108,6 +125,73 @@ struct MindMapView: View {
         .padding(.top, 12)
     }
 
+    // MARK: - Filter bar
+
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(Filter.allCases) { f in
+                    Button {
+                        withAnimation(.easeOut(duration: 0.2)) { filter = f }
+                    } label: {
+                        Text(f.rawValue)
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .tracking(0.4)
+                            .foregroundStyle(filter == f ? .white : DS.textSecondary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                Capsule()
+                                    .fill(filter == f ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg))
+                            )
+                            .overlay(
+                                Capsule().stroke(
+                                    filter == f ? DS.accent.opacity(0.4) : DS.goldBase.opacity(0.25),
+                                    lineWidth: 1
+                                )
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+        }
+    }
+
+    /// Returns whether this bias should be visually emphasised given the
+    /// current filter + highlight state. Used by node + edge dim logic.
+    private func isInFocus(_ bias: BiasPattern) -> Bool {
+        // Filter gate
+        let triggered = triggerCount(for: bias) > 0
+        let topNames = allBiasPatterns
+            .sorted { triggerCount(for: $0) > triggerCount(for: $1) }
+            .prefix(3)
+            .map(\.name)
+        let passesFilter: Bool = switch filter {
+        case .all:       true
+        case .topThree:  topNames.contains(bias.name)
+        case .triggered: triggered
+        case .untouched: !triggered
+        }
+        guard passesFilter else { return false }
+
+        // Highlight gate: if a bias is highlighted, only it + its related
+        // siblings stay in focus.
+        if let hl = highlightedBias {
+            if bias.name == hl.name { return true }
+            return BiasRelationships.related[hl.name]?.contains(bias.name) ?? false
+        }
+        return true
+    }
+
+    /// Aggregate trigger count for a whole lane (personality), used to
+    /// drive the lane heat tint.
+    private func laneTriggerCount(category: String) -> Int {
+        let patterns = biasCategories.first(where: { $0.name == category })?.patterns ?? []
+        return patterns.reduce(0) { $0 + triggerCount(for: $1) }
+    }
+
     // MARK: - Lane pillar (one cluster)
 
     private func lanePillar(idx: Int, lane: (archetype: String, category: String)) -> some View {
@@ -116,10 +200,15 @@ struct MindMapView: View {
         let icon = personalityIcon(for: lane.category)
 
         let nodes = biasCategories.first(where: { $0.name == lane.category })?.patterns ?? []
+        // Lane heat tint: opacity scales 0...0.18 with total triggers in
+        // this personality. Caps at 8 triggers for the max tint.
+        let heat = min(CGFloat(laneTriggerCount(category: lane.category)) / 8.0, 1.0)
+        let heatOpacity: CGFloat = isPrimary ? 0.10 : 0.18 * heat
         return ZStack(alignment: .topLeading) {
-            // Cluster boundary glow for the user's primary.
+            // Cluster boundary glow for the user's primary OR heat tint
+            // for engagement intensity (whichever is stronger).
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(isPrimary ? icon.tint.opacity(0.10) : Color.clear)
+                .fill(icon.tint.opacity(heatOpacity))
                 .overlay(
                     RoundedRectangle(cornerRadius: 22, style: .continuous)
                         .stroke(
@@ -166,6 +255,9 @@ struct MindMapView: View {
             // Nodes
             ForEach(Array(nodes.enumerated()), id: \.element.id) { i, p in
                 node(p, isPrimaryCluster: isPrimary)
+                    .opacity(isInFocus(p) ? 1.0 : 0.25)
+                    .animation(.easeOut(duration: 0.2), value: filter)
+                    .animation(.easeOut(duration: 0.2), value: highlightedBias?.name)
                     .position(nodePosition(laneIdx: idx, nodeIdx: i))
             }
         }
@@ -176,6 +268,10 @@ struct MindMapView: View {
         // Scale node 1.0x to 1.35x based on how often the user has hit it.
         let scale: CGFloat = min(1.35, 1.0 + CGFloat(trigger) * 0.07)
         return Button {
+            // Highlight neighbours immediately; sheet opens after.
+            withAnimation(.easeOut(duration: 0.2)) {
+                highlightedBias = pattern
+            }
             selectedBias = pattern
         } label: {
             VStack(spacing: 5) {
@@ -231,10 +327,15 @@ struct MindMapView: View {
                                           y: (fromPos.y + toPos.y) / 2 + 16)
                         path.move(to: fromPos)
                         path.addQuadCurve(to: toPos, control: mid)
+                        // Brighten the edge if it connects the currently
+                        // highlighted bias to one of its siblings.
+                        let isHL = highlightedBias.map { hl in
+                            hl.name == from || hl.name == to
+                        } ?? false
                         ctx.stroke(
                             path,
-                            with: .color(DS.goldBase.opacity(0.15)),
-                            style: StrokeStyle(lineWidth: 1.0, lineCap: .round)
+                            with: .color(DS.goldBase.opacity(isHL ? 0.8 : 0.15)),
+                            style: StrokeStyle(lineWidth: isHL ? 2.5 : 1.0, lineCap: .round)
                         )
                     }
                 }
