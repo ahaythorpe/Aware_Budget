@@ -17,8 +17,10 @@ struct HomeView: View {
     @State private var financeInvestment: String = ""
     @State private var userArchetype: String? = nil
     @State private var showMoneyMindQuiz: Bool = false
+    @State private var showNamePrompt: Bool = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
+    @AppStorage("hasPromptedForName") private var hasPromptedForName: Bool = false
 
     private enum CheckInMode {
         case daily, weekly, monthly
@@ -283,6 +285,15 @@ struct HomeView: View {
         }) {
             NavigationStack { MoneyMindQuizView() }
         }
+        .sheet(isPresented: $showNamePrompt, onDismiss: {
+            Task { await viewModel.load() }
+        }) {
+            NamePromptSheet(onSaved: { _ in
+                Task { await viewModel.load() }
+            })
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $showCredibility) {
             CredibilitySheet()
         }
@@ -375,7 +386,16 @@ struct HomeView: View {
 
     private func loadArchetype() async {
         let profile = try? await SupabaseService.shared.fetchProfile()
-        await MainActor.run { userArchetype = profile?.archetype }
+        await MainActor.run {
+            userArchetype = profile?.archetype
+            // First-launch name prompt: only if we have a profile, the
+            // display_name is empty, and we haven't asked yet.
+            if let p = profile,
+               !hasPromptedForName,
+               (p.displayName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
+                showNamePrompt = true
+            }
+        }
     }
 
     // MARK: - Your Finances card
