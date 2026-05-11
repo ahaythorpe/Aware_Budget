@@ -17,6 +17,13 @@ struct SettingsView: View {
     @State private var isDeleting = false
     @State private var deleteError: String?
 
+    // Profile (display preferences from public.profiles)
+    @State private var displayName: String = ""
+    @State private var hideName: Bool = false
+    @State private var hideEmail: Bool = false
+    @State private var profileStatus: String = ""
+    @State private var profileLoaded = false
+
     // Finance entry — manual, no bank connection. Drives the
     // net-worth trend chart on the Insights tab.
     @State private var monthlyIncome: String = ""
@@ -76,7 +83,41 @@ struct SettingsView: View {
                     } header: {
                         Text("Net worth tracking")
                     } footer: {
-                        Text("Manual entry — no bank connection. Updating today's snapshot overwrites; older snapshots are kept for the trend.")
+                        Text("Manual entry, no bank connection. Updating today's snapshot overwrites; older snapshots are kept for the trend.")
+                            .font(.caption)
+                    }
+
+                    Section {
+                        HStack {
+                            Text("Display name")
+                            Spacer()
+                            TextField("Your name", text: $displayName)
+                                .multilineTextAlignment(.trailing)
+                                .textInputAutocapitalization(.words)
+                                .autocorrectionDisabled()
+                                .frame(maxWidth: 200)
+                        }
+                        Toggle("Hide my name in greetings", isOn: $hideName)
+                        Toggle("Hide my email below", isOn: $hideEmail)
+                        Button {
+                            Task { await saveProfile() }
+                        } label: {
+                            HStack {
+                                Image(systemName: "person.crop.circle.badge.checkmark")
+                                Text("Save profile")
+                                    .font(.system(.body, weight: .semibold))
+                            }
+                            .foregroundStyle(DS.accent)
+                        }
+                        if !profileStatus.isEmpty {
+                            Text(profileStatus)
+                                .font(.caption)
+                                .foregroundStyle(DS.textSecondary)
+                        }
+                    } header: {
+                        Text("Profile")
+                    } footer: {
+                        Text("Your display name appears in greetings and Nudge messages. Hiding it shows \"there\" instead. Hiding your email replaces it with masked text in the Account section below.")
                             .font(.caption)
                     }
 
@@ -84,7 +125,7 @@ struct SettingsView: View {
                         HStack {
                             Text("Email")
                             Spacer()
-                            Text(accountEmail)
+                            Text(hideEmail ? maskedEmail(accountEmail) : accountEmail)
                                 .foregroundStyle(DS.textSecondary)
                                 .lineLimit(1)
                                 .truncationMode(.middle)
@@ -136,6 +177,53 @@ struct SettingsView: View {
                     }
 
                     Section {
+                        Link(destination: AppConfig.supportMailtoURL) {
+                            HStack {
+                                Image(systemName: "envelope")
+                                Text("Contact support")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(DS.textTertiary)
+                            }
+                            .foregroundStyle(DS.textPrimary)
+                        }
+                    } header: {
+                        Text("Help")
+                    } footer: {
+                        Text("Refunds are processed by Apple at reportaproblem.apple.com. For anything else, email us. We read every message.")
+                            .font(.caption)
+                    }
+
+                    Section {
+                        Link(destination: AppConfig.termsOfServiceURL) {
+                            HStack {
+                                Image(systemName: "doc.text")
+                                Text("Terms of Service")
+                                Spacer()
+                                Image(systemName: "arrow.up.right.square")
+                                    .font(.caption)
+                                    .foregroundStyle(DS.textTertiary)
+                            }
+                            .foregroundStyle(DS.textPrimary)
+                        }
+                        Link(destination: AppConfig.privacyPolicyURL) {
+                            HStack {
+                                Image(systemName: "lock.shield")
+                                Text("Privacy Policy")
+                                Spacer()
+                                Image(systemName: "arrow.up.right.square")
+                                    .font(.caption)
+                                    .foregroundStyle(DS.textTertiary)
+                            }
+                            .foregroundStyle(DS.textPrimary)
+                        }
+                    } header: {
+                        Text("Legal")
+                    }
+
+                    #if DEBUG
+                    Section {
                         Button {
                             showResetConfirm = true
                         } label: {
@@ -146,9 +234,10 @@ struct SettingsView: View {
                             .foregroundStyle(DS.warning)
                         }
                     } footer: {
-                        Text("Clears all local check-ins, events, and streaks for testing.")
+                        Text("DEBUG only. Clears your local check-ins, events, and bias progress.")
                             .font(.caption)
                     }
+                    #endif
 
                     Section {
                         Button(role: .destructive) {
@@ -255,6 +344,7 @@ struct SettingsView: View {
             .task {
                 await loadFinanceData()
                 await loadAccountInfo()
+                await loadProfile()
             }
         }
     }
@@ -264,6 +354,40 @@ struct SettingsView: View {
             accountEmail = info.email
             accountCreatedAt = info.createdAt
         }
+    }
+
+    private func loadProfile() async {
+        guard let profile = try? await service.fetchProfile() else { return }
+        displayName = profile.displayName ?? ""
+        hideName = profile.hideName
+        hideEmail = profile.hideEmail
+        profileLoaded = true
+    }
+
+    private func saveProfile() async {
+        guard profileLoaded else { return }
+        let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            try await service.updateProfile(ProfileUpdate(
+                displayName: trimmed.isEmpty ? nil : trimmed,
+                hideName: hideName,
+                hideEmail: hideEmail
+            ))
+            profileStatus = "Saved."
+        } catch {
+            profileStatus = "Couldn't save: \(error.localizedDescription)"
+        }
+    }
+
+    /// Masks an email for cosmetic display when `hideEmail` is on.
+    /// Example: "a.haythorpe@hotmail.com" → "a•••@hotmail.com".
+    /// Purely visual — does not affect auth or what Supabase has stored.
+    private func maskedEmail(_ email: String) -> String {
+        guard let atIdx = email.firstIndex(of: "@") else { return email }
+        let local = email[..<atIdx]
+        let domain = email[atIdx...]
+        guard let firstChar = local.first else { return email }
+        return "\(firstChar)•••\(domain)"
     }
 
     private func performDeleteAccount() async {

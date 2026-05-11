@@ -176,7 +176,7 @@ struct DecisionHelperSheet: View {
                     dismiss()
                 }
             } label: {
-                Text("I'm ready — log it")
+                Text("I'm ready. Log it.")
             }
             .goldButtonStyle()
 
@@ -190,7 +190,7 @@ struct DecisionHelperSheet: View {
                     dismiss()
                 }
             } label: {
-                Text("Skip — go straight to logging")
+                Text("Skip. Go straight to logging.")
                     .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
             }

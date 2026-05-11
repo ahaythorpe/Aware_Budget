@@ -403,7 +403,7 @@ struct HomeView: View {
 
         let nudgeLine: String = {
             if isEmpty {
-                return "Track your income and savings — Nudge connects the dots to your spending patterns."
+                return "Track your income and savings. Nudge connects the dots to your spending patterns."
             }
             if let last = lastUpdated {
                 let days = Calendar.current.dateComponents([.day], from: last, to: Date()).day ?? 0

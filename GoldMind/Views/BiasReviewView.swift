@@ -261,7 +261,7 @@ struct BiasReviewView: View {
                     .tracking(1.2)
                     .foregroundStyle(Color(hex: "8B6010"))
             }
-            Text("This bias has come up a few times — these related ones might also fit:")
+            Text("This bias has come up a few times. These related ones might also fit:")
                 .font(.system(.caption, weight: .medium))
                 .foregroundStyle(Color(hex: "3A2000").opacity(0.75))
                 .lineSpacing(2)
@@ -461,7 +461,7 @@ struct BiasReviewView: View {
                     HStack(spacing: 10) {
                         Text("✏️").font(.system(size: 22))
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("Other — doesn't fit any of these")
+                            Text("Other. Doesn't fit any of these")
                                 .font(.system(.subheadline, weight: .bold))
                                 .foregroundStyle(DS.textPrimary)
                             Text("Type what the real reason was")
@@ -584,17 +584,17 @@ struct BiasReviewView: View {
         switch bias {
         case "Social Proof":          return "Others were doing it, so I did too"
         case "Availability Heuristic": return "A recent vivid memory pulled me in"
-        case "Status Quo Bias":        return "I defaulted — it's just what I do"
+        case "Status Quo Bias":        return "I defaulted. It's just what I do"
         case "Anchoring":              return "A reference price made it feel fair"
         case "Scarcity Heuristic":     return "Urgency ('only a few left') pushed me"
         case "Ego Depletion":          return "I was tired, stressed, or decision-fatigued"
-        case "Mental Accounting":      return "This money felt 'different' — bonus, refund, fun money"
-        case "Moral Licensing":        return "I'd earned it — recent good behaviour justified this"
+        case "Mental Accounting":      return "This money felt 'different' (bonus, refund, fun money)"
+        case "Moral Licensing":        return "I'd earned it. Recent good behaviour justified this"
         case "Present Bias":           return "Now mattered more than future me"
         case "Planning Fallacy":       return "It cost way more than I thought it would"
         case "Loss Aversion":          return "Fear of missing / losing drove it"
-        case "Sunk Cost Fallacy":      return "I'd already spent on this — kept going"
-        case "Overconfidence Bias":    return "I was sure — more sure than I should've been"
+        case "Sunk Cost Fallacy":      return "I'd already spent on this, kept going"
+        case "Overconfidence Bias":    return "I was sure. More sure than I should've been"
         case "Framing Effect":         return "How it was sold ('save 30%') shaped my choice"
         case "Denomination Effect":    return "Tap/card felt less real than cash"
         case "Ostrich Effect":         return "I avoided info that might've stopped me"
@@ -630,11 +630,11 @@ struct BiasReviewView: View {
                 stat(icon: "checkmark.circle.fill", tint: DS.positive,
                      count: outcome.identifiedCount,
                      label: "Identified correctly",
-                     detail: "Pattern score lowered — awareness gained")
+                     detail: "Pattern score lowered. Awareness gained.")
                 stat(icon: "questionmark.circle.fill", tint: DS.warning,
                      count: outcome.notSureCount,
                      label: "Blind spots",
-                     detail: "Pattern stays flagged — watch for next time")
+                     detail: "Pattern stays flagged. Watch for next time.")
                 stat(icon: "arrow.triangle.2.circlepath.circle.fill", tint: DS.textSecondary,
                      count: outcome.differentCount,
                      label: "Marked different reason",

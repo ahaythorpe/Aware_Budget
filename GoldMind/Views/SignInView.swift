@@ -59,7 +59,7 @@ struct SignInView: View {
                         .multilineTextAlignment(.center)
                 }
 
-                Text("Your Apple ID stays private — we only get the email you choose to share.")
+                Text("Your Apple ID stays private. We only get the email you choose to share.")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -85,6 +85,12 @@ struct SignInView: View {
             }
             do {
                 try await SupabaseService.shared.signInWithApple(idToken: token, nonce: nonce)
+                // Apple only returns `fullName` on the FIRST sign-in for
+                // a given Apple ID — if we don't capture it now, it's
+                // gone forever (subsequent sign-ins return nil). Persist
+                // immediately into profiles.display_name so the greeting
+                // and Nudge messages have a real name to read.
+                await SupabaseService.shared.captureAppleDisplayName(credential.fullName)
                 errorMessage = nil
                 // AuthStore picks up the session change; the gate will
                 // re-render and route forward.

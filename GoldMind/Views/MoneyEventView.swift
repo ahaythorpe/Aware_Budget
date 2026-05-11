@@ -258,7 +258,7 @@ struct MoneyEventView: View {
             Text("Quick log")
                 .font(.system(.largeTitle, weight: .bold))
                 .foregroundStyle(DS.textPrimary)
-            Text("Tap what you spent on. Log at your own pace — patterns show up over time.")
+            Text("Tap what you spent on. Log at your own pace. Patterns show up over time.")
                 .font(.system(.subheadline, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -657,11 +657,11 @@ struct MoneyEventView: View {
         } label: {
             Text(range.label)
                 .font(.system(.headline, weight: .bold))
-                .foregroundStyle(isSelected ? DS.goldForeground : DS.deepGreen)
+                .foregroundStyle(isSelected ? Color.white : DS.deepGreen)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
-                .background(isSelected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg), in: Capsule())
-                .overlay(Capsule().stroke(isSelected ? DS.goldBase.opacity(0.5) : DS.goldSurfaceStroke, lineWidth: isSelected ? 1 : 0.5))
+                .background(isSelected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.goldSurfaceBg), in: Capsule())
+                .overlay(Capsule().stroke(isSelected ? DS.primary.opacity(0.4) : DS.goldSurfaceStroke, lineWidth: isSelected ? 1 : 0.5))
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
@@ -678,21 +678,21 @@ struct MoneyEventView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(status.label)
                         .font(.system(.headline, weight: .bold))
-                        .foregroundStyle(DS.goldForeground)
+                        .foregroundStyle(Color.white)
                     Text(statusDetail(status))
                         .font(.system(.subheadline, weight: .bold))
-                        .foregroundStyle(DS.goldForeground.opacity(0.92))
+                        .foregroundStyle(Color.white.opacity(0.92))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(DS.goldForeground.opacity(0.5))
+                    .foregroundStyle(Color.white.opacity(0.7))
                     .padding(.top, 2)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(DS.nuggetGold, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.goldBase.opacity(0.4), lineWidth: 0.5))
+            .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.primary.opacity(0.3), lineWidth: 0.5))
         }
         .buttonStyle(.plain)
         .disabled(isBatchSaving)
@@ -701,8 +701,8 @@ struct MoneyEventView: View {
     private func statusDetail(_ status: MoneyEvent.PlannedStatus) -> String {
         switch status {
         case .planned:  return "I knew this was coming"
-        case .surprise: return "Didn't see it coming — external"
-        case .impulse:  return "Wanted it in the moment — internal"
+        case .surprise: return "Didn't see it coming. External."
+        case .impulse:  return "Wanted it in the moment. Internal."
         }
     }
 
@@ -872,21 +872,21 @@ struct MoneyEventView: View {
                     .font(.system(size: 20))
                 Text(status.label)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(selected ? DS.goldForeground : DS.goldForeground)
+                    .foregroundStyle(selected ? Color.white : DS.deepGreen)
                 Spacer()
                 if selected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(DS.goldForeground)
+                        .foregroundStyle(Color.white)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 12)
             .padding(.horizontal, 20)
-            .background(selected ? AnyShapeStyle(DS.nuggetGold) : AnyShapeStyle(DS.goldSurfaceBg))
+            .background(selected ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.goldSurfaceBg))
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(selected ? DS.goldBase.opacity(0.6) : DS.goldSurfaceStroke, lineWidth: selected ? 1.5 : 0.5)
+                    .stroke(selected ? DS.primary.opacity(0.4) : DS.goldSurfaceStroke, lineWidth: selected ? 1.5 : 0.5)
             )
         }
         .buttonStyle(.plain)

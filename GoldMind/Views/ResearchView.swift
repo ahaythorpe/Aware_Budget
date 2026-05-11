@@ -156,7 +156,7 @@ struct ResearchView: View {
                 .foregroundStyle(.white)
                 .shadow(color: DS.deepGreen.opacity(0.7), radius: 4, x: 0, y: 1)
 
-            Text("The 16 patterns behind your decisions — grouped into six families, with the science to back them.")
+            Text("The 16 patterns behind your decisions, grouped into six families, with the science to back them.")
                 .font(.system(.subheadline, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .shadow(color: DS.deepGreen.opacity(0.6), radius: 3, x: 0, y: 1)

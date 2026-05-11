@@ -201,7 +201,7 @@ struct CredibilitySheet: View {
                 stageRow("Noticed", DS.stageNoticed, "Showing up occasionally")
                 stageRow("Emerging", DS.stageEmerging, "Becoming a clear pattern")
                 stageRow("Active", DS.stageActive, "Frequently driving decisions")
-                stageRow("Aware", DS.positive, "You recognise it — breaking the grip")
+                stageRow("Aware", DS.positive, "You recognise it. Breaking the grip.")
             }
             .padding(14)
             .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
@@ -246,7 +246,7 @@ struct CredibilitySheet: View {
                         .foregroundStyle(DS.textPrimary)
                 }
 
-                Text("The Behavioural Finance Assessment Score is used by professional financial planners before giving advice. GoldMind brings the same framework to everyday spending — the same 16 patterns, adapted for daily life.")
+                Text("Used by professional planners before giving advice. GoldMind brings those 16 patterns to everyday spending, adapted for daily life.")
                     .font(.system(.subheadline, weight: .regular))
                     .foregroundStyle(DS.textPrimary)
                     .lineSpacing(3)
@@ -312,7 +312,7 @@ struct CredibilitySheet: View {
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
 
-            Text("96% of people have made a budget at some point. More than half check it once a month at most. Not from laziness — from apps that create shame, not awareness.")
+            Text("96% of people have made a budget at some point. More than half check it once a month at most. Not from laziness. From apps that create shame, not awareness.")
                 .font(.system(.footnote, weight: .regular))
                 .foregroundStyle(.white.opacity(0.85))
                 .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 1)
@@ -333,7 +333,7 @@ struct CredibilitySheet: View {
 
     private var nudgeSays: some View {
         NudgeSaysCard(
-            message: "This is not a generic quiz. It's the same framework professional planners use — so when you share your profile, they know exactly which biases to watch for.",
+            message: "This is not a generic quiz. It's the same framework professional planners use, so when you share your profile they know exactly which biases to watch for.",
             citation: "BFAS · Pompian, 2012",
             surface: .whiteShimmer
         )

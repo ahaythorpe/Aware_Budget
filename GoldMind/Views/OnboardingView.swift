@@ -239,7 +239,7 @@ struct OnboardingView: View {
     private var nudgeResponse: some View {
         VStack(spacing: 16) {
             NudgeSaysCard(
-                message: "You're not broken. The method is. 96% of people have made a budget — but most check it once a month at most.",
+                message: "You're not broken. The method is. 96% of people have made a budget, but most check it once a month at most.",
                 citation: "CFPB · Consumer Financial Protection Bureau",
                 surface: .whiteShimmer
             )

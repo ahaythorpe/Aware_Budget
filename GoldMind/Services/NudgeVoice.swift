@@ -32,7 +32,7 @@ enum NudgeVoice {
 
     // MARK: - Motto lines (Nudge Says cards, session summaries, general rotation)
     static let motto: [String] = [
-        "Awareness is interest — it compounds for future-you's savings.",
+        "Awareness is interest. It compounds for future-you's savings.",
         "Small awareness. Big difference.",
         "Patterns repeat. Until they don't.",
         "This is how the slow change happens.",
@@ -85,7 +85,7 @@ enum NudgeVoice {
         "Still yes? Still no?",
         "Thirty days of small truths.",
         "A month of quiet data. Let's see.",
-        "Checkpoint — not a grade.",
+        "Checkpoint. Not a grade.",
     ]
 
     // MARK: - Bias-matched motto (smart pairing, see sessionSummary use)
@@ -111,7 +111,7 @@ enum NudgeVoice {
         case "Availability Heuristic":
             return "Closing your eyes doesn't close the tab."
         case "Mental Accounting":
-            return "Awareness is interest — it compounds for future-you's savings."
+            return "Awareness is interest. It compounds for future-you's savings."
         case "Loss Aversion":
             return "The snail arrives fully noticed."
         case "Sunk Cost Fallacy":
