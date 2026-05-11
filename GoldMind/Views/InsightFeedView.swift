@@ -21,7 +21,9 @@ struct InsightFeedView: View {
     private let borderColor = DS.accent.opacity(0.15)
 
     private var hasNoData: Bool {
-        allEvents.isEmpty && recentCheckIns.isEmpty && !isLoading
+        // Keep empty state up through the initial load so blank charts
+        // never flash behind the "Log your first event" CTA.
+        allEvents.isEmpty && recentCheckIns.isEmpty
     }
 
     private var monthlySpend30d: Double {
