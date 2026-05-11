@@ -631,7 +631,11 @@ struct HomeView: View {
         Button {
             Task {
                 if notifAuthStatus == .notDetermined {
-                    await NotificationService.requestPermission()
+                    // First-time grant — kick off scheduling immediately
+                    // so the user doesn't have to relaunch for daily
+                    // reminders to start working.
+                    let granted = await NotificationService.requestPermission()
+                    if granted { NotificationService.scheduleAll() }
                 } else {
                     NotificationService.openSystemSettings()
                 }

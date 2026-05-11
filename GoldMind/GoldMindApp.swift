@@ -63,13 +63,15 @@ struct GoldMindApp: App {
                 } else {
                     RootTabView()
                         .task {
-                            await NotificationService.requestPermission()
-                            NotificationService.scheduleMorningReminder()
-                            NotificationService.scheduleEveningNudge()
-                            NotificationService.scheduleNoEventsReminder()
-                            NotificationService.scheduleWeeklyReview()
-                            NotificationService.scheduleMonthlyCheckpoint()
-                            NotificationService.scheduleAddNumbersReminder()
+                            // Nothing queues in the OS pending list until
+                            // the user actually grants permission. Banner
+                            // grant path in HomeView mirrors this flow.
+                            let granted = await NotificationService.requestPermission()
+                            guard granted else {
+                                NotificationService.cancelAll()
+                                return
+                            }
+                            NotificationService.scheduleAll()
                             await scheduleSmartNudgesFromHistory()
                         }
                 }

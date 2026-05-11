@@ -74,18 +74,26 @@ enum NotificationService {
 
     // MARK: - Permission
 
-    /// Requests authorization on first launch. iOS only shows the system
-    /// prompt once per install; if the user has already declined or the
-    /// status is .denied, this is a no-op. Use `authorizationStatus()` +
-    /// `openSystemSettings()` to recover from a prior denial.
-    static func requestPermission() async {
+    /// Requests authorization on first launch. Returns true iff the
+    /// final status is authorized/provisional/ephemeral. iOS only shows
+    /// the system prompt once per install; on subsequent launches this
+    /// just reports the current status. Callers should gate scheduling
+    /// on the returned bool so nothing queues in the OS pending list
+    /// while permission is still .notDetermined or .denied.
+    @discardableResult
+    static func requestPermission() async -> Bool {
         let current = await UNUserNotificationCenter.current().notificationSettings()
-        guard current.authorizationStatus == .notDetermined else { return }
-        do {
-            _ = try await UNUserNotificationCenter.current()
-                .requestAuthorization(options: [.alert, .sound, .badge])
-        } catch {
-            // Permission denied — app works without notifications.
+        switch current.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return true
+        case .notDetermined:
+            let granted = (try? await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+            return granted
+        case .denied:
+            return false
+        @unknown default:
+            return false
         }
     }
 
@@ -330,6 +338,28 @@ enum NotificationService {
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
         let request = UNNotificationRequest(identifier: monthlyCheckpointID, content: content, trigger: trigger)
         center.add(request)
+    }
+
+    // MARK: - Bulk scheduler (call only after permission granted)
+
+    /// Schedules every recurring + one-shot reminder the app owns.
+    /// Caller MUST have confirmed permission first — otherwise these
+    /// requests sit in the system pending list and would auto-fire if
+    /// the user later grants permission via Settings, which is the
+    /// exact "ghost notification" behaviour Apple reviewers flag.
+    static func scheduleAll() {
+        scheduleMorningReminder()
+        scheduleEveningNudge()
+        scheduleNoEventsReminder()
+        scheduleWeeklyReview()
+        scheduleMonthlyCheckpoint()
+        scheduleAddNumbersReminder()
+    }
+
+    /// Wipe every pending request the app owns. Used when permission
+    /// is denied or revoked so nothing lingers in the OS queue.
+    static func cancelAll() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
     // MARK: - Legacy compatibility

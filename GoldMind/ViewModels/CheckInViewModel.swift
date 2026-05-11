@@ -48,8 +48,8 @@ final class CheckInViewModel {
             isComplete = true
 
             NotificationService.cancelIfCheckedIn()
-            await NotificationService.requestPermission()
-            NotificationService.scheduleDailyReminder()
+            let granted = await NotificationService.requestPermission()
+            if granted { NotificationService.scheduleDailyReminder() }
         } catch {
             errorMessage = error.localizedDescription
         }
