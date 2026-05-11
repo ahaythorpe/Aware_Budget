@@ -1,11 +1,15 @@
 import SwiftUI
 
+/// Tab routes used by NotificationRouter + view code. Renamed 2026-05-11:
+/// `.awareness` removed as a top-level tab (its content folded into the new
+/// Education tab); `.education` repurposed as the Learn slot at position 3;
+/// `.research` becomes the Reference tab at position 4.
 enum RootTab: Int, Hashable {
-    case home = 0
-    case log = 1
-    case insights = 2
-    case awareness = 3
-    case research = 4
+    case home      = 0
+    case log       = 1
+    case insights  = 2
+    case education = 3
+    case research  = 4
 }
 
 struct RootTabView: View {
@@ -23,11 +27,11 @@ struct RootTabView: View {
             NavigationStack { InsightFeedView(selectedTab: $selection) }
                 .tabItem { Label("Insights", systemImage: "chart.line.uptrend.xyaxis") }
                 .tag(RootTab.insights)
-            NavigationStack { AwarenessView() }
-                .tabItem { Label("Awareness", systemImage: "brain.head.profile") }
-                .tag(RootTab.awareness)
-            NavigationStack { ResearchView() }
-                .tabItem { Label("Education", systemImage: "book.closed.fill") }
+            NavigationStack { ResearchView(mode: .learn) }
+                .tabItem { Label("Education", systemImage: "graduationcap.fill") }
+                .tag(RootTab.education)
+            NavigationStack { ResearchView(mode: .reference) }
+                .tabItem { Label("Research", systemImage: "book.closed.fill") }
                 .tag(RootTab.research)
         }
         .toolbarBackground(.visible, for: .tabBar)

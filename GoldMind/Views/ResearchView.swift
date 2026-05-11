@@ -10,9 +10,22 @@ import SwiftUI
 /// name kept as ResearchView to avoid a wider rename touching imports and
 /// preview names — micro-fix policy).
 struct ResearchView: View {
+    /// Reused in TWO tabs: the Education tab passes `.learn` to show
+    /// personalities + quiz + your progress; the Research tab passes
+    /// `.reference` to show papers + framework + ranking + all biases +
+    /// counteract guide. Defaults to `.learn` so existing call sites work.
+    enum Mode { case learn, reference }
+    var mode: Mode = .learn
+
     /// Tracks which archetype cards are currently expanded. Multiple can
     /// be open at once so the user can compare families.
     @State private var expandedCategories: Set<String> = []
+
+    // Awareness / Your Progress state (folded in from AwarenessView when
+    // mode == .learn). Loaded once via .task; falls back gracefully if
+    // the fetch fails (Education still renders the personalities).
+    @State private var biasProgress: [BiasProgress] = []
+    @State private var eventTagCounts: [String: Int] = [:]
 
     /// User's archetype from `profiles.archetype` (Money Mind Quiz result).
     /// Drives the "← You" tag on the matching category card and the
@@ -67,22 +80,31 @@ struct ResearchView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 hero
-                quizCTA
-                categoriesSection
-                papersSection
-                frameworkSection
-                howRankingWorks
-                allBiasesSection
-                spotAndOvercomeSection
+                if mode == .learn {
+                    quizCTA
+                    categoriesSection
+                    yourProgressSection
+                } else {
+                    papersSection
+                    frameworkSection
+                    howRankingWorks
+                    allBiasesSection
+                    spotAndOvercomeSection
+                }
                 Spacer(minLength: 32)
             }
             .padding(.horizontal, DS.hPadding)
             .padding(.top, 12)
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("Education")
+        .navigationTitle(mode == .learn ? "Education" : "Research")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await loadArchetype() }
+        .task {
+            await loadArchetype()
+            if mode == .learn {
+                await loadProgress()
+            }
+        }
         .fullScreenCover(isPresented: $showQuiz, onDismiss: {
             Task { await loadArchetype() }
         }) {
@@ -103,6 +125,114 @@ struct ResearchView: View {
         case "Social":            "Bandwagon"
         case "Defaults & Habits": "Autopilot"
         default:                  ""
+        }
+    }
+
+    // MARK: - Your Progress (folded in from AwarenessView)
+
+    /// Returns the user's triggered biases — those with any check-in
+    /// progress OR any tagged money event this month. Mirrors the
+    /// awareness-score logic so Education tab matches what Home shows.
+    private var triggeredBiases: [BiasPattern] {
+        allBiasPatterns.filter { p in
+            let progressed = biasProgress.first(where: { $0.biasName == p.name })?.timesEncountered ?? 0
+            let tagged = eventTagCounts[p.name] ?? 0
+            return progressed + tagged > 0
+        }
+    }
+
+    /// Section that surfaces the user's own progress inside Education so
+    /// they don't need a separate Awareness tab. Shows a count vs 16 plus
+    /// the top 5 most-triggered biases. Quietly disappears if the user
+    /// has nothing logged yet — keeps Education calm for new users.
+    @ViewBuilder private var yourProgressSection: some View {
+        if !triggeredBiases.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionLabel("YOUR PROGRESS")
+                progressCard
+            }
+        }
+    }
+
+    private var progressCard: some View {
+        let count = triggeredBiases.count
+        let pct = Double(count) / 16.0
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .stroke(DS.mintBg, lineWidth: 6)
+                        .frame(width: 64, height: 64)
+                    Circle()
+                        .trim(from: 0, to: CGFloat(pct))
+                        .stroke(DS.goldBase, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .frame(width: 64, height: 64)
+                    Text("\(count)/16")
+                        .font(.system(size: 13, weight: .black, design: .serif))
+                        .foregroundStyle(DS.goldBase)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("\(Int(pct * 100))% identified")
+                        .font(.system(size: 20, weight: .black, design: .serif))
+                        .foregroundStyle(DS.textPrimary)
+                    Text("Patterns you've started to notice")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(DS.textSecondary)
+                }
+                Spacer(minLength: 0)
+            }
+
+            if triggeredBiases.count > 0 {
+                Divider()
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("TOP PATTERNS FOR YOU")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.accent)
+                    ForEach(Array(triggeredBiases.sorted { triggerCount(for: $0) > triggerCount(for: $1) }.prefix(5))) { p in
+                        HStack(spacing: 10) {
+                            Image(systemName: p.sfSymbol)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color(hex: p.iconColor))
+                                .frame(width: 22)
+                            Text(p.displayName)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(DS.textPrimary)
+                            Spacer()
+                            Text("×\(triggerCount(for: p))")
+                                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                .foregroundStyle(DS.goldBase)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.3), lineWidth: 1)
+        )
+    }
+
+    private func triggerCount(for p: BiasPattern) -> Int {
+        let progressed = biasProgress.first(where: { $0.biasName == p.name })?.timesEncountered ?? 0
+        let tagged = eventTagCounts[p.name] ?? 0
+        return progressed + tagged
+    }
+
+    /// Loads bias progress + this-month tag counts. Mirrors HomeViewModel
+    /// so the Education progress section uses the same source of truth.
+    private func loadProgress() async {
+        let progress = (try? await SupabaseService.shared.fetchBiasProgress()) ?? []
+        let events = (try? await SupabaseService.shared.fetchMoneyEvents(forMonth: Date())) ?? []
+        let counts: [String: Int] = events
+            .compactMap(\.behaviourTag)
+            .reduce(into: [:]) { c, tag in c[tag, default: 0] += 1 }
+        await MainActor.run {
+            self.biasProgress = progress
+            self.eventTagCounts = counts
         }
     }
 
