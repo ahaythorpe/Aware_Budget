@@ -1,9 +1,26 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-04-12
+> Updated: 2026-05-11 (Build 18 on TestFlight)
 
 ---
+
+## Current build state (2026-05-11)
+
+**TestFlight: Builds 12–18 distributed.** Build 18 is the cumulative snapshot. Latest features in order:
+
+| Build | What landed |
+|---|---|
+| 11 | Bias mind map v1 (Education tab → "Explore the bias map" card) |
+| 12 | Nudge welcome popover · trimmed Backed-by-Research sheet · Top Biases ⓘ → algo · Settings + Insights InfoPopovers · industry top-5 restored · Pattern C copy tightened |
+| 13 | Avatar photo upload (PHPicker + Supabase Storage `avatars` bucket) |
+| 14 | Notification deep-link fix · mind map v2/v3/v3.1 (labels visible, tap-to-highlight, filter chips, heat tint, separated headers) · Nudge bottom-right · em-dash sweep 4 |
+| 15 | Notification permission banner + iOS Settings deep-link (App-Store-readiness for denied state) |
+| 16 | Gold-coin Nudge avatar · quieter mind map (no green halo, softer heat, no pulse) |
+| 17 | Em-dash sweep round 5 (9 user-facing strings) |
+| 18 | Muted/sophisticated colour theme — `accent #3F7A47`, `goldBase #A87E2A`, `goldText #D4A745`, supporting greens softened |
+
+**App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 
 ## What this is
 
