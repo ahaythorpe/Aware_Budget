@@ -36,7 +36,7 @@ struct MindMapView: View {
     private let headerHeight: CGFloat = 112  // taller header + breathing room between title and first node
     private let nodeSpacing: CGFloat = 96
     private let nodeSize: CGFloat = 40
-    private let canvasTopPadding: CGFloat = 28
+    private let canvasTopPadding: CGFloat = 130  // header + pinned NudgeSays card
     private let labelHeight: CGFloat = 36
     private let headerToNodeGap: CGFloat = 18  // explicit gap after the header divider
 
@@ -78,8 +78,17 @@ struct MindMapView: View {
                 .padding(.top, canvasTopPadding)
                 .padding(.bottom, 40)
             }
-            VStack {
+            VStack(spacing: 10) {
                 header
+                // Purpose card with Nudge cut-out coin baked in
+                // (showCoin: true). Pinned so the user always has a
+                // read on what the canvas is.
+                NudgeSaysCard(
+                    message: "Six money personalities, sixteen biases. Tap a node to unpack one. Lines show patterns that travel together.",
+                    citation: "BFAS · Pompian, 2012",
+                    surface: .whiteShimmer
+                )
+                .padding(.horizontal, 16)
                 Spacer()
             }
         }
