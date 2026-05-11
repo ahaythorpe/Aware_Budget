@@ -27,6 +27,8 @@
 - **#26 Paywall pricing display** — parked. Needs RevenueCat dashboard or custom SwiftUI paywall; both off-limits.
 - **#27 Organize biases in AwarenessView** — **done.** Already grouped by 6 BFAS categories. `Models/BiasData.swift:220` defines `biasCategories`; `Views/AwarenessView.swift:67` iterates them with per-category headers + mid-tab BFAS callouts after categories 2 and 4. If extending: sort modes / triggered-only filter / collapsible sections.
 - **#28 Editorial pass + interactivity on dense screens** — open. No coach marks.
+- **#29 Monthly checkpoint screen** — `NotificationService.scheduleMonthlyCheckpoint` already fires a 1st-of-month push but tap currently lands on Home with no dedicated recap UI. Needs an in-app monthly review screen (events / streaks / awareness moments delta from prior month).
+- **#30 Mind map concept-graph interactivity** — beyond per-node sheet redesign (done in `ec90d5f`), explore concept-map layouts: zoom levels, multi-bias clusters, "show all relations" toggle, drag-to-rearrange. Concept maps as a richer interaction model than the current lane layout.
 
 ## What this is
 
