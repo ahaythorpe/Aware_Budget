@@ -22,6 +22,12 @@
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 
+## Live follow-up tasks (audit 2026-05-12)
+
+- **#26 Paywall pricing display** — parked. Needs RevenueCat dashboard or custom SwiftUI paywall; both off-limits.
+- **#27 Organize biases in AwarenessView** — **done.** Already grouped by 6 BFAS categories. `Models/BiasData.swift:220` defines `biasCategories`; `Views/AwarenessView.swift:67` iterates them with per-category headers + mid-tab BFAS callouts after categories 2 and 4. If extending: sort modes / triggered-only filter / collapsible sections.
+- **#28 Editorial pass + interactivity on dense screens** — open. No coach marks.
+
 ## What this is
 
 iOS behavioural finance app. Swift + SwiftUI + Supabase.
