@@ -166,10 +166,17 @@ struct InsightFeedView: View {
                 .offset(x: -20, y: 80)
 
             VStack(alignment: .leading, spacing: 14) {
-                Text("THIS WEEK")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(DS.goldText)
-                    .tracking(1.2)
+                HStack(spacing: 6) {
+                    Text("THIS WEEK")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(DS.goldText)
+                        .tracking(1.2)
+                    InfoPopover(
+                        "A rolling 7-day view of your logged events and check-ins. Resets each Monday.",
+                        title: "THIS WEEK"
+                    )
+                    Spacer()
+                }
 
                 if weekEvents.isEmpty {
                     Text("Log events to see your weekly trends")
@@ -310,10 +317,17 @@ struct InsightFeedView: View {
         let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
 
         if !biasSpend.isEmpty {
-            Text("SPENDING BY BIAS")
-                .font(.system(size: 12, weight: .heavy, design: .rounded))
-                .tracking(1.6)
-                .foregroundStyle(DS.goldBase)
+            HStack(spacing: 6) {
+                Text("SPENDING BY BIAS")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .tracking(1.6)
+                    .foregroundStyle(DS.goldBase)
+                InfoPopover(
+                    "Each tagged spend is grouped by the bias driving it. The dollar amounts show how much each pattern is costing you this month.",
+                    title: "SPENDING BY BIAS"
+                )
+                Spacer()
+            }
 
             ForEach(biasSpend.prefix(5), id: \.key) { bias, amount in
                 HStack(spacing: 8) {
