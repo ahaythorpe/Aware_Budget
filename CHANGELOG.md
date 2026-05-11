@@ -5,6 +5,78 @@
 
 ---
 
+## 2026-05-11 — Builds 8, 9, 10 + fold-up patterns (Claude Code, Opus 4.7 1M)
+
+### Build 8 (uploaded 2026-05-11)
+- **NamePromptSheet** (`Views/NamePromptSheet.swift`) — auto-prompts for display name on first Home load when `profile.display_name` is empty and `hasPromptedForName` AppStorage flag is false. Save → patches profile; Skip → flag set.
+- **Notification deep-link unification** (#39):
+  - `NotificationRoute` enum + `NotificationRouter.pendingRoute` channel (additive to slot-based routing).
+  - `NotificationService.scheduleAddNumbersReminder()` — fires 48h after first launch with `userInfo["route"] = "finance_editor"`.
+  - `cancelAddNumbersReminder()` auto-called when finance numbers are saved.
+- **Em-dash sweep round 2** — Insights, Awareness, AlgorithmExplainerSheet, ResearchView papers/ranking. ~20 more user-facing em-dashes removed.
+
+### Build 9 (uploaded 2026-05-11)
+- **Audit-driven legibility pass** across 6 files. Bumped `.caption` / `.caption2` / `.footnote` on user-facing copy to `.subheadline` / `.body` / 14pt minimums. Worst offenders: MoneyEventView (8 hits), InsightFeedView (6), HomeView (4), CredibilitySheet (4), AwarenessView (2), AlgorithmExplainerSheet (1).
+- **Education biasMiniRow redesign** (Bella's main complaint): name 16pt, body 14pt with extra lineSpacing, citation de-emphasized to 11pt semibold gold-opacity, row padding 10→12, VStack spacing 4→6. Hierarchy fixed.
+- **Tab restructure (5 tabs preserved):**
+  - `RootTab.awareness` removed as top-level. `.education` repurposed as Learn slot (position 3). `.research` is Reference slot (position 4).
+  - `ResearchView` extended with `Mode` enum (`.learn` / `.reference`). Body conditionally renders sections; navigation title swaps.
+  - **Education tab** = hero + quiz CTA + 6 spending personalities (with tap-to-flip bias chips) + **Your Progress section** (patterns-identified ring + top 5 triggered biases, folded in from old AwarenessView).
+  - **Research tab** = 4 papers + BFAS framework + ranking explainer + all 16 biases + counteract guide.
+  - SF Symbols: Education = `graduationcap.fill`; Research = `book.closed.fill`.
+- **Profile surfaces (`Views/AvatarDisc.swift`):**
+  - Reusable gold-gradient initial-letter disc.
+  - Home greeting: avatar on left (tap → Settings); personality chip + day shows under name if archetype set.
+  - Settings: full profile card at top with 76pt avatar + serif name + personality chip + streak/biases-seen stat card.
+- **Consolidation pass** — "spending personality" everywhere in user copy. "Archetype" retained in code/enum/citations only. BFAS auto-prompt removed from launch gate; Money Mind Quiz is now primary entry-level assessment.
+- **Quiz + reveal redesign:**
+  - `MoneyMindQuizView` — soft hero halo, per-question Nudge framer card, single gold-bordered question card with paleGreen-on-accent radio rows, full-width gold `Next` with chevron + sparkles icon, BFAS citation pill footer.
+  - `ArchetypeRevealView` — numbered top 3 biases (gold #1 medallion, gold-outline #2/#3), full comparison table of all 6 archetype scores with mini bars + "YOU" chip on primary, plain-English "Why X and not Y" explainer.
+- **Education tab — spending personalities + interactive bias chips:**
+  - "The 6 families" → "The 6 spending personalities".
+  - NudgeSaysCard explainer above the list.
+  - Personality cards use gold-circled SF Symbols (eye-slash for Drifter, bolt for Reactor, tray for Bookkeeper, hourglass for Now, person-wave for Bandwagon, repeat for Autopilot) tinted with category accent.
+  - Bias chips tap-to-flip between one-liner and Nudge's contextual note with chevron + paleGreen highlight.
+- **Home counteract-your-top-biases card** — collapsible card pairing the user's top 3 ranked biases with the matching `BiasLessonsMock.seed` `howToCounter` strategy. Each row tap-to-expand with chevron + paleGreen highlight. Hides when no signal yet.
+- **Gear icon fix** — Home gear was wired to Dev menu, blocking access to Settings (Profile, Delete account, etc.). Re-wired: tap → Settings in all builds; DEBUG-only long-press still exposes Dev menu.
+- **Empty-state CTA clarity** — "Add your numbers" → "Add income, savings & investments" + "Takes 30 seconds · manual entry only" subtitle.
+- **Gold button polish:**
+  - `nuggetGold` specular peak `#FFFDF0 → #EFD080` (warm champagne, no near-white).
+  - GoldButtonStyle adds subtle dark text shadow (#3A2400 @ 0.55).
+  - Slow 4.5s shimmer band capped at `#F5DC9C` opacity 0.28 with `.plusLighter` blend; respects Reduce Motion.
+- **'How to Spot & Overcome' → 'How to counteract your biases'** rename.
+- **BiasData em-dash cleanup** (oneLiners + 5 nudgeSays strings).
+- **DEBUG trigger** — Dev menu → Notifications section → "Fire 'Add numbers' in 10s" button. Lets us verify the deep-link route without waiting 48h.
+
+### Build 10 (uploaded 2026-05-11) — Fold-up patterns
+- **Pattern A: "See related" chips** — `Models/BiasRelationships.swift` defines research-grounded co-occurrence pairs (16 entries). When a bias is expanded inside a personality card, a horizontally-scrolling row of 1-3 sibling biases appears with chevrons. Tapping a chip adds that bias to `revealedBiases` so it expands inline below the current row. Builds the mental web in place.
+- **Pattern B: InfoPopover** (`Views/InfoPopover.swift`) — reusable gold "?" disc that opens a popover with title + short explanation. Wired onto Home's `Patterns identified` and `Day streak` labels. Closes the "what does this mean?" gap without sending users away.
+- **Pattern C: "Why this fits [archetype]"** — `Models/ArchetypeBiasExplanation.swift` holds 13 unique rationales keyed by archetype × bias. When a bias chip is expanded inside its parent personality card, the rationale appears under the Nudge note in a paleGreen panel with accent border.
+
+### Supabase / backend
+- **No DB changes in this batch.** All work is client-side; reads from existing `profiles.archetype`, `bias_progress`, `money_events`, `money_mind_quiz_responses` tables. RLS policies untouched.
+
+### Files added
+- `Models/BiasRelationships.swift`
+- `Models/ArchetypeBiasExplanation.swift`
+- `Views/AvatarDisc.swift`
+- `Views/InfoPopover.swift`
+- `Views/NamePromptSheet.swift`
+
+### Memory updates
+- `feedback_em_dash_overuse.md` — em-dashes as AI-tell noise; grep before shipping copy.
+- `feedback_gold_button_legibility.md` — saturated gold pills too heavy.
+- `project_goldmind_archetypes.md` — 6-archetype canonical framework.
+- `project_goldmind.md` updated — no App Store / RevenueCat changes until Bella explicitly says.
+
+### Outstanding
+- **#40** Start check-in disappearing — code investigation found no gating logic; needs fresh screenshot for repro.
+- **#26** Paywall discount badge — parked (RevenueCat dashboard work; Bella deferred).
+- **Mind map** — designed, deferred to dedicated session.
+- **Photo upload on avatar** — initial-letter ships first; PHPickerViewController + `profiles.avatar_url` column later.
+
+---
+
 ## 2026-05-11 — Build 7 + post-7 polish (Claude Code, Opus 4.7 1M)
 
 **Shipped in Build 7** (uploaded 2026-05-11, state VALID, Internal Test group):
