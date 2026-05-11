@@ -17,31 +17,31 @@ enum ArchetypeBiasExplanation {
 
         // Reactor -> Decision Making
         "Reactor::Loss Aversion":
-            "The Reactor's fast decisions are often loss-driven. The fear of missing a sale, losing on an investment, or being left behind fuels the rush. Notice the urgency before you commit.",
+            "The Reactor's fast decisions are often loss-driven. The fear of missing a sale, losing on an investment, or being left behind fuels the rush. The urgency is the tell.",
         "Reactor::Anchoring":
             "Reactors latch onto the first number they see. A 'was $200, now $80' tag locks the brain on $200, not on whether $80 is fair. The anchor stays even after you walk away.",
         "Reactor::Overconfidence Bias":
-            "Reactors trust their gut. That's usually fine for small daily picks, but it bites on larger calls (investments, big-ticket buys) where careful comparison would beat instinct.",
+            "Reactors trust their gut. Fine for the daily picks. Costly on the big calls (investments, big-ticket buys), where comparison beats instinct.",
 
         // Bookkeeper -> Money Psychology
         "Bookkeeper::Mental Accounting":
             "The Bookkeeper's mental ledgers are Mental Accounting in action. Treating tax refunds, bonuses, and salary differently feels organised, but the dollar is the same. Watch for 'fun money' framing.",
         "Bookkeeper::Denomination Effect":
-            "Splitting a $50 note feels worse than tapping five $10 spends on a card. Bookkeepers feel this acutely. Notice when tap-to-pay erodes the friction that used to be a natural budget.",
+            "Splitting a $50 note feels worse than tapping five $10 spends on a card. Bookkeepers feel this acutely. Tap-to-pay erases the friction that used to be a natural brake.",
         "Bookkeeper::Framing Effect":
-            "Bookkeepers organise their money by labels: 'savings', 'spending', 'fun'. That helps until the labels themselves frame what feels OK to spend. Reframe to see the total picture.",
+            "Bookkeepers organise their money by labels: 'savings', 'spending', 'fun'. That helps until the labels themselves decide what feels OK to spend. The label is doing the thinking.",
 
         // Now -> Time Perception
         "Now::Present Bias":
-            "Present Bias is The Now's signature pattern. Future rewards feel less real than now-rewards. Even small delays restore proportionality. Sleep on it, see how it feels tomorrow.",
+            "Present Bias is The Now's signature pattern. Future rewards feel less real than now-rewards. Even small delays restore proportionality. Tomorrow-you sees this differently.",
         "Now::Planning Fallacy":
             "The Now underestimates future cost the same way it overweights present reward. The renovation budget, the holiday spend, the side project: all consistently bigger than the plan said.",
 
         // Bandwagon -> Social
         "Bandwagon::Social Proof":
-            "When everyone's buying the ETF, the Bandwagon buys too. The crowd's confidence feels like signal but is usually just confidence. Decouple your decision from the timing of theirs.",
+            "When everyone's buying the ETF, the Bandwagon buys too. The crowd's confidence feels like signal. It's usually just confidence.",
         "Bandwagon::Scarcity Heuristic":
-            "'Only 3 left' lands harder on Bandwagons. Scarcity cues exploit the social fear of missing out. Ask: would I want this if it weren't running out?",
+            "'Only 3 left' lands harder on Bandwagons. Scarcity cues exploit the social fear of missing out. The countdown is the lever, not the offer.",
 
         // Autopilot -> Defaults & Habits
         "Autopilot::Status Quo Bias":
