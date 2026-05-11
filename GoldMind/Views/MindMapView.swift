@@ -33,11 +33,12 @@ struct MindMapView: View {
 
     private let laneWidth: CGFloat = 184
     private let laneSpacing: CGFloat = 8
-    private let headerHeight: CGFloat = 96
-    private let nodeSpacing: CGFloat = 92  // larger to fit visible labels under each disc
-    private let nodeSize: CGFloat = 38
+    private let headerHeight: CGFloat = 112  // taller header + breathing room between title and first node
+    private let nodeSpacing: CGFloat = 96
+    private let nodeSize: CGFloat = 40
     private let canvasTopPadding: CGFloat = 28
-    private let labelHeight: CGFloat = 34  // reserved for the 2-line bias name
+    private let labelHeight: CGFloat = 36
+    private let headerToNodeGap: CGFloat = 18  // explicit gap after the header divider
 
     /// Order of the lanes left-to-right. Matches the canonical archetype order.
     private let lanes: [(archetype: String, category: String)] = [
@@ -225,17 +226,17 @@ struct MindMapView: View {
                 .animation(.easeInOut(duration: 1.6), value: pulse)
 
             // Header
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 ZStack {
                     Circle().fill(icon.tint.opacity(0.18))
                     Circle().stroke(icon.tint.opacity(0.5), lineWidth: 1)
                     Image(systemName: icon.symbol)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(icon.tint)
                 }
-                .frame(width: 40, height: 40)
+                .frame(width: 44, height: 44)
                 Text("The \(lane.archetype)")
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(DS.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -250,7 +251,14 @@ struct MindMapView: View {
                 }
             }
             .frame(width: laneWidth)
-            .position(x: xOrigin, y: headerHeight / 2 + 4)
+            .position(x: xOrigin, y: 48)
+
+            // Divider line under the header so titles read as their own
+            // band, separated from the node grid.
+            Rectangle()
+                .fill(DS.goldBase.opacity(0.18))
+                .frame(width: laneWidth - 32, height: 0.75)
+                .position(x: xOrigin, y: headerHeight - headerToNodeGap)
 
             // Nodes
             ForEach(Array(nodes.enumerated()), id: \.element.id) { i, p in
@@ -267,9 +275,10 @@ struct MindMapView: View {
         let trigger = triggerCount(for: pattern)
         // Scale node 1.0x to 1.35x based on how often the user has hit it.
         let scale: CGFloat = min(1.35, 1.0 + CGFloat(trigger) * 0.07)
+        let isHighlighted = highlightedBias?.name == pattern.name
         return Button {
             // Highlight neighbours immediately; sheet opens after.
-            withAnimation(.easeOut(duration: 0.2)) {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.7)) {
                 highlightedBias = pattern
             }
             selectedBias = pattern
@@ -279,10 +288,12 @@ struct MindMapView: View {
                     Circle()
                         .fill(Color(hex: pattern.iconBg))
                     Circle()
-                        .stroke(DS.goldBase.opacity(isPrimaryCluster ? 0.85 : 0.4),
-                                lineWidth: isPrimaryCluster ? 1.5 : 1)
+                        .stroke(
+                            isHighlighted ? DS.accent : DS.goldBase.opacity(isPrimaryCluster ? 0.85 : 0.4),
+                            lineWidth: isHighlighted ? 2.5 : (isPrimaryCluster ? 1.5 : 1)
+                        )
                     Image(systemName: pattern.sfSymbol)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Color(hex: pattern.iconColor))
                     if trigger > 0 {
                         Text("\(trigger)")
@@ -295,8 +306,12 @@ struct MindMapView: View {
                     }
                 }
                 .frame(width: nodeSize, height: nodeSize)
-                .scaleEffect(scale)
-                .shadow(color: .black.opacity(0.10), radius: 3, y: 1)
+                .scaleEffect(isHighlighted ? scale * 1.12 : scale)
+                .shadow(
+                    color: isHighlighted ? DS.accent.opacity(0.35) : .black.opacity(0.10),
+                    radius: isHighlighted ? 8 : 3,
+                    y: 1
+                )
 
                 Text(pattern.displayName)
                     .font(.system(size: 11, weight: .bold))
@@ -435,7 +450,7 @@ struct MindMapView: View {
     private func nodePosition(laneIdx: Int, nodeIdx: Int) -> CGPoint {
         CGPoint(
             x: laneOriginX(laneIdx),
-            y: headerHeight + 24 + CGFloat(nodeIdx) * nodeSpacing
+            y: headerHeight + headerToNodeGap + 32 + CGFloat(nodeIdx) * nodeSpacing
         )
     }
 
