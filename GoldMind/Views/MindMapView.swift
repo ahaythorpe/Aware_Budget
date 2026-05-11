@@ -88,9 +88,13 @@ struct MindMapView: View {
         // by the YOU chip + a slightly bolder gold border, nothing more.
         .task { await loadProgress() }
         .sheet(item: $selectedBias) { bias in
-            biasSheet(for: bias)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+            BiasDetailSheet(
+                pattern: bias,
+                triggerCount: triggerCount(for: bias),
+                onSelectRelated: { selectedBias = $0 }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         // Tap empty canvas (anywhere outside a node button) clears the
         // highlight so the user can reset without picking another bias.
@@ -345,66 +349,6 @@ struct MindMapView: View {
 
     // MARK: - Bias sheet (description + nudge + counteract)
 
-    private func biasSheet(for pattern: BiasPattern) -> some View {
-        let lesson = BiasLessonsMock.seed.first(where: { $0.biasName == pattern.name })
-        return ZStack {
-            DS.bg.ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    // Hero icon + name + cite
-                    VStack(alignment: .leading, spacing: 10) {
-                        ZStack {
-                            Circle().fill(Color(hex: pattern.iconBg))
-                            Image(systemName: pattern.sfSymbol)
-                                .font(.system(size: 24, weight: .semibold))
-                                .foregroundStyle(Color(hex: pattern.iconColor))
-                        }
-                        .frame(width: 56, height: 56)
-                        Text(pattern.displayName)
-                            .font(.system(size: 26, weight: .black, design: .serif))
-                            .foregroundStyle(DS.textPrimary)
-                        Text(pattern.keyRef)
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .tracking(0.6)
-                            .foregroundStyle(DS.goldBase)
-                    }
-
-                    sheetSection(title: "THE PATTERN", body: pattern.oneLiner)
-                    sheetSection(title: "NUDGE SAYS",   body: pattern.nudgeSays)
-                    if let counter = lesson?.howToCounter {
-                        sheetSection(title: "HOW TO COUNTERACT", body: counter, accent: true)
-                    }
-                }
-                .padding(20)
-                .padding(.bottom, 40)
-            }
-        }
-    }
-
-    private func sheetSection(title: String, body: String, accent: Bool = false) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .tracking(1.2)
-                .foregroundStyle(accent ? DS.accent : DS.goldBase)
-            Text(body)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(DS.textPrimary)
-                .lineSpacing(3)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(accent ? DS.paleGreen.opacity(0.45) : DS.cardBg)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(accent ? DS.accent.opacity(0.35) : DS.goldBase.opacity(0.2), lineWidth: 1)
-        )
-    }
-
     // MARK: - Background dot grid
 
     private var dotGrid: some View {
@@ -480,4 +424,218 @@ struct MindMapView: View {
 
 #Preview {
     MindMapView(userArchetype: "Reactor")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// BIAS DETAIL SHEET — scanable layout: stat chip, Nudge quote,
+// bulleted counters, expand-to-see real example, related chips
+// (tap navigates the sheet to that bias).
+// ─────────────────────────────────────────────────────────────────
+private struct BiasDetailSheet: View {
+    let pattern: BiasPattern
+    let triggerCount: Int
+    let onSelectRelated: (BiasPattern) -> Void
+
+    @State private var showExample = false
+
+    private var counterBullets: [String] {
+        let lesson = BiasLessonsMock.seed.first(where: { $0.biasName == pattern.name })
+        return (lesson?.howToCounter ?? "")
+            .components(separatedBy: ". ")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines)
+                     .trimmingCharacters(in: CharacterSet(charactersIn: ".")) }
+            .filter { !$0.isEmpty }
+    }
+
+    private var example: String? {
+        BiasLessonsMock.seed.first(where: { $0.biasName == pattern.name })?.realWorldExample
+    }
+
+    private var related: [BiasPattern] {
+        BiasRelationships.relatedBiases(for: pattern.name)
+    }
+
+    var body: some View {
+        ZStack {
+            DS.bg.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    hero
+                    triggerChip
+                    Text(pattern.oneLiner)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    nudgeQuote
+                    if !counterBullets.isEmpty { counterCard }
+                    if let example { exampleDisclosure(example) }
+                    if !related.isEmpty { relatedRow }
+                }
+                .padding(20)
+                .padding(.bottom, 40)
+            }
+        }
+    }
+
+    private var hero: some View {
+        HStack(alignment: .center, spacing: 14) {
+            ZStack {
+                Circle().fill(Color(hex: pattern.iconBg))
+                Image(systemName: pattern.sfSymbol)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(Color(hex: pattern.iconColor))
+            }
+            .frame(width: 52, height: 52)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(pattern.displayName)
+                    .font(.system(size: 22, weight: .black, design: .serif))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                Text(pattern.keyRef)
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(0.6)
+                    .foregroundStyle(DS.goldBase)
+            }
+            Spacer()
+        }
+    }
+
+    private var triggerChip: some View {
+        HStack(spacing: 6) {
+            Image(systemName: triggerCount > 0 ? "chart.bar.fill" : "circle.dashed")
+                .font(.system(size: 10, weight: .bold))
+            Text(triggerCount > 0 ? "Seen \(triggerCount)× in your logs" : "Not seen in your logs yet")
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .tracking(0.3)
+        }
+        .foregroundStyle(triggerCount > 0 ? .white : DS.textSecondary)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(
+            Capsule().fill(
+                triggerCount > 0 ? AnyShapeStyle(DS.heroGradient) : AnyShapeStyle(DS.cardBg)
+            )
+        )
+        .overlay(
+            Capsule().stroke(
+                triggerCount > 0 ? DS.accent.opacity(0.3) : DS.goldBase.opacity(0.25),
+                lineWidth: 1
+            )
+        )
+    }
+
+    private var nudgeQuote: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image("nudge")
+                .resizable().scaledToFit()
+                .frame(width: 28, height: 28)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("NUDGE")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.accent)
+                Text(pattern.nudgeSays)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12).stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
+        )
+    }
+
+    private var counterCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("HOW TO COUNTERACT")
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.2)
+                .foregroundStyle(DS.accent)
+            ForEach(Array(counterBullets.enumerated()), id: \.offset) { _, line in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(DS.accent)
+                        .padding(.top, 2)
+                    Text(line)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.paleGreen.opacity(0.45), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.accent.opacity(0.35), lineWidth: 1))
+    }
+
+    private func exampleDisclosure(_ example: String) -> some View {
+        Button {
+            withAnimation(.easeOut(duration: 0.2)) { showExample.toggle() }
+        } label: {
+            VStack(alignment: .leading, spacing: showExample ? 10 : 0) {
+                HStack {
+                    Text("REAL EXAMPLE")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.goldBase)
+                    Spacer()
+                    Image(systemName: showExample ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(DS.goldBase)
+                }
+                if showExample {
+                    Text(example)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.goldBase.opacity(0.2), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var relatedRow: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("RELATED PATTERNS")
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.2)
+                .foregroundStyle(DS.goldBase)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(related) { r in
+                        Button { onSelectRelated(r) } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: r.sfSymbol)
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(DS.goldBase)
+                                Text(r.displayName)
+                                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(DS.textPrimary)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Capsule().fill(DS.cardBg))
+                            .overlay(Capsule().stroke(DS.goldBase.opacity(0.3), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
 }
