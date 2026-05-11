@@ -20,6 +20,7 @@ struct HomeView: View {
     @State private var financeSavings: String = ""
     @State private var financeInvestment: String = ""
     @State private var userArchetype: String? = nil
+    @State private var userAvatarUrl: String? = nil
     @State private var showMoneyMindQuiz: Bool = false
     @State private var showNamePrompt: Bool = false
     @State private var expandedCounter: Set<String> = []
@@ -86,7 +87,7 @@ struct HomeView: View {
                     // Uses the same destination as the gear icon so users
                     // who tap either end up in the right place.
                     Button { showSettings = true } label: {
-                        AvatarDisc(name: viewModel.firstName, size: 52)
+                        AvatarDisc(name: viewModel.firstName, avatarUrl: userAvatarUrl, size: 52)
                     }
                     .buttonStyle(.plain)
 
@@ -583,6 +584,7 @@ struct HomeView: View {
         let profile = try? await SupabaseService.shared.fetchProfile()
         await MainActor.run {
             userArchetype = profile?.archetype
+            userAvatarUrl = profile?.avatarUrl
             // First-launch name prompt: only if we have a profile, the
             // display_name is empty, and we haven't asked yet.
             if let p = profile,

@@ -14,6 +14,7 @@ struct Profile: Codable, Hashable {
     var hideEmail: Bool
     var archetype: String?
     var topBiases: [String]
+    var avatarUrl: String?
     var createdAt: Date
     var updatedAt: Date
 
@@ -24,6 +25,7 @@ struct Profile: Codable, Hashable {
         case hideEmail   = "hide_email"
         case archetype
         case topBiases   = "top_biases"
+        case avatarUrl   = "avatar_url"
         case createdAt   = "created_at"
         case updatedAt   = "updated_at"
     }
@@ -38,6 +40,7 @@ struct Profile: Codable, Hashable {
         hideEmail    = try c.decode(Bool.self, forKey: .hideEmail)
         archetype    = try c.decodeIfPresent(String.self, forKey: .archetype)
         topBiases    = (try? c.decode([String].self, forKey: .topBiases)) ?? []
+        avatarUrl    = try c.decodeIfPresent(String.self, forKey: .avatarUrl)
         createdAt    = try c.decode(Date.self, forKey: .createdAt)
         updatedAt    = try c.decode(Date.self, forKey: .updatedAt)
     }
@@ -51,6 +54,7 @@ struct ProfileUpdate: Codable {
     var hideEmail: Bool?
     var archetype: String? = nil
     var topBiases: [String]? = nil
+    var avatarUrl: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case displayName = "display_name"
@@ -58,6 +62,7 @@ struct ProfileUpdate: Codable {
         case hideEmail   = "hide_email"
         case archetype
         case topBiases   = "top_biases"
+        case avatarUrl   = "avatar_url"
     }
 
     // Skip nil keys so PostgREST treats this as a true PATCH — omitted keys
@@ -69,5 +74,6 @@ struct ProfileUpdate: Codable {
         try c.encodeIfPresent(hideEmail,   forKey: .hideEmail)
         try c.encodeIfPresent(archetype,   forKey: .archetype)
         try c.encodeIfPresent(topBiases,   forKey: .topBiases)
+        try c.encodeIfPresent(avatarUrl,   forKey: .avatarUrl)
     }
 }

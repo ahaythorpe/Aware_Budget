@@ -180,6 +180,59 @@ final class SupabaseService {
         try? await updateProfile(ProfileUpdate(displayName: name, hideName: nil, hideEmail: nil))
     }
 
+    // MARK: - Avatar upload
+
+    /// Uploads a JPEG avatar to the `avatars` storage bucket under the
+    /// user's folder (`<user_id>/avatar.jpg`), then patches
+    /// `profiles.avatar_url` with the resulting public CDN URL. Returns
+    /// the new URL on success.
+    ///
+    /// The Storage RLS policy restricts writes to the user's own folder,
+    /// so this is safe to call from the client. Old avatars at the same
+    /// path are overwritten (`upsert: true`).
+    @discardableResult
+    func uploadAvatar(jpegData: Data) async throws -> String? {
+        guard let uid = await currentUserId else { return nil }
+        let path = "\(uid.uuidString)/avatar.jpg"
+
+        try await client.storage
+            .from("avatars")
+            .upload(
+                path,
+                data: jpegData,
+                options: FileOptions(
+                    cacheControl: "3600",
+                    contentType: "image/jpeg",
+                    upsert: true
+                )
+            )
+
+        let publicURL = try client.storage
+            .from("avatars")
+            .getPublicURL(path: path)
+        // Append a cache-busting query so the AsyncImage on AvatarDisc
+        // doesn't keep showing the previous photo.
+        let bustedURL = publicURL.absoluteString + "?t=\(Int(Date().timeIntervalSince1970))"
+
+        try await updateProfile(ProfileUpdate(
+            displayName: nil, hideName: nil, hideEmail: nil,
+            avatarUrl: bustedURL
+        ))
+        return bustedURL
+    }
+
+    /// Removes the user's avatar file and clears `profiles.avatar_url`.
+    /// Falls back silently if the file isn't there.
+    func removeAvatar() async throws {
+        guard let uid = await currentUserId else { return }
+        let path = "\(uid.uuidString)/avatar.jpg"
+        _ = try? await client.storage.from("avatars").remove(paths: [path])
+        try await updateProfile(ProfileUpdate(
+            displayName: nil, hideName: nil, hideEmail: nil,
+            avatarUrl: ""
+        ))
+    }
+
     // MARK: - Money Mind Quiz
 
     /// Persists one quiz completion: writes the audit row to

@@ -26,6 +26,10 @@ struct SettingsView: View {
     @State private var archetypeName: String? = nil
     @State private var streak: Int = 0
     @State private var biasesIdentified: Int = 0
+    @State private var avatarUrl: String? = nil
+    @State private var showPhotoPicker: Bool = false
+    @State private var isUploadingAvatar: Bool = false
+    @State private var avatarError: String? = nil
 
     // Finance entry — manual, no bank connection. Drives the
     // net-worth trend chart on the Insights tab.
@@ -389,7 +393,46 @@ struct SettingsView: View {
         let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         let nameForCard = trimmed.isEmpty ? "Set your name" : trimmed
         return VStack(spacing: 14) {
-            AvatarDisc(name: trimmed.isEmpty ? nil : trimmed, size: 76)
+            Button {
+                showPhotoPicker = true
+            } label: {
+                ZStack(alignment: .bottomTrailing) {
+                    AvatarDisc(
+                        name: trimmed.isEmpty ? nil : trimmed,
+                        avatarUrl: avatarUrl,
+                        size: 76
+                    )
+                    if isUploadingAvatar {
+                        Circle()
+                            .fill(.black.opacity(0.35))
+                            .frame(width: 76, height: 76)
+                        ProgressView().tint(.white)
+                    } else {
+                        ZStack {
+                            Circle().fill(DS.cardBg)
+                            Circle().stroke(DS.goldBase, lineWidth: 1)
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(DS.goldBase)
+                        }
+                        .frame(width: 26, height: 26)
+                        .offset(x: 2, y: 2)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(isUploadingAvatar)
+            .sheet(isPresented: $showPhotoPicker) {
+                PhotoPicker { data in
+                    guard let data else { return }
+                    Task { await uploadAvatar(data) }
+                }
+            }
+            if let err = avatarError {
+                Text(err)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.red)
+            }
 
             VStack(spacing: 4) {
                 Text(nameForCard)
@@ -443,6 +486,29 @@ struct SettingsView: View {
         .padding(.horizontal, 16)
     }
 
+    /// Uploads the selected photo to Supabase Storage and refreshes the
+    /// profile card so the new avatar appears immediately. The URL is
+    /// cache-busted (?t=epoch) by the service so AsyncImage doesn't
+    /// keep showing the previous file.
+    private func uploadAvatar(_ data: Data) async {
+        await MainActor.run {
+            isUploadingAvatar = true
+            avatarError = nil
+        }
+        do {
+            let newURL = try await service.uploadAvatar(jpegData: data)
+            await MainActor.run {
+                avatarUrl = newURL
+                isUploadingAvatar = false
+            }
+        } catch {
+            await MainActor.run {
+                avatarError = "Couldn't upload photo. Try again."
+                isUploadingAvatar = false
+            }
+        }
+    }
+
     private func statColumn(value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(value)
@@ -463,6 +529,7 @@ struct SettingsView: View {
         hideName = profile.hideName
         hideEmail = profile.hideEmail
         archetypeName = profile.archetype
+        avatarUrl = profile.avatarUrl
         profileLoaded = true
 
         // Stats for the profile card. Counts are best-effort and silent
