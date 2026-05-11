@@ -41,11 +41,13 @@ enum DS {
     static let animSpring: Double = 0.35
     static let animProgress: Double = 1.2
 
-    // Money green palette
-    static let primary    = Color(hex: "2E7D32")   // hero cards, nav
-    static let accent     = Color(hex: "4CAF50")   // labels, ring, buttons
-    static let lightGreen = Color(hex: "81C784")   // card backs, tints
-    static let paleGreen  = Color(hex: "E8F5E9")   // pills, tab active bg
+    // Money green palette — muted 2026-05-11 for a more sophisticated
+    // feel. Bright #4CAF50 → deeper forest #3F7A47; supporting tones
+    // shifted to match.
+    static let primary    = Color(hex: "295E2C")   // hero cards, nav (was 2E7D32)
+    static let accent     = Color(hex: "3F7A47")   // labels, ring, buttons (was 4CAF50)
+    static let lightGreen = Color(hex: "6FA877")   // card backs, tints (was 81C784)
+    static let paleGreen  = Color(hex: "E4EFE5")   // pills, tab active bg (was E8F5E9)
     static let bg         = Color(hex: "FAFAF8")   // app background
     static let altBg      = Color(hex: "F5F7F5")   // alternate background
     static let cardBg     = Color.white             // card background
@@ -100,9 +102,10 @@ enum DS {
         endPoint: .bottomTrailing
     )
 
-    // Gold
-    static let goldBase = Color(hex: "C59430")
-    static let goldText = Color(hex: "E8B84B")
+    // Gold — muted 2026-05-11. Bright base shifted to a quieter
+    // champagne brass; highlight goldText reduced in saturation.
+    static let goldBase = Color(hex: "A87E2A")   // was C59430
+    static let goldText = Color(hex: "D4A745")   // was E8B84B
 
     /// Flat matte yellow for confirmation/Yes buttons. Distinct from
     /// the metallic `nuggetGold` gradient (which is reserved for
