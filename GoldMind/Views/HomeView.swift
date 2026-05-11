@@ -292,12 +292,12 @@ struct HomeView: View {
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
 
-                // ── MONEY MIND QUIZ TILE (until completed) ──
-                if userArchetype == nil {
-                    moneyMindQuizTile
-                        .padding(.horizontal, 18)
-                        .padding(.bottom, 12)
-                }
+                // ── MONEY MIND QUIZ TILE (always shown) ──
+                // Pre-quiz: invites the user to take it.
+                // Post-quiz: shows their personality + a retake affordance.
+                moneyMindQuizTile
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 12)
 
                 // ── CHECK IN (morphs daily / weekly / monthly) ──
                 VStack(alignment: .leading, spacing: 10) {
@@ -577,7 +577,9 @@ struct HomeView: View {
     /// gradient on the check-in card. Disappears once an archetype is
     /// saved to `profiles.archetype`.
     private var moneyMindQuizTile: some View {
-        Button { showMoneyMindQuiz = true } label: {
+        let arch = userArchetype?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasArch = arch?.isEmpty == false
+        return Button { showMoneyMindQuiz = true } label: {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
@@ -588,10 +590,12 @@ struct HomeView: View {
                         .foregroundStyle(.white)
                 }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Money Mind Quiz")
+                    Text(hasArch ? "Your spending personality" : "Money Mind Quiz")
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(DS.textPrimary)
-                    Text("Find your spending personality · 2 min")
+                    Text(hasArch
+                         ? "The \(arch!) · tap to retake"
+                         : "Find your spending personality · 2 min")
                         .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(DS.textSecondary)
                 }
