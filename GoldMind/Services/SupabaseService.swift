@@ -101,20 +101,128 @@ final class SupabaseService {
         try await client.auth.signIn(email: email, password: password)
     }
 
+    /// Resolves the first-name shown in the greeting and Nudge messages.
+    ///
+    /// Lookup order:
+    ///   1. `public.profiles.display_name` (preferred — user-editable, set
+    ///      via Apple sign-in capture or Settings → Profile).
+    ///   2. `auth.users.user_metadata.full_name` (legacy email/password
+    ///      signups that wrote a name into metadata before profiles
+    ///      existed).
+    ///   3. "there" (anonymous fallback).
+    ///
+    /// The previous fallback to email local-part was removed deliberately —
+    /// Apple Sign-In with Hide-My-Email returns a relay address whose
+    /// local-part is opaque (e.g. `xfbsmt9rs4@privaterelay.appleid.com`),
+    /// and printing that as a name is a known App Store rejection signal.
+    /// If `profiles.hide_name == true` we always return "there" regardless
+    /// of `display_name`.
     func fetchFirstName() async -> String {
         _ = try? await client.auth.refreshSession()
         guard let session = try? await client.auth.session else { return "there" }
+
+        if let profile = try? await fetchProfile() {
+            if profile.hideName { return "there" }
+            if let displayName = profile.displayName, !displayName.isEmpty,
+               let first = displayName.split(separator: " ").first, !first.isEmpty {
+                return first.prefix(1).uppercased() + first.dropFirst().lowercased()
+            }
+        }
+
         if let raw = session.user.userMetadata["full_name"],
            case .string(let fullName) = raw,
            let first = fullName.split(separator: " ").first, !first.isEmpty {
             return first.prefix(1).uppercased() + first.dropFirst().lowercased()
         }
-        if let email = session.user.email {
-            let local = String(email.split(separator: "@").first ?? "there")
-            if local.contains("-") || local.contains("debug") { return "there" }
-            return local.prefix(1).uppercased() + local.dropFirst()
-        }
+
         return "there"
+    }
+
+    // MARK: - Profile
+
+    /// Reads the signed-in user's profile row. The row is auto-created by
+    /// the `on_auth_user_created` trigger so this should always succeed
+    /// for an authenticated user. Returns `nil` only if no session exists
+    /// (e.g. signed-out state) or on a transient network error.
+    func fetchProfile() async throws -> Profile? {
+        guard let uid = await currentUserId else { return nil }
+        let response: [Profile] = try await client.from("profiles")
+            .select()
+            .eq("id", value: uid.uuidString)
+            .limit(1)
+            .execute()
+            .value
+        return response.first
+    }
+
+    /// Updates one or more fields on the signed-in user's profile.
+    /// Patch semantics — only non-nil fields in `update` are written.
+    func updateProfile(_ update: ProfileUpdate) async throws {
+        guard let uid = await currentUserId else { return }
+        try await client.from("profiles")
+            .update(update)
+            .eq("id", value: uid.uuidString)
+            .execute()
+    }
+
+    /// Captures the name from Apple Sign-In's `fullName` credential and
+    /// writes it to `profiles.display_name`. Apple only returns this on
+    /// the very first sign-in (subsequent attempts return nil), so this
+    /// must be called immediately after `signInWithApple` succeeds.
+    /// Skips the write if `displayName` is empty/whitespace.
+    func captureAppleDisplayName(_ components: PersonNameComponents?) async {
+        guard let components else { return }
+        let formatter = PersonNameComponentsFormatter()
+        formatter.style = .default
+        let name = formatter.string(from: components)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        try? await updateProfile(ProfileUpdate(displayName: name, hideName: nil, hideEmail: nil))
+    }
+
+    // MARK: - Money Mind Quiz
+
+    /// Persists one quiz completion: writes the audit row to
+    /// `money_mind_quiz_responses` and updates `profiles.archetype` +
+    /// `profiles.top_biases` so future reads don't need to re-score.
+    /// Both writes go in one logical unit but are two HTTP calls — if the
+    /// profile patch fails after the row is inserted, the next quiz retake
+    /// will overwrite. Acceptable trade-off vs an RPC for v1.
+    func saveMoneyMindQuizResponse(
+        answers: [Int],
+        scores: [Archetype: Int],
+        archetype: Archetype,
+        topBiases: [String]
+    ) async throws {
+        guard let uid = await currentUserId else { return }
+
+        // Serialise scores with string keys for jsonb compatibility.
+        var scoreDict: [String: Int] = [:]
+        for (k, v) in scores { scoreDict[k.rawValue] = v }
+
+        struct QuizInsert: Encodable {
+            let user_id: String
+            let answers: [Int]
+            let scores: [String: Int]
+            let archetype: String
+            let top_biases: [String]
+        }
+        let row = QuizInsert(
+            user_id: uid.uuidString,
+            answers: answers,
+            scores: scoreDict,
+            archetype: archetype.rawValue,
+            top_biases: topBiases
+        )
+        try await client.from("money_mind_quiz_responses")
+            .insert(row)
+            .execute()
+
+        try await updateProfile(ProfileUpdate(
+            displayName: nil, hideName: nil, hideEmail: nil,
+            archetype: archetype.rawValue,
+            topBiases: topBiases
+        ))
     }
 
     /// DEBUG-only — ensures there's a valid Supabase session on every launch.
@@ -370,6 +478,19 @@ final class SupabaseService {
             .select()
             .eq("user_id", value: uid.uuidString)
             .eq("behaviour_tag", value: tag)
+            .execute()
+            .value
+        return response.count
+    }
+
+    /// Total count of money_events for the signed-in user across all time.
+    /// Used by NudgeEngine to detect "first ever event" moments and tailor
+    /// the celebratory message accordingly.
+    func countAllMoneyEvents() async throws -> Int {
+        guard let uid = await currentUserId else { return 0 }
+        let response: [MoneyEvent] = try await client.from("money_events")
+            .select()
+            .eq("user_id", value: uid.uuidString)
             .execute()
             .value
         return response.count

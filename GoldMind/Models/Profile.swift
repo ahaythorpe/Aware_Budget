@@ -49,10 +49,25 @@ struct ProfileUpdate: Codable {
     var displayName: String?
     var hideName: Bool?
     var hideEmail: Bool?
+    var archetype: String? = nil
+    var topBiases: [String]? = nil
 
     enum CodingKeys: String, CodingKey {
         case displayName = "display_name"
         case hideName    = "hide_name"
         case hideEmail   = "hide_email"
+        case archetype
+        case topBiases   = "top_biases"
+    }
+
+    // Skip nil keys so PostgREST treats this as a true PATCH — omitted keys
+    // leave the column untouched, whereas an explicit `null` would overwrite.
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encodeIfPresent(displayName, forKey: .displayName)
+        try c.encodeIfPresent(hideName,    forKey: .hideName)
+        try c.encodeIfPresent(hideEmail,   forKey: .hideEmail)
+        try c.encodeIfPresent(archetype,   forKey: .archetype)
+        try c.encodeIfPresent(topBiases,   forKey: .topBiases)
     }
 }
