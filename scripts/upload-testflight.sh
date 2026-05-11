@@ -69,7 +69,7 @@ echo "▸ Build number: $BUILD_NUMBER"
 echo "▸ Marketing version: $(xcrun agvtool what-marketing-version -terse | head -1)"
 echo
 
-echo "▸ Cleaning previous archive at $ARCHIVE_PATH…"
+echo "▸ Cleaning previous archive at ${ARCHIVE_PATH}…"
 rm -rf "$ARCHIVE_PATH" "$EXPORT_PATH"
 
 echo "▸ Archiving (Release, generic iOS device)…"
