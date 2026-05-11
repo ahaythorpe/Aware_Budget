@@ -17,7 +17,7 @@ enum ArchetypeBiasExplanation {
 
         // Reactor -> Decision Making
         "Reactor::Loss Aversion":
-            "The Reactor's fast decisions are often loss-driven. The fear of missing a sale, losing on an investment, or being left behind fuels the rush. The urgency is the tell.",
+            "The Reactor's fast decisions are often loss-driven. The fear of missing a sale, losing on an investment, or being left behind fuels the rush. If a decision feels suddenly urgent, that's loss aversion talking.",
         "Reactor::Anchoring":
             "Reactors latch onto the first number they see. A 'was $200, now $80' tag locks the brain on $200, not on whether $80 is fair. The anchor stays even after you walk away.",
         "Reactor::Overconfidence Bias":
