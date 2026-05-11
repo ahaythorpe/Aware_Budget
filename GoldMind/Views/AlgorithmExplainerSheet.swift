@@ -174,7 +174,7 @@ struct AlgorithmExplainerSheet: View {
         sectionCard(title: "STEP BY STEP") {
             VStack(alignment: .leading, spacing: 14) {
                 step(1, "You pick a category (e.g. Coffee), a range, and a reason (Planned / Surprise / Impulse).")
-                step(2, "Nudge suggests a bias based on your combination — for example, Coffee + Impulse → Status Quo Bias (habitual choice).")
+                step(2, "Nudge suggests a bias based on your combination. For example: Coffee + Impulse → Status Quo Bias (habitual choice).")
                 step(3, "The event is saved with that suggested tag. Every save nudges that bias up in your ranking.")
                 step(4, "Your BFAS baseline (the 16 questions on first open) seeds each bias with 0–10. Your actual spending overrides that over time.")
             }
@@ -203,13 +203,13 @@ struct AlgorithmExplainerSheet: View {
     private var scoringCard: some View {
         sectionCard(title: "HOW THE SCORE MOVES") {
             VStack(alignment: .leading, spacing: 10) {
-                scoreRow("⬆ \"Yes, that's me\" (you identified it)", "+5 — gold standard")
+                scoreRow("⬆ \"Yes, that's me\" (you identified it)", "+5 gold standard")
                 scoreRow("⬇ \"No, different reason\" (active denial)", "−2")
                 scoreRow("• \"Not sure\" (no signal)", "0")
-                scoreRow("⬆ Each passive event tag", "+1 — weak signal")
+                scoreRow("⬆ Each passive event tag", "+1 weak signal")
                 scoreRow("⬆ BFAS baseline at signup", "0–10 one-time seed")
                 Divider().background(DS.accent.opacity(0.15))
-                Text("Active YES outweighs passive observation 5:1. Why: Stone et al. 1991, Robinson & Clore 2002 — when you identify a pattern in real time, you're 3–5× more accurate than any algorithm watching from the outside. Beck 1976: the act of self-labelling is itself part of the change.")
+                Text("Active YES outweighs passive observation 5:1. Why: Stone et al. 1991, Robinson & Clore 2002. When you identify a pattern in real time, you're 3–5× more accurate than any algorithm watching from the outside. Beck 1976: the act of self-labelling is itself part of the change.")
                     .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
                     .lineSpacing(3)
@@ -246,7 +246,7 @@ struct AlgorithmExplainerSheet: View {
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("If you can identify what's driving a decision, you can override it. That's why your mastery stage moves Unseen → Noticed → Emerging → Active → Aware as you correctly flag your patterns in check-ins.")
+                Text("Identify the driver, override the decision. Mastery moves Unseen → Noticed → Emerging → Active → Aware as you flag patterns in check-ins.")
                     .font(.system(.footnote, weight: .regular))
                     .foregroundStyle(DS.textSecondary)
                     .lineSpacing(3)

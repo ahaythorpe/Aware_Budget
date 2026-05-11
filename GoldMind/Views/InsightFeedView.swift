@@ -249,7 +249,7 @@ struct InsightFeedView: View {
             let latestSnapshot = balanceSnapshots.last
 
             VStack(alignment: .leading, spacing: 16) {
-                financeOverviewRow(emoji: "💰", label: "Income", value: monthlyIncome, note: monthlyIncome > 0 ? nil : "Not set — update on Home")
+                financeOverviewRow(emoji: "💰", label: "Income", value: monthlyIncome, note: monthlyIncome > 0 ? nil : "Not set. Update on Home.")
                 financeOverviewRow(emoji: "🛒", label: "Spent this month", value: totalExpenses, note: "\(allEvents.filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) }.count) events")
                 financeOverviewRow(emoji: "⚡", label: "Impulse spending", value: impulseTotal, note: totalExpenses > 0 ? "\(Int((impulseTotal / totalExpenses) * 100))% of total" : nil)
                 financeOverviewRow(emoji: "📋", label: "Planned spending", value: plannedTotal, note: nil)
@@ -311,8 +311,8 @@ struct InsightFeedView: View {
 
         if !biasSpend.isEmpty {
             Text("SPENDING BY BIAS")
-                .font(.system(size: 10, weight: .heavy, design: .rounded))
-                .tracking(1.5)
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .tracking(1.6)
                 .foregroundStyle(DS.goldBase)
 
             ForEach(biasSpend.prefix(5), id: \.key) { bias, amount in
@@ -339,7 +339,7 @@ struct InsightFeedView: View {
             }
 
             NudgeSaysCard(
-                message: "Each dollar is tagged with the bias driving the spend. This is behavioural finance in action — awareness precedes change.",
+                message: "Each dollar is tagged with the bias driving the spend. This is behavioural finance in action. Awareness precedes change.",
                 citation: "Kahneman 2011 · Thaler & Sunstein 2008",
                 surface: .whiteShimmer
             )
@@ -868,7 +868,7 @@ struct InsightFeedView: View {
                         calculationRow(icon: "leaf", label: "Savings", detail: "Income − Expenses (derived)")
                     }
 
-                    ResearchFootnote(text: "Thaler's Mental Accounting (1985) — categorising spending changes how we value it.", style: .inline)
+                    ResearchFootnote(text: "Thaler's Mental Accounting (1985): categorising spending changes how we value it.", style: .inline)
                 }
                 .padding(20)
             }
@@ -969,7 +969,7 @@ struct InsightFeedView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     NudgeSaysCard(
-                        message: "After you identify a bias, Nudge tracks whether your spending pattern shifts. This is the core of behavioural finance — awareness precedes change.",
+                        message: "After you identify a bias, Nudge tracks whether your spending pattern shifts. This is the core of behavioural finance. Awareness precedes change.",
                         citation: "Kahneman 2011 · Thaler & Sunstein 2008",
                         surface: .whiteShimmer
                     )
@@ -982,7 +982,7 @@ struct InsightFeedView: View {
 
                         calculationRow(icon: "1.circle", label: "Before", detail: "Average weekly spend tagged with this bias before you confirmed it in a check-in")
                         calculationRow(icon: "2.circle", label: "After", detail: "Average weekly spend since confirmation")
-                        calculationRow(icon: "arrow.triangle.2.circlepath", label: "Impact", detail: "% change — positive = spending dropped")
+                        calculationRow(icon: "arrow.triangle.2.circlepath", label: "Impact", detail: "% change. Positive = spending dropped.")
                     }
 
                     ResearchFootnote(text: "Debiasing through awareness · Fischhoff 1982 · Larrick 2004", style: .inline)
@@ -1039,7 +1039,7 @@ struct InsightFeedView: View {
             if improving {
                 insight = "Down \(abs(Int(change)))% per week since awareness"
             } else if change > 5 {
-                insight = "Up \(Int(change))% — pattern still active"
+                insight = "Up \(Int(change))%. Pattern still active."
             } else {
                 insight = "Holding steady"
             }
@@ -1078,15 +1078,15 @@ struct InsightFeedView: View {
         let leadCopy: String = {
             switch snapsSoFar {
             case 0: return "Track your net worth over time."
-            case 1: return "You've started — one more snapshot and the trend appears."
-            default: return "Almost there — log one more snapshot to see your trend."
+            case 1: return "You've started. One more snapshot and the trend appears."
+            default: return "Almost there. Log one more snapshot to see your trend."
             }
         }()
         return VStack(alignment: .leading, spacing: 8) {
             Text(leadCopy)
                 .font(.system(.subheadline, weight: .bold))
                 .foregroundStyle(DS.textPrimary)
-            Text("Add your monthly take-home + savings + investment balance in Settings (gear icon on Home). Drop a fresh snapshot weekly. After 3+ snapshots, the trend shows up here — with bias awareness overlaid so you can see how the two move together.")
+            Text("Add your monthly take-home, savings, and investment balance in Settings (gear icon on Home). Drop a fresh snapshot weekly. After 3+ snapshots, the trend shows up here with bias awareness overlaid so you can see how the two move together.")
                 .font(.system(.footnote, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .lineSpacing(2)
@@ -1280,10 +1280,10 @@ struct InsightFeedView: View {
         }
         if netDelta > 0 {
             let pct = Int((netDelta / max(priorAnchor.value, 1)) * 100)
-            return "Net worth up \(pct)% this month. Keep noticing — the data is moving in your direction."
+            return "Net worth up \(pct)% this month. Keep noticing. The data is moving in your direction."
         }
         if recentAwareness > priorAwareness {
-            return "You banked \(recentAwareness) new lessons this month. Net worth hasn't moved yet — that's normal. Awareness comes first."
+            return "You banked \(recentAwareness) new lessons this month. Net worth hasn't moved yet. That's normal. Awareness comes first."
         }
         return nil
     }
@@ -1296,8 +1296,8 @@ struct InsightFeedView: View {
                 .frame(width: 32, height: 32)
             VStack(alignment: .leading, spacing: 4) {
                 Text("NUDGE")
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .tracking(1.4)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .tracking(1.6)
                     .foregroundStyle(DS.accent)
                 Text(message)
                     .font(.system(.footnote, weight: .semibold))

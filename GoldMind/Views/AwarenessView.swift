@@ -75,14 +75,14 @@ struct AwarenessView: View {
                         // After every 2nd + 4th category
                         if index == 1 {
                             bfasCallout(
-                                "These 16 patterns come from the Behavioural Finance Assessment Score — the same framework used by professional financial planners.",
+                                "These 16 patterns come from the Behavioural Finance Assessment Score. The same framework used by professional financial planners.",
                                 cite: "Pompian, 2012"
                             )
                             .padding(.top, 6)
                         }
                         if index == 3 {
                             bfasCallout(
-                                "Noticing a pattern is the first step. The algorithm tracks what you recognise — not what you avoid.",
+                                "Noticing a pattern is the first step. The algorithm tracks what you recognise, not what you avoid.",
                                 cite: "Kahneman & Tversky, 1979"
                             )
                             .padding(.top, 6)
@@ -117,11 +117,11 @@ struct AwarenessView: View {
     /// Shown as a benchmark so the user can compare their own triggered
     /// patterns against what shows up in the population at large.
     private let industryTopBiases: [(name: String, emoji: String, why: String, cite: String)] = [
-        ("Loss Aversion", "⚖️", "Losses feel ~2× worse than equivalent gains — nearly universal.", "Kahneman & Tversky, 1979"),
-        ("Present Bias", "⏳", "Hyperbolic discounting — choosing now over future-you replicates across markets.", "Laibson, 1997"),
-        ("Mental Accounting", "💰", "Treating money differently based on its label — pervasive in household budgets.", "Thaler, 1985"),
-        ("Status Quo Bias", "🔁", "Defaults win — auto-renewals, subscriptions, inertia.", "Samuelson & Zeckhauser, 1988"),
-        ("Anchoring", "⚓", "Reference prices shape what feels 'fair' — present in every negotiation.", "Tversky & Kahneman, 1974"),
+        ("Loss Aversion", "⚖️", "Losses feel ~2× worse than equivalent gains. Nearly universal.", "Kahneman & Tversky, 1979"),
+        ("Present Bias", "⏳", "Hyperbolic discounting: choosing now over future-you replicates across markets.", "Laibson, 1997"),
+        ("Mental Accounting", "💰", "Treating money differently based on its label. Pervasive in household budgets.", "Thaler, 1985"),
+        ("Status Quo Bias", "🔁", "Defaults win. Auto-renewals, subscriptions, inertia.", "Samuelson & Zeckhauser, 1988"),
+        ("Anchoring", "⚓", "Reference prices shape what feels 'fair'. Present in every negotiation.", "Tversky & Kahneman, 1974"),
     ]
 
     private var industryTopBiasesCard: some View {
@@ -137,7 +137,7 @@ struct AwarenessView: View {
                 Spacer()
             }
 
-            Text("What shows up in the population — not necessarily in you.")
+            Text("What shows up in the population. Not necessarily in you.")
                 .font(.system(.footnote, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -190,8 +190,8 @@ struct AwarenessView: View {
                     .font(.system(.largeTitle, weight: .bold))
                     .foregroundStyle(DS.textPrimary)
                 Text("YOUR BIAS PROFILE")
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .tracking(1.5)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .tracking(1.6)
                     .foregroundStyle(DS.goldBase)
                 Text("Tap any triggered pattern to hear from Nudge.")
                     .font(.system(.subheadline, weight: .medium))
@@ -209,8 +209,8 @@ struct AwarenessView: View {
                 .font(.system(size: 22, weight: .black, design: .serif))
                 .foregroundStyle(DS.goldForeground)
             Text("OF \(patterns.count)")
-                .font(.system(size: 9, weight: .heavy, design: .rounded))
-                .tracking(1.0)
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.2)
                 .foregroundStyle(DS.goldForeground.opacity(0.7))
         }
         .frame(width: 70, height: 64)
@@ -403,8 +403,8 @@ struct BiasAwarenessCard: View {
                             .frame(width: 32, height: 32)
                         VStack(alignment: .leading, spacing: 4) {
                             Text("NUDGE")
-                                .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                .tracking(1.5)
+                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                .tracking(1.6)
                                 .foregroundStyle(DS.accent)
                             Text(pattern.nudgeSays)
                                 .font(.system(.subheadline, weight: .regular))

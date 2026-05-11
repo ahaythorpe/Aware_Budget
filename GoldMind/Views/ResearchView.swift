@@ -38,7 +38,7 @@ struct ResearchView: View {
     private let papers: [Paper] = [
         .init(author: "Pompian", year: "2012",
               title: "Behavioral Finance and Wealth Management",
-              detail: "Codifies the BFAS framework GoldMind uses — 16 patterns, behavioural investor types, used by professional financial planners."),
+              detail: "Codifies the BFAS framework GoldMind uses: 16 patterns, behavioural investor types, used by professional financial planners."),
         .init(author: "Kahneman & Tversky", year: "1979",
               title: "Prospect Theory",
               detail: "The original behavioural-economics paper. Loss aversion, framing, reference points. Econometrica 47(2):263–291."),
@@ -354,7 +354,7 @@ struct ResearchView: View {
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(DS.textPrimary)
                 }
-                Text("The same framework professional planners use before giving advice. GoldMind adapts those 16 patterns into a daily awareness practice — not a one-off test.")
+                Text("The same framework professional planners use before giving advice. GoldMind adapts those 16 patterns into a daily awareness practice, not a one-off test.")
                     .font(.system(.subheadline, weight: .regular))
                     .foregroundStyle(DS.textPrimary)
                     .lineSpacing(3)
@@ -375,7 +375,7 @@ struct ResearchView: View {
                 bulletRow(1, "Each check-in answer and tagged spend feeds your bias profile.")
                 bulletRow(2, "The algorithm ranks biases by how often they show up in your decisions.")
                 bulletRow(3, "As you notice them, they move from Active → Aware.")
-                bulletRow(4, "Your first BFAS assessment seeds the baseline — daily data overrides it over time.")
+                bulletRow(4, "Your first BFAS assessment seeds the baseline. Daily data overrides it over time.")
             }
             .padding(16)
             .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
