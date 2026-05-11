@@ -35,17 +35,41 @@ fi
 SCHEME="GoldMind"
 PROJECT="GoldMind.xcodeproj"
 BUILD_DIR="$PROJECT_DIR/build/testflight"
-ARCHIVE_PATH="$BUILD_DIR/GoldMind.xcarchive"
-EXPORT_PATH="$BUILD_DIR/export"
+
+# Lock file prevents concurrent runs from trampling each other's
+# archives. The 17/18 build loss came from two uploads running in
+# parallel, both writing to the same fixed archive path. Fail-fast
+# if another run is already in progress.
+LOCK_FILE="$BUILD_DIR/.upload.lock"
+mkdir -p "$BUILD_DIR"
+if [[ -f "$LOCK_FILE" ]]; then
+    other_pid=$(cat "$LOCK_FILE" 2>/dev/null || echo "?")
+    if kill -0 "$other_pid" 2>/dev/null; then
+        echo "✗ Another TestFlight upload is already running (pid $other_pid). Aborting."
+        echo "  If you're sure no other run is active, delete: $LOCK_FILE"
+        exit 1
+    fi
+    echo "▸ Stale lock from pid $other_pid (process gone). Reclaiming."
+fi
+echo $$ > "$LOCK_FILE"
+trap 'rm -f "$LOCK_FILE"' EXIT INT TERM
+
+# Capture the build number ONCE at script start. Previously this was
+# re-read at the final "Uploaded build N" line — if the file changed
+# mid-run, the log lied about which version was uploaded.
+BUILD_NUMBER="$(grep -m1 'CURRENT_PROJECT_VERSION =' "$PROJECT/project.pbxproj" | sed -E 's/.*= ([0-9]+);.*/\1/' || echo "?")"
+
+# Per-build paths so concurrent runs (or interrupted prior runs) can't
+# wipe an in-flight archive.
+ARCHIVE_PATH="$BUILD_DIR/GoldMind-${BUILD_NUMBER}.xcarchive"
+EXPORT_PATH="$BUILD_DIR/export-${BUILD_NUMBER}"
 IPA_PATH="$EXPORT_PATH/GoldMind.ipa"
 
-mkdir -p "$BUILD_DIR"
-
-echo "▸ Build number: $(xcrun agvtool what-version -terse)"
+echo "▸ Build number: $BUILD_NUMBER"
 echo "▸ Marketing version: $(xcrun agvtool what-marketing-version -terse | head -1)"
 echo
 
-echo "▸ Cleaning previous archive…"
+echo "▸ Cleaning previous archive at $ARCHIVE_PATH…"
 rm -rf "$ARCHIVE_PATH" "$EXPORT_PATH"
 
 echo "▸ Archiving (Release, generic iOS device)…"
@@ -87,12 +111,24 @@ xcrun altool --validate-app \
     --apiIssuer "$ASC_ISSUER_ID"
 
 echo "▸ Uploading to TestFlight…"
-xcrun altool --upload-app \
+upload_log="$(mktemp)"
+if xcrun altool --upload-app \
     -f "$IPA_PATH" \
     -t ios \
     --apiKey "$ASC_KEY_ID" \
-    --apiIssuer "$ASC_ISSUER_ID"
-
-echo
-echo "✓ Uploaded build $(xcrun agvtool what-version -terse) to TestFlight."
-echo "  Processing usually takes 5–15 min. Check App Store Connect."
+    --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee "$upload_log"; then
+    if grep -q "No errors uploading" "$upload_log"; then
+        echo
+        echo "✓ Uploaded build $BUILD_NUMBER to TestFlight."
+        echo "  Processing usually takes 5–15 min. Check App Store Connect."
+    else
+        echo "✗ altool returned 0 but no success line. Check the log above."
+        rm -f "$upload_log"
+        exit 1
+    fi
+else
+    echo "✗ altool failed for build $BUILD_NUMBER. See log above."
+    rm -f "$upload_log"
+    exit 1
+fi
+rm -f "$upload_log"
