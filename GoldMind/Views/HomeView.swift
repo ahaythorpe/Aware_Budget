@@ -150,15 +150,21 @@ struct HomeView: View {
                 // floating chip so it doesn't crowd the main HStack.
                 .overlay(alignment: .bottomTrailing) {
                     Button { showNudgeHello = true } label: {
-                        Image("nudge")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 36, height: 36)
-                            .background(
-                                Circle().fill(DS.cardBg)
-                                    .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
-                            )
-                            .overlay(Circle().stroke(DS.goldBase.opacity(0.4), lineWidth: 1))
+                        ZStack {
+                            // Gold-coin disc behind the Nudge face. No white
+                            // background; the metallic gold reads as a coin.
+                            Circle()
+                                .fill(DS.nuggetGold)
+                                .frame(width: 40, height: 40)
+                            Image("nudge")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 34, height: 34)
+                        }
+                        .overlay(
+                            Circle().stroke(DS.goldBase.opacity(0.6), lineWidth: 1)
+                        )
+                        .shadow(color: Color(hex: "5C3A0A").opacity(0.25), radius: 4, y: 2)
                     }
                     .buttonStyle(.plain)
                     .offset(x: -8, y: -8)
