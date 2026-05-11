@@ -5,6 +5,72 @@
 
 ---
 
+## 2026-05-11 — Builds 11–18 + mind map + muted theme (Claude Code, Opus 4.7 1M)
+
+### Build 11 — Bias Mind Map v1
+- New `Views/MindMapView.swift` — full-screen visual canvas inside Education tab. Six horizontal lanes (Drifter / Reactor / Bookkeeper / Now / Bandwagon / Autopilot), each containing the personality's biases as 44pt SF Symbol discs.
+- Curved bezier edges (via `Canvas`) connect biases listed in `BiasRelationships`.
+- Tap a node → bottom-sheet detail with PATTERN + NUDGE SAYS + HOW TO COUNTERACT (latter from `BiasLessonsMock`).
+- Subtle dot grid background. Launched from a prominent "Explore the bias map" card on Education.
+
+### Build 12 — Polish batch
+- **Nudge welcome popover** on Home greeting (38pt avatar between greeting text + gear, time-of-day + streak-aware hello).
+- **Top Biases ⓘ rewired** — opens AlgorithmExplainerSheet instead of full Backed-by-Research.
+- **CredibilitySheet trimmed** to 4 sections (hero + 96% fact + GoldMind-vs-Traditional table + CTA). Medium-detent default.
+- **Education "How to spot & overcome" → "How to counteract your biases"** rename.
+- **InfoPopovers** (Pattern B) extended to Settings → Hide name + Hide email toggles, plus Insights → THIS WEEK + SPENDING BY BIAS section titles.
+- **Industry top-5 biases card** restored to Education's Your Progress section.
+- **Pattern C copy tightened** — 7 of 13 "Why this fits" explanations rewritten to drop preachy lines.
+- **BiasData em-dash sweep** — 13 strings cleaned.
+
+### Build 13 — Photo upload
+- Migration `20260511180000_add_avatar_url_to_profiles.sql` adds `profiles.avatar_url` + creates public `avatars` Storage bucket with RLS (public read, own-folder write).
+- `Views/PhotoPicker.swift` — PHPickerViewController wrapper that downsizes to 512px JPEG @ 0.8 quality.
+- `SupabaseService.uploadAvatar(jpegData:)` + `removeAvatar()`.
+- AvatarDisc renders the uploaded photo via AsyncImage; falls back to initial-letter disc. Settings profile card gains a camera badge; tap to open picker.
+- Home greeting picks up the same `avatar_url` so the photo appears in both spots.
+
+### Build 14 — Notification fix + mind map iterations + Nudge corner
+- **Notification deep-link fix:** RootTabView now switches to Home tab on `pendingRoute`, plus initial `.task` check covers the cold-launch case. HomeView's `consumePendingRoute` runs on both `.onChange` and `.task` so taps reliably open the finance editor sheet.
+- **Mind map v2:** bias names always visible under each node. Wider lanes (184pt), tighter nodes (38pt), more spacing (92pt) for labels to fit. Edges dimmed (0.15 opacity / 1.0 lineWidth).
+- **Mind map v3:** three Obsidian/Strava/Notion-inspired patterns — tap-to-highlight neighbours (dims non-related to 0.25, brightens connected edges), filter chips (All / My top 3 / Triggered / Untouched), lane heat tint based on user trigger count.
+- **Mind map v3.1:** lane headers in their own 112pt band with thin gold divider, breathing room before first node, richer tap feedback (spring + accent border + 1.12× scale + green shadow).
+- **Nudge moved to bottom-right** of the greeting card (overlay alignment .bottomTrailing, 36pt).
+- **Em-dash sweep round 4:** NudgeEngine (5 strings), NudgeCardView preview, CheckIn "Most people abandon..." font bumped to .subheadline.
+
+### Build 15 — Notification permission UX
+- `NotificationService.requestPermission()` now gates on `.notDetermined` to avoid silent no-ops.
+- New `authorizationStatus()` + `openSystemSettings()` helpers.
+- **HomeView gets a "Turn on notifications" banner** when status is denied or not-determined. Tap → either requests permission (first time) or deep-links to iOS Settings (when previously denied). Banner clears once granted. Important for App Store review — denied state now has graceful recovery.
+
+### Build 16 — Mind map cleanup + gold-coin Nudge
+- **Mind map quieter:** primary cluster border subtler gold (0.55 opacity) instead of loud accent green. Heat tint capped at 0.08 opacity. Pulsing animation removed.
+- **Nudge bottom-right is now a gold coin** — metallic `DS.nuggetGold` disc behind the Nudge face, gold-base hairline ring, bronze drop shadow. No more white background.
+
+### Build 17 — Em-dash sweep round 5
+- 9 user-facing em-dashes cleaned across BFASQuestion, AppConfig, BiasMappings, QuestionPool (×4), NotificationService, HomeView. Agent-driven exhaustive audit.
+
+### Build 18 — Muted / sophisticated colour theme
+- Single-file token swap in `DesignSystem.swift`. Easy to revert.
+- Green palette: primary `2E7D32→295E2C`, accent `4CAF50→3F7A47`, lightGreen `81C784→6FA877`, paleGreen `E8F5E9→E4EFE5`.
+- Gold palette: goldBase `C59430→A87E2A` (champagne brass), goldText `E8B84B→D4A745`.
+- Net effect: shifts the app from "fresh & energetic" toward "considered & adult" — closer to Calm / Day One / Things 3 territory.
+
+### Files added across this batch
+- `Views/MindMapView.swift`
+- `Views/PhotoPicker.swift`
+- `Models/BiasRelationships.swift` (used by mind map edges + Education chip "RELATED")
+- `Models/ArchetypeBiasExplanation.swift` (Pattern C content)
+- `supabase/migrations/20260511180000_add_avatar_url_to_profiles.sql`
+
+### Outstanding
+- **#40** Start check-in disappearing bug — code investigation found no gating; needs fresh screenshot.
+- **#26** Paywall discount badge — parked (RevenueCat dashboard work; Bella deferred).
+- **Educational graph v2** — iterate after Bella tests Build 16's quieter version.
+- **Photo upload edge cases** — initial ships; HEIC handling, deletion UI could come later.
+
+---
+
 ## 2026-05-11 — Builds 8, 9, 10 + fold-up patterns (Claude Code, Opus 4.7 1M)
 
 ### Build 8 (uploaded 2026-05-11)
