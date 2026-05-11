@@ -202,18 +202,9 @@ struct MindMapView: View {
         let heat = min(CGFloat(laneTriggerCount(category: lane.category)) / 8.0, 1.0)
         let heatOpacity: CGFloat = isPrimary ? 0.10 : 0.18 * heat
         return ZStack(alignment: .topLeading) {
-            // Cluster boundary. Subtle in all states; primary marked by
-            // the YOU chip in the header rather than a loud halo. Heat
-            // tint is much lighter so labels read on top.
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(icon.tint.opacity(min(0.08, heatOpacity * 0.55)))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .stroke(
-                            isPrimary ? DS.goldBase.opacity(0.55) : DS.goldBase.opacity(0.18),
-                            lineWidth: isPrimary ? 1.25 : 1
-                        )
-                )
+            // Lane container kept for hit-test/layout but invisible;
+            // grouping is conveyed by node placement + the header chip.
+            Color.clear
                 .frame(width: laneWidth, height: laneHeight(nodeCount: nodes.count))
                 .offset(x: xOrigin - laneWidth / 2, y: 0)
 
