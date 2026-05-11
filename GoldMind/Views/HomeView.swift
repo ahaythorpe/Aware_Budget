@@ -14,6 +14,8 @@ struct HomeView: View {
     @State private var financeIncome: String = ""
     @State private var financeSavings: String = ""
     @State private var financeInvestment: String = ""
+    @State private var userArchetype: String? = nil
+    @State private var showMoneyMindQuiz: Bool = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
 
@@ -53,6 +55,19 @@ struct HomeView: View {
         Double(viewModel.biasesSeenCount) / Double(totalPatterns)
     }
 
+    /// True when the user has logged nothing and entered no finance numbers.
+    /// Drives the empty-state CTA card so a new user gets one clear next
+    /// step instead of staring at six zeroes. Becomes false the moment any
+    /// data exists.
+    private var isEmptyState: Bool {
+        viewModel.streak == 0
+            && viewModel.recentEvents.isEmpty
+            && viewModel.biasesSeenCount == 0
+            && viewModel.monthlyIncome == 0
+            && viewModel.latestSavings == 0
+            && viewModel.latestInvestment == 0
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -89,6 +104,13 @@ struct HomeView: View {
                 .padding(.top, 14)
                 .padding(.bottom, 14)
 
+                // ── EMPTY-STATE CTA (first-time, nothing logged yet) ──
+                if isEmptyState {
+                    emptyStateCard
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 14)
+                }
+
                 // ── STREAK + CIRCLE ──
                 HStack(spacing: 12) {
                     // Streak card
@@ -97,8 +119,8 @@ struct HomeView: View {
                             .font(.system(size: 40, weight: .black, design: .serif))
                             .foregroundStyle(DS.goldText)
                         Text("🔥 DAY STREAK")
-                            .font(.system(size: 10, weight: .heavy, design: .rounded))
-                            .tracking(1.0)
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .tracking(1.2)
                             .foregroundStyle(.white.opacity(0.9))
                             .shadow(color: DS.deepGreen.opacity(0.7), radius: 2, x: 0, y: 1)
                             .minimumScaleFactor(0.85)
@@ -159,6 +181,13 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
+
+                // ── MONEY MIND QUIZ TILE (until completed) ──
+                if userArchetype == nil {
+                    moneyMindQuizTile
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 12)
+                }
 
                 // ── CHECK IN (morphs daily / weekly / monthly) ──
                 VStack(alignment: .leading, spacing: 10) {
@@ -224,12 +253,24 @@ struct HomeView: View {
         .navigationBarHidden(true)
         .task {
             await viewModel.load()
+            await loadArchetype()
         }
         .refreshable {
             await viewModel.load()
+            await loadArchetype()
         }
         .onChange(of: selectedTab?.wrappedValue) { _, new in
-            if new == .home { Task { await viewModel.load() } }
+            if new == .home {
+                Task {
+                    await viewModel.load()
+                    await loadArchetype()
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showMoneyMindQuiz, onDismiss: {
+            Task { await loadArchetype() }
+        }) {
+            NavigationStack { MoneyMindQuizView() }
         }
         .sheet(isPresented: $showCredibility) {
             CredibilitySheet()
@@ -270,6 +311,52 @@ struct HomeView: View {
                         .padding(.trailing, 16)
                 }
         }
+    }
+
+    // MARK: - Money Mind Quiz tile
+
+    /// Promo card shown on Home until the user has completed the quiz.
+    /// Quiet gold/cream tone so it doesn't compete with the green hero
+    /// gradient on the check-in card. Disappears once an archetype is
+    /// saved to `profiles.archetype`.
+    private var moneyMindQuizTile: some View {
+        Button { showMoneyMindQuiz = true } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(DS.heroGradient)
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Money Mind Quiz")
+                        .font(.system(.headline, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Text("Find your archetype · 2 min")
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(DS.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(DS.goldBase)
+            }
+            .padding(14)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(DS.goldBase.opacity(0.45), lineWidth: 1)
+            )
+            .premiumCardShadow()
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func loadArchetype() async {
+        let profile = try? await SupabaseService.shared.fetchProfile()
+        await MainActor.run { userArchetype = profile?.archetype }
     }
 
     // MARK: - Your Finances card
@@ -357,14 +444,93 @@ struct HomeView: View {
         }
     }
 
+    /// First-time empty-state card. Two clear actions — set finances or
+    /// log first event. Disappears the moment any data exists.
+    private var emptyStateCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                Image("nudge")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 44, height: 44)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("NUDGE SAYS")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .tracking(1.6)
+                        .foregroundStyle(DS.accent)
+                    Text("Two quick things to set up. Then you're tracking.")
+                        .font(.system(.body, weight: .semibold))
+                        .foregroundStyle(DS.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+
+            VStack(spacing: 10) {
+                Button {
+                    financeIncome = ""
+                    financeSavings = ""
+                    financeInvestment = ""
+                    showFinanceEditor = true
+                } label: {
+                    HStack {
+                        Image(systemName: "dollarsign.circle.fill")
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Add income, savings & investments")
+                                .font(.system(.body, weight: .semibold))
+                            Text("Takes 30 seconds · manual entry only")
+                                .font(.system(size: 11, weight: .medium))
+                                .opacity(0.85)
+                        }
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(DS.heroGradient, in: RoundedRectangle(cornerRadius: DS.buttonRadius))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    selectedTab?.wrappedValue = .log
+                } label: {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Log your first event")
+                            .font(.system(.body, weight: .semibold))
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                    }
+                    .foregroundStyle(DS.deepGreen)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: DS.buttonRadius))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.buttonRadius)
+                            .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(16)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+        )
+        .premiumCardShadow()
+    }
+
     private func financeStatItem(label: String, value: String) -> some View {
         VStack(spacing: 2) {
             Text(value)
                 .font(.system(size: 18, weight: .black, design: .serif))
                 .foregroundStyle(DS.goldBase)
             Text(label)
-                .font(.system(size: 9, weight: .heavy, design: .rounded))
-                .tracking(1.0)
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(1.2)
                 .foregroundStyle(DS.textTertiary)
         }
     }

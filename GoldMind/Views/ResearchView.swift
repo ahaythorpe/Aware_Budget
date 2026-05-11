@@ -1,10 +1,40 @@
 import SwiftUI
 
-/// 5th tab — Research / Library. Surfaces the credibility content for users
-/// who want the deep-dive. Permanent home for the 4 canonical papers, BFAS
-/// framework, all 16 biases with citations, and plain-English algorithm
-/// transparency. CredibilitySheet stays as the in-context popup behind ⓘ.
+/// 5th tab — Education. Surfaces the credibility content for users who want
+/// the deep-dive. Top: the 6 archetype families (clickable, expand inline to
+/// show biases). Below: the 4 canonical papers, BFAS framework, ranking
+/// explainer, full bias list, and counter-strategies. CredibilitySheet stays
+/// as the in-context popup behind ⓘ.
+///
+/// Renamed from "Research" 2026-05-11 (RootTabView label updated; struct
+/// name kept as ResearchView to avoid a wider rename touching imports and
+/// preview names — micro-fix policy).
 struct ResearchView: View {
+    /// Tracks which archetype cards are currently expanded. Multiple can
+    /// be open at once so the user can compare families.
+    @State private var expandedCategories: Set<String> = []
+
+    /// User's archetype from `profiles.archetype` (Money Mind Quiz result).
+    /// Drives the "← You" tag on the matching category card and the
+    /// "Take the quiz" CTA. Loaded once on appear.
+    @State private var userArchetype: String? = nil
+    @State private var showQuiz: Bool = false
+
+    /// Friendly archetype name + tagline + citation marker per category.
+    /// Tied to the canonical 6-archetype framework approved 2026-05-11
+    /// (see memory: project_goldmind_archetypes.md).
+    private func archetype(for category: String) -> (name: String, tagline: String) {
+        switch category {
+        case "Avoidance":         return ("The Drifter",     "Looks away. Defers. Hopes it sorts itself.")
+        case "Decision Making":   return ("The Reactor",     "Decides fast. Regrets later.")
+        case "Money Psychology":  return ("The Bookkeeper",  "Mental ledgers. Tax refund ≠ salary.")
+        case "Time Perception":   return ("The Now",         "Now > Future, every time.")
+        case "Social":            return ("The Bandwagon",   "Buys what the crowd buys.")
+        case "Defaults & Habits": return ("The Autopilot",   "Whatever the default is, fine.")
+        default:                  return (category,           "")
+        }
+    }
+
     private let papers: [Paper] = [
         .init(author: "Pompian", year: "2012",
               title: "Behavioral Finance and Wealth Management",
@@ -32,6 +62,8 @@ struct ResearchView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 hero
+                quizCTA
+                categoriesSection
                 papersSection
                 frameworkSection
                 howRankingWorks
@@ -43,8 +75,71 @@ struct ResearchView: View {
             .padding(.top, 12)
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("Research")
+        .navigationTitle("Education")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await loadArchetype() }
+        .fullScreenCover(isPresented: $showQuiz, onDismiss: {
+            Task { await loadArchetype() }
+        }) {
+            NavigationStack { MoneyMindQuizView() }
+        }
+    }
+
+    /// Maps the BiasCategory name to the matching archetype rawValue (e.g.
+    /// "Avoidance" → "Drifter") so we can highlight the user's card. Kept
+    /// inline to avoid coupling ResearchView to the Archetype enum's
+    /// init(rawValue:) — also more readable.
+    private func archetypeRawValue(forCategory name: String) -> String {
+        switch name {
+        case "Avoidance":         "Drifter"
+        case "Decision Making":   "Reactor"
+        case "Money Psychology":  "Bookkeeper"
+        case "Time Perception":   "Now"
+        case "Social":            "Bandwagon"
+        case "Defaults & Habits": "Autopilot"
+        default:                  ""
+        }
+    }
+
+    private func loadArchetype() async {
+        let profile = try? await SupabaseService.shared.fetchProfile()
+        await MainActor.run { userArchetype = profile?.archetype }
+    }
+
+    /// Take-the-quiz CTA. Hidden once the user has an archetype — the
+    /// "← You" tag on the matching family card becomes the silent indicator.
+    @ViewBuilder private var quizCTA: some View {
+        if userArchetype == nil {
+            Button { showQuiz = true } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.white)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Take the Money Mind Quiz")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                        Text("Find your archetype · 2 min")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.9))
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .fill(DS.heroGradient)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.cardRadius)
+                        .stroke(DS.goldBase, lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - Hero (green moment)
@@ -56,12 +151,12 @@ struct ResearchView: View {
                 .scaledToFit()
                 .frame(width: 64, height: 64)
 
-            Text("The science behind it")
+            Text("Your money mind")
                 .font(.system(.largeTitle, weight: .bold))
                 .foregroundStyle(.white)
                 .shadow(color: DS.deepGreen.opacity(0.7), radius: 4, x: 0, y: 1)
 
-            Text("Where GoldMind's patterns come from, and how the ranking works.")
+            Text("The 16 patterns behind your decisions — grouped into six families, with the science to back them.")
                 .font(.system(.subheadline, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .shadow(color: DS.deepGreen.opacity(0.6), radius: 3, x: 0, y: 1)
@@ -78,6 +173,130 @@ struct ResearchView: View {
             RoundedRectangle(cornerRadius: DS.cardRadius)
                 .stroke(DS.goldBase, lineWidth: 1)
         )
+    }
+
+    // MARK: - The 6 archetype families (clickable bias map)
+
+    private var categoriesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("THE 6 FAMILIES")
+            VStack(spacing: 10) {
+                ForEach(biasCategories, id: \.name) { category in
+                    categoryCard(category)
+                }
+            }
+        }
+    }
+
+    private func categoryCard(_ category: BiasCategory) -> some View {
+        let isExpanded = expandedCategories.contains(category.name)
+        let arch = archetype(for: category.name)
+        let isYou = userArchetype == archetypeRawValue(forCategory: category.name)
+        return VStack(alignment: .leading, spacing: 0) {
+            // Header — tap to expand/collapse
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+                    if isExpanded {
+                        expandedCategories.remove(category.name)
+                    } else {
+                        expandedCategories.insert(category.name)
+                    }
+                }
+            } label: {
+                HStack(alignment: .center, spacing: 12) {
+                    Text(category.emoji)
+                        .font(.system(size: 26))
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text(arch.name)
+                                .font(.system(.headline, weight: .bold))
+                                .foregroundStyle(DS.textPrimary)
+                            if isYou {
+                                Text("← You")
+                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                    .tracking(0.4)
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(
+                                        Capsule().fill(DS.heroGradient)
+                                    )
+                            }
+                        }
+                        Text(category.name.uppercased())
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .tracking(1.4)
+                            .foregroundStyle(DS.goldBase)
+                        Text(arch.tagline)
+                            .font(.system(.subheadline, weight: .medium))
+                            .foregroundStyle(DS.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 2)
+                    }
+                    Spacer()
+                    VStack(spacing: 4) {
+                        Text("\(category.patterns.count)")
+                            .font(.system(size: 22, weight: .black, design: .serif))
+                            .foregroundStyle(DS.goldBase)
+                        Text("patterns")
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(0.8)
+                            .foregroundStyle(DS.textTertiary)
+                    }
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(DS.goldBase)
+                        .padding(.leading, 4)
+                }
+                .padding(14)
+            }
+            .buttonStyle(.plain)
+
+            // Expanded — list of biases in this family
+            if isExpanded {
+                Divider().padding(.horizontal, 14)
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(category.patterns) { pattern in
+                        biasMiniRow(pattern)
+                    }
+                }
+                .padding(14)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(isYou ? DS.accent : DS.goldBase.opacity(0.3),
+                        lineWidth: isYou ? 1.5 : 1)
+        )
+    }
+
+    /// Compact bias row shown inside an expanded category card. Name + 1
+    /// sentence + one-liner citation. No navigation away — keeps the
+    /// Education tab as a self-contained map.
+    private func biasMiniRow(_ pattern: BiasPattern) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: pattern.sfSymbol)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(Color(hex: pattern.iconColor))
+                .frame(width: 24, alignment: .center)
+                .padding(.top, 2)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(pattern.displayName)
+                    .font(.system(.subheadline, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                Text(pattern.oneLiner)
+                    .font(.system(.footnote, weight: .regular))
+                    .foregroundStyle(DS.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(pattern.keyRef)
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(0.8)
+                    .foregroundStyle(DS.goldBase)
+                    .padding(.top, 1)
+            }
+        }
     }
 
     // MARK: - Papers
@@ -135,7 +354,7 @@ struct ResearchView: View {
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(DS.textPrimary)
                 }
-                Text("Behavioural Finance Assessment Score is the framework professional financial planners use to assess client behaviour before giving advice. GoldMind brings the same 16 patterns to everyday spending — adapted from a one-off assessment into a daily awareness practice.")
+                Text("The same framework professional planners use before giving advice. GoldMind adapts those 16 patterns into a daily awareness practice — not a one-off test.")
                     .font(.system(.subheadline, weight: .regular))
                     .foregroundStyle(DS.textPrimary)
                     .lineSpacing(3)
