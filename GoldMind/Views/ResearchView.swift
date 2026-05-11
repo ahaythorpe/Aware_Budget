@@ -20,6 +20,11 @@ struct ResearchView: View {
     @State private var userArchetype: String? = nil
     @State private var showQuiz: Bool = false
 
+    /// Bias IDs the user has tapped open inside an expanded category card.
+    /// Used for the "Tap to see Nudge's take" interaction so each bias
+    /// can flip between a one-liner and a longer Nudge note.
+    @State private var revealedBiases: Set<UUID> = []
+
     /// Friendly archetype name + tagline + citation marker per category.
     /// Tied to the canonical 6-archetype framework approved 2026-05-11
     /// (see memory: project_goldmind_archetypes.md).
@@ -175,16 +180,36 @@ struct ResearchView: View {
         )
     }
 
-    // MARK: - The 6 archetype families (clickable bias map)
+    // MARK: - The 6 spending personalities (clickable bias map)
 
     private var categoriesSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("THE 6 FAMILIES")
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel("THE 6 SPENDING PERSONALITIES")
+            NudgeSaysCard(
+                message: "These six personalities come from how you answer the Money Mind quiz. Each is scored across all 16 underlying biases. Most people are a blend; the quiz surfaces the strongest signal.",
+                citation: "BFAS · Pompian, 2012",
+                surface: .whiteShimmer
+            )
             VStack(spacing: 10) {
                 ForEach(biasCategories, id: \.name) { category in
                     categoryCard(category)
                 }
             }
+        }
+    }
+
+    /// Per-personality icon + tint. Replaces the flat default emojis with
+    /// a gold-circled SF Symbol that matches the canonical Archetype enum,
+    /// so the visual identity carries across Education + Home + Reveal.
+    private func personalityIcon(forCategory name: String) -> (symbol: String, tint: Color) {
+        switch name {
+        case "Avoidance":         return ("eye.slash.circle.fill", Color(hex: "E65100"))
+        case "Decision Making":   return ("bolt.fill",              Color(hex: "C62828"))
+        case "Money Psychology":  return ("tray.2.fill",             Color(hex: "4527A0"))
+        case "Time Perception":   return ("hourglass",               Color(hex: "880E4F"))
+        case "Social":            return ("person.2.wave.2.fill",    Color(hex: "7B1FA2"))
+        case "Defaults & Habits": return ("repeat.circle.fill",      Color(hex: "E65100"))
+        default:                  return ("circle.fill",              DS.goldBase)
         }
     }
 
@@ -203,9 +228,18 @@ struct ResearchView: View {
                     }
                 }
             } label: {
-                HStack(alignment: .center, spacing: 12) {
-                    Text(category.emoji)
-                        .font(.system(size: 26))
+                let icon = personalityIcon(forCategory: category.name)
+                HStack(alignment: .center, spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(icon.tint.opacity(0.12))
+                        Circle()
+                            .stroke(icon.tint.opacity(0.35), lineWidth: 1)
+                        Image(systemName: icon.symbol)
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(icon.tint)
+                    }
+                    .frame(width: 44, height: 44)
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 6) {
                             Text(arch.name)
@@ -272,31 +306,67 @@ struct ResearchView: View {
         )
     }
 
-    /// Compact bias row shown inside an expanded category card. Name + 1
-    /// sentence + one-liner citation. No navigation away — keeps the
-    /// Education tab as a self-contained map.
+    /// Compact bias row shown inside an expanded category card. Tap to
+    /// flip between the one-line definition and Nudge's longer
+    /// contextual note (from BiasPattern.nudgeSays). Keeps Education
+    /// self-contained — no navigation away.
     private func biasMiniRow(_ pattern: BiasPattern) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: pattern.sfSymbol)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Color(hex: pattern.iconColor))
-                .frame(width: 24, alignment: .center)
-                .padding(.top, 2)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(pattern.displayName)
-                    .font(.system(.subheadline, weight: .bold))
-                    .foregroundStyle(DS.textPrimary)
-                Text(pattern.oneLiner)
-                    .font(.system(.footnote, weight: .regular))
-                    .foregroundStyle(DS.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(pattern.keyRef)
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .tracking(0.8)
-                    .foregroundStyle(DS.goldBase)
-                    .padding(.top, 1)
+        let isRevealed = revealedBiases.contains(pattern.id)
+        return Button {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
+                if isRevealed { revealedBiases.remove(pattern.id) }
+                else          { revealedBiases.insert(pattern.id) }
             }
+        } label: {
+            HStack(alignment: .top, spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: pattern.iconBg))
+                    Image(systemName: pattern.sfSymbol)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color(hex: pattern.iconColor))
+                }
+                .frame(width: 32, height: 32)
+                .padding(.top, 1)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Text(pattern.displayName)
+                            .font(.system(.subheadline, weight: .bold))
+                            .foregroundStyle(DS.textPrimary)
+                        Spacer(minLength: 0)
+                        Image(systemName: isRevealed ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 11, weight: .heavy))
+                            .foregroundStyle(DS.goldBase)
+                    }
+                    if isRevealed {
+                        Text(pattern.nudgeSays)
+                            .font(.system(.footnote, weight: .medium))
+                            .foregroundStyle(DS.textPrimary)
+                            .lineSpacing(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    } else {
+                        Text(pattern.oneLiner)
+                            .font(.system(.footnote, weight: .regular))
+                            .foregroundStyle(DS.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Text(pattern.keyRef)
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .tracking(0.8)
+                        .foregroundStyle(DS.goldBase)
+                        .padding(.top, 1)
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isRevealed ? DS.paleGreen.opacity(0.4) : Color.clear)
+            )
         }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Papers
