@@ -70,7 +70,7 @@ struct ArchetypeRevealView: View {
                 Image(systemName: archetype.sfSymbol)
                     .font(.system(size: 26, weight: .semibold))
                     .foregroundStyle(.white)
-                Text("YOUR ARCHETYPE")
+                Text("YOUR SPENDING PERSONALITY")
                     .font(.system(size: 12, weight: .heavy))
                     .tracking(1.5)
                     .foregroundStyle(.white.opacity(0.85))
@@ -164,7 +164,7 @@ struct ArchetypeRevealView: View {
     private var comparisonSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionLabel("HOW THE 6 ARCHETYPES RANKED FOR YOU")
-            Text("Your answers gave every archetype a score. \(archetype.displayName) came out on top. Here's the full ordering — most people are a blend.")
+            Text("Your answers gave every personality a score. \(archetype.displayName) came out on top. Here's the full ordering. Most people are a blend.")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -274,7 +274,7 @@ struct ArchetypeRevealView: View {
                 .font(.system(size: 11, weight: .heavy))
                 .tracking(1.4)
                 .foregroundStyle(DS.textSecondary)
-            Text("Based on the BFAS framework (Pompian, 2012) with archetype mapping drawn from Klontz & Britt's Money Scripts (2011), Pompian's Behavioral Investor Types (2012), and underlying research (Kahneman & Tversky 1974, 1979; Thaler 1985; Laibson 1997; Samuelson & Zeckhauser 1988; Banerjee 1992; Galai & Sade 2006).")
+            Text("Based on the BFAS framework (Pompian, 2012) with personality mapping drawn from Klontz & Britt's Money Scripts (2011), Pompian's Behavioral Investor Types (2012), and underlying research (Kahneman & Tversky 1974, 1979; Thaler 1985; Laibson 1997; Samuelson & Zeckhauser 1988; Banerjee 1992; Galai & Sade 2006).")
                 .font(.system(size: 11))
                 .foregroundStyle(DS.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

@@ -76,27 +76,48 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
 
-                // ── GREETING (white card on metallic green bg) ──
+                // ── GREETING (user avatar + name + personality chip) ──
                 HStack(alignment: .center, spacing: 14) {
-                    Image("nudge")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 52, height: 52)
+                    // Avatar disc — tap to open Settings (profile + edits).
+                    // Uses the same destination as the gear icon so users
+                    // who tap either end up in the right place.
+                    Button { showSettings = true } label: {
+                        AvatarDisc(name: viewModel.firstName, size: 52)
+                    }
+                    .buttonStyle(.plain)
+
                     VStack(alignment: .leading, spacing: 5) {
                         Text(viewModel.welcomeMessage)
                             .font(.system(.headline, design: .default, weight: .semibold))
                             .foregroundStyle(DS.textPrimary)
                             .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text(viewModel.todayLabel)
-                            .font(.system(.body, weight: .semibold))
-                            .foregroundStyle(DS.goldBase)
+                        if let arch = userArchetype, !arch.isEmpty {
+                            // Personality chip — only shows once the user
+                            // has taken the Money Mind Quiz.
+                            HStack(spacing: 6) {
+                                Text("The \(arch)")
+                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                    .tracking(0.4)
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(Capsule().fill(DS.heroGradient))
+                                Text(viewModel.todayLabel)
+                                    .font(.system(.subheadline, weight: .semibold))
+                                    .foregroundStyle(DS.goldBase)
+                            }
+                        } else {
+                            Text(viewModel.todayLabel)
+                                .font(.system(.body, weight: .semibold))
+                                .foregroundStyle(DS.goldBase)
+                        }
                     }
                     Spacer(minLength: 8)
-                    // Gear -> Settings (Profile, finance entry, delete
-                    // account, terms, help). The Dev menu is dev-only and
-                    // surfaced via long-press in DEBUG so production users
-                    // never see it.
+                    // Gear -> Settings. Kept as a secondary entry point so
+                    // tap targets work for users who don't realise the
+                    // avatar is interactive. Dev menu lives behind a
+                    // DEBUG-only long-press here.
                     Button { showSettings = true } label: {
                         Image(systemName: "gearshape")
                             .font(.system(size: 18))
@@ -377,7 +398,7 @@ struct HomeView: View {
                     Text("Money Mind Quiz")
                         .font(.system(.headline, weight: .bold))
                         .foregroundStyle(DS.textPrimary)
-                    Text("Find your archetype · 2 min")
+                    Text("Find your spending personality · 2 min")
                         .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(DS.textSecondary)
                 }

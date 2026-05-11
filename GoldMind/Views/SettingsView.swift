@@ -23,6 +23,9 @@ struct SettingsView: View {
     @State private var hideEmail: Bool = false
     @State private var profileStatus: String = ""
     @State private var profileLoaded = false
+    @State private var archetypeName: String? = nil
+    @State private var streak: Int = 0
+    @State private var biasesIdentified: Int = 0
 
     // Finance entry — manual, no bank connection. Drives the
     // net-worth trend chart on the Insights tab.
@@ -39,6 +42,14 @@ struct SettingsView: View {
                 DS.altBg.ignoresSafeArea()
 
                 List {
+                    // MARK: - Profile header card
+                    Section {
+                        profileHeaderCard
+                            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    }
+
                     // MARK: - Finance (manual entry)
                     Section {
                         HStack {
@@ -356,12 +367,106 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Profile header card
+
+    /// Big avatar + name + personality chip + streak/bias stats. Sits at
+    /// the very top of Settings so the gear-icon entry feels like opening
+    /// a real profile, not a preferences screen. Read-only display; the
+    /// editable fields live in the Profile section below.
+    private var profileHeaderCard: some View {
+        let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let nameForCard = trimmed.isEmpty ? "Set your name" : trimmed
+        return VStack(spacing: 14) {
+            AvatarDisc(name: trimmed.isEmpty ? nil : trimmed, size: 76)
+
+            VStack(spacing: 4) {
+                Text(nameForCard)
+                    .font(.system(size: 22, weight: .black, design: .serif))
+                    .foregroundStyle(DS.textPrimary)
+                if let arch = archetypeName, !arch.isEmpty {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 11, weight: .bold))
+                        Text("The \(arch)")
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .tracking(0.4)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(DS.heroGradient))
+                } else {
+                    Text("Take the Money Mind Quiz to find yours")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(DS.textSecondary)
+                }
+            }
+
+            // Stats row — streak + biases identified. Quiet, not loud.
+            HStack(spacing: 0) {
+                statColumn(value: "\(streak)", label: "Day streak")
+                Divider().frame(height: 32)
+                statColumn(value: "\(biasesIdentified)/16", label: "Biases seen")
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(DS.goldBase.opacity(0.25), lineWidth: 1)
+            )
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .fill(DS.cardBg)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.35), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.06), radius: 10, y: 4)
+        .padding(.horizontal, 16)
+    }
+
+    private func statColumn(value: String, label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(size: 22, weight: .black, design: .serif))
+                .foregroundStyle(DS.goldBase)
+            Text(label)
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .tracking(0.8)
+                .foregroundStyle(DS.textSecondary)
+                .textCase(.uppercase)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private func loadProfile() async {
         guard let profile = try? await service.fetchProfile() else { return }
         displayName = profile.displayName ?? ""
         hideName = profile.hideName
         hideEmail = profile.hideEmail
+        archetypeName = profile.archetype
         profileLoaded = true
+
+        // Stats for the profile card. Counts are best-effort and silent
+        // on failure — they're not load-bearing for the screen itself.
+        if let history = try? await service.fetchRecentCheckIns(limit: 1),
+           let today = history.first {
+            streak = today.streakCount
+        }
+        // Mirror HomeViewModel.biasesSeenCount: union of bias_progress
+        // (timesEncountered > 0) + this-month event behaviour tags.
+        if let progress = try? await service.fetchBiasProgress(),
+           let events = try? await service.fetchMoneyEvents(forMonth: Date()) {
+            let progressNames = Set(progress.filter { $0.timesEncountered > 0 }.map(\.biasName))
+            let tagNames = Set(events.compactMap(\.behaviourTag))
+            biasesIdentified = progressNames.union(tagNames).count
+        }
     }
 
     private func saveProfile() async {

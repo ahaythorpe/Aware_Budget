@@ -48,14 +48,12 @@ struct GoldMindApp: App {
                     }
                 } else if !auth.isAuthenticated {
                     SignInView()
-                } else if !hasCompletedBFAS {
-                    BFASAssessmentView { answers in
-                        Task {
-                            try? await SupabaseService.shared.saveBFASAssessment(answers: answers)
-                            await MainActor.run { hasCompletedBFAS = true }
-                        }
-                    }
                 } else if !paywall.hasLoaded {
+                    // BFAS auto-prompt removed 2026-05-11. Money Mind Quiz
+                    // is now the primary entry-level assessment surfaced
+                    // from Home + Education. BFAS remains available as an
+                    // opt-in deeper assessment via Settings for users who
+                    // want the full 16-question clinical version.
                     ZStack {
                         DS.bg.ignoresSafeArea()
                         ProgressView()

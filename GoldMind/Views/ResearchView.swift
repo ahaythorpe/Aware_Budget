@@ -124,7 +124,7 @@ struct ResearchView: View {
                         Text("Take the Money Mind Quiz")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
-                        Text("Find your archetype · 2 min")
+                        Text("Find your spending personality · 2 min")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.white.opacity(0.85))
                     }
