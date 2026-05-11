@@ -36,7 +36,7 @@ struct BFASQuestion: Identifiable, Equatable {
         .init(biasName: "Overconfidence Bias", emoji: "📈",
               prompt: "You believe your future income will cover decisions made today."),
         .init(biasName: "Framing Effect", emoji: "🖼️",
-              prompt: "'Save 30%' feels better than 'pay 70%' — even when it's the same deal."),
+              prompt: "'Save 30%' feels better than 'pay 70%'. Even when it's the same deal."),
         .init(biasName: "Availability Heuristic", emoji: "📰",
               prompt: "A single bad purchase memory shapes what you buy next more than data does."),
         .init(biasName: "Ostrich Effect", emoji: "📭",

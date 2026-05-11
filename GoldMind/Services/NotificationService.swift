@@ -319,7 +319,7 @@ enum NotificationService {
         content.body = ["A month in. Let's see what moved.",
                         "Thirty days of small truths.",
                         "Still yes? Still no?",
-                        "Monthly checkpoint — not a grade."].randomElement() ?? "Monthly checkpoint."
+                        "Monthly checkpoint. Not a grade."].randomElement() ?? "Monthly checkpoint."
         content.sound = .default
 
         var components = DateComponents()

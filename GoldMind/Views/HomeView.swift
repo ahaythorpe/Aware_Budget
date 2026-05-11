@@ -887,7 +887,7 @@ struct HomeView: View {
                         .padding(.top, 20)
 
                     NudgeSaysCard(
-                        message: "This is 100% voluntary. GoldMind never connects to your bank — you type your own numbers. Under Australian law, that means only the Privacy Act 1988 applies. No financial licence, no CDR, no regulation beyond basic data privacy.",
+                        message: "This is 100% voluntary. GoldMind never connects to your bank. You type your own numbers. Under Australian law, that means only the Privacy Act 1988 applies. No financial licence, no CDR, no regulation beyond basic data privacy.",
                         citation: "Privacy Act 1988 (Cth) · no AFSL · no CDR",
                         surface: .whiteShimmer
                     )

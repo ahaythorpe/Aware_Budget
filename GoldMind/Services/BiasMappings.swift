@@ -133,7 +133,7 @@ enum BiasMappings {
 
         // MARK: Subscriptions
         .init(category: "Subscriptions", status: .planned, bias: "Status Quo Bias",
-              citation: "Samuelson & Zeckhauser 1988 (default-subscription persistence — the textbook case)",
+              citation: "Samuelson & Zeckhauser 1988 (default-subscription persistence: the textbook case)",
               confidence: .high),
         .init(category: "Subscriptions", status: .planned, bias: "Sunk Cost Fallacy",
               citation: "Thaler 1980 ('I've paid for it so I should use it' justifying renewal)",
