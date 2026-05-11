@@ -515,7 +515,7 @@ struct ResearchView: View {
 
     private var spotAndOvercomeSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("HOW TO SPOT & OVERCOME")
+            sectionLabel("HOW TO COUNTERACT YOUR BIASES")
 
             NudgeSaysCard(
                 message: "Awareness is the first step. Below are practical, research-backed strategies for each bias.",
