@@ -20,6 +20,7 @@ struct HomeView: View {
     @State private var userArchetype: String? = nil
     @State private var showMoneyMindQuiz: Bool = false
     @State private var showNamePrompt: Bool = false
+    @State private var expandedCounter: Set<String> = []
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
     @AppStorage("hasPromptedForName") private var hasPromptedForName: Bool = false
@@ -276,6 +277,13 @@ struct HomeView: View {
                     .padding(.horizontal, 22)
                     .padding(.bottom, 12)
 
+                // ── COUNTERACT YOUR TOP BIASES (tap to expand) ──
+                if !topCounterLessons.isEmpty {
+                    counteractCard
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 12)
+                }
+
                 // ── NUDGE (white card with shimmering gold border — signature) ──
                 NudgeSaysCard(
                     message: homeNudgeMessage,
@@ -376,6 +384,88 @@ struct HomeView: View {
                         .padding(.trailing, 16)
                 }
         }
+    }
+
+    // MARK: - Counteract Your Top Biases
+
+    /// Top 3 BiasLessons matching the user's most-triggered biases.
+    /// Pairs viewModel.dailyPatterns (ranked) with BiasLessonsMock.seed
+    /// (howToCounter strategies). Empty until the user has any signal.
+    private var topCounterLessons: [BiasLesson] {
+        let topNames = viewModel.dailyPatterns.prefix(3).map(\.biasName)
+        return topNames.compactMap { name in
+            BiasLessonsMock.seed.first(where: { $0.biasName == name })
+        }
+    }
+
+    /// Surfaces "how to counteract" strategies for the user's top biases
+    /// directly on Home — collapsed by default, tap each row to expand
+    /// the full counter-move. Saves a trip to the Research tab for the
+    /// most actionable content the user actually needs.
+    private var counteractCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "shield.lefthalf.filled")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(DS.goldBase)
+                Text("HOW TO COUNTERACT YOUR TOP BIASES")
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.goldBase)
+                Spacer()
+            }
+            VStack(spacing: 8) {
+                ForEach(topCounterLessons) { lesson in
+                    counteractRow(lesson)
+                }
+            }
+        }
+        .padding(14)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.3), lineWidth: 1)
+        )
+        .premiumCardShadow()
+    }
+
+    private func counteractRow(_ lesson: BiasLesson) -> some View {
+        let isExpanded = expandedCounter.contains(lesson.biasName)
+        return Button {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
+                if isExpanded { expandedCounter.remove(lesson.biasName) }
+                else { expandedCounter.insert(lesson.biasName) }
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Text(lesson.emoji)
+                        .font(.system(size: 18))
+                    Text(lesson.displayName)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(DS.goldBase)
+                }
+                if isExpanded {
+                    Text(lesson.howToCounter)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(DS.textPrimary)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isExpanded ? DS.paleGreen.opacity(0.4) : Color.clear)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Money Mind Quiz tile
