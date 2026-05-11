@@ -83,13 +83,9 @@ struct MindMapView: View {
                 Spacer()
             }
         }
-        .onAppear {
-            if !reduceMotion {
-                withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
-                    pulse = true
-                }
-            }
-        }
+        // Pulsing animation removed 2026-05-11 — it competed with labels
+        // and made the layout feel busy. Primary cluster is now marked
+        // by the YOU chip + a slightly bolder gold border, nothing more.
         .task { await loadProgress() }
         .sheet(item: $selectedBias) { bias in
             biasSheet(for: bias)
@@ -206,24 +202,20 @@ struct MindMapView: View {
         let heat = min(CGFloat(laneTriggerCount(category: lane.category)) / 8.0, 1.0)
         let heatOpacity: CGFloat = isPrimary ? 0.10 : 0.18 * heat
         return ZStack(alignment: .topLeading) {
-            // Cluster boundary glow for the user's primary OR heat tint
-            // for engagement intensity (whichever is stronger).
+            // Cluster boundary. Subtle in all states; primary marked by
+            // the YOU chip in the header rather than a loud halo. Heat
+            // tint is much lighter so labels read on top.
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(icon.tint.opacity(heatOpacity))
+                .fill(icon.tint.opacity(min(0.08, heatOpacity * 0.55)))
                 .overlay(
                     RoundedRectangle(cornerRadius: 22, style: .continuous)
                         .stroke(
-                            isPrimary ? DS.accent : DS.goldBase.opacity(0.12),
-                            lineWidth: isPrimary ? 1.5 : 1
+                            isPrimary ? DS.goldBase.opacity(0.55) : DS.goldBase.opacity(0.18),
+                            lineWidth: isPrimary ? 1.25 : 1
                         )
-                )
-                .shadow(
-                    color: isPrimary ? DS.accent.opacity(pulse ? 0.45 : 0.18) : .clear,
-                    radius: isPrimary ? 14 : 0
                 )
                 .frame(width: laneWidth, height: laneHeight(nodeCount: nodes.count))
                 .offset(x: xOrigin - laneWidth / 2, y: 0)
-                .animation(.easeInOut(duration: 1.6), value: pulse)
 
             // Header
             VStack(spacing: 8) {
