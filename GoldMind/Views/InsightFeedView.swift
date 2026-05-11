@@ -174,7 +174,7 @@ struct InsightFeedView: View {
                         .foregroundStyle(DS.goldText)
                         .tracking(1.2)
                     InfoPopover(
-                        "A rolling 7-day view of your logged events and check-ins. Resets each Monday.",
+                        "Last 7 days of events and check-ins. Resets Monday.",
                         title: "THIS WEEK"
                     )
                     Spacer()
@@ -325,7 +325,7 @@ struct InsightFeedView: View {
                     .tracking(1.6)
                     .foregroundStyle(DS.goldBase)
                 InfoPopover(
-                    "Each tagged spend is grouped by the bias driving it. The dollar amounts show how much each pattern is costing you this month.",
+                    "Each spend grouped by the bias driving it. Dollars show what each pattern costs this month.",
                     title: "SPENDING BY BIAS"
                 )
                 Spacer()
@@ -355,7 +355,7 @@ struct InsightFeedView: View {
             }
 
             NudgeSaysCard(
-                message: "Each dollar is tagged with the bias driving the spend. This is behavioural finance in action. Awareness precedes change.",
+                message: "Each dollar tagged with its driver. Awareness precedes change.",
                 citation: "Kahneman 2011 · Thaler & Sunstein 2008",
                 surface: .whiteShimmer
             )
@@ -622,7 +622,7 @@ struct InsightFeedView: View {
 
                     if data.count < 2 {
                         NudgeSaysCard(
-                            message: "This is your first month. As months pass, bars appear side by side showing how your spending and savings trend over time.",
+                            message: "First month logged. Bars appear side-by-side as months stack up.",
                             surface: .whiteShimmer
                         )
                     }
@@ -728,7 +728,7 @@ struct InsightFeedView: View {
                     NudgeSaysCard(
                         message: weekCount > 1
                             ? "Watch your bias lines trend down as awareness kicks in. Falling lines = awareness working."
-                            : "This shows spending per bias this week. As you log over more weeks, this becomes a trend line showing how awareness changes your spending.",
+                            : "Spending per bias this week. Becomes a trend line as you log more weeks.",
                         citation: "Debiasing · Fischhoff 1982 · Larrick 2004",
                         surface: .whiteShimmer
                     )
@@ -868,7 +868,7 @@ struct InsightFeedView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     NudgeSaysCard(
-                        message: "Your expenses are calculated automatically from your logged events. Savings = income minus expenses. No bank connection needed.",
+                        message: "Expenses tally from your logs. Savings = income minus expenses. No bank connection.",
                         citation: "Manual entry keeps you outside CDR/AFSL regulation · Privacy Act 1988 only",
                         surface: .whiteShimmer
                     )
@@ -985,7 +985,7 @@ struct InsightFeedView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     NudgeSaysCard(
-                        message: "After you identify a bias, Nudge tracks whether your spending pattern shifts. This is the core of behavioural finance. Awareness precedes change.",
+                        message: "Once a bias is named, Nudge tracks whether spending shifts. Awareness precedes change.",
                         citation: "Kahneman 2011 · Thaler & Sunstein 2008",
                         surface: .whiteShimmer
                     )
@@ -1102,7 +1102,7 @@ struct InsightFeedView: View {
             Text(leadCopy)
                 .font(.system(.subheadline, weight: .bold))
                 .foregroundStyle(DS.textPrimary)
-            Text("Add your monthly take-home, savings, and investment balance in Settings (gear icon on Home). Drop a fresh snapshot weekly. After 3+ snapshots, the trend shows up here with bias awareness overlaid so you can see how the two move together.")
+            Text("Add your monthly numbers in Settings (gear icon on Home). Drop a fresh snapshot weekly. After 3+ snapshots the trend appears here with bias awareness overlaid.")
                 .font(.system(.footnote, weight: .medium))
                 .foregroundStyle(DS.textSecondary)
                 .lineSpacing(2)
@@ -1465,7 +1465,7 @@ struct InsightFeedView: View {
             NudgeSaysCard(
                 message: weekCount > 1
                     ? "Tap a category to focus its trend."
-                    : "This shows spending per category this week. Lines appear as you log across more weeks.",
+                    : "Spending per category this week. Lines appear as you log more weeks.",
                 showCoin: false,
                 surface: .whiteShimmer
             )
@@ -1846,14 +1846,14 @@ struct InsightFeedView: View {
         let patterns = computeBiasPatterns()
         if let top = patterns.first, top.count >= 5 {
             return .withAction(
-                "\(top.tag.label) is your dominant pattern at \(top.count) encounters. That's worth understanding.",
+                "\(top.tag.label) dominates this week at \(top.count) encounters.",
                 actionLabel: "See your fix",
                 action: .openLearnBias(top.tag.label)
             )
         }
 
         if unplannedPct > 50 {
-            return .text("\(unplannedPct)% unplanned this week. Nudge isn't judging, but awareness is the lever.")
+            return .text("\(unplannedPct)% unplanned this week. Awareness is the lever.")
         }
 
         if unplannedPct < 20, !weekEvents.isEmpty {
