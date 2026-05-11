@@ -114,18 +114,20 @@ enum DS {
 
     // MARK: - Nugget Gold gradient (metallic shiny)
 
-    // Matches "Gold Gradient buttons.png" reference — symmetric bronze edges,
-    // sharp diagonal specular stripe.
+    // Muted specular version — replaces the near-white peak (#FFFDF0) with a
+    // warm champagne (#E8C870) so white CTA text retains contrast against the
+    // brightest band. Bronze edges retained for the metallic identity. Tuned
+    // 2026-05-11 after legibility feedback on "Start check-in →".
     static let nuggetGold = LinearGradient(
         stops: [
             .init(color: Color(hex: "5C3A0A"), location: 0.0),
             .init(color: Color(hex: "8B6010"), location: 0.14),
             .init(color: Color(hex: "B07820"), location: 0.28),
-            .init(color: Color(hex: "E0C050"), location: 0.40),
-            .init(color: Color(hex: "FFF0A0"), location: 0.47),
-            .init(color: Color(hex: "FFFDF0"), location: 0.5),
-            .init(color: Color(hex: "FFF0A0"), location: 0.53),
-            .init(color: Color(hex: "E0C050"), location: 0.60),
+            .init(color: Color(hex: "D9B250"), location: 0.40),
+            .init(color: Color(hex: "E8C870"), location: 0.47),
+            .init(color: Color(hex: "EFD080"), location: 0.5),
+            .init(color: Color(hex: "E8C870"), location: 0.53),
+            .init(color: Color(hex: "D9B250"), location: 0.60),
             .init(color: Color(hex: "B07820"), location: 0.72),
             .init(color: Color(hex: "8B6010"), location: 0.86),
             .init(color: Color(hex: "5C3A0A"), location: 1.0),
@@ -142,6 +144,9 @@ struct GoldButtonStyle: ViewModifier {
         content
             .font(.system(.headline, weight: .bold))
             .foregroundStyle(Color.white)
+            // Subtle dark text shadow so white text stays readable on the
+            // muted gold band — paired with the lowered specular peak.
+            .shadow(color: Color(hex: "3A2400").opacity(0.55), radius: 1, x: 0, y: 1)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
@@ -152,7 +157,7 @@ struct GoldButtonStyle: ViewModifier {
             .overlay(
                 LinearGradient(
                     stops: [
-                        .init(color: .white.opacity(0.25), location: 0),
+                        .init(color: .white.opacity(0.18), location: 0),
                         .init(color: .clear, location: 0.3),
                     ],
                     startPoint: .top,
@@ -163,7 +168,7 @@ struct GoldButtonStyle: ViewModifier {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 999)
-                    .stroke(Color(hex: "FFF8D0").opacity(0.5), lineWidth: 0.5)
+                    .stroke(Color(hex: "C59430").opacity(0.5), lineWidth: 0.5)
             )
             .shadow(color: Color(hex: "5C3A0A").opacity(0.25), radius: 1, x: 0, y: 1)
             .shadow(color: Color(hex: "5C3A0A").opacity(0.20), radius: 8, x: 0, y: 4)
