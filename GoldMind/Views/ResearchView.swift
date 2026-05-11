@@ -235,12 +235,69 @@ struct ResearchView: View {
     /// the top 5 most-triggered biases. Quietly disappears if the user
     /// has nothing logged yet — keeps Education calm for new users.
     @ViewBuilder private var yourProgressSection: some View {
-        if !triggeredBiases.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
+            if !triggeredBiases.isEmpty {
                 sectionLabel("YOUR PROGRESS")
                 progressCard
             }
+            sectionLabel("MOST COMMON IN RESEARCH")
+            industryTopBiasesCard
         }
+    }
+
+    /// Five biases consistently flagged as most prevalent across
+    /// behavioural finance literature. Originally lived in AwarenessView
+    /// before the tab restructure; restored 2026-05-11.
+    private let industryTopBiases: [(name: String, emoji: String, why: String, cite: String)] = [
+        ("Loss Aversion", "⚖️", "Losses feel ~2× worse than equivalent gains. Nearly universal.", "Kahneman & Tversky, 1979"),
+        ("Present Bias", "⏳", "Hyperbolic discounting: choosing now over future-you replicates across markets.", "Laibson, 1997"),
+        ("Mental Accounting", "💰", "Treating money differently based on its label. Pervasive in household budgets.", "Thaler, 1985"),
+        ("Status Quo Bias", "🔁", "Defaults win. Auto-renewals, subscriptions, inertia.", "Samuelson & Zeckhauser, 1988"),
+        ("Anchoring", "⚓", "Reference prices shape what feels 'fair'. Present in every negotiation.", "Tversky & Kahneman, 1974"),
+    ]
+
+    private var industryTopBiasesCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("What shows up in the population. Not necessarily in you.")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(DS.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 10) {
+                ForEach(Array(industryTopBiases.enumerated()), id: \.element.name) { idx, item in
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("\(idx + 1)")
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .frame(width: 22, height: 22)
+                            .background(Circle().fill(DS.goldBase))
+                        Text(item.emoji).font(.system(size: 18))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(item.name)
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundStyle(DS.textPrimary)
+                            Text(item.why)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(DS.textSecondary)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text(item.cite)
+                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .tracking(0.4)
+                                .foregroundStyle(DS.goldBase.opacity(0.85))
+                                .padding(.top, 1)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.3), lineWidth: 1)
+        )
     }
 
     private var progressCard: some View {

@@ -108,8 +108,20 @@ struct SettingsView: View {
                                 .autocorrectionDisabled()
                                 .frame(maxWidth: 200)
                         }
-                        Toggle("Hide my name in greetings", isOn: $hideName)
-                        Toggle("Hide my email below", isOn: $hideEmail)
+                        HStack {
+                            Toggle("Hide my name in greetings", isOn: $hideName)
+                            InfoPopover(
+                                "Replaces your name with 'there' on Home and in Nudge messages. Your display name stays saved.",
+                                title: "HIDE NAME"
+                            )
+                        }
+                        HStack {
+                            Toggle("Hide my email below", isOn: $hideEmail)
+                            InfoPopover(
+                                "Masks your account email in the Account section below. Doesn't affect Supabase or Apple Sign In.",
+                                title: "HIDE EMAIL"
+                            )
+                        }
                         Button {
                             Task { await saveProfile() }
                         } label: {
