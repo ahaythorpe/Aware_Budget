@@ -1,5 +1,6 @@
 import Foundation
 import UserNotifications
+import UIKit
 
 /// Time-of-day slots used to deep-link a notification tap into the
 /// matching pre-filtered Quick log surface. Stored in the
@@ -73,12 +74,35 @@ enum NotificationService {
 
     // MARK: - Permission
 
+    /// Requests authorization on first launch. iOS only shows the system
+    /// prompt once per install; if the user has already declined or the
+    /// status is .denied, this is a no-op. Use `authorizationStatus()` +
+    /// `openSystemSettings()` to recover from a prior denial.
     static func requestPermission() async {
+        let current = await UNUserNotificationCenter.current().notificationSettings()
+        guard current.authorizationStatus == .notDetermined else { return }
         do {
             _ = try await UNUserNotificationCenter.current()
                 .requestAuthorization(options: [.alert, .sound, .badge])
         } catch {
             // Permission denied — app works without notifications.
+        }
+    }
+
+    /// Current notification authorization status. Used by Home to decide
+    /// whether to show the "Enable notifications" banner.
+    static func authorizationStatus() async -> UNAuthorizationStatus {
+        await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+    }
+
+    /// Opens the iOS Settings app on this app's notification page. Use
+    /// this when the user previously denied permission — only way for
+    /// them to re-grant without reinstalling.
+    @MainActor
+    static func openSystemSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString),
+           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
         }
     }
 

@@ -24,6 +24,11 @@ struct HomeView: View {
     @State private var showMoneyMindQuiz: Bool = false
     @State private var showNamePrompt: Bool = false
     @State private var expandedCounter: Set<String> = []
+    /// Notification authorization state. Drives the "Enable notifications"
+    /// banner so users who missed or declined the system prompt have a
+    /// visible recovery path (deep-link to iOS Settings). Important for
+    /// App Store reviewers — they verify denied-state UX is graceful.
+    @State private var notifAuthStatus: UNAuthorizationStatus = .notDetermined
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasCompletedBFAS") private var hasCompletedBFAS = false
     @AppStorage("hasPromptedForName") private var hasPromptedForName: Bool = false
@@ -179,6 +184,17 @@ struct HomeView: View {
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
                 .padding(.bottom, 14)
+
+                // ── NOTIFICATION PERMISSION BANNER ──
+                // Shown when status is .denied or .notDetermined. Disappears
+                // silently once the user grants. Important: provides the only
+                // recovery path for users who already dismissed the system
+                // prompt (iOS won't re-ask).
+                if notifAuthStatus == .denied || notifAuthStatus == .notDetermined {
+                    notificationBanner
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 12)
+                }
 
                 // ── EMPTY-STATE CTA (first-time, nothing logged yet) ──
                 if isEmptyState {
@@ -353,10 +369,12 @@ struct HomeView: View {
         .task {
             await viewModel.load()
             await loadArchetype()
+            await refreshNotifAuthStatus()
         }
         .refreshable {
             await viewModel.load()
             await loadArchetype()
+            await refreshNotifAuthStatus()
         }
         .onChange(of: selectedTab?.wrappedValue) { _, new in
             if new == .home {
@@ -600,6 +618,59 @@ struct HomeView: View {
             showFinanceEditor = true
         }
         router.pendingRoute = nil
+    }
+
+    private func refreshNotifAuthStatus() async {
+        let status = await NotificationService.authorizationStatus()
+        await MainActor.run { notifAuthStatus = status }
+    }
+
+    // MARK: - Notification permission banner
+
+    private var notificationBanner: some View {
+        Button {
+            Task {
+                if notifAuthStatus == .notDetermined {
+                    await NotificationService.requestPermission()
+                } else {
+                    NotificationService.openSystemSettings()
+                }
+                // Re-poll after the user returns so the banner clears
+                // when they grant permission.
+                let status = await NotificationService.authorizationStatus()
+                await MainActor.run { notifAuthStatus = status }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "bell.badge.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(DS.heroGradient))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Turn on notifications")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(DS.textPrimary)
+                    Text(notifAuthStatus == .denied
+                         ? "Currently off. Open Settings to enable."
+                         : "Nudge will remind you to log + check in.")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(DS.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(DS.goldBase)
+            }
+            .padding(12)
+            .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private func loadArchetype() async {
