@@ -5,6 +5,7 @@ struct HomeView: View {
 
     @State private var viewModel = HomeViewModel()
     @State private var showCredibility = false
+    @State private var showSettings = false
     @State private var showDevMenu = false
     @State private var previewOnboarding = false
     @State private var previewBFAS = false
@@ -89,12 +90,22 @@ struct HomeView: View {
                             .foregroundStyle(DS.goldBase)
                     }
                     Spacer(minLength: 8)
-                    Button { showDevMenu = true } label: {
+                    // Gear -> Settings (Profile, finance entry, delete
+                    // account, terms, help). The Dev menu is dev-only and
+                    // surfaced via long-press in DEBUG so production users
+                    // never see it.
+                    Button { showSettings = true } label: {
                         Image(systemName: "gearshape")
                             .font(.system(size: 18))
                             .foregroundStyle(DS.deepGreen)
                     }
                     .buttonStyle(.plain)
+                    #if DEBUG
+                    .simultaneousGesture(
+                        LongPressGesture(minimumDuration: 0.6)
+                            .onEnded { _ in showDevMenu = true }
+                    )
+                    #endif
                 }
                 .padding(16)
                 .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
@@ -274,6 +285,14 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showCredibility) {
             CredibilitySheet()
+        }
+        .sheet(isPresented: $showSettings, onDismiss: {
+            Task {
+                await viewModel.load()
+                await loadArchetype()
+            }
+        }) {
+            SettingsView(hasCompletedOnboarding: $hasCompletedOnboarding)
         }
         .sheet(isPresented: $showDevMenu) {
             devMenu
