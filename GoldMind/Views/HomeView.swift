@@ -363,13 +363,13 @@ struct HomeView: View {
         // NotificationRouter, open the finance editor sheet and clear
         // the route so it doesn't re-fire on the next render.
         .onChange(of: router.pendingRoute) { _, route in
-            if route == .openFinanceEditor {
-                financeIncome = ""
-                financeSavings = ""
-                financeInvestment = ""
-                showFinanceEditor = true
-                router.pendingRoute = nil
-            }
+            consumePendingRoute(route)
+        }
+        .task {
+            // Cold-launch case: if the tap happened while the app was
+            // closed, the router's pendingRoute may already be set before
+            // any onChange observer attaches. Consume it on first appear.
+            consumePendingRoute(router.pendingRoute)
         }
         .fullScreenCover(isPresented: $showMoneyMindQuiz, onDismiss: {
             Task { await loadArchetype() }
@@ -578,6 +578,21 @@ struct HomeView: View {
             .premiumCardShadow()
         }
         .buttonStyle(.plain)
+    }
+
+    /// Applies a pending NotificationRoute and clears it on the router
+    /// so the same route doesn't fire on the next render. Handles both
+    /// the onChange path (foreground tap) and the cold-launch path.
+    private func consumePendingRoute(_ route: NotificationRoute?) {
+        guard let route else { return }
+        switch route {
+        case .openFinanceEditor:
+            financeIncome = ""
+            financeSavings = ""
+            financeInvestment = ""
+            showFinanceEditor = true
+        }
+        router.pendingRoute = nil
     }
 
     private func loadArchetype() async {

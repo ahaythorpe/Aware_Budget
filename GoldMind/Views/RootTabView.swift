@@ -44,6 +44,20 @@ struct RootTabView: View {
             // Cleared by MoneyEventView once acted on.
             selection = .log
         }
+        .onChange(of: router.pendingRoute) { _, route in
+            guard route != nil else { return }
+            // Notification routes target Home flows (e.g. finance editor),
+            // so always swing to Home tab and let HomeView consume the route.
+            selection = .home
+        }
+        .task {
+            // Cold-launch case: if the user tapped a notification while the
+            // app was closed, the router may already have a pending value
+            // before any view's onChange observers start firing. Apply the
+            // initial routing once.
+            if router.pendingRoute != nil { selection = .home }
+            if router.pendingSlot != nil  { selection = .log }
+        }
     }
 }
 
