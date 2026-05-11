@@ -6,6 +6,7 @@ struct HomeView: View {
 
     @State private var viewModel = HomeViewModel()
     @State private var showCredibility = false
+    @State private var showAlgorithmExplainer = false
     @State private var showSettings = false
     @State private var showDevMenu = false
     @State private var showNudgeHello = false
@@ -310,7 +311,11 @@ struct HomeView: View {
                 TopBiasesCard(
                     patterns: viewModel.dailyPatterns,
                     totalSeen: viewModel.biasesSeenCount,
-                    onInfoTap: { showCredibility = true }
+                    // 'i' button on YOUR TOP BIASES opens the algorithm
+                    // explainer (same content as the Research tab's How
+                    // the ranking works section), not the full
+                    // credibility sheet.
+                    onInfoTap: { showAlgorithmExplainer = true }
                 )
                 .padding(.horizontal, 18)
                 .padding(.bottom, 4)
@@ -378,6 +383,9 @@ struct HomeView: View {
             })
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showAlgorithmExplainer) {
+            AlgorithmExplainerSheet()
         }
         .sheet(isPresented: $showCredibility) {
             CredibilitySheet()

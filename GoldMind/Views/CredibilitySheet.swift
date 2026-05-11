@@ -6,11 +6,19 @@ struct CredibilitySheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        // Trimmed 2026-05-11 — the heavy reference sections (how ranking
+        // works, stage legend, BFAS framework, full citations) now live
+        // in the Research tab. This sheet is now a focused card with the
+        // 96% fact + how GoldMind differs. Drag up to see the full
+        // version with all the extra cards.
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 18) {
                 hero
                     .padding(.horizontal, 22)
-                    .padding(.top, 24)
+                    .padding(.top, 20)
+
+                youreNotBroken
+                    .padding(.horizontal, 22)
 
                 theIdea
                     .padding(.horizontal, 22)
@@ -18,31 +26,13 @@ struct CredibilitySheet: View {
                 theDifference
                     .padding(.horizontal, 22)
 
-                howItWorks
-                    .padding(.horizontal, 22)
-
-                stageLegend
-                    .padding(.horizontal, 22)
-
-                theFramework
-                    .padding(.horizontal, 22)
-
-                citations
-                    .padding(.horizontal, 22)
-
-                youreNotBroken
-                    .padding(.horizontal, 22)
-
-                nudgeSays
-                    .padding(.horizontal, 22)
-
                 cta
                     .padding(.horizontal, 22)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 32)
             }
         }
         .background(DS.bg.ignoresSafeArea())
-        .presentationDetents([.large])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
 
