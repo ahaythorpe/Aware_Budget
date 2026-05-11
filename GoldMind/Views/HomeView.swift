@@ -119,35 +119,6 @@ struct HomeView: View {
                         }
                     }
                     Spacer(minLength: 8)
-                    // Nudge avatar — the friendly welcomer. Tap to see a
-                    // rotating hello from Nudge. Keeps Nudge present in
-                    // the daily glance without taking up the main greeting
-                    // line.
-                    Button { showNudgeHello = true } label: {
-                        Image("nudge")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 38, height: 38)
-                    }
-                    .buttonStyle(.plain)
-                    .popover(isPresented: $showNudgeHello,
-                             attachmentAnchor: .point(.bottom),
-                             arrowEdge: .top) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("NUDGE SAYS")
-                                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                                .tracking(1.2)
-                                .foregroundStyle(DS.accent)
-                            Text(nudgeHelloLine)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(DS.textPrimary)
-                                .lineSpacing(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(14)
-                        .frame(maxWidth: 260, alignment: .leading)
-                        .presentationCompactAdaptation(.popover)
-                    }
                     // Gear -> Settings. Kept as a secondary entry point so
                     // tap targets work for users who don't realise the
                     // avatar is interactive. Dev menu lives behind a
@@ -169,6 +140,42 @@ struct HomeView: View {
                 .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
                 .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
                 .premiumCardShadow()
+                // Nudge tucked into the bottom-right corner of the greeting
+                // card. Tap reveals a rotating welcome line. Sits as a
+                // floating chip so it doesn't crowd the main HStack.
+                .overlay(alignment: .bottomTrailing) {
+                    Button { showNudgeHello = true } label: {
+                        Image("nudge")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 36, height: 36)
+                            .background(
+                                Circle().fill(DS.cardBg)
+                                    .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+                            )
+                            .overlay(Circle().stroke(DS.goldBase.opacity(0.4), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .offset(x: -8, y: -8)
+                    .popover(isPresented: $showNudgeHello,
+                             attachmentAnchor: .point(.top),
+                             arrowEdge: .bottom) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("NUDGE SAYS")
+                                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                .tracking(1.2)
+                                .foregroundStyle(DS.accent)
+                            Text(nudgeHelloLine)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(DS.textPrimary)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: 260, alignment: .leading)
+                        .presentationCompactAdaptation(.popover)
+                    }
+                }
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
                 .padding(.bottom, 14)

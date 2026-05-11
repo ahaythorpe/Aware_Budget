@@ -21,12 +21,13 @@ struct MindMapView: View {
 
     // MARK: - Layout constants
 
-    private let laneWidth: CGFloat = 150
-    private let laneSpacing: CGFloat = 12
-    private let headerHeight: CGFloat = 80
-    private let nodeSpacing: CGFloat = 56
-    private let nodeSize: CGFloat = 44
-    private let canvasTopPadding: CGFloat = 32
+    private let laneWidth: CGFloat = 184
+    private let laneSpacing: CGFloat = 8
+    private let headerHeight: CGFloat = 96
+    private let nodeSpacing: CGFloat = 92  // larger to fit visible labels under each disc
+    private let nodeSize: CGFloat = 38
+    private let canvasTopPadding: CGFloat = 28
+    private let labelHeight: CGFloat = 34  // reserved for the 2-line bias name
 
     /// Order of the lanes left-to-right. Matches the canonical archetype order.
     private let lanes: [(archetype: String, category: String)] = [
@@ -42,8 +43,9 @@ struct MindMapView: View {
         CGFloat(lanes.count) * laneWidth + CGFloat(lanes.count - 1) * laneSpacing + 32
     }
     private var canvasHeight: CGFloat {
-        // tallest lane is Decision Making with 6 patterns
-        headerHeight + nodeSpacing * 6 + 60
+        // tallest lane is Decision Making with 6 patterns; nodeSpacing now
+        // includes room for the 2-line label beneath each disc.
+        headerHeight + nodeSpacing * 6 + 80
     }
 
     var body: some View {
@@ -176,29 +178,39 @@ struct MindMapView: View {
         return Button {
             selectedBias = pattern
         } label: {
-            ZStack {
-                Circle()
-                    .fill(Color(hex: pattern.iconBg))
-                Circle()
-                    .stroke(DS.goldBase.opacity(isPrimaryCluster ? 0.85 : 0.4),
-                            lineWidth: isPrimaryCluster ? 1.5 : 1)
-                Image(systemName: pattern.sfSymbol)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(Color(hex: pattern.iconColor))
-                if trigger > 0 {
-                    Text("\(trigger)")
-                        .font(.system(size: 9, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Capsule().fill(DS.accent))
-                        .offset(x: nodeSize / 2.4, y: -nodeSize / 2.4)
+            VStack(spacing: 5) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: pattern.iconBg))
+                    Circle()
+                        .stroke(DS.goldBase.opacity(isPrimaryCluster ? 0.85 : 0.4),
+                                lineWidth: isPrimaryCluster ? 1.5 : 1)
+                    Image(systemName: pattern.sfSymbol)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color(hex: pattern.iconColor))
+                    if trigger > 0 {
+                        Text("\(trigger)")
+                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Capsule().fill(DS.accent))
+                            .offset(x: nodeSize / 2.4, y: -nodeSize / 2.4)
+                    }
                 }
+                .frame(width: nodeSize, height: nodeSize)
+                .scaleEffect(scale)
+                .shadow(color: .black.opacity(0.10), radius: 3, y: 1)
+
+                Text(pattern.displayName)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+                    .frame(width: laneWidth - 24, height: labelHeight, alignment: .top)
             }
-            .frame(width: nodeSize, height: nodeSize)
-            .scaleEffect(scale)
             .opacity(isPrimaryCluster ? 1.0 : 0.85)
-            .shadow(color: .black.opacity(0.10), radius: 3, y: 1)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(pattern.displayName)
@@ -221,8 +233,8 @@ struct MindMapView: View {
                         path.addQuadCurve(to: toPos, control: mid)
                         ctx.stroke(
                             path,
-                            with: .color(DS.goldBase.opacity(0.22)),
-                            style: StrokeStyle(lineWidth: 1.2, lineCap: .round)
+                            with: .color(DS.goldBase.opacity(0.15)),
+                            style: StrokeStyle(lineWidth: 1.0, lineCap: .round)
                         )
                     }
                 }
