@@ -30,6 +30,7 @@
 - **#28 Editorial pass + interactivity on dense screens** — open. No coach marks.
 - **#29 Monthly checkpoint screen** — `NotificationService.scheduleMonthlyCheckpoint` already fires a 1st-of-month push but tap currently lands on Home with no dedicated recap UI. Needs an in-app monthly review screen (events / streaks / awareness moments delta from prior month).
 - **#30 Mind map concept-graph interactivity** — beyond per-node sheet redesign (done in `ec90d5f`), explore concept-map layouts: zoom levels, multi-bias clusters, "show all relations" toggle, drag-to-rearrange. Concept maps as a richer interaction model than the current lane layout.
+- **#31 Multi-bias question in check-ins** — Bella raised 2026-05-12: instead of one bias-tag question per spend (or bumping to two questions, which doubles tap cost), redesign the single question as a multi-select so one screen can capture 2+ co-driving biases. Faster, more accurate for stacked-driver events. No schema change (`behaviourTag` already nullable / could be array on a new field). Worth prototyping after #29.
 
 ## What this is
 
