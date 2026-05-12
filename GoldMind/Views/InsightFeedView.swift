@@ -257,20 +257,34 @@ struct InsightFeedView: View {
             let savings = monthlyIncome > 0 ? max(monthlyIncome - totalExpenses, 0) : 0
             let latestSnapshot = balanceSnapshots.last
 
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 14) {
+                // INCOME
+                financeGroupLabel("INCOME")
                 financeOverviewRow(emoji: "💰", label: "Income", value: monthlyIncome, note: monthlyIncome > 0 ? nil : "Not set. Update on Home.")
+
+                financeGroupDivider()
+
+                // SPENDING
+                financeGroupLabel("SPENDING")
                 financeOverviewRow(emoji: "🛒", label: "Spent this month", value: totalExpenses, note: "\(allEvents.filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) }.count) events")
                 financeOverviewRow(emoji: "⚡", label: "Impulse spending", value: impulseTotal, note: totalExpenses > 0 ? "\(Int((impulseTotal / totalExpenses) * 100))% of total" : nil)
                 financeOverviewRow(emoji: "📋", label: "Planned spending", value: plannedTotal, note: nil)
-                if monthlyIncome > 0 {
-                    financeOverviewRow(emoji: "💎", label: "Estimated savings", value: savings, note: "\(Int((savings / monthlyIncome) * 100))% of income")
-                }
-                if let snap = latestSnapshot {
-                    financeOverviewRow(emoji: "🏦", label: "Savings balance", value: snap.savings_balance, note: nil)
-                    financeOverviewRow(emoji: "📈", label: "Invested", value: snap.investment_balance, note: nil)
+
+                if monthlyIncome > 0 || latestSnapshot != nil {
+                    financeGroupDivider()
+
+                    // WEALTH
+                    financeGroupLabel("WEALTH")
+                    if monthlyIncome > 0 {
+                        financeOverviewRow(emoji: "💎", label: "Estimated savings", value: savings, note: "\(Int((savings / monthlyIncome) * 100))% of income")
+                    }
+                    if let snap = latestSnapshot {
+                        financeOverviewRow(emoji: "🏦", label: "Savings balance", value: snap.savings_balance, note: nil)
+                        financeOverviewRow(emoji: "📈", label: "Invested", value: snap.investment_balance, note: nil)
+                    }
                 }
 
-                Divider()
+                Divider().padding(.top, 4)
 
                 biasSpendingBreakdown(expenses: totalExpenses)
 
@@ -309,48 +323,100 @@ struct InsightFeedView: View {
     }
 
     @ViewBuilder
+    /// Small uppercase group label for Financial overview (INCOME / SPENDING / WEALTH).
+    private func financeGroupLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .heavy, design: .rounded))
+            .tracking(1.4)
+            .foregroundStyle(DS.textSecondary)
+    }
+
+    /// Hairline divider between Financial-overview groups.
+    private func financeGroupDivider() -> some View {
+        Divider()
+            .background(DS.goldBase.opacity(0.12))
+            .padding(.vertical, 2)
+    }
+
+    @ViewBuilder
     private func biasSpendingBreakdown(expenses: Double) -> some View {
         let taggedEvents = allEvents.filter {
             Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) && $0.behaviourTag != nil
         }
-        let biasSpend = Dictionary(grouping: taggedEvents, by: { $0.behaviourTag! })
+        // Per-bias totals (primary tag only for now — secondary tag
+        // aggregation lands with Layer 5 of the multi-bias rollout).
+        let biasSpend: [String: Double] = Dictionary(grouping: taggedEvents, by: { $0.behaviourTag! })
             .mapValues { $0.reduce(0.0) { $0 + $1.amount } }
-            .sorted { $0.value > $1.value }
         let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
 
-        if !biasSpend.isEmpty {
+        // Re-group bias spend by BFAS category so Avoidance, Decision
+        // Making, Money Psychology, Time Perception, Social, and
+        // Defaults & Habits each get a collapsible row.
+        let categoryGroups: [(category: String, total: Double, biases: [(name: String, amount: Double)])] =
+            biasCategories.compactMap { cat in
+                let pairs = cat.patterns.compactMap { p in
+                    biasSpend[p.name].map { (name: p.name, amount: $0) }
+                }
+                guard !pairs.isEmpty else { return nil }
+                let total = pairs.reduce(0.0) { $0 + $1.amount }
+                return (cat.name, total, pairs.sorted { $0.amount > $1.amount })
+            }
+            .sorted { $0.total > $1.total }
+
+        if !categoryGroups.isEmpty {
             HStack(spacing: 6) {
                 Text("SPENDING BY BIAS")
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .tracking(1.6)
                     .foregroundStyle(DS.goldBase)
                 InfoPopover(
-                    "Each spend grouped by the bias driving it. Dollars show what each pattern costs this month.",
+                    "Grouped by bias category. Tap a row to see the individual biases inside.",
                     title: "SPENDING BY BIAS"
                 )
                 Spacer()
             }
 
-            ForEach(biasSpend.prefix(5), id: \.key) { bias, amount in
-                HStack(spacing: 8) {
-                    Text(emojiLookup[bias] ?? "🧠")
-                        .font(.system(size: 14))
-                    Text(bias)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(DS.textPrimary)
-                        .lineLimit(1)
-                    Spacer()
-                    Text("$\(Int(amount))")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(DS.goldBase)
-                    if expenses > 0 {
-                        Text("\(Int((amount / expenses) * 100))%")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(DS.accent, in: Capsule())
+            VStack(spacing: 6) {
+                ForEach(categoryGroups, id: \.category) { group in
+                    DisclosureGroup {
+                        VStack(spacing: 6) {
+                            ForEach(group.biases, id: \.name) { b in
+                                HStack(spacing: 8) {
+                                    Text(emojiLookup[b.name] ?? "🧠")
+                                        .font(.system(size: 13))
+                                    Text(b.name)
+                                        .font(.caption)
+                                        .foregroundStyle(DS.textSecondary)
+                                        .lineLimit(1)
+                                    Spacer()
+                                    Text("$\(Int(b.amount))")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(DS.goldBase)
+                                }
+                            }
+                        }
+                        .padding(.top, 6)
+                        .padding(.leading, 8)
+                    } label: {
+                        HStack(spacing: 8) {
+                            Text(group.category)
+                                .font(.system(.subheadline, weight: .semibold))
+                                .foregroundStyle(DS.textPrimary)
+                            Spacer()
+                            Text("$\(Int(group.total))")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(DS.goldBase)
+                            if expenses > 0 {
+                                Text("\(Int((group.total / expenses) * 100))%")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(DS.accent, in: Capsule())
+                            }
+                        }
                     }
+                    .tint(DS.goldBase)
                 }
             }
 
