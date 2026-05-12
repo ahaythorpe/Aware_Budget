@@ -900,29 +900,30 @@ struct ResearchView: View {
     }
 
     private func overcomeCard(_ lesson: BiasLesson) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Text(lesson.emoji)
-                    .font(.system(size: 22))
+                    .font(.system(size: 20))
                 Text(lesson.biasName)
-                    .font(.system(size: 19, weight: .semibold))
+                    .font(.system(.headline, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
             }
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .top, spacing: 6) {
                     Image(systemName: "eye.fill")
                         .font(.caption)
                         .foregroundStyle(DS.goldBase)
                         .frame(width: 16)
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text("HOW TO SPOT IT")
-                            .font(.system(size: 12, weight: .bold, design: .rounded))
-                            .tracking(1.0)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.2)
                             .foregroundStyle(DS.goldBase)
                         Text(lesson.shortDescription)
-                            .font(.system(size: 17, weight: .regular))
+                            .font(.system(.subheadline, weight: .regular))
                             .foregroundStyle(DS.textSecondary)
+                            .lineSpacing(2)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -932,14 +933,15 @@ struct ResearchView: View {
                         .font(.caption)
                         .foregroundStyle(DS.accent)
                         .frame(width: 16)
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text("HOW TO OVERCOME IT")
-                            .font(.system(size: 12, weight: .bold, design: .rounded))
-                            .tracking(1.0)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(1.2)
                             .foregroundStyle(DS.accent)
                         Text(lesson.howToCounter)
-                            .font(.system(size: 17, weight: .regular))
+                            .font(.system(.subheadline, weight: .regular))
                             .foregroundStyle(DS.textPrimary)
+                            .lineSpacing(2)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }

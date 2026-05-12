@@ -324,9 +324,24 @@ struct HomeView: View {
                 .padding(.bottom, 12)
 
                 // ── FUTURE YOU (above the calendar) ──
-                futureYouCard
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 12)
+                // Compound-growth chart showing what your current
+                // monthly spend turns into in your future bank account
+                // at 8% avg return. Same interactive component used at
+                // the bottom of Insights — range chips + drag-to-zoom.
+                // Empty-state Nudge card sits above when there's no
+                // spend data yet (it'll fill in after a few logs).
+                if monthlySpend30d > 0 {
+                    futureYouAutoPopulateNote
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 8)
+                    CompoundGrowthCard(monthlySpend: monthlySpend30d)
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 12)
+                } else {
+                    futureYouEmptyState
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 12)
+                }
 
                 // ── MONTH CALENDAR ──
                 MonthCalendarView(eventsByDay: viewModel.monthEventsByDay)
@@ -719,59 +734,52 @@ struct HomeView: View {
             .map { String($0).trimmingCharacters(in: .whitespaces) + "." } ?? text
     }
 
-    /// "Future you" hero — the planned-vs-impulse net of this week's
-    /// spending. Surfaces above the calendar so the user sees the
-    /// weekly summary before drilling into individual days. Empty
-    /// state shows a Nudge note explaining it'll populate after logs.
-    private var futureYouCard: some View {
-        let planned = viewModel.weekEvents.filter { $0.plannedStatus == .planned }.reduce(0.0) { $0 + $1.amount }
-        let unplanned = viewModel.weekEvents.filter { $0.plannedStatus.isUnplanned }.reduce(0.0) { $0 + $1.amount }
-        let net = planned - unplanned
-        let checkInDays = viewModel.weekCheckInDays
+    /// Last-30-days spend total. Feeds CompoundGrowthCard so the Home
+    /// future-you chart uses the same data path as the Insights one.
+    private var monthlySpend30d: Double {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        return viewModel.monthEventsByDay.values
+            .flatMap { $0 }
+            .filter { $0.createdAt >= cutoff }
+            .reduce(0.0) { $0 + abs($1.amount) }
+    }
 
-        return ZStack(alignment: .topTrailing) {
-            Circle()
-                .fill(Color.white.opacity(0.06))
-                .frame(width: 100, height: 100)
-                .offset(x: 30, y: -25)
-
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 6) {
-                    Text("FUTURE YOU")
-                        .font(.system(size: 11, weight: .heavy, design: .rounded))
-                        .tracking(1.4)
-                        .foregroundStyle(DS.goldText)
-                    Spacer()
-                }
-
-                if viewModel.weekEvents.isEmpty {
-                    HStack(alignment: .top, spacing: 10) {
-                        Image("nudge")
-                            .resizable().scaledToFit()
-                            .frame(width: 32, height: 32)
-                        Text("Log a spend or two and this fills in. You'll see the weekly net of planned versus impulse, and how many days you chose future you.")
-                            .font(.system(.subheadline, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.92))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                } else {
-                    let sign = net >= 0 ? "+" : ""
-                    Text("\(sign)$\(Int(abs(net))) from future you")
-                        .font(.system(.title3, weight: .bold))
-                        .foregroundStyle(.white)
-                    Text("\(checkInDays) of 7 days you chose future you")
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.8))
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(18)
-        .background(
-            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
-                .fill(DS.heroGradient)
+    /// Short auto-population note shown above the compound-growth chart
+    /// once data exists. Explains the chart is derived from logged
+    /// spending — keeps users from thinking the projection is invented.
+    private var futureYouAutoPopulateNote: some View {
+        NudgeSaysCard(
+            message: "Your future bank account is built from what you've actually logged. The more you log, the truer the projection.",
+            surface: .whiteShimmer
         )
-        .clipShape(RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous))
+    }
+
+    /// Empty-state card shown in place of the compound-growth chart
+    /// when no spend events exist yet. Promises the chart populates
+    /// once events log.
+    private var futureYouEmptyState: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image("nudge")
+                .resizable().scaledToFit()
+                .frame(width: 44, height: 44)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Your future bank account")
+                    .font(.system(.headline, weight: .bold))
+                    .foregroundStyle(DS.textPrimary)
+                Text("Log a spend or two. Nudge projects what today's spending pattern compounds to at 8% over 5 to 30 years. The chart fills in here once you have data.")
+                    .font(.system(.footnote, weight: .medium))
+                    .foregroundStyle(DS.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+        )
     }
 
     private var yourFinancesCard: some View {
