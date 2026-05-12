@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 22 (staged 2026-05-12 — multi-bias model end-to-end, Nudge avatar, future-you Home card, Insights + Research grouping, false-claim audit)
+**Current build:** 23 (staged 2026-05-12 — compound-growth chart on Home, Research text consistency, 4 nudgeSays accuracy fixes; builds on 22's multi-bias + grouping work)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things

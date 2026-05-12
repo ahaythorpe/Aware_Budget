@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-05-12 — Build 23 — compound-growth chart on Home + Research text consistency (Claude Code, Opus 4.7 1M)
+
+- **Home future-you replaced** with the actual CompoundGrowthCard (same interactive component used at the bottom of Insights — range chips 5/10/20/30yr, drag-to-zoom slider, bottom stat row). Build 22 shipped a text summary by mistake; this is what Bella originally asked for. `6592672`.
+- **Future-you empty state:** Nudge cut-out card explaining the chart fills in once events log. `6592672`.
+- **Future-you auto-populate note:** short Nudge card above the chart when populated, clarifying the projection is built from actual logged spending. `6592672`.
+- **Research tab text consistency:** bias-card body text switched from fixed sizes (19 / 17) to semantic `.headline` / `.subheadline` matching Insights + AlgorithmExplainerSheet. Section labels brought into the size 11 / weight .heavy / tracking 1.2 convention. Added lineSpacing for multi-line breathing. `6592672`.
+- **Bias nudgeSays accuracy sweep:** Mental Accounting (drop promotional line) · Planning Fallacy (Oxford comma) · Status Quo (soften "all chosen" claim) · Moral Licensing (research-accurate "another" instead of "several"). `c085330`.
+
+---
+
 ## 2026-05-12 — Build 22 — Nudge avatar, multi-bias model, Home future-you (Claude Code, Opus 4.7 1M)
 
 Biggest single-build batch this week. Lands the multi-bias model end-to-end, three new Home/Insights/Research UI restructures, copy fixes that close out false-claim risks for Apple review, and a docs audit alignment.
