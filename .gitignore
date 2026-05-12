@@ -31,3 +31,8 @@ fastlane/test_output
 *.env
 Secrets.swift
 Secrets.plist
+
+# AI tool / agent config (local to each developer's setup)
+.agents/
+.claude/
+.kiro/

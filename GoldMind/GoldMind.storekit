@@ -1,0 +1,109 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "9F8A1D2C-3B4E-4D5A-9C7F-2E8A4B6D1F3A",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "149.99",
+      "familyShareable" : false,
+      "internalID" : "A1B2C3D4",
+      "localizations" : [
+        {
+          "description" : "GoldMind Pro Lifetime — buy once, unlock forever.",
+          "displayName" : "GoldMind Pro Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "goldmind_lifetime_v1",
+      "referenceName" : "GoldMind Pro Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6767502006",
+    "_developerTeamID" : "RCRK696XMD",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "AUS",
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21501234",
+      "localizations" : [
+        {
+          "description" : "GoldMind Pro subscription tiers",
+          "displayName" : "GoldMind Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "GoldMind Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "B2C3D4E5",
+          "introductoryOffer" : {
+            "internalID" : "C3D4E5F6",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "GoldMind Pro Monthly subscription",
+              "displayName" : "GoldMind Pro Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "goldmind_monthly_2026",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "GoldMind Pro Monthly",
+          "subscriptionGroupID" : "21501234",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "99.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "D4E5F6G7",
+          "introductoryOffer" : {
+            "internalID" : "E5F6G7H8",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "GoldMind Pro Annual subscription",
+              "displayName" : "GoldMind Pro Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "goldmind_yearly_2026",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "GoldMind Pro Annual",
+          "subscriptionGroupID" : "21501234",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
