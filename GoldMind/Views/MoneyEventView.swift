@@ -905,20 +905,29 @@ struct MoneyEventView: View {
             ResearchFootnote(text: "BFAS framework · Grable & Joo, 2004")
 
             if let tag = viewModel.behaviourTag {
-                HStack(spacing: 10) {
+                // Primary driver chip + optional secondary chip. Real
+                // planners note multiple drivers per behaviour rather
+                // than reducing to one (Pompian 2012, Klontz 2011). The
+                // secondary chip surfaces when BiasRotation found a
+                // plausible second driver from a different category.
+                HStack(spacing: 8) {
                     Text(tag)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(DS.goldText)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(
-                            Capsule()
-                                .fill(DS.goldBase.opacity(0.15))
-                        )
-                        .overlay(
-                            Capsule()
-                                .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
-                        )
+                        .background(Capsule().fill(DS.goldBase.opacity(0.15)))
+                        .overlay(Capsule().stroke(DS.goldBase.opacity(0.4), lineWidth: 1))
+
+                    if let secondary = viewModel.secondaryBehaviourTag {
+                        Text("+ also \(secondary)")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(DS.goldBase.opacity(0.85))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Capsule().fill(DS.goldBase.opacity(0.08)))
+                            .overlay(Capsule().stroke(DS.goldBase.opacity(0.25), lineWidth: 0.5))
+                    }
 
                     if viewModel.suggestedTag == tag {
                         Text("suggested")

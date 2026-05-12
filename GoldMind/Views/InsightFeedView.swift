@@ -343,10 +343,20 @@ struct InsightFeedView: View {
         let taggedEvents = allEvents.filter {
             Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month) && $0.behaviourTag != nil
         }
-        // Per-bias totals (primary tag only for now — secondary tag
-        // aggregation lands with Layer 5 of the multi-bias rollout).
-        let biasSpend: [String: Double] = Dictionary(grouping: taggedEvents, by: { $0.behaviourTag! })
-            .mapValues { $0.reduce(0.0) { $0 + $1.amount } }
+        // Per-bias totals counting BOTH the primary and secondary tag.
+        // When a spend is co-driven (e.g. Ego Depletion + Present Bias),
+        // each bias gets full credit — matches how real planners
+        // attribute behaviour rather than splitting signal across
+        // co-occurring drivers. Total of percentages can exceed 100%,
+        // which correctly communicates overlap (Pompian 2012).
+        let biasSpend: [String: Double] = taggedEvents.reduce(into: [:]) { acc, e in
+            if let primary = e.behaviourTag {
+                acc[primary, default: 0] += e.amount
+            }
+            if let secondary = e.secondaryBehaviourTag {
+                acc[secondary, default: 0] += e.amount
+            }
+        }
         let emojiLookup = Dictionary(uniqueKeysWithValues: BiasLessonsMock.seed.map { ($0.biasName, $0.emoji) })
 
         // Re-group bias spend by BFAS category so Avoidance, Decision
