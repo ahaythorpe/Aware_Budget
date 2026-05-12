@@ -48,7 +48,7 @@ struct AlgorithmExplainerSheet: View {
                             .foregroundStyle(DS.textPrimary)
                             .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text("If a mapping (e.g. \"Ego Depletion on Coffee+Impulse\") drops below 30% confirmation after 20+ reviews, it gets flagged here for retirement. Right now, no mappings have crossed the threshold.")
+                        Text("If a mapping (e.g. \"Ego Depletion on Coffee+Impulse\") drops below 30% confirmation after 20+ reviews, it gets flagged for retirement. None have yet.")
                             .font(.system(.footnote, weight: .regular))
                             .foregroundStyle(DS.textSecondary)
                             .lineSpacing(3)
@@ -58,7 +58,7 @@ struct AlgorithmExplainerSheet: View {
             } else {
                 sectionCard(title: "MAPPINGS YOUR DATA IS REJECTING") {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("These (purchase × bias) mappings are being confirmed less than 30% of the time across your reviews. Flagged for retirement.")
+                        Text("Confirmed less than 30% of the time across your reviews. Flagged for retirement.")
                             .font(.system(.footnote, weight: .semibold))
                             .foregroundStyle(DS.textSecondary)
                             .lineSpacing(3)
@@ -74,7 +74,7 @@ struct AlgorithmExplainerSheet: View {
             if !flaggedQuestions.isEmpty {
                 sectionCard(title: "QUESTIONS UNDERPERFORMING") {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("These specific bias×category questions are confirmed less than 30% of the time. The question wording may need refining.")
+                        Text("Confirmed less than 30% of the time. The wording may need refining.")
                             .font(.system(.footnote, weight: .semibold))
                             .foregroundStyle(DS.textSecondary)
                             .lineSpacing(3)
@@ -209,7 +209,7 @@ struct AlgorithmExplainerSheet: View {
                 scoreRow("⬆ A logged spend tagged with this bias", "+1")
                 scoreRow("⬆ Your sign-up BFAS answers", "0 to 10 (one-off)")
                 Divider().background(DS.accent.opacity(0.15))
-                Text("Active YES outweighs passive observation 5:1. Why: Stone et al. 1991, Robinson & Clore 2002. When you identify a pattern in real time, you're 3–5× more accurate than any algorithm watching from the outside. Beck 1976: the act of self-labelling is itself part of the change.")
+                Text("Active YES outweighs passive observation 5:1. When you identify a pattern in real time, you're 3–5× more accurate than any algorithm watching from outside. Self-labelling is itself part of the change. (Stone 1991 · Robinson & Clore 2002 · Beck 1976.)")
                     .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
                     .lineSpacing(3)
