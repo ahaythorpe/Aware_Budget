@@ -99,6 +99,45 @@ This **is** a tonight job — straightforward port of the Insights pattern. Logg
 
 ---
 
+## #33 — Research tab: more text + more interactivity
+
+Bella's note (2026-05-12 evening): the category-grouped Research tab (`e74859d`) is a good start, but the bias cards inside need richer content + interactive elements. Currently each card shows `shortDescription` + `howToCounter` only.
+
+### Unused content already in `BiasLessonsMock`
+
+The `BiasLesson` model carries four text fields. The Research tab only uses two:
+
+| Field | Used? | Length |
+|---|---|---|
+| `shortDescription` | ✓ HOW TO SPOT IT | one sentence |
+| `fullExplanation` | ✗ unused on Research | two to three sentences |
+| `realWorldExample` | ✗ unused on Research (used in Mind-Map node sheet) | scenario, two to three sentences |
+| `howToCounter` | ✓ HOW TO OVERCOME IT | two to four sentences |
+
+**Low-effort v1.1 win:** surface `fullExplanation` + `realWorldExample` on the Research card. Either expanded by default (more text on first read) or as a "Read more" disclosure.
+
+### Interactivity ideas (ranked low → high effort)
+
+1. **Personal trigger count chip** per bias card. Reuses `viewModel.biasProgress` from the existing data path. One line: "Seen N× in your logs." Same chip pattern already used on the mind-map node sheet.
+2. **Mastery stage badge** (Unseen / Noticed / Emerging / Active / Aware) drawn from `bias_progress.stage`. Compact pill in the card header.
+3. **"Mark as understood" toggle** writes to `bias_progress` as a passive awareness signal. Adds +1 to that bias (same weight as a logged spend).
+4. **Tap-to-open detail sheet** that reuses the Mind-Map node sheet (already has stat chip, Nudge quote, counter bullets, real-example disclosure, related-pattern chips). Avoids building a second detail UI.
+5. **Mini-quiz card** per bias — one multiple-choice question (e.g. "Which of these is anchoring?"). Confirms understanding without requiring a check-in.
+6. **Filter bar** at top of Research: All / My top 3 / Triggered / Untouched — same chip pattern as the mind-map filter.
+7. **Search bar** for finding a specific bias by name.
+
+### My recommendation
+
+Tonight = nothing. Submit v1.0 with the category grouping that's already in.
+
+Post-launch v1.1 sequence (1-2 days total):
+- Day 1: Surface `fullExplanation` + `realWorldExample` (idea 0). Add trigger-count chip + mastery badge (ideas 1+2). Wire the existing Mind-Map node sheet as the tap-to-open detail (idea 4) — no new view to build.
+- Day 2: Filter bar (idea 6) + search (idea 7) if usage data shows the list-scrolling problem hasn't fixed itself.
+
+Skip mini-quiz + mark-as-understood until there's signal that users want them. Those add complexity (state, write paths, scoring decisions) that don't pay back until v2.
+
+---
+
 ## Status as of 2026-05-12
 
 - v1.0 submission to Apple targeted for tomorrow.

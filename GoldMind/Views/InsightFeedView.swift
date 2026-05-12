@@ -1490,9 +1490,12 @@ struct InsightFeedView: View {
     @ViewBuilder
     private func categoryTrendChart(series: [CategoryTrendPoint]) -> some View {
         let categories = Array(Set(series.map(\.category))).sorted()
-        // Category palette: green-cool, signals the structural angle —
-        // visually distinct from the gold-warm bias trend palette.
-        let palette: [Color] = [DS.accent, DS.deepGreen, DS.primary, DS.lightGreen, DS.goldBase]
+        // Gold-family palette mirroring the Home compound-growth chart
+        // aesthetic. Bella's call (2026-05-12): the cool-green palette
+        // read out of place vs the rest of the gold-themed Insights;
+        // subtitle line under each chart title still differentiates
+        // WHY (bias) vs WHERE (category).
+        let palette: [Color] = [DS.goldBase, DS.goldText, DS.matteYellow, DS.warning, DS.goldForeground]
         let weekCount = Set(series.map(\.weekStart)).count
         let catValues: [Double] = {
             if let focused = expandedCategory {
