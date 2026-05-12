@@ -261,7 +261,7 @@ struct BiasReviewView: View {
                     .tracking(1.2)
                     .foregroundStyle(Color(hex: "8B6010"))
             }
-            Text("This bias has come up a few times. These related ones might also fit:")
+            Text("Comes up often. These related ones might also fit:")
                 .font(.system(.caption, weight: .medium))
                 .foregroundStyle(Color(hex: "3A2000").opacity(0.75))
                 .lineSpacing(2)
