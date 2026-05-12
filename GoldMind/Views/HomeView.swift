@@ -642,11 +642,6 @@ struct HomeView: View {
             financeSavings = ""
             financeInvestment = ""
             showFinanceEditor = true
-        case .openInsights:
-            // Handled by RootTabView (tab switch + clear). HomeView
-            // doesn't react to insights routes; this case just keeps
-            // the switch exhaustive.
-            return
         }
         router.pendingRoute = nil
     }
@@ -750,11 +745,12 @@ struct HomeView: View {
     }
 
     /// Short auto-population note shown above the compound-growth chart
-    /// once data exists. Explains the chart is derived from logged
-    /// spending — keeps users from thinking the projection is invented.
+    /// once data exists. Explains in plain English how the projection is
+    /// generated — keeps users from thinking the numbers are invented.
     private var futureYouAutoPopulateNote: some View {
         NudgeSaysCard(
-            message: "Your future bank account is built from what you've actually logged. The more you log, the truer the projection.",
+            message: "Nudge takes your last 30 days of logged spending and projects what it compounds to at 8% annual return. The more you log, the truer the projection.",
+            citation: "Compound interest · annual return assumption based on long-run market average",
             surface: .whiteShimmer
         )
     }

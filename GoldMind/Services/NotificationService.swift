@@ -310,8 +310,11 @@ enum NotificationService {
                         "Seven days, laid bare.",
                         "Sunday review is ready."].randomElement() ?? "Weekly review ready."
         content.sound = .default
-        // Tap lands on the Insights tab — that's where the weekly data lives.
-        content.userInfo["route"] = NotificationRoute.openInsights.rawValue
+        // Per Bella's "all notifications land on Quick Log or log
+        // numbers" principle: weekly review tap → Log tab so the user
+        // immediately picks up their logging cadence rather than just
+        // browsing data.
+        content.userInfo["slot"] = NotificationSlot.morning.rawValue
 
         var components = DateComponents()
         components.weekday = 1  // Sunday
@@ -336,8 +339,9 @@ enum NotificationService {
                         "Still yes? Still no?",
                         "Monthly checkpoint. Not a grade."].randomElement() ?? "Monthly checkpoint."
         content.sound = .default
-        // Same as weekly review — Insights is where the month's data lives.
-        content.userInfo["route"] = NotificationRoute.openInsights.rawValue
+        // Same as weekly review — land on Log so the next action is
+        // capturing today's data, not browsing past data.
+        content.userInfo["slot"] = NotificationSlot.morning.rawValue
 
         var components = DateComponents()
         components.day = 1      // 1st of month

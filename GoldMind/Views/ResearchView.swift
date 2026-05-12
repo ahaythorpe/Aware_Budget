@@ -1055,8 +1055,9 @@ struct ResearchView: View {
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+                .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
         )
+        .premiumCardShadow()
     }
 
     // MARK: - Helpers

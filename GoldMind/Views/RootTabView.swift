@@ -45,34 +45,19 @@ struct RootTabView: View {
             selection = .log
         }
         .onChange(of: router.pendingRoute) { _, route in
-            guard let route else { return }
-            // Notification routes target a specific tab. Home routes
-            // (e.g. finance editor) swing to Home; insights routes
-            // (weekly + monthly review pushes) swing to Insights.
-            switch route {
-            case .openFinanceEditor:
-                // HomeView reads pendingRoute to open the editor sheet
-                // and clears it once acted on, so don't nil here.
-                selection = .home
-            case .openInsights:
-                selection = .insights
-                // No view consumes openInsights beyond the tab switch,
-                // so clear it now to avoid re-firing on next nav.
-                router.pendingRoute = nil
-            }
+            guard route != nil else { return }
+            // Notification routes target Home flows (e.g. finance editor).
+            // HomeView reads pendingRoute to open the editor sheet and
+            // clears it once acted on.
+            selection = .home
         }
         .task {
             // Cold-launch case: if the user tapped a notification while the
             // app was closed, the router may already have a pending value
             // before any view's onChange observers start firing. Apply the
             // initial routing once.
-            if let route = router.pendingRoute {
-                switch route {
-                case .openFinanceEditor: selection = .home
-                case .openInsights:      selection = .insights
-                }
-            }
-            if router.pendingSlot != nil { selection = .log }
+            if router.pendingRoute != nil { selection = .home }
+            if router.pendingSlot != nil  { selection = .log }
         }
     }
 }
