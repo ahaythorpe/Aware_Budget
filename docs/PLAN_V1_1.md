@@ -138,6 +138,70 @@ Skip mini-quiz + mark-as-understood until there's signal that users want them. T
 
 ---
 
+## #34 — Research-tab concept graph (papers ↔ biases)
+
+Bella's note (2026-05-13 morning): apply the concept-graph idea from #30 to the Research tab itself, not just the Mind Map. Make the research → bias relationship visual + interactive so the tab teaches the framework rather than just listing it.
+
+### What it is
+
+A node-edge graph showing how the **foundational papers** connect to the **16 biases** they underpin. Three layers:
+
+1. **Paper nodes** at the top (Pompian 2012, Kahneman & Tversky 1979, Thaler & Sunstein 2008, Kahneman et al. 2004, plus Klontz / Cialdini / Samuelson & Zeckhauser / Baumeister where they're load-bearing).
+2. **Framework node** in the middle (BFAS · 16 patterns · 6 spending personalities).
+3. **Bias nodes** at the bottom (the 16 we already render), already coloured by their BFAS category.
+
+Edges connect:
+- Paper → bias (each paper introduces or formalises specific biases — Kahneman & Tversky 1979 → Loss Aversion, Anchoring; Samuelson & Zeckhauser 1988 → Status Quo Bias; etc.).
+- Framework → all 6 categories.
+
+### Interactivity
+
+- **Tap a paper:** all biases it underpins glow gold; unrelated biases dim to 0.18 (same dim treatment as the existing Mind Map).
+- **Tap a bias:** the paper(s) it traces to glow; the bias's BFAS category lights up on the framework node.
+- **Tap an edge:** short Nudge card pops with the citation context — "Loss aversion: Kahneman & Tversky (1979) showed losses feel ~2× worse than equivalent gains. Established Prospect Theory."
+- **Zoom / scroll:** the graph is wider than the screen at default zoom — drag-to-zoom and pinch-to-explore similar to the Mind Map.
+
+### Data layer
+
+No new schema. The mapping data lives in two new static dictionaries:
+
+```swift
+enum ResearchGraph {
+    /// Bias name → primary source citation key. Used by the Research
+    /// graph to light up the founding paper when a bias is tapped.
+    static let primaryPaper: [String: String] = [
+        "Loss Aversion":          "kahneman_tversky_1979",
+        "Anchoring":              "kahneman_tversky_1974",
+        "Status Quo Bias":        "samuelson_zeckhauser_1988",
+        "Mental Accounting":      "thaler_1985",
+        "Present Bias":           "laibson_1997",
+        // ... 16 total
+    ]
+    /// Paper key → list of biases it introduces or formalises.
+    static let papersToBiases: [String: [String]] = [
+        "pompian_2012":          [/* all 16, framework-level */],
+        "kahneman_tversky_1979": ["Loss Aversion", "Sunk Cost Fallacy"],
+        // ...
+    ]
+}
+```
+
+Most of this data is already inline in `BiasData.keyRef` and `BiasData.citation`. Refactor those into a structured lookup so the graph can render edges without duplicating the citation text.
+
+### Effort estimate
+
+- Static data extraction: ~2 hours (already in `BiasData`, just needs reshaping).
+- Force-directed or layered layout via SwiftUI `Canvas` (similar pattern to `MindMapView`): ~6-8 hours.
+- Tap-to-highlight + dim-others: ~2 hours (reuses `MindMapView.isInFocus` pattern).
+- Edge tap → Nudge card: ~1 hour.
+- **Total: 11-13 hours.** Solid v1.1 day or v1.2 polish week.
+
+### My recommendation
+
+Build after #30 Path A (concept-cluster Mind Map toggle) ships. They share the layout engine, so doing them in sequence amortises the SwiftUI Canvas work. Skip until users have proven they care about deeper research context; ship interactive-charts (#32) first since the demand is clearer.
+
+---
+
 ## Status as of 2026-05-12
 
 - v1.0 submission to Apple targeted for tomorrow.
