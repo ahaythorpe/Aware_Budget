@@ -17,9 +17,12 @@ their spending. The loop:
 
 ```
 1. User logs a spend (Quick log)
-   → algorithm tags it with the most likely bias for that
+   → algorithm tags it with the primary bias (and optionally a
+     secondary from a different bias category) for that
      (category × planned_status), drawn from a citation-grounded
-     shortlist (BiasMappings.swift)
+     shortlist (BiasMappings.swift) via BiasRotation.nextBiasPair.
+     Max two tags per event (Pompian 2012, Klontz 2011 on
+     bias co-occurrence)
 2. After a logging session, the user reviews each tagged event
    → "Yes, that's me" / "Not sure" / "No, different reason"
 3. Active confirmation feeds three downstream systems:

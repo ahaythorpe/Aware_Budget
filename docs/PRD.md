@@ -24,12 +24,13 @@
 
 Lives in `BiasScoreService.computeScore`. User sees **outputs** (top biases, stage, trend) but never the maths.
 
-```
-final_score = current_score + BFAS_initial_weight
-
-current_score = (YES answers × 2) + (tagged events × 3) − (NO answers × 1)
-BFAS_initial_weight = 0–10 per bias, seeded from onboarding assessment
-```
+> **Source of truth:** see `docs/ALGORITHM.md` §6 and `Views/AlgorithmExplainerSheet.swift`. The shipped weights are 5:1 active-vs-passive (Stone 1991 · Robinson & Clore 2002 · Beck 1976):
+>
+> - +5 for "Yes, that's me" in a check-in
+> - −2 for "No, different reason"
+> - 0 for "Not sure"
+> - +1 per logged spend tagged with the bias (counts for each tag when an event has two)
+> - 0 to 10 one-off seed from the sign-up BFAS answers
 
 Trend: improving / worsening / stable (last 3 answers).
 Stage: unseen → noticed → emerging → active → aware.
