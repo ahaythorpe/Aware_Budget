@@ -52,9 +52,10 @@ enum BiasMappings {
         .init(category: "Coffee", status: .impulse, bias: "Present Bias",
               citation: "O'Donoghue & Rabin 1999 (hyperbolic discounting → small immediate rewards)",
               confidence: .high),
-        .init(category: "Coffee", status: .impulse, bias: "Status Quo Bias",
-              citation: "Samuelson & Zeckhauser 1988 (habit defaults → daily-purchase routines)",
-              confidence: .medium),
+        // Coffee + impulse → Status Quo (habit defaults) removed
+        // 2026-05-12 — Bella flagged the contradiction: habit-default
+        // is by definition routine/planned, not impulse. Impulse coffee
+        // is already covered by Ego Depletion + Present Bias above.
         .init(category: "Coffee", status: .planned, bias: "Status Quo Bias",
               citation: "Samuelson & Zeckhauser 1988 (planned routine purchases sustain by default)",
               confidence: .high),
