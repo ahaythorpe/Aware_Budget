@@ -1,11 +1,13 @@
 import SwiftUI
 
 /// Reusable circular avatar for the user. Renders the user's uploaded
-/// photo when `avatarUrl` is non-nil; falls back to the first letter of
-/// their display name inside a gold gradient disc otherwise.
+/// photo when `avatarUrl` is non-nil; falls back to the Nudge cut-out
+/// coin otherwise. (Previously fell back to a gold initial-letter disc;
+/// switched to Nudge so users see the mascot as their default profile
+/// picture until they upload one — at which point Nudge moves to the
+/// right corner of the greeting card.)
 ///
-/// Sized via the `size` parameter. The font scales with the disc.
-/// Falls back to "?" when no name is set.
+/// Sized via the `size` parameter.
 struct AvatarDisc: View {
     var name: String?
     var avatarUrl: String? = nil
@@ -13,12 +15,6 @@ struct AvatarDisc: View {
     /// When true, draws a soft gold ring around the disc. Use on tap
     /// affordances to signal "this is interactive."
     var ring: Bool = true
-
-    private var initial: String {
-        let trimmed = (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let first = trimmed.first else { return "?" }
-        return String(first).uppercased()
-    }
 
     private var photoURL: URL? {
         guard let s = avatarUrl,
@@ -35,12 +31,12 @@ struct AvatarDisc: View {
                     case .success(let image):
                         image.resizable().scaledToFill()
                     default:
-                        initialDisc
+                        nudgeFallback
                     }
                 }
                 .clipShape(Circle())
             } else {
-                initialDisc
+                nudgeFallback
             }
             if ring {
                 Circle()
@@ -52,25 +48,13 @@ struct AvatarDisc: View {
         .accessibilityLabel(Text("Profile, \(name ?? "no name set")"))
     }
 
-    /// Gold-gradient initial-letter disc, used as the default and as the
-    /// AsyncImage placeholder/failure fallback.
-    private var initialDisc: some View {
-        ZStack {
-            Circle()
-                .fill(DS.nuggetGold)
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.25), .clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-            Text(initial)
-                .font(.system(size: size * 0.46, weight: .black, design: .serif))
-                .foregroundStyle(.white)
-                .shadow(color: Color(hex: "3A2400").opacity(0.45), radius: 1, y: 1)
-        }
+    /// Nudge cut-out used as the default and as the AsyncImage placeholder.
+    /// The image is the same asset rendered elsewhere as a floating coin,
+    /// so the avatar reads as "Nudge is standing in for your picture."
+    private var nudgeFallback: some View {
+        Image("nudge")
+            .resizable()
+            .scaledToFit()
     }
 }
 

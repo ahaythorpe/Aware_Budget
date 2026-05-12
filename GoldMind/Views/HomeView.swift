@@ -150,14 +150,20 @@ struct HomeView: View {
                 // floating chip so it doesn't crowd the main HStack.
                 .overlay(alignment: .bottomTrailing) {
                     Button { showNudgeHello = true } label: {
-                        // Floating cut-out — matches Nudge in popovers/cards.
+                        // Floating cut-out. Sized 56 (was 40) so Nudge
+                        // reads as a peer to the 52pt avatar disc on
+                        // the left of the greeting card.
                         Image("nudge")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 56, height: 56)
                     }
                     .buttonStyle(.plain)
-                    .offset(x: -8, y: -8)
+                    // Pushes Nudge below the gear icon + slightly into
+                    // the card's lower-right margin. y: 8 = nudge sits
+                    // 8pt below the card's bottom edge, partly outside
+                    // the rounded corner so it reads as floating.
+                    .offset(x: -4, y: 8)
                     .popover(isPresented: $showNudgeHello,
                              attachmentAnchor: .point(.top),
                              arrowEdge: .bottom) {
