@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-05-12 — Build 24 — Research interactivity, gold palette, notification routing fix (Claude Code, Opus 4.7 1M)
+
+- **Category-trend chart palette** swapped from cool greens to a gold-family palette (goldBase, goldText, matteYellow, warning, goldForeground) so it sits naturally in the rest of the gold-themed Insights. Subtitle still differentiates WHY (bias trend) vs WHERE (category trend). `13eed6d`.
+- **Notification routing fix:** bias-hit pushes had no slot/route — now route to Log tab (morning slot). Weekly + monthly review pushes had no destination — new `NotificationRoute.openInsights` case wired so they land on Insights, where the data lives. RootTabView pendingRoute handler switched from "always Home" to a switch over the route enum. `86a79d7`.
+- **Research dropdown polish:** category card stroke 0.4→0.18 (hairline), label .headline→.subheadline matching Insights, count chip restyled with rounded-heavy font + 0.08 bg + 0.25 stroke, added `.premiumCardShadow()` so cards sit consistently with the rest of the app. `86a79d7`.
+- **Research card interactivity:** per the v1.1 plan #33, surfaced two `BiasLesson` fields that had been sitting unused: `fullExplanation` (new "THE FULL PICTURE" disclosure) and `realWorldExample` (new "REAL EXAMPLE" disclosure, previously only on mind-map node sheet). Both collapsed by default so cards stay scannable. Added a personal "Seen N×" trigger chip in each card header (sourced from bias_progress + this-month eventTagCounts — matches mind-map node-sheet pattern). `c62a6bf`.
+
+---
+
 ## 2026-05-12 — Build 23 — compound-growth chart on Home + Research text consistency (Claude Code, Opus 4.7 1M)
 
 - **Home future-you replaced** with the actual CompoundGrowthCard (same interactive component used at the bottom of Insights — range chips 5/10/20/30yr, drag-to-zoom slider, bottom stat row). Build 22 shipped a text summary by mistake; this is what Bella originally asked for. `6592672`.

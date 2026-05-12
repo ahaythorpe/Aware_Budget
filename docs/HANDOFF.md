@@ -1,7 +1,7 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-05-12 (Build 23 staged)
+> Updated: 2026-05-12 (Build 24 staged)
 
 ---
 
@@ -23,6 +23,7 @@
 | 21 | Algorithm sheet plain English (no more "gold standard"/"weak signal") · bias-trend vs category-trend now visually distinct (warm gold vs cool green palettes + subtitles) · mind-map filter chips wired back into canvas · editorial pass on Awareness/Home/BiasReview/Settings/Patterns/Credibility · Onboarding/SignIn microcopy legibility bump · tree fully clean (AppConfig, .storekit, 7 migrations now tracked) |
 | 22 | Multi-bias model end-to-end (data + algo + UI + aggregation + explainer) · Nudge cut-out as default profile avatar · future-you card on Home above calendar · Financial overview grouped INCOME/SPENDING/WEALTH · Spending-by-Bias + Research tab cards as collapsible BFAS categories · mind-map canvas clears pinned UI · false-claim fixes (Ostrich 12-days, Denomination 12-taps-$87) · Loss Aversion phrasing fix · 6 howToCounter run-on rewrites · algorithm doc consistency audit pass · v1.1 plan captured |
 | 23 | Home future-you swapped to the interactive CompoundGrowthCard (range chips + drag-to-zoom + stat row) · Research tab text scales now consistent with rest of app · 4 nudgeSays accuracy fixes (Mental Accounting / Planning Fallacy / Status Quo / Moral Licensing) |
+| 24 | Category-trend chart palette → gold family · notification routing fix (bias-hit → Log, weekly + monthly review → new Insights route) · Research dropdown polish (lighter stroke + matched label/chip styling + shadow) · Research card interactivity: "Seen N×" personal trigger chip, "THE FULL PICTURE" + "REAL EXAMPLE" collapsibles surfacing previously-unused BiasLesson fields |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 
