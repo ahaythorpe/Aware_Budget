@@ -54,7 +54,7 @@ struct AwarenessView: View {
 
                 // ── NUDGE SAYS (gold) ──
                 NudgeSaysCard(
-                    message: "Each pattern you identify sharpens your BFAS profile. Professional financial planners use the same framework to assess client behaviour.",
+                    message: "Each pattern sharpens your BFAS profile. The framework planners use on clients.",
                     citation: "BFAS · Behavioural Finance Assessment Score",
                     surface: .whiteShimmer
                 )
@@ -75,7 +75,7 @@ struct AwarenessView: View {
                         // After every 2nd + 4th category
                         if index == 1 {
                             bfasCallout(
-                                "These 16 patterns come from the Behavioural Finance Assessment Score. The same framework used by professional financial planners.",
+                                "These 16 patterns come from BFAS. The framework planners use on clients.",
                                 cite: "Pompian, 2012"
                             )
                             .padding(.top, 6)
