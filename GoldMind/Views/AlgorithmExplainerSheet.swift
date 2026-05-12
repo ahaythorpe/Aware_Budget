@@ -174,9 +174,10 @@ struct AlgorithmExplainerSheet: View {
         sectionCard(title: "STEP BY STEP") {
             VStack(alignment: .leading, spacing: 14) {
                 step(1, "You pick a category (e.g. Coffee), a range, and a reason (Planned / Surprise / Impulse).")
-                step(2, "Nudge suggests a bias based on your combination. For example: Coffee + Impulse → Status Quo Bias (habitual choice).")
-                step(3, "The event is saved with that suggested tag. Every save nudges that bias up in your ranking.")
-                step(4, "Your BFAS baseline (the 16 questions on first open) seeds each bias with 0–10. Your actual spending overrides that over time.")
+                step(2, "Nudge suggests up to two biases for that combination. Example: Coffee + Impulse → Ego Depletion (decision fatigue, you're tired) and Present Bias (a small reward your future self pays for).")
+                step(3, "Why two? Real planners note that one spend often has more than one driver (Pompian 2012, Klontz 2011). The second bias only appears when it comes from a different bias category, so the two signals don't repeat each other.")
+                step(4, "The event is saved with both tags. Each save nudges those biases up in your ranking. Confirming a tag in a check-in moves it faster (see scoring below).")
+                step(5, "Your BFAS baseline (the 16 questions on first open) seeds each bias with 0 to 10. Your actual spending overrides that over time.")
             }
         }
     }
@@ -209,6 +210,11 @@ struct AlgorithmExplainerSheet: View {
                 scoreRow("⬆ A logged spend tagged with this bias", "+1")
                 scoreRow("⬆ Your sign-up BFAS answers", "0 to 10 (one-off)")
                 Divider().background(DS.accent.opacity(0.15))
+                Text("When a spend has two bias tags (see step 2 above), each tag earns the +1 independently. Two real drivers means two signals.")
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(DS.textSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text("Active YES outweighs passive observation 5:1. When you identify a pattern in real time, you're 3–5× more accurate than any algorithm watching from outside. Self-labelling is itself part of the change. (Stone 1991 · Robinson & Clore 2002 · Beck 1976.)")
                     .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(DS.textSecondary)
