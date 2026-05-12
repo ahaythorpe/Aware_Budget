@@ -232,6 +232,10 @@ final class MoneyEventViewModel {
     var selectedRange: AmountRange?
     var plannedStatus: MoneyEvent.PlannedStatus?
     var behaviourTag: String?
+    /// Optional second bias for events with overlapping drivers. Set
+    /// alongside `behaviourTag` when BiasRotation finds a plausible
+    /// second bias from a different category. Max two biases per event.
+    var secondaryBehaviourTag: String?
     var isSaving = false
     var errorMessage: String?
     var didSave = false
@@ -265,6 +269,7 @@ final class MoneyEventViewModel {
         selectedRange = nil
         plannedStatus = nil
         behaviourTag = nil
+        secondaryBehaviourTag = nil
         didSave = false
         nudgeResponse = nil
         errorMessage = nil
@@ -273,14 +278,16 @@ final class MoneyEventViewModel {
 
     func onPlannedStatusSet() {
         guard let cat = selectedCategory, let status = plannedStatus else { return }
-        // Optimistic sync pick (advances rotation index) so the picker
-        // shows a tag immediately. Then async-upgrade with the
-        // neglected-bias boost using the latest bias_progress rows —
-        // if a neglected bias qualifies, it overrides the rotation.
-        let optimistic = BiasRotation.nextBias(category: cat.name, status: status)
-        behaviourTag = optimistic
+        // Optimistic sync pair-pick (advances rotation index) so the
+        // picker shows tags immediately. Then async-upgrade the primary
+        // with the neglected-bias boost using the latest bias_progress
+        // rows. Secondary stays as the rotation pick — boost logic
+        // only applies to the primary signal.
+        let pair = BiasRotation.nextBiasPair(category: cat.name, status: status)
+        behaviourTag = pair.primary
+        secondaryBehaviourTag = pair.secondary
         Task {
-            await loadBiasCount(optimistic)
+            await loadBiasCount(pair.primary)
             do {
                 async let progressFetch = service.fetchBiasProgress()
                 async let recentEventsFetch = service.fetchMoneyEvents(forMonth: Date())
@@ -289,14 +296,21 @@ final class MoneyEventViewModel {
                 let medianGap = BiasRotation.medianLogGapDays(events: recentEvents)
                 let threshold = BiasRotation.adaptiveThreshold(medianGapDays: medianGap)
                 let boosted = BiasRotation.boostedPick(
-                    rotatedPick: optimistic,
+                    rotatedPick: pair.primary,
                     category: cat.name,
                     status: status,
                     progress: progress,
                     thresholdDays: threshold
                 )
-                if boosted != optimistic {
+                if boosted != pair.primary {
                     behaviourTag = boosted
+                    // Drop secondary if the boost promoted a bias from
+                    // the same category as the previous secondary — keeps
+                    // the "different category" invariant intact.
+                    if let sec = secondaryBehaviourTag,
+                       BiasRotation.sameCategory(boosted, sec) {
+                        secondaryBehaviourTag = nil
+                    }
                     await loadBiasCount(boosted)
                 }
             } catch {
@@ -339,6 +353,7 @@ final class MoneyEventViewModel {
             amount: range.midpoint,
             plannedStatus: status,
             behaviourTag: behaviourTag,
+            secondaryBehaviourTag: secondaryBehaviourTag,
             lifeEvent: nil,
             lifeArea: cat.name,
             note: {

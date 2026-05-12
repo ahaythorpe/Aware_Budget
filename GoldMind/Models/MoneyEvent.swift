@@ -6,7 +6,14 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
     var date: Date
     var amount: Double
     var plannedStatus: PlannedStatus
+    /// Primary bias driving this spend. Set by BiasRotation.
     var behaviourTag: String?
+    /// Optional second bias when the spend has overlapping drivers.
+    /// Nullable — most events have one clear driver. The algorithm
+    /// only suggests a secondary when two plausible biases come from
+    /// different bias categories (avoiding redundant near-duplicates).
+    /// Max two biases per event (Bella's constraint, 2026-05-12).
+    var secondaryBehaviourTag: String?
     var lifeEvent: String?
     var lifeArea: String?
     var note: String?
@@ -88,6 +95,7 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         case userId = "user_id"
         case plannedStatus = "planned_status"
         case behaviourTag = "behaviour_tag"
+        case secondaryBehaviourTag = "secondary_behaviour_tag"
         case lifeEvent = "life_event"
         case lifeArea = "life_area"
         case createdAt = "created_at"
@@ -103,6 +111,7 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         amount: Double,
         plannedStatus: PlannedStatus,
         behaviourTag: String? = nil,
+        secondaryBehaviourTag: String? = nil,
         lifeEvent: String? = nil,
         lifeArea: String? = nil,
         note: String? = nil,
@@ -114,6 +123,7 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         self.amount = amount
         self.plannedStatus = plannedStatus
         self.behaviourTag = behaviourTag
+        self.secondaryBehaviourTag = secondaryBehaviourTag
         self.lifeEvent = lifeEvent
         self.lifeArea = lifeArea
         self.note = note
@@ -135,6 +145,7 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         try c.encode(amount, forKey: .amount)
         try c.encode(plannedStatus, forKey: .plannedStatus)
         try c.encodeIfPresent(behaviourTag, forKey: .behaviourTag)
+        try c.encodeIfPresent(secondaryBehaviourTag, forKey: .secondaryBehaviourTag)
         try c.encodeIfPresent(lifeEvent, forKey: .lifeEvent)
         try c.encodeIfPresent(lifeArea, forKey: .lifeArea)
         try c.encodeIfPresent(note, forKey: .note)
@@ -156,6 +167,7 @@ struct MoneyEvent: Identifiable, Codable, Hashable {
         amount = try c.decode(Double.self, forKey: .amount)
         plannedStatus = try c.decode(PlannedStatus.self, forKey: .plannedStatus)
         behaviourTag = try c.decodeIfPresent(String.self, forKey: .behaviourTag)
+        secondaryBehaviourTag = try c.decodeIfPresent(String.self, forKey: .secondaryBehaviourTag)
         lifeEvent = try c.decodeIfPresent(String.self, forKey: .lifeEvent)
         lifeArea = try c.decodeIfPresent(String.self, forKey: .lifeArea)
         note = try c.decodeIfPresent(String.self, forKey: .note)

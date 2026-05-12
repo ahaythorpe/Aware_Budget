@@ -79,6 +79,66 @@ enum BiasRotation {
         return list[index % list.count]
     }
 
+    // MARK: - Pair selection (multi-bias)
+
+    /// Reverse lookup: bias name → bias category (e.g. "Loss Aversion" →
+    /// "Decision Making"). Built once from `biasCategories` so callers
+    /// don't pay an O(n) scan per lookup.
+    private static let biasCategoryByName: [String: String] = {
+        var map: [String: String] = [:]
+        for c in biasCategories {
+            for p in c.patterns {
+                map[p.name] = c.name
+            }
+        }
+        return map
+    }()
+
+    /// True when both bias names belong to the same bias category
+    /// (e.g. "Loss Aversion" and "Anchoring" both fall under
+    /// "Decision Making"). Used by the save path to drop a secondary
+    /// tag that becomes redundant after a boost-driven primary swap.
+    static func sameCategory(_ a: String, _ b: String) -> Bool {
+        guard let ca = biasCategoryByName[a],
+              let cb = biasCategoryByName[b] else { return false }
+        return ca == cb
+    }
+
+    /// Returns up to two biases for a (category × status) event: the
+    /// primary (current rotation pick) and an optional secondary from a
+    /// *different* bias category, so the user gets meaningfully
+    /// overlapping signals rather than two near-duplicates.
+    ///
+    /// Bella's algorithm constraint (2026-05-12): max two biases per
+    /// spending event, with the second only added when genuine overlap
+    /// exists. "Different bias category" is the proxy for genuine
+    /// overlap — same-category secondaries (e.g. two Social biases on
+    /// one Drinks purchase) get filtered out as redundant.
+    ///
+    /// Advances the rotation index once (same as `nextBias`) so the
+    /// caller doesn't double-advance when both fields are stored.
+    static func nextBiasPair(
+        category: String,
+        status: MoneyEvent.PlannedStatus
+    ) -> (primary: String, secondary: String?) {
+        let list = shortlist(category: category, status: status)
+        guard !list.isEmpty else { return ("Present Bias", nil) }
+
+        let key = "biasRot_\(category)_\(status.rawValue)"
+        let defaults = UserDefaults.standard
+        let index = defaults.integer(forKey: key)
+        let primary = list[index % list.count]
+        defaults.set(index + 1, forKey: key)
+
+        let primaryCategory = biasCategoryByName[primary]
+        let secondary = list
+            .first { name in
+                name != primary && biasCategoryByName[name] != primaryCategory
+            }
+
+        return (primary, secondary)
+    }
+
     // MARK: - Neglected-bias boost (adaptive threshold)
 
     /// Default fallback when the user hasn't logged enough to derive
