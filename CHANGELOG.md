@@ -5,6 +5,54 @@
 
 ---
 
+## 2026-05-12 — Build 22 — Nudge avatar, multi-bias model, Home future-you (Claude Code, Opus 4.7 1M)
+
+Biggest single-build batch this week. Lands the multi-bias model end-to-end, three new Home/Insights/Research UI restructures, copy fixes that close out false-claim risks for Apple review, and a docs audit alignment.
+
+### Multi-bias model (max 2 biases per spend)
+- **Data:** `MoneyEvent.secondaryBehaviourTag: String?` + migration `20260512200000_add_secondary_behaviour_tag.sql` (applied). `f13c2c0`.
+- **Algorithm:** `BiasRotation.nextBiasPair(category:status:)` returns primary + optional secondary from a *different* BFAS category. Same-category secondaries filtered out as redundant. `f13c2c0`.
+- **Save path:** MoneyEventViewModel now sets both tags optimistically and preserves the different-category invariant through the boost-rerank. `f13c2c0`.
+- **Logging UI:** MoneyEventView now shows the primary bias chip plus a subtler "+ also <Secondary>" pill when two drivers apply. Framed in real-planner voice (Pompian 2012, Klontz 2011). `efb1fa2`.
+- **Insights aggregation:** biasSpendingBreakdown counts both tags; each bias gets full credit for a co-driven spend. Total % can exceed 100 — accurate to the model. `efb1fa2`.
+- **AlgorithmExplainerSheet:** rewritten step-by-step section explaining the two-bias model + new "each tag earns the +1 independently" note. Old Status Quo example replaced with the actual current Coffee+Impulse mapping. `d555cac`.
+- **Consistency audit:** ALGORITHM.md step 1 + PRD.md scoring block updated to match shipped code. Deleted dead `suggestedBiasTag()` lookup table in MoneyEventViewModel (60 lines of stale Coffee+impulse → Status Quo Bias). `e13b84f`.
+
+### Profile avatar + Home greeting
+- **Default avatar:** Nudge cut-out replaces the gold initial-letter disc as the default profile picture. Uploaded photo still takes precedence. `3cad06f`.
+- **Right-corner Nudge:** bumped 40 → 56pt (peer-sized to the left avatar). Offset moved to float past the bottom-right of the greeting card. `3cad06f`.
+- **Future-you card:** new on Home, pinned above the calendar. Shows weekly planned-minus-impulse net + "N of 7 days you chose future you" pill. Empty state surfaces a Nudge note explaining the card fills in once spends log. `9eabc71`.
+
+### Insights restructure
+- **Financial overview** grouped INCOME / SPENDING / WEALTH with uppercase labels + hairline dividers between groups. WEALTH only renders when there's data to show. `945fe0f`.
+- **Spending by Bias** rebuilt as DisclosureGroup-per-BFAS-category. The flat top-5 list is now collapsible rows showing category total + % of monthly spend; tap to expand to the biases inside. `945fe0f`.
+
+### Research tab
+- **Bias lessons grouped by BFAS category** with DisclosureGroups (the chunky flat 16-card scroll is now collapsible). Categories with no lessons skipped. `e74859d`.
+
+### Mind map
+- **Canvas clears the pinned UI** — bumped `canvasTopPadding` 180 → 240 so personality lane labels never sit under the filter chips. `dd0c8ce`.
+
+### Copy / false-claim fixes (Apple review hygiene)
+- BiasData Ostrich Effect: drop hardcoded "12 days straight" claim — user has 2 days of activity. `9eabc71`.
+- BiasLessonsMock Denomination Effect: drop hardcoded "12 times this week / $87" personalised numbers. Reframed as illustrative. `9eabc71`.
+- BiasData Loss Aversion: rewrote to make the loss-vs-gain asymmetry explicit ("Losing $50 feels twice as bad as gaining $50 feels good") rather than confusing arithmetic. `9eabc71`.
+- BiasData Sunk Cost Fallacy: tighten run-on in the nudgeSays line. `dd0c8ce`.
+- Six BiasLessonsMock howToCounter strings: punctuation + run-on sweep (Ostrich, Loss Aversion, Anchoring, Sunk Cost, Present Bias, Status Quo, Mental Accounting). `ef243b2`.
+- ArchetypeRevealView: stop force-lowercasing archetype names + oneLiners in the why-explanation text (read like typos). `09caf61`.
+
+### Plan docs (v1.1 captured, not built)
+- `docs/PLAN_V1_1.md` covers #32 interactive charts (port CompoundGrowthCard pattern to bias / category / net-worth / financial trends) and #30 concept-graph layouts in Education tab. Both deferred to v1.1. `adc728c`.
+
+### Known gap (v1.0 carry-over)
+- `BiasReviewView` confirm flow still reviews the primary bias only. Secondary tag contributes to Insights aggregation but isn't presented for separate confirm/deny yet. Score updates via primary only. Recoverable post-launch without a migration.
+
+---
+
+## 2026-05-12 — Build 21 — chart differentiation + plain-English explainer + tree hygiene (Claude Code, Opus 4.7 1M)
+
+---
+
 ## 2026-05-12 — Build 21 — chart differentiation + plain-English explainer + tree hygiene (Claude Code, Opus 4.7 1M)
 
 Follow-up to Build 20 picking up the train-ride feedback (jargon on the algorithm sheet, the two graphs looking the same).

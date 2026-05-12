@@ -238,6 +238,13 @@ final class HomeViewModel {
                 weekSpendTrend = "$0"
                 weekSpendTrendUp = nil
             }
+            // Surface week data to the future-you Home card.
+            self.weekEvents = weekEvents
+            self.weekCheckInDays = Set(
+                weekHistory
+                    .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .weekOfYear) }
+                    .map { Calendar.current.component(.weekday, from: $0.date) }
+            ).count
 
             // Event logging streak (consecutive days with events)
             let allEvents = try await service.fetchMoneyEvents(forMonth: Date())

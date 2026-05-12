@@ -1,7 +1,7 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-05-12 (Build 21 staged)
+> Updated: 2026-05-12 (Build 22 staged)
 
 ---
 
@@ -21,6 +21,7 @@
 | 18 | Muted/sophisticated colour theme — `accent #3F7A47`, `goldBase #A87E2A`, `goldText #D4A745`, supporting greens softened |
 | 20 | UX cleanup: Nudge coin cut-out on Home · Insights empty-state no longer flashes blank charts · mind-map lane rectangles removed · node sheet redesigned (stat chip, bullet counters, real-example disclosure, related chips) · NudgeSays purpose card pinned on mind-map canvas · notification scheduling gated on permission grant · 11 verbose Insights blurbs compressed |
 | 21 | Algorithm sheet plain English (no more "gold standard"/"weak signal") · bias-trend vs category-trend now visually distinct (warm gold vs cool green palettes + subtitles) · mind-map filter chips wired back into canvas · editorial pass on Awareness/Home/BiasReview/Settings/Patterns/Credibility · Onboarding/SignIn microcopy legibility bump · tree fully clean (AppConfig, .storekit, 7 migrations now tracked) |
+| 22 | Multi-bias model end-to-end (data + algo + UI + aggregation + explainer) · Nudge cut-out as default profile avatar · future-you card on Home above calendar · Financial overview grouped INCOME/SPENDING/WEALTH · Spending-by-Bias + Research tab cards as collapsible BFAS categories · mind-map canvas clears pinned UI · false-claim fixes (Ostrich 12-days, Denomination 12-taps-$87) · Loss Aversion phrasing fix · 6 howToCounter run-on rewrites · algorithm doc consistency audit pass · v1.1 plan captured |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 
