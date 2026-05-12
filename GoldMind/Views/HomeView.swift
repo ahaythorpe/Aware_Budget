@@ -215,7 +215,7 @@ struct HomeView: View {
                                 .minimumScaleFactor(0.85)
                                 .lineLimit(1)
                             InfoPopover(
-                                "Days in a row you opened the app and completed your check-in.",
+                                "Days in a row you checked in.",
                                 title: "DAY STREAK"
                             )
                         }
@@ -259,7 +259,7 @@ struct HomeView: View {
                                         .font(.system(.subheadline, weight: .semibold))
                                         .foregroundStyle(DS.textSecondary)
                                     InfoPopover(
-                                        "Patterns are the 16 biases tracked from your tagged spending. Each log moves the count.",
+                                        "16 biases tracked from your tagged spending. Each log moves the count.",
                                         title: "PATTERNS"
                                     )
                                 }
@@ -717,12 +717,12 @@ struct HomeView: View {
 
         let nudgeLine: String = {
             if isEmpty {
-                return "Track your income and savings. Nudge connects the dots to your spending patterns."
+                return "Track income and savings. Nudge connects them to your spending."
             }
             if let last = lastUpdated {
                 let days = Calendar.current.dateComponents([.day], from: last, to: Date()).day ?? 0
                 if days > 30 {
-                    return "It's been \(days) days since you updated. A quick refresh keeps the picture honest."
+                    return "\(days) days since your last update. A refresh keeps the picture honest."
                 }
             }
             return NudgeVoice.random(NudgeVoice.motto)
@@ -885,7 +885,7 @@ struct HomeView: View {
                         .padding(.top, 20)
 
                     NudgeSaysCard(
-                        message: "This is 100% voluntary. GoldMind never connects to your bank. You type your own numbers. Under Australian law, that means only the Privacy Act 1988 applies. No financial licence, no CDR, no regulation beyond basic data privacy.",
+                        message: "100% voluntary. GoldMind never connects to your bank. You type your own numbers, so only the Privacy Act 1988 applies. No financial licence, no CDR.",
                         citation: "Privacy Act 1988 (Cth) · no AFSL · no CDR",
                         surface: .whiteShimmer
                     )
@@ -955,7 +955,7 @@ struct HomeView: View {
 
             VStack(spacing: 16) {
                 NudgeSaysCard(
-                    message: "The trend graph only works when it has numbers to compare. Without income and savings, Nudge can't show you how awareness changes your finances. It takes 30 seconds.",
+                    message: "The trend graph needs numbers to compare. Without income and savings, Nudge can't show how awareness shifts your finances. 30 seconds.",
                     citation: "Thaler 1985 · Mental Accounting",
                     surface: .whiteShimmer
                 )
