@@ -323,6 +323,11 @@ struct HomeView: View {
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
 
+                // ── FUTURE YOU (above the calendar) ──
+                futureYouCard
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 12)
+
                 // ── MONTH CALENDAR ──
                 MonthCalendarView(eventsByDay: viewModel.monthEventsByDay)
                     .padding(.horizontal, 18)
@@ -712,6 +717,61 @@ struct HomeView: View {
     private func firstSentence(_ text: String) -> String {
         text.split(separator: ".", maxSplits: 1).first
             .map { String($0).trimmingCharacters(in: .whitespaces) + "." } ?? text
+    }
+
+    /// "Future you" hero — the planned-vs-impulse net of this week's
+    /// spending. Surfaces above the calendar so the user sees the
+    /// weekly summary before drilling into individual days. Empty
+    /// state shows a Nudge note explaining it'll populate after logs.
+    private var futureYouCard: some View {
+        let planned = viewModel.weekEvents.filter { $0.plannedStatus == .planned }.reduce(0.0) { $0 + $1.amount }
+        let unplanned = viewModel.weekEvents.filter { $0.plannedStatus.isUnplanned }.reduce(0.0) { $0 + $1.amount }
+        let net = planned - unplanned
+        let checkInDays = viewModel.weekCheckInDays
+
+        return ZStack(alignment: .topTrailing) {
+            Circle()
+                .fill(Color.white.opacity(0.06))
+                .frame(width: 100, height: 100)
+                .offset(x: 30, y: -25)
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 6) {
+                    Text("FUTURE YOU")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .tracking(1.4)
+                        .foregroundStyle(DS.goldText)
+                    Spacer()
+                }
+
+                if viewModel.weekEvents.isEmpty {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image("nudge")
+                            .resizable().scaledToFit()
+                            .frame(width: 32, height: 32)
+                        Text("Log a spend or two and this fills in. You'll see the weekly net of planned versus impulse, and how many days you chose future you.")
+                            .font(.system(.subheadline, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.92))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                } else {
+                    let sign = net >= 0 ? "+" : ""
+                    Text("\(sign)$\(Int(abs(net))) from future you")
+                        .font(.system(.title3, weight: .bold))
+                        .foregroundStyle(.white)
+                    Text("\(checkInDays) of 7 days you chose future you")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.8))
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous)
+                .fill(DS.heroGradient)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: DS.cardRadius, style: .continuous))
     }
 
     private var yourFinancesCard: some View {

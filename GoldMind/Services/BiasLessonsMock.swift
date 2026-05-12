@@ -105,7 +105,7 @@ enum BiasLessonsMock {
             category: "Money Psychology",
             shortDescription: "We spend small denominations more freely than large ones, especially digital.",
             fullExplanation: "Raghubir and Srivastava (2009) showed people spend more when using small bills or digital payments versus large notes. Tap-and-go removes the friction that used to slow spending down.",
-            realWorldExample: "You tap your card 12 times this week for coffees and snacks. Each felt trivial. The total is $87. You would have noticed handing over a $100 note.",
+            realWorldExample: "A week of small card taps for coffees and snacks. Each one feels trivial. The total quietly adds up to more than you'd ever hand over as a single note.",
             howToCounter: "Check your weekly total, not individual transactions. Set up a weekly push notification showing total tap-and-go spend.",
             emoji: "💳",
             sortOrder: 9
