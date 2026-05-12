@@ -14,7 +14,7 @@ enum BiasLessonsMock {
             shortDescription: "We avoid information that might be bad news, even when knowing would help us.",
             fullExplanation: "The Ostrich Effect describes our tendency to ignore negative financial information. Research by Galai and Sade (2006) showed that investors check portfolios less frequently when markets fall. The irony is that avoidance increases anxiety over time while exposure reduces it.",
             realWorldExample: "You notice your balance is lower than expected so you stop checking your banking app. Three weeks later you are hit with an overdraft fee you could have avoided.",
-            howToCounter: "Start with the smallest possible exposure: just open the app. You do not have to do anything. Just look. Regular low-stakes exposure reduces the stress response until checking feels normal.",
+            howToCounter: "Start small. Just open the app. You don't have to do anything. Just look. Regular low-stakes exposure dulls the stress response. Eventually checking feels normal.",
             emoji: "🫣",
             sortOrder: 1
         ),
@@ -27,7 +27,7 @@ enum BiasLessonsMock {
             shortDescription: "Losses feel roughly twice as painful as equivalent gains feel good.",
             fullExplanation: "Kahneman and Tversky's Prospect Theory (1979) showed the pain of losing $50 is psychologically equivalent to the pleasure of gaining ~$100. This asymmetry distorts decisions in both directions.",
             realWorldExample: "You bought shares that have fallen 30%. Selling would lock in the loss, so you hold, telling yourself they will recover, while a better opportunity sits in front of you.",
-            howToCounter: "Ask: if I did not already own this, would I buy it today? If no, loss aversion may be driving the decision. Reframing as choosing between options reduces the emotional charge.",
+            howToCounter: "Ask: if I didn't already own this, would I buy it today? If no, loss aversion is driving you. Reframing the decision as a choice between options cuts the emotional charge.",
             emoji: "📉",
             sortOrder: 2
         ),
@@ -38,7 +38,7 @@ enum BiasLessonsMock {
             shortDescription: "The first number we see sets an invisible reference point for every number after.",
             fullExplanation: "Tversky and Kahneman (1974) showed that arbitrary initial values systematically bias estimates. In retail, the original price anchors your perception so the sale price feels like a bargain, even when the sale price is still above fair value.",
             realWorldExample: "A jacket marked down from $400 to $200 feels like a steal. But you would never have paid $200 for it without the anchor. The discount is doing the selling.",
-            howToCounter: "Decide your price before seeing theirs. Write down what an item is worth to you before browsing. If the sale price is above your number, walk away.",
+            howToCounter: "Decide your price before seeing theirs. Write your number down before you browse. If the sale price is above it, walk away.",
             emoji: "⚓",
             sortOrder: 3
         ),
@@ -49,7 +49,7 @@ enum BiasLessonsMock {
             shortDescription: "We throw good money after bad because we cannot let go of what we already spent.",
             fullExplanation: "The sunk cost fallacy leads us to continue investing in something because of what we have already put in rather than what we expect to get out. Past costs should be irrelevant to future decisions, but they rarely feel that way.",
             realWorldExample: "You have spent $3,000 renovating a car that keeps breaking down. You spend another $1,500 because otherwise the first $3,000 was wasted. But it was already wasted.",
-            howToCounter: "Ask: would I choose this if I were starting from scratch today? If no, the sunk cost is driving the decision. Walk away from past spending and evaluate the future on its own terms.",
+            howToCounter: "Ask: would I choose this if I were starting from scratch today? If no, the sunk cost is driving the decision. Walk away from past spending. Judge the future on its own terms.",
             emoji: "🧾",
             sortOrder: 4
         ),
@@ -95,7 +95,7 @@ enum BiasLessonsMock {
             shortDescription: "We treat money differently depending on where it came from or what it is for.",
             fullExplanation: "Richard Thaler (Nobel 2017) showed we create psychological buckets for different types of money. Windfall money gets spent more freely even though $100 from a refund buys exactly the same things as $100 from salary.",
             realWorldExample: "You receive a $300 tax refund and immediately spend it on something you would never have justified from salary. The refund felt like free money. It was your money all along.",
-            howToCounter: "Before spending any windfall ask: would I spend this if it came from my salary? If no, that is mental accounting talking. Treat all money as interchangeable, because it is.",
+            howToCounter: "Before spending any windfall, ask: would I spend this if it came from my salary? If no, that's mental accounting talking. Treat all money as interchangeable. Because it is.",
             emoji: "🧮",
             sortOrder: 8
         ),
@@ -130,7 +130,7 @@ enum BiasLessonsMock {
             shortDescription: "We consistently overvalue the present at the expense of our future selves.",
             fullExplanation: "Present bias is the tendency to prefer smaller sooner rewards over larger later ones. Behavioural economists call this hyperbolic discounting. We treat our future self like a stranger whose interests matter less.",
             realWorldExample: "You know you should put $200 into savings this month. But a weekend away feels urgent and vivid. Future-you's retirement feels abstract. You go on the trip.",
-            howToCounter: "Make your future self more vivid: write a letter to them, name a savings pot after a goal, use a photo of somewhere you want to go. The less abstract the future, the less steeply we discount it.",
+            howToCounter: "Make your future self vivid. Write them a letter. Name a savings pot after a goal. Use a photo of where you want to go. The less abstract the future, the less steeply we discount it.",
             emoji: "⏰",
             sortOrder: 11
         ),
@@ -189,7 +189,7 @@ enum BiasLessonsMock {
             shortDescription: "We prefer the current state of affairs and resist change even when change is beneficial.",
             fullExplanation: "Samuelson and Zeckhauser (1988) described the tendency to prefer the existing situation. Driven by loss aversion, regret aversion, and cognitive ease. Costs money every year through insurance auto-renewals and forgotten subscriptions.",
             realWorldExample: "Your home insurance renews automatically at a price that has increased 20% year-on-year. Switching would take 25 minutes and save $200. But switching feels like effort. So you renew.",
-            howToCounter: "Schedule a quarterly financial MOT: a short session to review what you are paying and whether anything should change. Making inertia-breaking a habit removes the activation energy.",
+            howToCounter: "Schedule a quarterly money review. A short session to check what you're paying and whether anything should change. Making it a habit removes the activation energy.",
             emoji: "🛑",
             sortOrder: 16
         ),
