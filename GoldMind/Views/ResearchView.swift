@@ -751,7 +751,11 @@ struct ResearchView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-        .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
+        )
+        .premiumCardShadow()
     }
 
     // MARK: - BFAS Framework card
@@ -779,7 +783,11 @@ struct ResearchView: View {
             }
             .padding(14)
             .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-            .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
+            )
+            .premiumCardShadow()
         }
     }
 
@@ -796,7 +804,11 @@ struct ResearchView: View {
             }
             .padding(16)
             .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
-            .shimmeringGoldBorder(cornerRadius: DS.cardRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.cardRadius)
+                    .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
+            )
+            .premiumCardShadow()
         }
     }
 
