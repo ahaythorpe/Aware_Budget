@@ -720,7 +720,7 @@ struct ResearchView: View {
 
     private var papersSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("THE FOUR PAPERS")
+            sectionLabel("THE MAIN PAPERS")
             VStack(spacing: 10) {
                 ForEach(papers) { paper in
                     paperCard(paper)
