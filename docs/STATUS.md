@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 24 (staged 2026-05-12 — Research interactivity + Full Picture/Real Example disclosures + trigger chip · category-trend gold palette · notification routing fix · Research dropdown polish)
+**Current build:** 25 (staged 2026-05-13 — notification routing fix lands · bias → personality attribution on Research + Awareness · richer Home chart explainer · Research inner-card polish)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things

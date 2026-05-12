@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-05-13 — Build 25 — notification routing fix lands; bias → personality attribution; richer chart explainer (Claude Code, Opus 4.7 1M)
+
+- **Notifications:** weekly review + monthly checkpoint pushes now route to Log tab (morning slot) per Bella's "all notifications land on Quick Log or log-numbers" principle. Removed the dead `openInsights` route case; RootTabView + HomeView consumePendingRoute simplified back to single-branch. Bias-hit push still routes to Log. `481436b`.
+- **Home chart explainer:** Nudge note above the compound-growth chart rewritten in plain English explaining the method ("Nudge takes your last 30 days of logged spending and projects what it compounds to at 8% annual return..."). Added a citation line on the 8% assumption (long-run market average). `481436b`.
+- **Research inner card polish:** the inner "overcome" cards inside each category dropdown still had the old heavy gold stroke. Brought into line with the outer card aesthetic — stroke 0.4 → 0.18 + hairline 0.5pt + `.premiumCardShadow()`. Inner + outer now read as one consistent card family. `481436b`.
+- **Bias → personality attribution:** Research tab DisclosureGroup labels and Awareness tab category headers now show "The {Archetype}" as the primary heading with the BFAS category name underneath as a subtle attribution. Users see at a glance which spending personality owns which biases. YOU pill on the user's own archetype in Research.
+
+---
+
 ## 2026-05-12 — Build 24 — Research interactivity, gold palette, notification routing fix (Claude Code, Opus 4.7 1M)
 
 - **Category-trend chart palette** swapped from cool greens to a gold-family palette (goldBase, goldText, matteYellow, warning, goldForeground) so it sits naturally in the rest of the gold-themed Insights. Subtitle still differentiates WHY (bias trend) vs WHERE (category trend). `13eed6d`.

@@ -287,15 +287,34 @@ struct AwarenessView: View {
         )
     }
 
+    /// Surface the spending personality (archetype) that owns each BFAS
+    /// category. Builds the bias → personality link in plain sight, so
+    /// users scrolling the Awareness list can attribute the 16 patterns
+    /// to the 6 spending personalities from the Money Mind Quiz.
+    private func archetypeName(forCategory name: String) -> String {
+        switch name {
+        case "Avoidance":         return "The Drifter"
+        case "Decision Making":   return "The Reactor"
+        case "Money Psychology":  return "The Bookkeeper"
+        case "Time Perception":   return "The Now"
+        case "Social":            return "The Bandwagon"
+        case "Defaults & Habits": return "The Autopilot"
+        default:                  return ""
+        }
+    }
+
     private func categoryHeader(_ name: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Image(systemName: icon(for: name))
                     .font(.system(size: 12, weight: .heavy))
                     .foregroundStyle(DS.goldBase)
+                Text(archetypeName(forCategory: name))
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(DS.textPrimary)
                 Text(name.uppercased())
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .tracking(1.5)
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(1.2)
                     .foregroundStyle(DS.goldBase)
             }
             .padding(.horizontal, 14)

@@ -1,7 +1,7 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-05-12 (Build 24 staged)
+> Updated: 2026-05-13 (Build 25 staged)
 
 ---
 
@@ -24,6 +24,7 @@
 | 22 | Multi-bias model end-to-end (data + algo + UI + aggregation + explainer) · Nudge cut-out as default profile avatar · future-you card on Home above calendar · Financial overview grouped INCOME/SPENDING/WEALTH · Spending-by-Bias + Research tab cards as collapsible BFAS categories · mind-map canvas clears pinned UI · false-claim fixes (Ostrich 12-days, Denomination 12-taps-$87) · Loss Aversion phrasing fix · 6 howToCounter run-on rewrites · algorithm doc consistency audit pass · v1.1 plan captured |
 | 23 | Home future-you swapped to the interactive CompoundGrowthCard (range chips + drag-to-zoom + stat row) · Research tab text scales now consistent with rest of app · 4 nudgeSays accuracy fixes (Mental Accounting / Planning Fallacy / Status Quo / Moral Licensing) |
 | 24 | Category-trend chart palette → gold family · notification routing fix (bias-hit → Log, weekly + monthly review → new Insights route) · Research dropdown polish (lighter stroke + matched label/chip styling + shadow) · Research card interactivity: "Seen N×" personal trigger chip, "THE FULL PICTURE" + "REAL EXAMPLE" collapsibles surfacing previously-unused BiasLesson fields |
+| 25 | Notification routing reverted: weekly + monthly review pushes now also route to Log tab (per Bella's "all to Quick Log") · richer Nudge explainer on the Home compound-growth chart with method + citation · Research inner overcome cards now match outer card aesthetic (hairline stroke + shadow) · bias→personality attribution surfaced on Research labels + Awareness category headers ("The Drifter · AVOIDANCE", "YOU" pill on user's archetype) |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 

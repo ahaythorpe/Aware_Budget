@@ -878,6 +878,8 @@ struct ResearchView: View {
                     BiasLessonsMock.seed.first(where: { $0.biasName == p.name })
                 }
                 if !lessonsInCategory.isEmpty {
+                    let archetypeRaw = archetypeRawValue(forCategory: category.name)
+                    let isYou = userArchetype == archetypeRaw
                     DisclosureGroup {
                         VStack(spacing: 10) {
                             ForEach(lessonsInCategory, id: \.id) { lesson in
@@ -886,10 +888,31 @@ struct ResearchView: View {
                         }
                         .padding(.top, 10)
                     } label: {
-                        HStack(spacing: 8) {
-                            Text(category.name)
-                                .font(.system(.subheadline, weight: .semibold))
-                                .foregroundStyle(DS.textPrimary)
+                        // Two-line label: archetype name in bold (with
+                        // YOU pill if it's the user's), then the BFAS
+                        // category as a subtle attribution underneath.
+                        // Surfaces the bias → spending-personality link.
+                        HStack(alignment: .center, spacing: 8) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text("The \(archetypeRaw)")
+                                        .font(.system(.subheadline, weight: .semibold))
+                                        .foregroundStyle(DS.textPrimary)
+                                    if isYou {
+                                        Text("YOU")
+                                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                                            .tracking(0.8)
+                                            .foregroundStyle(.white)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Capsule().fill(DS.accent))
+                                    }
+                                }
+                                Text(category.name.uppercased())
+                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                    .tracking(0.8)
+                                    .foregroundStyle(DS.goldBase)
+                            }
                             Spacer()
                             Text("\(lessonsInCategory.count)")
                                 .font(.system(size: 11, weight: .heavy, design: .rounded))
