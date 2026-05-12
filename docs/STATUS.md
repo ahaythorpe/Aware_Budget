@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 20 (uploaded to TestFlight 2026-05-12, processing)
+**Current build:** 21 (staged 2026-05-12, follow-up to Build 20 with chart palette differentiation, plain-English algorithm sheet, mind-map filter chips, more editorial)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things

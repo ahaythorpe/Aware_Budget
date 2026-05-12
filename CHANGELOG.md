@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-05-12 — Build 21 — chart differentiation + plain-English explainer + tree hygiene (Claude Code, Opus 4.7 1M)
+
+Follow-up to Build 20 picking up the train-ride feedback (jargon on the algorithm sheet, the two graphs looking the same).
+
+- **AlgorithmExplainerSheet:** score-delta rows now in plain English. Right column shows just the number (+5, −2, 0, +1, 0–10) and the left column names the actual user action ("'Yes, that's me' in a check-in", "A logged spend tagged with this bias", "Your sign-up BFAS answers"). No more "gold standard" / "weak signal" / "active denial" / "one-time seed". `72566a6`.
+- **Insights charts:** bias-trend and category-trend were rendering with the same gold→yellow→green palette. Differentiated — bias = warm gold (goldBase, goldText, matteYellow, warning, deepGreen), category = cool green (accent, deepGreen, primary, lightGreen, goldBase). Each gained a subtitle line: bias = "WHY you spent...", category = "WHERE the money went...". `60aeb92`.
+- **Mind map:** filter chips (All / My top 3 / Triggered / Untouched) were defined but never inserted into the canvas; wired back in below the purpose card. `62825ed`.
+- **Editorial passes:** verbose blurbs compressed across AwarenessView, HomeView, BiasReviewView, SettingsView, PatternsDetailView, CredibilitySheet, AlgorithmExplainerSheet. Same meaning, fewer words. `782d87d`, `e0789d0`, `90a727e`, `81fb852`, `5759fb3`.
+- **Onboarding + SignIn legibility:** caption-sized microcopy bumped to footnote/medium weight, SignIn privacy line opacity 70→80%. `c1cb3db`.
+- **Tree hygiene:** AppConfig.swift, GoldMind.storekit, 7 supabase migrations (Apple-compliance batch from 2026-05-09) now in version control. `.agents/.claude/.kiro/` added to .gitignore. Working tree fully clean. `121beec`, `96a9105`, `edaece2`.
+
+---
+
 ## 2026-05-12 — Build 20 — UX cleanup + notification gate (Claude Code, Opus 4.7 1M)
 
 Nine commits sweeping the rough edges Bella surfaced during Build 18 TestFlight testing.

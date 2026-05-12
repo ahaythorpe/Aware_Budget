@@ -1,7 +1,7 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-05-12 (Build 20 staged, not yet uploaded)
+> Updated: 2026-05-12 (Build 21 staged)
 
 ---
 
@@ -20,6 +20,7 @@
 | 17 | Em-dash sweep round 5 (9 user-facing strings) |
 | 18 | Muted/sophisticated colour theme — `accent #3F7A47`, `goldBase #A87E2A`, `goldText #D4A745`, supporting greens softened |
 | 20 | UX cleanup: Nudge coin cut-out on Home · Insights empty-state no longer flashes blank charts · mind-map lane rectangles removed · node sheet redesigned (stat chip, bullet counters, real-example disclosure, related chips) · NudgeSays purpose card pinned on mind-map canvas · notification scheduling gated on permission grant · 11 verbose Insights blurbs compressed |
+| 21 | Algorithm sheet plain English (no more "gold standard"/"weak signal") · bias-trend vs category-trend now visually distinct (warm gold vs cool green palettes + subtitles) · mind-map filter chips wired back into canvas · editorial pass on Awareness/Home/BiasReview/Settings/Patterns/Credibility · Onboarding/SignIn microcopy legibility bump · tree fully clean (AppConfig, .storekit, 7 migrations now tracked) |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 
