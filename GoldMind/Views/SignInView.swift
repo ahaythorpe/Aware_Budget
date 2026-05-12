@@ -60,8 +60,8 @@ struct SignInView: View {
                 }
 
                 Text("Your Apple ID stays private. We only get the email you choose to share.")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .font(.system(.footnote, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .padding(.bottom, 32)

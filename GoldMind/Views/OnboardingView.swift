@@ -126,7 +126,7 @@ struct OnboardingView: View {
                                         .font(.subheadline.weight(.bold))
                                         .foregroundStyle(DS.textPrimary)
                                     Text(p.line)
-                                        .font(.caption)
+                                        .font(.system(.footnote, weight: .medium))
                                         .foregroundStyle(DS.textSecondary)
                                 }
 
