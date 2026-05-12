@@ -642,6 +642,11 @@ struct HomeView: View {
             financeSavings = ""
             financeInvestment = ""
             showFinanceEditor = true
+        case .openInsights:
+            // Handled by RootTabView (tab switch + clear). HomeView
+            // doesn't react to insights routes; this case just keeps
+            // the switch exhaustive.
+            return
         }
         router.pendingRoute = nil
     }

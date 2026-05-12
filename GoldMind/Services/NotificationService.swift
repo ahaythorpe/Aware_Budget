@@ -186,6 +186,11 @@ enum NotificationService {
         content.title = "GoldMind"
         content.body = "\(biasName) appeared \(count) times. Nudge has something."
         content.sound = .default
+        // Bias-hit pushes had no destination — tap opened the app on the
+        // default tab. Route to Log via the morning slot so the user
+        // lands on a productive surface (Quick log) consistent with the
+        // rest of the spend-related pushes.
+        content.userInfo["slot"] = NotificationSlot.morning.rawValue
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
@@ -305,6 +310,8 @@ enum NotificationService {
                         "Seven days, laid bare.",
                         "Sunday review is ready."].randomElement() ?? "Weekly review ready."
         content.sound = .default
+        // Tap lands on the Insights tab — that's where the weekly data lives.
+        content.userInfo["route"] = NotificationRoute.openInsights.rawValue
 
         var components = DateComponents()
         components.weekday = 1  // Sunday
@@ -329,6 +336,8 @@ enum NotificationService {
                         "Still yes? Still no?",
                         "Monthly checkpoint. Not a grade."].randomElement() ?? "Monthly checkpoint."
         content.sound = .default
+        // Same as weekly review — Insights is where the month's data lives.
+        content.userInfo["route"] = NotificationRoute.openInsights.rawValue
 
         var components = DateComponents()
         components.day = 1      // 1st of month

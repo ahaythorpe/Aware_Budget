@@ -10,6 +10,12 @@ enum NotificationRoute: String {
     /// Used by the "Add your numbers" first-week reminder so a tap from
     /// the lock screen lands on the same UI as the Home empty-state CTA.
     case openFinanceEditor = "finance_editor"
+
+    /// Switch to the Insights tab. Used by the weekly review push (Sunday
+    /// 10am) and the monthly checkpoint push (1st of month 10am) — both
+    /// are "look at the data" prompts, not "log new data" prompts, so
+    /// they should land on Insights rather than the Log/Quick-log surface.
+    case openInsights = "insights"
 }
 
 /// Catches notification taps and routes them into the app. When the

@@ -872,19 +872,20 @@ struct ResearchView: View {
                                 overcomeCard(lesson)
                             }
                         }
-                        .padding(.top, 8)
+                        .padding(.top, 10)
                     } label: {
                         HStack(spacing: 8) {
                             Text(category.name)
-                                .font(.system(.headline, weight: .semibold))
+                                .font(.system(.subheadline, weight: .semibold))
                                 .foregroundStyle(DS.textPrimary)
                             Spacer()
                             Text("\(lessonsInCategory.count)")
-                                .font(.caption.weight(.bold))
+                                .font(.system(size: 11, weight: .heavy, design: .rounded))
                                 .foregroundStyle(DS.goldBase)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Capsule().fill(DS.goldBase.opacity(0.1)))
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(DS.goldBase.opacity(0.08)))
+                                .overlay(Capsule().stroke(DS.goldBase.opacity(0.25), lineWidth: 0.5))
                         }
                     }
                     .tint(DS.goldBase)
@@ -892,8 +893,9 @@ struct ResearchView: View {
                     .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
                     .overlay(
                         RoundedRectangle(cornerRadius: DS.cardRadius)
-                            .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+                            .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
                     )
+                    .premiumCardShadow()
                 }
             }
         }
