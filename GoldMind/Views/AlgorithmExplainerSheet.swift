@@ -203,11 +203,11 @@ struct AlgorithmExplainerSheet: View {
     private var scoringCard: some View {
         sectionCard(title: "HOW THE SCORE MOVES") {
             VStack(alignment: .leading, spacing: 10) {
-                scoreRow("⬆ \"Yes, that's me\" (you identified it)", "+5 gold standard")
-                scoreRow("⬇ \"No, different reason\" (active denial)", "−2")
-                scoreRow("• \"Not sure\" (no signal)", "0")
-                scoreRow("⬆ Each passive event tag", "+1 weak signal")
-                scoreRow("⬆ BFAS baseline at signup", "0–10 one-time seed")
+                scoreRow("⬆ \"Yes, that's me\" in a check-in", "+5")
+                scoreRow("⬇ \"No, different reason\" in a check-in", "−2")
+                scoreRow("• \"Not sure\" in a check-in", "0")
+                scoreRow("⬆ A logged spend tagged with this bias", "+1")
+                scoreRow("⬆ Your sign-up BFAS answers", "0 to 10 (one-off)")
                 Divider().background(DS.accent.opacity(0.15))
                 Text("Active YES outweighs passive observation 5:1. Why: Stone et al. 1991, Robinson & Clore 2002. When you identify a pattern in real time, you're 3–5× more accurate than any algorithm watching from the outside. Beck 1976: the act of self-labelling is itself part of the change.")
                     .font(.system(.footnote, weight: .semibold))
