@@ -36,7 +36,7 @@ struct MindMapView: View {
     private let headerHeight: CGFloat = 112  // taller header + breathing room between title and first node
     private let nodeSpacing: CGFloat = 96
     private let nodeSize: CGFloat = 40
-    private let canvasTopPadding: CGFloat = 180  // header + NudgeSays card + filter bar
+    private let canvasTopPadding: CGFloat = 240  // header + NudgeSays card + filter bar — with clearance so lane labels never sit under the chips
     private let labelHeight: CGFloat = 36
     private let headerToNodeGap: CGFloat = 18  // explicit gap after the header divider
 

@@ -49,6 +49,12 @@ final class HomeViewModel {
     // Monthly calendar — events grouped by day-of-month string (ISO date-only)
     var monthEventsByDay: [String: [MoneyEvent]] = [:]
 
+    // This-week snapshot used by the Home future-you card. Empty when
+    // no events were logged this week — Home renders an empty Nudge
+    // explanation in that case.
+    var weekEvents: [MoneyEvent] = []
+    var weekCheckInDays: Int = 0
+
     private let service = SupabaseService.shared
 
     var isCheckedInToday: Bool { todaysCheckIn != nil }
