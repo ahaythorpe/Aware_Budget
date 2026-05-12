@@ -263,7 +263,7 @@ struct ArchetypeRevealView: View {
     /// Keeps the table educational: the secondary signal is also real,
     /// just not the dominant one in your answers.
     private func whyExplanation(primary: Archetype, secondary: Archetype) -> String {
-        "Your answers leaned harder on the patterns behind \(primary.displayName.lowercased()) (\(primary.oneLiner.lowercased())) than \(secondary.displayName.lowercased()) (\(secondary.oneLiner.lowercased())). Both signals are present in you. The primary is just where Nudge will start watching first."
+        "Your answers leaned harder on the patterns behind \(primary.displayName) (\(primary.oneLiner)) than \(secondary.displayName) (\(secondary.oneLiner)). Both signals are present in you. The primary is just where Nudge will start watching first."
     }
 
     // MARK: - Footer
