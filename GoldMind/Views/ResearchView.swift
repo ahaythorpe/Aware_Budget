@@ -38,6 +38,11 @@ struct ResearchView: View {
     /// Used for the "Tap to see Nudge's take" interaction so each bias
     /// can flip between a one-liner and a longer Nudge note.
     @State private var revealedBiases: Set<UUID> = []
+    /// Per-lesson disclosure state for the new Research card sections.
+    /// Lessons start collapsed so the card stays scannable; tapping
+    /// "Full picture" or "Real example" expands that section only.
+    @State private var expandedFullPicture: Set<UUID> = []
+    @State private var expandedRealExample: Set<UUID> = []
 
     /// Friendly archetype name + tagline + citation marker per category.
     /// Tied to the canonical 6-archetype framework approved 2026-05-11
@@ -365,6 +370,13 @@ struct ResearchView: View {
     private func triggerCount(for p: BiasPattern) -> Int {
         let progressed = biasProgress.first(where: { $0.biasName == p.name })?.timesEncountered ?? 0
         let tagged = eventTagCounts[p.name] ?? 0
+        return progressed + tagged
+    }
+
+    /// Name-based overload used by Research bias cards.
+    private func triggerCount(forBias name: String) -> Int {
+        let progressed = biasProgress.first(where: { $0.biasName == name })?.timesEncountered ?? 0
+        let tagged = eventTagCounts[name] ?? 0
         return progressed + tagged
     }
 
@@ -902,16 +914,33 @@ struct ResearchView: View {
     }
 
     private func overcomeCard(_ lesson: BiasLesson) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let count = triggerCount(forBias: lesson.biasName)
+        let showFullPicture = expandedFullPicture.contains(lesson.id)
+        let showExample = expandedRealExample.contains(lesson.id)
+        return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Text(lesson.emoji)
                     .font(.system(size: 20))
                 Text(lesson.biasName)
                     .font(.system(.headline, weight: .semibold))
                     .foregroundStyle(DS.textPrimary)
+                Spacer()
+                // Personal trigger chip — same pattern as the mind-map
+                // node sheet (Seen N×). Lets the user see at a glance
+                // whether they've encountered this bias in their logs.
+                if count > 0 {
+                    Text("Seen \(count)×")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .tracking(0.4)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(DS.accent))
+                }
             }
 
             VStack(alignment: .leading, spacing: 8) {
+                // HOW TO SPOT IT — short, always visible.
                 HStack(alignment: .top, spacing: 6) {
                     Image(systemName: "eye.fill")
                         .font(.caption)
@@ -930,6 +959,78 @@ struct ResearchView: View {
                     }
                 }
 
+                // THE FULL PICTURE — collapsible. Surfaces lesson.fullExplanation,
+                // which previously sat unused in the data model.
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        if showFullPicture { expandedFullPicture.remove(lesson.id) }
+                        else               { expandedFullPicture.insert(lesson.id) }
+                    }
+                } label: {
+                    HStack(alignment: .top, spacing: 6) {
+                        Image(systemName: "text.book.closed.fill")
+                            .font(.caption)
+                            .foregroundStyle(DS.goldBase)
+                            .frame(width: 16)
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack(spacing: 4) {
+                                Text("THE FULL PICTURE")
+                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                    .tracking(1.2)
+                                    .foregroundStyle(DS.goldBase)
+                                Image(systemName: showFullPicture ? "chevron.up" : "chevron.down")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundStyle(DS.goldBase.opacity(0.7))
+                            }
+                            if showFullPicture {
+                                Text(lesson.fullExplanation)
+                                    .font(.system(.subheadline, weight: .regular))
+                                    .foregroundStyle(DS.textSecondary)
+                                    .lineSpacing(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        Spacer()
+                    }
+                }
+                .buttonStyle(.plain)
+
+                // REAL EXAMPLE — collapsible. Surfaces lesson.realWorldExample.
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        if showExample { expandedRealExample.remove(lesson.id) }
+                        else           { expandedRealExample.insert(lesson.id) }
+                    }
+                } label: {
+                    HStack(alignment: .top, spacing: 6) {
+                        Image(systemName: "sparkles")
+                            .font(.caption)
+                            .foregroundStyle(DS.goldBase)
+                            .frame(width: 16)
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack(spacing: 4) {
+                                Text("REAL EXAMPLE")
+                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                    .tracking(1.2)
+                                    .foregroundStyle(DS.goldBase)
+                                Image(systemName: showExample ? "chevron.up" : "chevron.down")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundStyle(DS.goldBase.opacity(0.7))
+                            }
+                            if showExample {
+                                Text(lesson.realWorldExample)
+                                    .font(.system(.subheadline, weight: .regular))
+                                    .foregroundStyle(DS.textPrimary)
+                                    .lineSpacing(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        Spacer()
+                    }
+                }
+                .buttonStyle(.plain)
+
+                // HOW TO OVERCOME IT — the action, always visible.
                 HStack(alignment: .top, spacing: 6) {
                     Image(systemName: "lightbulb.fill")
                         .font(.caption)
@@ -954,7 +1055,7 @@ struct ResearchView: View {
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.goldBase, lineWidth: 1.5)
+                .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
         )
     }
 
