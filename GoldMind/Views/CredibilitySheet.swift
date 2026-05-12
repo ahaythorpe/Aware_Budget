@@ -236,7 +236,7 @@ struct CredibilitySheet: View {
                         .foregroundStyle(DS.textPrimary)
                 }
 
-                Text("Used by professional planners before giving advice. GoldMind brings those 16 patterns to everyday spending, adapted for daily life.")
+                Text("Used by planners before they advise. GoldMind brings those 16 patterns to everyday spending.")
                     .font(.system(.subheadline, weight: .regular))
                     .foregroundStyle(DS.textPrimary)
                     .lineSpacing(3)
@@ -323,7 +323,7 @@ struct CredibilitySheet: View {
 
     private var nudgeSays: some View {
         NudgeSaysCard(
-            message: "This is not a generic quiz. It's the same framework professional planners use, so when you share your profile they know exactly which biases to watch for.",
+            message: "Not a generic quiz. It's the same framework planners use, so a shared profile tells them which biases to watch.",
             citation: "BFAS · Pompian, 2012",
             surface: .whiteShimmer
         )

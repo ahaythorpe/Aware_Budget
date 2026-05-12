@@ -144,7 +144,7 @@ struct SettingsView: View {
                     } header: {
                         Text("Profile")
                     } footer: {
-                        Text("Your display name appears in greetings and Nudge messages. Hiding it shows \"there\" instead. Hiding your email replaces it with masked text in the Account section below.")
+                        Text("Display name shows in greetings. Use the toggles to override per field.")
                             .font(.caption)
                     }
 

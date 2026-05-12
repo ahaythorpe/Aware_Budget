@@ -34,7 +34,7 @@ struct PatternsDetailView: View {
 
     private var algorithmCard: some View {
         NudgeSaysCard(
-            message: "Patterns are identified when your check-in answers and spending tags converge on the same bias. The more you log, the sharper the picture.",
+            message: "Patterns emerge when check-in answers and spending tags point at the same bias. More logs, sharper picture.",
             citation: "BFAS scoring · Pompian 2012 · 5:1 active vs passive weighting",
             surface: .whiteShimmer
         )
