@@ -858,8 +858,43 @@ struct ResearchView: View {
                 surface: .whiteShimmer
             )
 
-            ForEach(BiasLessonsMock.seed, id: \.id) { lesson in
-                overcomeCard(lesson)
+            // Categorised by BFAS bias category with DisclosureGroups
+            // so the 16 cards aren't a single chunky scrolling wall.
+            // Categories with no lessons are skipped.
+            ForEach(biasCategories, id: \.name) { category in
+                let lessonsInCategory = category.patterns.compactMap { p in
+                    BiasLessonsMock.seed.first(where: { $0.biasName == p.name })
+                }
+                if !lessonsInCategory.isEmpty {
+                    DisclosureGroup {
+                        VStack(spacing: 10) {
+                            ForEach(lessonsInCategory, id: \.id) { lesson in
+                                overcomeCard(lesson)
+                            }
+                        }
+                        .padding(.top, 8)
+                    } label: {
+                        HStack(spacing: 8) {
+                            Text(category.name)
+                                .font(.system(.headline, weight: .semibold))
+                                .foregroundStyle(DS.textPrimary)
+                            Spacer()
+                            Text("\(lessonsInCategory.count)")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(DS.goldBase)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Capsule().fill(DS.goldBase.opacity(0.1)))
+                        }
+                    }
+                    .tint(DS.goldBase)
+                    .padding(14)
+                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius)
+                            .stroke(DS.goldBase.opacity(0.4), lineWidth: 1)
+                    )
+                }
             }
         }
     }
