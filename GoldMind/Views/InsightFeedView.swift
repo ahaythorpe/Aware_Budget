@@ -679,15 +679,20 @@ struct InsightFeedView: View {
     }
 
     private var biasTrendChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             SectionHeader(title: "Bias spending trend")
+            Text("WHY you spent. Driver-tagged dollars over the last six weeks.")
+                .font(.system(.footnote, weight: .medium))
+                .foregroundStyle(DS.textSecondary)
+                .padding(.bottom, 4)
 
             let data = computeBiasTrend()
             if data.isEmpty {
                 emptyCard(message: "Log events across multiple weeks to see how bias-tagged spending changes.")
             } else {
                 let biases = Array(Set(data.map(\.bias))).sorted()
-                let palette: [Color] = [DS.goldBase, DS.matteYellow, DS.accent, DS.deepGreen, DS.lightGreen]
+                // Bias palette: gold-warm, signals the behavioural angle.
+                let palette: [Color] = [DS.goldBase, DS.goldText, DS.matteYellow, DS.warning, DS.deepGreen]
                 let weekCount = Set(data.map(\.weekLabel)).count
 
                 let biasValues = data.map(\.amount)
@@ -1344,8 +1349,12 @@ struct InsightFeedView: View {
     /// answers "where does my money actually trend over time?" — the
     /// foundation question for behavioural awareness.
     private var categoryTrendSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             SectionHeader(title: "Category trend")
+            Text("WHERE the money went. Top five life areas, week by week.")
+                .font(.system(.footnote, weight: .medium))
+                .foregroundStyle(DS.textSecondary)
+                .padding(.bottom, 4)
             let series = computeCategoryTrend()
             if series.isEmpty {
                 emptyCard(message: "Log spend events across a few weeks to see your category trends.")
@@ -1405,7 +1414,9 @@ struct InsightFeedView: View {
     @ViewBuilder
     private func categoryTrendChart(series: [CategoryTrendPoint]) -> some View {
         let categories = Array(Set(series.map(\.category))).sorted()
-        let palette: [Color] = [DS.goldBase, DS.matteYellow, DS.accent, DS.deepGreen, DS.lightGreen]
+        // Category palette: green-cool, signals the structural angle —
+        // visually distinct from the gold-warm bias trend palette.
+        let palette: [Color] = [DS.accent, DS.deepGreen, DS.primary, DS.lightGreen, DS.goldBase]
         let weekCount = Set(series.map(\.weekStart)).count
         let catValues: [Double] = {
             if let focused = expandedCategory {
