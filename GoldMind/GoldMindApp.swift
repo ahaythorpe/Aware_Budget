@@ -13,14 +13,20 @@ struct GoldMindApp: App {
     init() {
         Purchases.logLevel = .warn
         Purchases.configure(withAPIKey: "appl_XFOSSZlyhbOaxldNVLKSAZnkJmg")
-        // Install the UNUserNotificationCenter delegate synchronously at
-        // launch — BEFORE any async work in .task — so the delegate is
-        // already in place if iOS cold-launches the app from a notification
-        // tap (Apple calls didReceive on launch in that flow). Previously
-        // the install happened after `ensureDebugSession()` which could
-        // race the OS callback in DEBUG. Required for reliable deep-link
-        // routing in all build configs.
         NotificationRouter.install()
+
+        #if DEBUG
+        // SCREENSHOT MODE — DEBUG-only paywall bypass for capturing
+        // App Store screenshots without a sandbox purchase loop.
+        // Activated by adding `-ScreenshotMode YES` to the Xcode
+        // scheme's launch arguments (Product → Scheme → Edit Scheme
+        // → Run → Arguments). Forces PaywallStore.isPro = true so the
+        // root navigator skips the paywall and lands on RootTabView.
+        if ProcessInfo.processInfo.arguments.contains("-ScreenshotMode")
+            || UserDefaults.standard.bool(forKey: "screenshotMode") {
+            PaywallStore.shared.forceProForScreenshots()
+        }
+        #endif
     }
 
     /// Pulls last 30 days of events, computes user's median log hour per

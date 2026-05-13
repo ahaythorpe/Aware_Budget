@@ -38,4 +38,17 @@ final class PaywallStore {
     private func apply(_ info: CustomerInfo) {
         isPro = info.entitlements[Self.entitlementID]?.isActive == true
     }
+
+    #if DEBUG
+    /// DEBUG-only paywall bypass for App Store screenshot capture.
+    /// Called from `GoldMindApp.init` when `-ScreenshotMode YES` is
+    /// passed as a launch argument or `screenshotMode = true` is set
+    /// in UserDefaults. Forces both `isPro` and `hasLoaded` so the
+    /// root navigator skips both the paywall and the loading spinner.
+    /// Has zero effect on Release builds.
+    func forceProForScreenshots() {
+        isPro = true
+        hasLoaded = true
+    }
+    #endif
 }

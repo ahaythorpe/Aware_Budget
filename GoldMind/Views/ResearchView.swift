@@ -91,6 +91,7 @@ struct ResearchView: View {
                     // on Research only. Education is for personal /
                     // educational depth (quiz, mind map, personality
                     // cards) — the paper map is reference material.
+                    awarenessScoreBar
                     quizCTA
                     mindMapCard
                     categoriesSection
@@ -423,6 +424,58 @@ struct ResearchView: View {
 
     /// Take-the-quiz CTA. Hidden once the user has an archetype — the
     /// "← You" tag on the matching family card becomes the silent indicator.
+    /// Awareness Score bar — "X of 16 patterns identified". Sits at the
+    /// top of the Education tab so the user sees their personal learning
+    /// progress before scrolling into the quiz + cards. Triggered count
+    /// = the number of distinct biases where `bias_progress.times_reflected`
+    /// > 0 (i.e. confirmed in at least one check-in or end-of-week review).
+    private var awarenessScoreBar: some View {
+        let reflectedCount = biasProgress.filter { $0.timesReflected > 0 }.count
+        let total = allBiasPatterns.count
+        let fraction = total > 0 ? Double(reflectedCount) / Double(total) : 0
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(DS.goldBase)
+                Text("AWARENESS SCORE")
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundStyle(DS.goldBase)
+                Spacer()
+                Text("\(reflectedCount) / \(total)")
+                    .font(.system(size: 16, weight: .heavy, design: .serif))
+                    .foregroundStyle(DS.textPrimary)
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(DS.goldBase.opacity(0.12))
+                    Capsule()
+                        .fill(DS.nuggetGold)
+                        .frame(width: max(4, geo.size.width * fraction))
+                        .animation(.easeOut(duration: 0.6), value: fraction)
+                }
+            }
+            .frame(height: 10)
+
+            Text(reflectedCount == 0
+                 ? "Identify a pattern in any check-in to tick your first one."
+                 : "Each confirmed pattern moves you toward the full picture.")
+                .font(.system(.footnote, weight: .medium))
+                .foregroundStyle(DS.textSecondary)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.cardRadius)
+                .stroke(DS.goldBase, lineWidth: 1.5)
+        )
+        .premiumCardShadow()
+    }
+
     @ViewBuilder private var quizCTA: some View {
         if userArchetype == nil {
             Button { showQuiz = true } label: {
