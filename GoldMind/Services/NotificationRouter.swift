@@ -10,6 +10,12 @@ enum NotificationRoute: String {
     /// Used by the "Add your numbers" first-week reminder so a tap from
     /// the lock screen lands on the same UI as the Home empty-state CTA.
     case openFinanceEditor = "finance_editor"
+
+    /// Open the End-of-Week Review sheet on the Insights tab. Used by
+    /// the Sunday 10am + monthly 1st-of-month pushes so the user can
+    /// confirm whether the top biases the algorithm tagged this week
+    /// actually showed up for them.
+    case openEndOfWeekReview = "end_of_week_review"
 }
 
 /// Catches notification taps and routes them into the app. When the

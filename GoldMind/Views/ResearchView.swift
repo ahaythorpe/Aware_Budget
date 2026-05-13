@@ -87,11 +87,10 @@ struct ResearchView: View {
             VStack(alignment: .leading, spacing: 24) {
                 hero
                 if mode == .learn {
-                    // Concept graph surfaces first under the hero so
-                    // users land on the visual relationship between
-                    // papers and the 16 biases before scrolling into
-                    // the quiz, mind map, and personality cards.
-                    ResearchMapView()
+                    // Bella's call (2026-05-13): bias-paper map lives
+                    // on Research only. Education is for personal /
+                    // educational depth (quiz, mind map, personality
+                    // cards) — the paper map is reference material.
                     quizCTA
                     mindMapCard
                     categoriesSection

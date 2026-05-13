@@ -310,11 +310,11 @@ enum NotificationService {
                         "Seven days, laid bare.",
                         "Sunday review is ready."].randomElement() ?? "Weekly review ready."
         content.sound = .default
-        // Per Bella's "all notifications land on Quick Log or log
-        // numbers" principle: weekly review tap → Log tab so the user
-        // immediately picks up their logging cadence rather than just
-        // browsing data.
-        content.userInfo["slot"] = NotificationSlot.morning.rawValue
+        // Sunday push → open the End-of-Week Review sheet on Insights.
+        // Asks the user to confirm whether the top biases the algorithm
+        // tagged this week actually showed up for them. Each Yes feeds
+        // the +5 active-confirmation signal (Stone 1991, Beck 1976).
+        content.userInfo["route"] = NotificationRoute.openEndOfWeekReview.rawValue
 
         var components = DateComponents()
         components.weekday = 1  // Sunday
@@ -339,9 +339,9 @@ enum NotificationService {
                         "Still yes? Still no?",
                         "Monthly checkpoint. Not a grade."].randomElement() ?? "Monthly checkpoint."
         content.sound = .default
-        // Same as weekly review — land on Log so the next action is
-        // capturing today's data, not browsing past data.
-        content.userInfo["slot"] = NotificationSlot.morning.rawValue
+        // Same destination as weekly: open the End-of-Week Review sheet
+        // (top biases for the month, confirm Yes/No/Not sure).
+        content.userInfo["route"] = NotificationRoute.openEndOfWeekReview.rawValue
 
         var components = DateComponents()
         components.day = 1      // 1st of month

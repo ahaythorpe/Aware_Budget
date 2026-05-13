@@ -684,8 +684,12 @@ struct HomeView: View {
             financeSavings = ""
             financeInvestment = ""
             showFinanceEditor = true
+            router.pendingRoute = nil
+        case .openEndOfWeekReview:
+            // Consumed by InsightFeedView; HomeView doesn't react.
+            // Don't clear here so Insights still sees it.
+            return
         }
-        router.pendingRoute = nil
     }
 
     private func refreshNotifAuthStatus() async {

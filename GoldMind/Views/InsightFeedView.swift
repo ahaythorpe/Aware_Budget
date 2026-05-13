@@ -87,8 +87,30 @@ struct InsightFeedView: View {
         .task { await load() }
         .refreshable { await load() }
         .onChange(of: selectedTab?.wrappedValue) { _, new in
-            if new == .insights { Task { await load() } }
+            if new == .insights {
+                Task { await load() }
+                consumeRouteIfPending()
+            }
         }
+        .onChange(of: NotificationRouter.shared.pendingRoute) { _, route in
+            if route == .openEndOfWeekReview && selectedTab?.wrappedValue == .insights {
+                consumeRouteIfPending()
+            }
+        }
+        .task {
+            // Cold launch: notification tap landed us here with a
+            // pending review route. Open the sheet once load() has
+            // populated topBiasesThisWeek.
+            if NotificationRouter.shared.pendingRoute == .openEndOfWeekReview {
+                consumeRouteIfPending()
+            }
+        }
+    }
+
+    private func consumeRouteIfPending() {
+        guard NotificationRouter.shared.pendingRoute == .openEndOfWeekReview else { return }
+        showEndOfWeekReview = true
+        NotificationRouter.shared.pendingRoute = nil
     }
 
     // MARK: - Full-page empty state
