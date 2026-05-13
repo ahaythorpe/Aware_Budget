@@ -901,7 +901,7 @@ struct ResearchView: View {
             VStack(alignment: .leading, spacing: 12) {
                 bulletRow(1, "Each check-in answer and tagged spend feeds your bias profile.")
                 bulletRow(2, "The algorithm ranks biases by how often they show up in your decisions.")
-                bulletRow(3, "As you notice them, they move from Active → Aware.")
+                bulletRow(3, "As you notice them, they move toward Aware.")
                 bulletRow(4, "Your first BFAS assessment seeds the baseline. Daily data overrides it over time.")
             }
             .padding(16)

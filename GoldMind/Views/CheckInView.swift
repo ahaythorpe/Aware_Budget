@@ -860,6 +860,12 @@ struct CheckInView: View {
 
     private func swipeYes() {
         lastAnswerWasYes = true
+        // reflected:false because times_reflected stores the NO count
+        // (see BiasScoreService.computeScore — yesCount = encountered − reflected).
+        if currentIndex < questions.count {
+            let biasName = questions[currentIndex].biasName
+            Task { try? await service.updateBiasProgress(biasName: biasName, reflected: false) }
+        }
         withAnimation(.easeOut(duration: 0.3)) {
             dragOffset = CGSize(width: 600, height: 0)
         }
@@ -870,6 +876,10 @@ struct CheckInView: View {
 
     private func swipeNo() {
         lastAnswerWasYes = false
+        if currentIndex < questions.count {
+            let biasName = questions[currentIndex].biasName
+            Task { try? await service.updateBiasProgress(biasName: biasName, reflected: true) }
+        }
         withAnimation(.easeOut(duration: 0.3)) {
             dragOffset = CGSize(width: -600, height: 0)
         }

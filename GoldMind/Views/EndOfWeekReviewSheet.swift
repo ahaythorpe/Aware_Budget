@@ -4,9 +4,10 @@ import SwiftUI
 /// biases from the past 7 days and asks "Did this pattern show up for
 /// you this week?" per bias. Yes / No / Not sure controls per row.
 ///
-/// Each Yes → `updateBiasProgress(reflected: true)` (counts toward
-/// awareness signal). Each No → `updateBiasProgress(reflected: false)`
-/// (counts as "saw it but not me"). Not sure → no update.
+/// Each Yes → `updateBiasProgress(reflected: false)` (yesCount++, +5
+/// active confirmation). Each No → `updateBiasProgress(reflected: true)`
+/// (noCount++, −2 active denial). Not sure → no update. Matches the
+/// scoring promise in AlgorithmExplainerSheet.
 ///
 /// Bella's #37 spec, shipped lean for v1.0 (2026-05-13).
 struct EndOfWeekReviewSheet: View {
@@ -228,9 +229,9 @@ struct EndOfWeekReviewSheet: View {
         for (biasName, answer) in answers {
             switch answer {
             case .yes:
-                try? await service.updateBiasProgress(biasName: biasName, reflected: true)
-            case .no:
                 try? await service.updateBiasProgress(biasName: biasName, reflected: false)
+            case .no:
+                try? await service.updateBiasProgress(biasName: biasName, reflected: true)
             case .notSure:
                 break
             }

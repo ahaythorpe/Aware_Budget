@@ -252,7 +252,7 @@ struct AlgorithmExplainerSheet: View {
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("Identify the driver, override the decision. Mastery moves Unseen → Noticed → Emerging → Active → Aware as you flag patterns in check-ins.")
+                Text("Identify the driver, override the decision. Mastery moves Unseen → Noticed → Emerging → Active → Improving → Aware as you flag patterns in check-ins.")
                     .font(.system(.footnote, weight: .regular))
                     .foregroundStyle(DS.textSecondary)
                     .lineSpacing(3)

@@ -2,8 +2,8 @@
 
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
-**Last updated:** 2026-05-12
-**Current build:** 32 (staged 2026-05-13 — FINAL submission build: Awareness Score bar + Screenshot Mode + everything from Build 30)
+**Last updated:** 2026-05-13
+**Current build:** 34 (staged 2026-05-13: CheckInView writes to bias_progress + Model A scoring alignment + 6-stage list consistency)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things

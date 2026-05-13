@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-05-13 — Build 34 — Check-in linkage to bias_progress + Model A alignment (Claude Code, Opus 4.7 1M)
+
+Two fixes that resolve a major App Store risk: TOP BIASES would not populate after a daily check-in even though the in-app docs promised it would.
+
+- **CheckInView swipe Yes/No now write to user_bias_progress.** Before this build, swiping Yes/No only set a local boolean and advanced. `saveCheckIn()` wrote `daily_checkins` but never `user_bias_progress`. Result: a user could complete every check-in the app instructed them to do and TOP BIASES stayed empty. Now `swipeYes()` calls `updateBiasProgress(reflected: false)` (yesCount++, +5) and `swipeNo()` calls `updateBiasProgress(reflected: true)` (noCount++, -2). 2.3.1 metadata risk closed.
+- **Model A alignment across EndOfWeekReviewSheet + BiasReviewView.** YES previously decremented score in the review surfaces (Model B "awareness gained") while incrementing score per the shipped docs (Model A "active confirmation"). Same word "Yes" in two screens did opposite things to the same bias. Flipped both surfaces to Model A so YES always adds +5, NO always subtracts 2. Matches AlgorithmExplainerSheet copy.
+- **AlgorithmExplainerSheet stage list** now includes all 6 stages (Unseen, Noticed, Emerging, Active, Improving, Aware). Was missing "Improving" between Active and Aware.
+- **ResearchView howRankingWorks** bullet 3 simplified from a specific (wrong) `Active to Aware` to plain `move toward Aware`. Avoids contradicting the canonical 6-stage list.
+
+---
+
 ## 2026-05-13 — Build 33 — AboutScoreSheet content sync with current algorithm (Claude Code, Opus 4.7 1M)
 
 Single content fix on top of Build 32.

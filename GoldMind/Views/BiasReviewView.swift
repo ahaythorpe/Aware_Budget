@@ -1,13 +1,13 @@
 import SwiftUI
 
 /// Post-session bias review — user confirms or denies each suggested bias
-/// one at a time. Self-identification reduces the score (awareness);
-/// blind spots stay at their tagged weight.
+/// one at a time. Yes = active confirmation (+5), Different + picked-bias
+/// = active confirmation for the picked bias (+5).
 ///
 /// Writes to `SupabaseService.updateBiasProgress(biasName:reflected:)`:
-/// - "Yes, that's me" -> reflected: true   (awareness signal)
-/// - "Not sure"       -> no call            (blind spot stays)
-/// - "Different"      -> re-tag TODO        (handled locally for now)
+/// - "Yes, that's me" -> reflected: false   (yesCount++, +5)
+/// - "Not sure"       -> no call             (blind spot stays)
+/// - "Different"+pick -> reflected: false on the picked bias (+5)
 struct BiasReviewView: View {
     let entries: [Entry]
     var onDone: (ReviewOutcome) -> Void
@@ -548,8 +548,8 @@ struct BiasReviewView: View {
         if let eventId = entry.eventId {
             try? await service.retagMoneyEvent(id: eventId, newTag: newBias)
         }
-        // Credit the user's chosen bias as reflected (awareness gained).
-        try? await service.updateBiasProgress(biasName: newBias, reflected: true)
+        // Active confirmation of the user's chosen bias (+5).
+        try? await service.updateBiasProgress(biasName: newBias, reflected: false)
         pickingAlternativeFor = nil
         withAnimation { index += 1 }
     }
@@ -705,8 +705,8 @@ struct BiasReviewView: View {
         switch choice {
         case .identified:
             outcome.identifiedCount += 1
-            // reflected: true -> adds +1 to times_reflected -> noCount+1 -> -1 to score
-            try? await service.updateBiasProgress(biasName: entry.suggestedBias, reflected: true)
+            // Active YES confirmation: yesCount++, +5 to score.
+            try? await service.updateBiasProgress(biasName: entry.suggestedBias, reflected: false)
             // Bank a decision lesson — auto-pre-filled with the
             // bias's howToCounter. Future: prompt for a free-text
             // note before saving (queue item: optional lesson note).
