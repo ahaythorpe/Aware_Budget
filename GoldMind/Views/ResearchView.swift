@@ -106,9 +106,11 @@ struct ResearchView: View {
                 }
                 Spacer(minLength: 32)
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, DS.hPadding)
             .padding(.top, 12)
         }
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
         .background(DS.bg.ignoresSafeArea())
         .navigationTitle(mode == .learn ? "Education" : "Research")
         .navigationBarTitleDisplayMode(.inline)
