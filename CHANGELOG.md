@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-05-13 — Build 26 — final-pass polish: rename + Research card borders (Claude Code, Opus 4.7 1M)
+
+Final polish build ahead of App Store submission. Two visible UI changes plus a dev-handover doc.
+
+- **"THE FOUR PAPERS" → "THE MAIN PAPERS"** on the Research tab. The four shown are foundational but the bias cards cite other authors across the app (Klontz, Cialdini, Samuelson & Zeckhauser, Baumeister) — "four" overclaimed the exhaustiveness. `f62b4b7`.
+- **Research paper / framework / ranking cards** dropped `.shimmeringGoldBorder` (thick animated gold outline that read as visually heavier than every other card in the app). Same hairline 0.5pt @ 0.18 opacity stroke + `.premiumCardShadow()` as the rest of the Research surface. Three cards now consistent with the rest of the app. `618a45c`.
+- **`docs/DEV_HANDOVER.md`** — paste-ready handover for the developer doing RevenueCat dashboard verification + Supabase backend audit + App Store Connect submission. Splits responsibilities so Bella focuses on TestFlight polish + marketing site updates. `f52676b`.
+
+Deferred to v1.1 (per `docs/PLAN_V1_1.md`): #30 concept-graph mind map layouts, #34 papers↔biases concept graph on Research, #33 deeper Research interactivity (mini-quiz, filter bar, mark-as-understood), #32 interactive trend charts.
+
+---
+
 ## 2026-05-13 — Build 25 — notification routing fix lands; bias → personality attribution; richer chart explainer (Claude Code, Opus 4.7 1M)
 
 - **Notifications:** weekly review + monthly checkpoint pushes now route to Log tab (morning slot) per Bella's "all notifications land on Quick Log or log-numbers" principle. Removed the dead `openInsights` route case; RootTabView + HomeView consumePendingRoute simplified back to single-branch. Bias-hit push still routes to Log. `481436b`.

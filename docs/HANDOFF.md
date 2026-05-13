@@ -1,7 +1,7 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-05-13 (Build 25 staged)
+> Updated: 2026-05-13 (Build 26 staged — submission build)
 
 ---
 
@@ -25,6 +25,7 @@
 | 23 | Home future-you swapped to the interactive CompoundGrowthCard (range chips + drag-to-zoom + stat row) · Research tab text scales now consistent with rest of app · 4 nudgeSays accuracy fixes (Mental Accounting / Planning Fallacy / Status Quo / Moral Licensing) |
 | 24 | Category-trend chart palette → gold family · notification routing fix (bias-hit → Log, weekly + monthly review → new Insights route) · Research dropdown polish (lighter stroke + matched label/chip styling + shadow) · Research card interactivity: "Seen N×" personal trigger chip, "THE FULL PICTURE" + "REAL EXAMPLE" collapsibles surfacing previously-unused BiasLesson fields |
 | 25 | Notification routing reverted: weekly + monthly review pushes now also route to Log tab (per Bella's "all to Quick Log") · richer Nudge explainer on the Home compound-growth chart with method + citation · Research inner overcome cards now match outer card aesthetic (hairline stroke + shadow) · bias→personality attribution surfaced on Research labels + Awareness category headers ("The Drifter · AVOIDANCE", "YOU" pill on user's archetype) |
+| 26 | "THE FOUR PAPERS" → "THE MAIN PAPERS" · Research paper / framework / ranking cards drop the heavy shimmering gold border for the same hairline + shadow as the rest of the app · DEV_HANDOVER.md doc added |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 

@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 25 (staged 2026-05-13 — notification routing fix lands · bias → personality attribution on Research + Awareness · richer Home chart explainer · Research inner-card polish)
+**Current build:** 26 (staged 2026-05-13 — final-pass polish: MAIN PAPERS rename + Research paper/framework/ranking borders calmed + DEV_HANDOVER.md handover doc)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things
