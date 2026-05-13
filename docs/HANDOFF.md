@@ -31,6 +31,7 @@
 | 29 | Inline charts on Research overcome cards (was mind-map-only) · thick gold border restored on inner cards · personality icon disc on each Research category header · concept graph moved to top of Education tab · PLAN_BIAS_ANIMATIONS.md captured (v1.1 static illustrations + v2 Lottie animation path) |
 | 30 | Sunday weekly push + monthly checkpoint push now tap-route to End-of-Week Review sheet on Insights · bias-paper map moved to Research-only (Education focuses on personal depth) · horizontal-shift bug fix on Education/Research tabs |
 | 32 | **FINAL submission build.** Awareness Score gold progress bar at top of Education tab (X of 16 patterns identified) · DEBUG-only Screenshot Mode paywall bypass for App Store screenshot capture (-ScreenshotMode launch arg) · SCREENSHOTS_GUIDE.md captured |
+| 33 | AboutScoreSheet ("How your score works") content sync — was showing stale Build-18-era scoring (+2/-1/+3), now matches live algorithm (+5/-2/0/+1/0-10) |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 

@@ -2060,13 +2060,17 @@ private struct AboutScoreSheet: View {
 
                     sheetDivider
 
-                    // THE SCORING
+                    // THE SCORING — synced with AlgorithmExplainerSheet
+                    // + BiasScoreService (5:1 active-vs-passive weighting,
+                    // Stone 1991 · Robinson & Clore 2002 · Beck 1976).
                     VStack(alignment: .leading, spacing: 12) {
                         sectionTitle("THE SCORING")
                         VStack(spacing: 12) {
-                            scoreRow(icon: "\u{2726}", label: "Yes answer", detail: "+2 to that bias score")
-                            scoreRow(icon: "○", label: "No answer", detail: "-1 (awareness working)")
-                            scoreRow(icon: "💰", label: "Tagged spend", detail: "+3 (behaviour evidence)")
+                            scoreRow(icon: "✓", label: "\"Yes, that's me\"", detail: "+5 — strongest awareness signal")
+                            scoreRow(icon: "✕", label: "\"No, different reason\"", detail: "−2 — counts as different driver")
+                            scoreRow(icon: "•", label: "\"Not sure\"", detail: "0 — no change")
+                            scoreRow(icon: "💰", label: "Tagged spend", detail: "+1 per tag (counts for each bias when two)")
+                            scoreRow(icon: "🌱", label: "Sign-up BFAS seed", detail: "0 to 10 — one-off baseline")
                         }
                     }
 

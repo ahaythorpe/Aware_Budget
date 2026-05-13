@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-05-13 — Build 33 — AboutScoreSheet content sync with current algorithm (Claude Code, Opus 4.7 1M)
+
+Single content fix on top of Build 32.
+
+- **AboutScoreSheet ("How your score works")** scoring numbers brought into sync with the live algorithm. Was showing the stale Build-18-era values (+2 / −1 / +3). Now matches AlgorithmExplainerSheet + BiasScoreService:
+  - "Yes, that's me" → +5
+  - "No, different reason" → −2
+  - "Not sure" → 0
+  - Tagged spend → +1 per tag (counts for each bias when an event has two)
+  - Sign-up BFAS → 0–10 one-off baseline
+- Citation footer on the scoring block clarifies the 5:1 weighting comes from Stone 1991 · Robinson & Clore 2002 · Beck 1976.
+
+---
+
 ## 2026-05-13 — Build 32 — Awareness Score bar + Screenshot Mode (FINAL submission build) (Claude Code, Opus 4.7 1M)
 
 Final final. Skipped Build 31 as a marker. This is the build that ships to App Store.
