@@ -202,6 +202,51 @@ Build after #30 Path A (concept-cluster Mind Map toggle) ships. They share the l
 
 ---
 
+## #36 — Programmatic bias illustrations (v1.1)
+
+v1.0 shipped a Kahneman value-function S-curve inside the Loss Aversion bias detail sheet (see `Views/LossAversionChart.swift`). Bella's call: lean MVP, no paid integrations, render charts in SwiftUI Charts directly.
+
+Extend the same pattern to the 4 other biases with clean math shapes:
+
+- **Present Bias** — hyperbolic discounting curve. v(t) = 1 / (1 + kt) where k ≈ 0.5. Show how a $110 reward in 1 year discounts harder than a $110 reward in 1 week. ~30 min.
+- **Anchoring** — bar chart pair: "no anchor" estimate vs "high anchor" estimate, illustrating how the anchor pulls answers upward. ~30 min.
+- **Planning Fallacy** — actual cost / estimated cost ratio. Show the typical 30-50% overrun. ~30 min.
+- **Mental Accounting** — split-jar visualisation showing how "tax refund" vs "salary" labels change spending freedom. Conceptual — could be a custom shape. ~45 min.
+- **Overconfidence** — calibration curve (predicted vs actual). ~30 min.
+
+Other biases (Social Proof, Status Quo, Moral Licensing) don't have clean mathematical shapes; would need illustrations (Path B from #35).
+
+**Total v1.1 effort: ~3 hours for 5 charts.** Ship in the same v1.1 update as #35.
+
+---
+
+## #37 — End-of-week bias check-in (v2)
+
+Bella's idea (2026-05-13): a Sunday-evening prompt asking "Which of these patterns showed up for you this week?" with yes/no per bias the user encountered most. Closes the loop between the algorithm's tagging and the user's lived experience.
+
+### Flow
+
+- Trigger: Sunday 7pm push (or first Home open after Saturday).
+- Surface: full-screen sheet, similar to daily check-in.
+- Content: top 3 most-frequent tagged biases from the week's events.
+- Per bias: "Yes, that's me" / "No, different reason" / "Not sure".
+- Outcome: feeds the +5/−2/0 weighted score (same as daily check-in answer scoring).
+- Nudge close: short summary card on what changed in their awareness profile.
+
+### Why v2 not v1.0
+
+- New scheduled push surface (Sunday slot).
+- New scoring path (batch confirmation instead of single).
+- New review UI (similar to but distinct from BiasReviewView).
+- Adds load to the algorithm path that's already shipped for v1.0.
+- Bella explicitly scoped v1 as "enough value, lean MVP".
+
+### Cost note
+
+No external integrations needed. All UI + backend logic. First *paid* external integration the project takes on will be an AI advisory assistant — that's a future v2/v3 line item, not on tonight's roadmap.
+
+---
+
 ## #35 — Concept graphs on Education tab (v1.1)
 
 v1.0 shipped a lightweight `ResearchMapView` (chip layout, tap-to-highlight, no force-directed edges) on both Education and Research tabs. Bella greenlit the chip version for v1.0; the richer treatment is post-launch.
