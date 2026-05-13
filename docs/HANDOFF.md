@@ -28,6 +28,7 @@
 | 26 | "THE FOUR PAPERS" → "THE MAIN PAPERS" · Research paper / framework / ranking cards drop the heavy shimmering gold border for the same hairline + shadow as the rest of the app · DEV_HANDOVER.md doc added |
 | 27 | Research-tab concept graph (#34): new ResearchMapView with 16 papers + 16 biases as tappable chips; tap a paper to highlight underpinning biases, tap a bias to find its source; embedded between THE FRAMEWORK and HOW THE RANKING WORKS; new ResearchGraph data lookups derived from existing BiasData.keyRef |
 | 28 | 6 programmatic bias illustrations (Loss Aversion S-curve, Present Bias hyperbolic, Anchoring bars, Planning Fallacy overrun, Mental Accounting jars, Overconfidence calibration) · end-of-week bias review sheet on Insights tab · Scarcity Heuristic → Bandwagon Effect rename across 17 files + 6 Supabase tables · Cialdini 2001 → 1984 · MAIN PAPERS rename · Research personality cards thick gold border · mind-map related chips made static · Home Nudge speech bubble · concept graph on Education + Research tabs |
+| 29 | Inline charts on Research overcome cards (was mind-map-only) · thick gold border restored on inner cards · personality icon disc on each Research category header · concept graph moved to top of Education tab · PLAN_BIAS_ANIMATIONS.md captured (v1.1 static illustrations + v2 Lottie animation path) |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 

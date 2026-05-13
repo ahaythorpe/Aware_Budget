@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-05-13 — Build 29 — inline charts on Research cards + concept-graph reposition + animation plan (Claude Code, Opus 4.7 1M)
+
+Polish pass on top of Build 28.
+
+- **Inline illustrations on Research bias cards.** The 6 charts (Loss Aversion, Present Bias, Anchoring, Planning Fallacy, Mental Accounting, Overconfidence) now render directly inside each personality DisclosureGroup expansion on the Research tab, not only in the mind-map node sheet. Bella's "graphical visual should be under here" feedback. `f3cb96f`.
+- **Thick gold border restored** on the inner Research overcome cards (1.5pt full goldBase). Bella spotted the calmer hairline broke consistency with the rest of the bias-card family. `f3cb96f`.
+- **Personality icon disc** on each Research category header (36pt gold-tinted circle with SF Symbol — eye.slash for Drifter, bolt for Reactor, tray for Bookkeeper, clock for Now, person.2.wave for Bandwagon, repeat for Autopilot). `42b9be6`.
+- **Concept graph repositioned** to the top of Education tab (immediately under the hero), so users see the bias-paper map before the quiz + mind-map cards. `7e70cef`.
+- **`docs/PLAN_BIAS_ANIMATIONS.md`** — full plan for extending illustrations to all 16 biases (v1.1) and animating them Headspace-style via Lottie + commissioned After Effects work (v2). Honest cost estimates, anti-patterns to avoid, lean-MVP sequencing.
+
+---
+
 ## 2026-05-13 — Build 28 — submission build: 6 bias illustrations + end-of-week review + citation fixes (Claude Code, Opus 4.7 1M)
 
 Final submission build. Bella's last day before App Store. Major adds:

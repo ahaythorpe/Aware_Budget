@@ -51,12 +51,13 @@ struct CompoundGrowthCard: View {
                         Image(systemName: "chart.line.uptrend.xyaxis")
                             .foregroundColor(goldColor)
                             .font(.system(size: 16, weight: .semibold))
-                        Text("Future Yous Bank Account")
+                        Text("Future You's Bank Account")
                             .font(.system(size: 16, weight: .semibold))
                     }
-                    Text(String(format: "$%.0f/mo at 8%% avg return", monthlySpend))
+                    Text(String(format: "If you redirected the $%.0f/mo you're spending now into an investment at 8%% avg return", monthlySpend))
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
             }
@@ -192,7 +193,7 @@ struct CompoundGrowthCard: View {
                     highlight: true
                 )
                 Spacer()
-                statColumn(label: "You put in", value: formatShort(totalIn), highlight: false)
+                statColumn(label: "You'd put in", value: formatShort(totalIn), highlight: false)
                 Spacer()
                 statColumn(label: "Growth", value: "+\(growthPct)%", highlight: false)
             }
