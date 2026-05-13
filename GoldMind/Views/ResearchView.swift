@@ -94,6 +94,11 @@ struct ResearchView: View {
                 } else {
                     papersSection
                     frameworkSection
+                    // Interactive concept graph: tap a paper to see
+                    // the biases it underpins, or tap a bias to find
+                    // its source. Bridges THE FRAMEWORK abstraction
+                    // to the 16 specific patterns shown below.
+                    ResearchMapView()
                     howRankingWorks
                     allBiasesSection
                     spotAndOvercomeSection

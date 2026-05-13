@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 26 (staged 2026-05-13 — final-pass polish: MAIN PAPERS rename + Research paper/framework/ranking borders calmed + DEV_HANDOVER.md handover doc)
+**Current build:** 27 (staged 2026-05-13 — Research concept graph #34 added: papers ↔ biases interactive chips, tap-to-highlight)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things

@@ -1,7 +1,7 @@
 # GoldMind — Session Handoff
 
 > Read this at the START of every Claude Code session.
-> Updated: 2026-05-13 (Build 26 staged — submission build)
+> Updated: 2026-05-13 (Build 27 staged — submission build, adds Research concept graph)
 
 ---
 
@@ -26,6 +26,7 @@
 | 24 | Category-trend chart palette → gold family · notification routing fix (bias-hit → Log, weekly + monthly review → new Insights route) · Research dropdown polish (lighter stroke + matched label/chip styling + shadow) · Research card interactivity: "Seen N×" personal trigger chip, "THE FULL PICTURE" + "REAL EXAMPLE" collapsibles surfacing previously-unused BiasLesson fields |
 | 25 | Notification routing reverted: weekly + monthly review pushes now also route to Log tab (per Bella's "all to Quick Log") · richer Nudge explainer on the Home compound-growth chart with method + citation · Research inner overcome cards now match outer card aesthetic (hairline stroke + shadow) · bias→personality attribution surfaced on Research labels + Awareness category headers ("The Drifter · AVOIDANCE", "YOU" pill on user's archetype) |
 | 26 | "THE FOUR PAPERS" → "THE MAIN PAPERS" · Research paper / framework / ranking cards drop the heavy shimmering gold border for the same hairline + shadow as the rest of the app · DEV_HANDOVER.md doc added |
+| 27 | Research-tab concept graph (#34): new ResearchMapView with 16 papers + 16 biases as tappable chips; tap a paper to highlight underpinning biases, tap a bias to find its source; embedded between THE FRAMEWORK and HOW THE RANKING WORKS; new ResearchGraph data lookups derived from existing BiasData.keyRef |
 
 **App Store: NOT submitted.** Bella reaffirmed 2026-05-11 to stay in TestFlight-only iteration. No RevenueCat dashboard changes.
 

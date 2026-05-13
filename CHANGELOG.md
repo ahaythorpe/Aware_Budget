@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-05-13 — Build 27 — Research concept graph (papers ↔ biases) (Claude Code, Opus 4.7 1M)
+
+Bella greenlit pulling #34 forward into v1.0. New interactive section on the Research tab between THE FRAMEWORK and HOW THE RANKING WORKS.
+
+- **`Models/ResearchGraph.swift`** — new static lookup tables: `papers` (16 PaperCitation structs covering every distinct `BiasData.keyRef`), `biasToPaper` (bias name → primary paper key), `paperToBiases` (reverse). Derived from the existing `keyRef` strings; no schema change.
+- **`Views/ResearchMapView.swift`** — new interactive concept graph. Two layers — papers along the top (wrapping flow), biases along the bottom grouped by BFAS category (also wrapping). Tap a paper → biases it underpins stay at full opacity, unrelated biases dim to 0.25. Tap a bias → its primary paper highlights. Same dim-others pattern as the Mind Map filter. Includes a "Clear" button that surfaces only when a selection is active.
+- Embedded in `Views/ResearchView.swift` between `frameworkSection` and `howRankingWorks` so the abstraction (framework) connects to specifics (the 16 biases) via the graph.
+- FlowLayout (private to ResearchMapView) is a small Layout struct that wraps chips left-to-right + reflows on screen width.
+
+Still v1.1 / v2 per Bella: #30 concept-graph mind map, #33 deeper Research interactivity (mini-quiz, filter bar, mark-as-understood), #32 interactive trend charts.
+
+---
+
 ## 2026-05-13 — Build 26 — final-pass polish: rename + Research card borders (Claude Code, Opus 4.7 1M)
 
 Final polish build ahead of App Store submission. Two visible UI changes plus a dev-handover doc.
