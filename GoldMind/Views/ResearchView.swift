@@ -1116,6 +1116,11 @@ struct ResearchView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+
+                // Visual illustration (the 6 biases with math shapes
+                // render their chart here, matching the mind-map node
+                // sheet. Other biases render EmptyView).
+                biasIllustration(for: lesson.biasName)
             }
         }
         .padding(14)
@@ -1123,7 +1128,7 @@ struct ResearchView: View {
         .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: DS.cardRadius)
-                .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
+                .stroke(DS.goldBase, lineWidth: 1.5)
         )
         .premiumCardShadow()
     }
