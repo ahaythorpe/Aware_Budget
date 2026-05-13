@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-05-13 — Build 32 — Awareness Score bar + Screenshot Mode (FINAL submission build) (Claude Code, Opus 4.7 1M)
+
+Final final. Skipped Build 31 as a marker. This is the build that ships to App Store.
+
+- **Awareness Score bar** at the top of the Education tab. Gold capsule progress bar showing "X of 16 patterns identified" derived from `bias_progress.times_reflected`. Empty-state caption swaps to "Identify a pattern in any check-in to tick your first one." Bella's call: don't revert the old AwarenessView, port the pattern into Education where personal-progress belongs. `86a371a`.
+- **Screenshot Mode** — DEBUG-only paywall bypass for App Store screenshot capture. Activated by `-ScreenshotMode YES` launch argument in the Xcode scheme (or UserDefaults `screenshotMode = true`). PaywallStore.forceProForScreenshots() sets isPro = true + hasLoaded = true so the root navigator lands directly on RootTabView. Stripped from Release archives via `#if DEBUG`. Full guide in `docs/SCREENSHOTS_GUIDE.md`. `86a371a`.
+
+Everything in Build 30 carries forward (Sunday push wiring, bias-paper map on Research only, horizontal-shift fix).
+
+---
+
 ## 2026-05-13 — Build 30 — Sunday push wired to end-of-week review; bias-paper map → Research-only; horizontal-shift fix (Claude Code, Opus 4.7 1M)
 
 - **Sunday weekly push + monthly checkpoint push** now tap-route directly to the End-of-Week Review sheet on Insights (was routing to Log tab). New `NotificationRoute.openEndOfWeekReview` case. RootTabView routes openEndOfWeekReview → Insights; InsightFeedView consumes the route in onChange + task (cold-launch) and auto-opens the review sheet with top-3 weekly biases. Closes the loop: push → review → answer Yes/No/Not sure per bias → bias_progress updated. `296c775`.

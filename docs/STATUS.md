@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 30 (staged 2026-05-13 — Sunday push → End-of-Week Review wiring, bias-paper map to Research-only, horizontal-shift fix)
+**Current build:** 32 (staged 2026-05-13 — FINAL submission build: Awareness Score bar + Screenshot Mode + everything from Build 30)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things
