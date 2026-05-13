@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-05-13 — Build 30 — Sunday push wired to end-of-week review; bias-paper map → Research-only; horizontal-shift fix (Claude Code, Opus 4.7 1M)
+
+- **Sunday weekly push + monthly checkpoint push** now tap-route directly to the End-of-Week Review sheet on Insights (was routing to Log tab). New `NotificationRoute.openEndOfWeekReview` case. RootTabView routes openEndOfWeekReview → Insights; InsightFeedView consumes the route in onChange + task (cold-launch) and auto-opens the review sheet with top-3 weekly biases. Closes the loop: push → review → answer Yes/No/Not sure per bias → bias_progress updated. `296c775`.
+- **Bias-paper map moved to Research tab only.** Was rendering on both Education and Research; Bella's call is that Education is for personal depth (quiz, mind map, personality cards) and the paper map is reference material. `296c775`.
+- **Horizontal-shift fix on Education/Research tabs.** Side-to-side panning bug where embedded Charts inside bias cards could push the parent ScrollView past its bounds. `.frame(maxWidth: .infinity)` on the inner VStack + `.scrollBounceBehavior(.basedOnSize, axes: .horizontal)` on the ScrollView. `dc866c5`.
+
+---
+
 ## 2026-05-13 — Build 29 — inline charts on Research cards + concept-graph reposition + animation plan (Claude Code, Opus 4.7 1M)
 
 Polish pass on top of Build 28.

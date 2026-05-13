@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 28 (staged 2026-05-13 — submission build: 6 bias illustrations, end-of-week review, Bandwagon rename, Cialdini fix, Research polish)
+**Current build:** 30 (staged 2026-05-13 — Sunday push → End-of-Week Review wiring, bias-paper map to Research-only, horizontal-shift fix)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things
