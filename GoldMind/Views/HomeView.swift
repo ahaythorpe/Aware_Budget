@@ -149,38 +149,32 @@ struct HomeView: View {
                 // card. Tap reveals a rotating welcome line. Sits as a
                 // floating chip so it doesn't crowd the main HStack.
                 .overlay(alignment: .bottomTrailing) {
-                    Button { showNudgeHello = true } label: {
-                        // Floating cut-out. Sized 56 (was 40) so Nudge
-                        // reads as a peer to the 52pt avatar disc on
-                        // the left of the greeting card.
-                        Image("nudge")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 56, height: 56)
-                    }
-                    .buttonStyle(.plain)
-                    // Pushes Nudge below the gear icon + slightly into
-                    // the card's lower-right margin. y: 8 = nudge sits
-                    // 8pt below the card's bottom edge, partly outside
-                    // the rounded corner so it reads as floating.
-                    .offset(x: -4, y: 8)
-                    .popover(isPresented: $showNudgeHello,
-                             attachmentAnchor: .point(.top),
-                             arrowEdge: .bottom) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("NUDGE SAYS")
-                                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                                .tracking(1.2)
-                                .foregroundStyle(DS.accent)
-                            Text(nudgeHelloLine)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(DS.textPrimary)
-                                .lineSpacing(2)
-                                .fixedSize(horizontal: false, vertical: true)
+                    ZStack(alignment: .bottomTrailing) {
+                        // Speech bubble — anchored above-left of the Nudge
+                        // coin, expanding leftward so it never clips off
+                        // the right edge of the screen. Tail points down
+                        // toward the coin.
+                        if showNudgeHello {
+                            nudgeSpeechBubble
+                                .padding(.trailing, 28)
+                                .padding(.bottom, 56)
+                                .transition(.scale(scale: 0.85, anchor: .bottomTrailing)
+                                    .combined(with: .opacity))
+                                .zIndex(1)
                         }
-                        .padding(14)
-                        .frame(maxWidth: 260, alignment: .leading)
-                        .presentationCompactAdaptation(.popover)
+
+                        Button {
+                            withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+                                showNudgeHello.toggle()
+                            }
+                        } label: {
+                            Image("nudge")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 56, height: 56)
+                        }
+                        .buttonStyle(.plain)
+                        .offset(x: -4, y: 8)
                     }
                 }
                 .padding(.horizontal, 18)
@@ -484,7 +478,55 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Nudge hello (popover from greeting card)
+    // MARK: - Nudge hello (speech bubble from greeting card)
+
+    /// Custom speech bubble for the Nudge-coin tap. Replaces the system
+    /// `.popover` which clipped on iPhone near the screen edge. Renders
+    /// as an inline overlay above-left of the coin with a downward tail.
+    private var nudgeSpeechBubble: some View {
+        Button {
+            withAnimation(.easeOut(duration: 0.2)) {
+                showNudgeHello = false
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("NUDGE SAYS")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.accent)
+                Text(nudgeHelloLine)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineSpacing(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .frame(maxWidth: 220, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(.white)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(DS.goldBase.opacity(0.35), lineWidth: 0.5)
+            )
+            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+            .overlay(alignment: .bottomTrailing) {
+                NudgeBubbleTail()
+                    .fill(.white)
+                    .frame(width: 14, height: 10)
+                    .overlay(
+                        NudgeBubbleTail()
+                            .stroke(DS.goldBase.opacity(0.35), lineWidth: 0.5)
+                    )
+                    .offset(x: -16, y: 8)
+                    .shadow(color: .black.opacity(0.08), radius: 2, y: 2)
+            }
+        }
+        .buttonStyle(.plain)
+    }
 
     /// Rotating Nudge welcome line for the avatar-tap popover. Time-of-day
     /// aware + streak-aware so the hello feels alive instead of canned.
@@ -1178,5 +1220,19 @@ struct HomeView: View {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+}
+
+/// Downward-pointing triangle used as the tail on the Nudge speech
+/// bubble. Sits below-leading the bubble so it visually anchors to
+/// the Nudge coin in the bottom-right of the greeting card.
+private struct NudgeBubbleTail: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        p.closeSubpath()
+        return p
     }
 }

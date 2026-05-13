@@ -100,8 +100,7 @@ struct MindMapView: View {
         .sheet(item: $selectedBias) { bias in
             BiasDetailSheet(
                 pattern: bias,
-                triggerCount: triggerCount(for: bias),
-                onSelectRelated: { selectedBias = $0 }
+                triggerCount: triggerCount(for: bias)
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
@@ -444,7 +443,6 @@ struct MindMapView: View {
 private struct BiasDetailSheet: View {
     let pattern: BiasPattern
     let triggerCount: Int
-    let onSelectRelated: (BiasPattern) -> Void
 
     @State private var showExample = false
 
@@ -625,24 +623,26 @@ private struct BiasDetailSheet: View {
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .tracking(1.2)
                 .foregroundStyle(DS.goldBase)
+            // Static informational chips — display-only. The Research
+            // tab's concept graph is the place to actually navigate
+            // between biases; making these tappable inside a presented
+            // sheet caused flicker/dismiss issues on iOS (sheet
+            // re-presents when bound Identifiable changes).
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(related) { r in
-                        Button { onSelectRelated(r) } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: r.sfSymbol)
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundStyle(DS.goldBase)
-                                Text(r.displayName)
-                                    .font(.system(size: 12, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(DS.textPrimary)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(Capsule().fill(DS.cardBg))
-                            .overlay(Capsule().stroke(DS.goldBase.opacity(0.3), lineWidth: 1))
+                        HStack(spacing: 6) {
+                            Image(systemName: r.sfSymbol)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(DS.goldBase)
+                            Text(r.displayName)
+                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                .foregroundStyle(DS.textPrimary)
                         }
-                        .buttonStyle(.plain)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(DS.cardBg))
+                        .overlay(Capsule().stroke(DS.goldBase.opacity(0.3), lineWidth: 1))
                     }
                 }
             }

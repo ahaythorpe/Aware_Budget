@@ -89,15 +89,16 @@ struct ResearchView: View {
                 if mode == .learn {
                     quizCTA
                     mindMapCard
+                    // Interactive concept graph: tap a paper to see
+                    // the biases it underpins, or tap a bias to find
+                    // its source. Education tab natural home for a
+                    // learning aid; also rendered on Research below.
+                    ResearchMapView()
                     categoriesSection
                     yourProgressSection
                 } else {
                     papersSection
                     frameworkSection
-                    // Interactive concept graph: tap a paper to see
-                    // the biases it underpins, or tap a bias to find
-                    // its source. Bridges THE FRAMEWORK abstraction
-                    // to the 16 specific patterns shown below.
                     ResearchMapView()
                     howRankingWorks
                     allBiasesSection
@@ -523,12 +524,39 @@ struct ResearchView: View {
                 citation: "BFAS · Pompian, 2012",
                 surface: .whiteShimmer
             )
+            // Deep-dive hint — small Nudge card telling users each
+            // personality + bias card opens further. Reads as a tip,
+            // not a "great job" message.
+            deepDiveHint
             VStack(spacing: 10) {
                 ForEach(biasCategories, id: \.name) { category in
                     categoryCard(category)
                 }
             }
         }
+    }
+
+    private var deepDiveHint: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image("nudge")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 28, height: 28)
+            Text("Tap any personality to expand its biases. Tap a bias to see why it fits, the research behind it, and how to counteract it.")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(DS.textSecondary)
+                .lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.cardBg, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
+        )
     }
 
     /// Per-personality icon + tint. Replaces the flat default emojis with

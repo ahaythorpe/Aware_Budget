@@ -46,9 +46,12 @@ struct ResearchMapView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header + prompt
+            // Header — map-themed with compass icon
             HStack(spacing: 6) {
-                Text("RESEARCH MAP")
+                Image(systemName: "map.fill")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(DS.goldBase)
+                Text("THE BIAS-PAPER MAP")
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .tracking(1.5)
                     .foregroundStyle(DS.goldBase)
@@ -59,10 +62,28 @@ struct ResearchMapView: View {
                         .foregroundStyle(DS.accent)
                 }
             }
-            Text("Tap a paper to highlight the biases it underpins. Tap a bias to find its source.")
-                .font(.footnote)
-                .foregroundStyle(DS.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+
+            // Nudge speech-bubble intro
+            HStack(alignment: .top, spacing: 10) {
+                Image("nudge")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                Text("Every bias traces back to a paper. Tap a paper to see what it underpins, or tap a bias to find its source. The map is yours to wander.")
+                    .font(.system(.footnote, weight: .medium))
+                    .foregroundStyle(DS.textPrimary)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DS.goldSurfaceBg, in: RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DS.goldSurfaceStroke, lineWidth: 0.5)
+            )
 
             // Papers — flow grid
             FlexibleStack(spacing: 6) {
