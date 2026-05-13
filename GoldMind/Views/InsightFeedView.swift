@@ -16,6 +16,7 @@ struct InsightFeedView: View {
     @State private var expandedCategory: String? = nil
     @State private var isLoading = false
     @State private var showAboutScore = false
+    @State private var showEndOfWeekReview = false
 
     private let service = SupabaseService.shared
     private let borderColor = DS.accent.opacity(0.15)
@@ -41,6 +42,7 @@ struct InsightFeedView: View {
                 ScrollView {
                     VStack(spacing: DS.sectionGap) {
                         weeklyHeroCard
+                        endOfWeekReviewCTA
                         financialOverviewSection
                         highestExpenseCard
                         financialTrendChart
@@ -78,6 +80,9 @@ struct InsightFeedView: View {
         }
         .sheet(isPresented: $showAboutScore) {
             AboutScoreSheet()
+        }
+        .sheet(isPresented: $showEndOfWeekReview) {
+            EndOfWeekReviewSheet(topBiases: topBiasesThisWeek)
         }
         .task { await load() }
         .refreshable { await load() }
@@ -149,6 +154,66 @@ struct InsightFeedView: View {
     }
 
     // MARK: - 1. Weekly hero card (gradient)
+
+    /// Top-of-Insights CTA for the end-of-week bias review. Surfaces
+    /// the 3 most-tagged biases from the past 7 days and opens the
+    /// review sheet. v1.0 entry point — v1.1 plans a Sunday-7pm push
+    /// auto-trigger (#37 in PLAN_V1_1).
+    private var endOfWeekReviewCTA: some View {
+        let top = topBiasesThisWeek
+        return Group {
+            if !top.isEmpty {
+                Button { showEndOfWeekReview = true } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(DS.goldBase)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("END-OF-WEEK REVIEW")
+                                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                .tracking(1.2)
+                                .foregroundStyle(DS.goldBase)
+                            Text("Did these patterns show up for you this week?")
+                                .font(.system(.subheadline, weight: .semibold))
+                                .foregroundStyle(DS.textPrimary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(DS.goldBase)
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.cardRadius)
+                            .stroke(DS.goldBase, lineWidth: 1.5)
+                    )
+                    .premiumCardShadow()
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    /// Top 3 most-tagged biases over the last 7 days, summed across
+    /// primary + secondary tags. Drives the end-of-week review sheet.
+    private var topBiasesThisWeek: [(biasName: String, count: Int)] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+        let recent = allEvents.filter { $0.date >= cutoff }
+        var tally: [String: Int] = [:]
+        for e in recent {
+            if let p = e.behaviourTag { tally[p, default: 0] += 1 }
+            if let s = e.secondaryBehaviourTag { tally[s, default: 0] += 1 }
+        }
+        return tally
+            .map { (biasName: $0.key, count: $0.value) }
+            .sorted { $0.count > $1.count }
+            .prefix(3)
+            .map { $0 }
+    }
 
     private var weeklyHeroCard: some View {
         let planned = weekEvents.filter { $0.plannedStatus == .planned }.reduce(0.0) { $0 + $1.amount }

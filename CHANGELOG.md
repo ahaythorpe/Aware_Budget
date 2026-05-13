@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-05-13 — Build 28 — submission build: 6 bias illustrations + end-of-week review + citation fixes (Claude Code, Opus 4.7 1M)
+
+Final submission build. Bella's last day before App Store. Major adds:
+
+- **6 programmatic bias illustrations** (#36): Kahneman's value-function S-curve for Loss Aversion (`LossAversionChart`), plus 5 more in `BiasIllustrations.swift` covering Present Bias (hyperbolic discount curve), Anchoring (no-anchor vs high-anchor bars), Planning Fallacy (estimate vs actual), Mental Accounting (refund-jar vs salary-jar bars), and Overconfidence (confidence-vs-accuracy calibration curve). All pure SwiftUI Charts — no external paid integrations, fits Bella's lean-MVP constraint. Each renders in the bias detail sheet under the Nudge quote, with caption + citation.
+- **End-of-week bias review** (#37 lean version): new `EndOfWeekReviewSheet` surfacing the user's top 3 most-tagged biases from the past 7 days. Per bias: Yes / No / Not sure. Each Yes calls `updateBiasProgress(reflected: true)` to feed the +5 active-confirmation signal; each No counts +1 encountered without reflection. Entry point is a card at the top of Insights tab (auto-trigger via Sunday push deferred to v1.1).
+- **Citation corrections**: "Scarcity Heuristic" renamed to "Bandwagon Effect" across 17 Swift files + 6 Supabase tables (the Banerjee 1992 citation was always about herd behaviour, not scarcity). Cialdini 2001 → 1984 (original *Influence* edition). Verified by agent audit against academic record. `7d4c06c`.
+- **"THE FOUR PAPERS" → "THE MAIN PAPERS"** rename. `f62b4b7`.
+- **Research personality cards** thick gold border (1.5pt full opacity) + 14pt spacing between cards. Bella's "match the bias cards" feedback. `7d4c06c`.
+- **Mind map node-sheet related chips** made static (was buttons that re-triggered the sheet binding, causing flicker). Cross-bias navigation now lives on the Research-tab concept graph. `9d74e5a`.
+- **Home greeting Nudge popover** replaced with custom in-card speech bubble (system popover was clipping near screen edge). `9d74e5a`.
+- **Bias-paper concept graph** (`ResearchMapView`) now renders on both Education and Research tabs with map-themed header + Nudge bubble intro. `9d74e5a`.
+- **Deep-dive hint** at top of Education personality cards. `9d74e5a`.
+
+PLAN_V1_1.md additions: #36 fully extended (5 charts → all 5 built in this build), #37 lean shipped (full Sunday-push trigger deferred), #34 papers↔biases graph already shipped on Education + Research.
+
+---
+
 ## 2026-05-13 — Build 27 — Research concept graph (papers ↔ biases) (Claude Code, Opus 4.7 1M)
 
 Bella greenlit pulling #34 forward into v1.0. New interactive section on the Research tab between THE FRAMEWORK and HOW THE RANKING WORKS.

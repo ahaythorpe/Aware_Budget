@@ -476,13 +476,11 @@ private struct BiasDetailSheet: View {
                         .lineSpacing(2)
                         .fixedSize(horizontal: false, vertical: true)
                     nudgeQuote
-                    // v1.0 proof-of-concept: render Kahneman's value
-                    // function as a visual illustration for the bias
-                    // it directly describes. v1.1 extends to other
-                    // biases with clean math shapes (#36).
-                    if pattern.name == "Loss Aversion" {
-                        LossAversionChart()
-                    }
+                    // Visual illustration for the 6 biases with clean
+                    // math shapes (Loss Aversion, Present Bias,
+                    // Anchoring, Planning Fallacy, Mental Accounting,
+                    // Overconfidence). Other biases render no chart.
+                    biasIllustration(for: pattern.name)
                     if !counterBullets.isEmpty { counterCard }
                     if let example { exampleDisclosure(example) }
                     if !related.isEmpty { relatedRow }

@@ -3,7 +3,7 @@
 > Quick reference. Detailed state lives in `docs/HANDOFF.md`.
 
 **Last updated:** 2026-05-12
-**Current build:** 27 (staged 2026-05-13 — Research concept graph #34 added: papers ↔ biases interactive chips, tap-to-highlight)
+**Current build:** 28 (staged 2026-05-13 — submission build: 6 bias illustrations, end-of-week review, Bandwagon rename, Cialdini fix, Research polish)
 **App Store:** not submitted — Bella in TestFlight-only iteration mode
 
 ## Where to find things
