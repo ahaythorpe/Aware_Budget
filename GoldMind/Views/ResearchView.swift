@@ -144,6 +144,21 @@ struct ResearchView: View {
         }
     }
 
+    /// SF Symbol for the spending-personality icon shown on each
+    /// expanded category header. Mirrors `Archetype.sfSymbol` so the
+    /// Research overcome cards visually echo the rest of the app.
+    private func archetypeIconForCategory(_ name: String) -> String {
+        switch name {
+        case "Avoidance":         return "eye.slash.circle.fill"
+        case "Decision Making":   return "bolt.fill"
+        case "Money Psychology":  return "tray.2.fill"
+        case "Time Perception":   return "clock.fill"
+        case "Social":            return "person.2.wave.2.fill"
+        case "Defaults & Habits": return "repeat.circle.fill"
+        default:                  return "circle.fill"
+        }
+    }
+
     // MARK: - Bias chip fold-ups (Patterns A + C)
 
     /// Maps a category name to the matching Archetype rawValue so the
@@ -933,11 +948,19 @@ struct ResearchView: View {
                         }
                         .padding(.top, 10)
                     } label: {
-                        // Two-line label: archetype name in bold (with
-                        // YOU pill if it's the user's), then the BFAS
-                        // category as a subtle attribution underneath.
+                        // Two-line label: archetype icon + name in bold
+                        // (with YOU pill if it's the user's), then the
+                        // BFAS category as subtle attribution underneath.
                         // Surfaces the bias → spending-personality link.
-                        HStack(alignment: .center, spacing: 8) {
+                        HStack(alignment: .center, spacing: 10) {
+                            ZStack {
+                                Circle()
+                                    .fill(DS.goldBase.opacity(0.12))
+                                    .frame(width: 36, height: 36)
+                                Image(systemName: archetypeIconForCategory(category.name))
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(DS.goldBase)
+                            }
                             VStack(alignment: .leading, spacing: 2) {
                                 HStack(spacing: 6) {
                                     Text("The \(archetypeRaw)")
