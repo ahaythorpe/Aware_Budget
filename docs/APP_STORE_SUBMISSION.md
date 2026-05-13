@@ -6,6 +6,42 @@
 
 ---
 
+## Screenshots (captured 2026-05-13)
+
+Four canonical screenshots live in `docs/screenshots/`:
+
+| File | What | Notes |
+|---|---|---|
+| `01-insights.png` | Insights top — "$156 from future you" / END-OF-WEEK REVIEW card / FINANCIAL OVERVIEW grouped | Text-heavy; **skip in favour of #2** for the App Store listing |
+| `02-insights-with-graph.png` | Insights scrolled — BIGGEST SPEND / MONTHLY TREND bar chart / Nudge card | **Use this for Insights** — Bella's call: more visually appealing |
+| `03-education.png` | Education — "Your money mind" hero, AWARENESS SCORE bar (1/16), Take the Money Mind Quiz, Explore the bias map, 6 personalities | Note: previous "Awareness" tab is now "Education" |
+| `04-research.png` | Research — hero, THE MAIN PAPERS (Pompian / Kahneman & Tversky / Thaler & Sunstein) | Final tab |
+
+Still need to capture for a complete 8-shot set:
+- Home (greeting card + DAY STREAK + 25% patterns identified)
+- Home future-you compound-growth chart
+- Log tab mid-flow (picking category + status)
+- Mind map node sheet with Loss Aversion S-curve (the wow moment)
+
+When captured, drop into `docs/screenshots/` named `00-home.png`, `01b-home-chart.png`, `02b-log-flow.png`, `04b-mindmap-s-curve.png` to keep the ordering.
+
+---
+
+## ⚠️ Pre-submit verification — RevenueCat pricing tiers
+
+Bella's note 2026-05-13: the second and third RevenueCat tiers may only show the discounted price, RevCat may not have the updated prices. **Before submitting**, verify in the RevenueCat dashboard:
+
+1. https://app.revenuecat.com → Project → Products
+2. Confirm each product's **price** matches what you want shown in the App Store paywall:
+   - Annual — should be the full price (with the 7-day trial as a separate metadata field, not part of the price)
+   - Lifetime — full one-time price
+   - Monthly — full subscription price
+3. If RevenueCat is showing the discounted price as the headline price, fix in the RevenueCat product config OR in the App Store Connect Subscription pricing.
+
+The local `GoldMind.storekit` file (used only for sim/test) currently has Annual $99.99 / Lifetime $149.99 / Monthly $9.99. Adjust those to match the live RevenueCat config so sim test purchases stay consistent.
+
+---
+
 ## 0. Before you start
 
 Make sure these are done first (off-app):

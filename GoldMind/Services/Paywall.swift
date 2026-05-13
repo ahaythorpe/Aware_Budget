@@ -21,6 +21,12 @@ final class PaywallStore {
     /// for a paying user on cold start.
     var hasLoaded = false
 
+    /// DEBUG-only lock that prevents `apply(_:)` from overwriting the
+    /// forced-pro state with real RevenueCat data. Set by
+    /// `forceProForScreenshots()` so screenshot-mode launches don't get
+    /// clobbered the moment Purchases finishes its first round-trip.
+    private var screenshotBypassLocked = false
+
     private init() {}
 
     func start() {
@@ -36,6 +42,7 @@ final class PaywallStore {
     }
 
     private func apply(_ info: CustomerInfo) {
+        guard !screenshotBypassLocked else { return }
         isPro = info.entitlements[Self.entitlementID]?.isActive == true
     }
 
@@ -47,6 +54,7 @@ final class PaywallStore {
     /// root navigator skips both the paywall and the loading spinner.
     /// Has zero effect on Release builds.
     func forceProForScreenshots() {
+        screenshotBypassLocked = true
         isPro = true
         hasLoaded = true
     }
