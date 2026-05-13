@@ -25,7 +25,7 @@ struct BFASQuestion: Identifiable, Equatable {
               prompt: "You're more likely to buy something if friends rave about it."),
         .init(biasName: "Moral Licensing", emoji: "🎁",
               prompt: "After a good financial decision, you reward yourself by spending."),
-        .init(biasName: "Scarcity Heuristic", emoji: "⚡",
+        .init(biasName: "Bandwagon Effect", emoji: "⚡",
               prompt: "'Only 2 left' or 'sale ends today' pushes you to buy."),
         .init(biasName: "Sunk Cost Fallacy", emoji: "🧾",
               prompt: "You keep paying for things because you've already invested money."),

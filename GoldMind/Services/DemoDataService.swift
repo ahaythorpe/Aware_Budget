@@ -87,7 +87,7 @@ enum DemoDataService {
             try await service.updateBiasProgress(biasName: "Loss Aversion", reflected: false)
         }
         for _ in 0..<3 {
-            try await service.updateBiasProgress(biasName: "Scarcity Heuristic", reflected: false)
+            try await service.updateBiasProgress(biasName: "Bandwagon Effect", reflected: false)
         }
     }
 }

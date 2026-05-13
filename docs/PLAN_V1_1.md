@@ -202,6 +202,27 @@ Build after #30 Path A (concept-cluster Mind Map toggle) ships. They share the l
 
 ---
 
+## #35 — Concept graphs on Education tab (v1.1)
+
+v1.0 shipped a lightweight `ResearchMapView` (chip layout, tap-to-highlight, no force-directed edges) on both Education and Research tabs. Bella greenlit the chip version for v1.0; the richer treatment is post-launch.
+
+Three richer paths (escalating ambition):
+
+**Path A — Canvas edges** *(~6h)*
+Keep the chip layout but draw actual lines between paper chips and their underpinning bias chips using SwiftUI `Canvas` + a `PreferenceKey`-based position-capture pass. Lines fade dimmed nodes. No layout change.
+
+**Path B — Force-directed cluster layout** *(~12-14h)*
+Replace the static layered layout with a SwiftUI `Canvas`-driven force-directed graph. Biases pull together along `BiasRelationships` edges, repel based on `biasCategory` distance, drift toward their underpinning paper. Tap a node → it becomes the centre, others orbit. Visually striking but math-heavy.
+
+**Path C — Concept-layer drill-down** *(~3-5 days)*
+New top-level paradigm. Surface → Concept Cluster → Bias → Detail. User starts at 4-6 high-level concepts ("Why we spend the way we do") and drills in. Different mental model than the chip map.
+
+### Recommendation
+
+Path A first, ship in v1.1. The chip map already conveys the relationships; lines just make it look more graph-like. Defer Path B/C until usage data shows the chip version isn't enough.
+
+---
+
 ## Status as of 2026-05-12
 
 - v1.0 submission to Apple targeted for tomorrow.

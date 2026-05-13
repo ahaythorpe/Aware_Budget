@@ -102,7 +102,7 @@ enum NudgeVoice {
             return "Rushing is how we miss it."
         case "Social Proof":
             return "Your unexamined habits run a tab."
-        case "Scarcity Heuristic":
+        case "Bandwagon Effect":
             return "Awareness walks. Anxiety runs."
         case "Anchoring":
             return "Kahneman called it 'System 1'. You call it Tuesday."
@@ -154,7 +154,7 @@ enum NudgeVoice {
             return "We copy peers as a shortcut to 'safe.' · Cialdini 2001 + Berger & Heath 2007"
         case "Moral Licensing":
             return "Past good behaviour gives us permission for slips. · Monin & Miller 2001"
-        case "Scarcity Heuristic":
+        case "Bandwagon Effect":
             return "Limited availability raises perceived value. · Cialdini 2001"
         case "Sunk Cost Fallacy":
             return "We protect past spend even when it's wasted. · Thaler 1980 + Arkes & Blumer 1985"

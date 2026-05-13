@@ -160,7 +160,7 @@ enum BiasLessonsMock {
         ),
         BiasLesson(
             id: UUID(),
-            biasName: "Scarcity Heuristic",
+            biasName: "Bandwagon Effect",
             category: "External Influence",
             shortDescription: "Limited availability inflates how much we think something is worth.",
             fullExplanation: "Cialdini (1984) showed that scarcity increases perceived value. 'Only 2 left' and 'sale ends tonight' create urgency that overrides rational evaluation. Real scarcity is rare in consumer markets.",

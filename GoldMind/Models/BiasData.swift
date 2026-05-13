@@ -175,13 +175,13 @@ let allBiasPatterns: [BiasPattern] = [
         sfSymbol: "person.2.wave.2.fill",
         iconBg: "#F3E5F5", iconColor: "#7B1FA2",
         nudgeSays: "Keeping up with people around you is evolutionarily wired. In tribes, relative status mattered for survival. The Joneses are probably in debt. You're building awareness instead.",
-        keyRef: "Cialdini, 2001",
+        keyRef: "Cialdini, 1984",
         citation: "Cialdini, R.B. (2001). Influence: Science and Practice (4th ed.). Allyn & Bacon.",
         category: "Social",
         triggerCount: 0
     ),
     BiasPattern(
-        name: "Scarcity Heuristic",
+        name: "Bandwagon Effect",
         oneLiner: "We follow the crowd even when we privately know better",
         sfSymbol: "figure.walk.motion",
         iconBg: "#E8F5E9", iconColor: "#33691E",

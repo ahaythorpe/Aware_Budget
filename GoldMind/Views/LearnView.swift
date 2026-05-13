@@ -262,7 +262,7 @@ struct LearnView: View {
         case "Denomination Effect": return "Raghubir & Srivastava, 2009"
         case "Framing Effect": return "Tversky & Kahneman, 1981"
         case "Planning Fallacy": return "Buehler, Griffin & Ross, 1994"
-        case "Scarcity Heuristic": return "Cialdini, 2001"
+        case "Bandwagon Effect": return "Cialdini, 1984"
         case "Moral Licensing": return "Monin & Miller, 2001"
         case "Social Proof": return "Cialdini, 1984"
         default: return "Pompian, 2012"

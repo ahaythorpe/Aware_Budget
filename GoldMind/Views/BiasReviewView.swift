@@ -586,7 +586,7 @@ struct BiasReviewView: View {
         case "Availability Heuristic": return "A recent vivid memory pulled me in"
         case "Status Quo Bias":        return "I defaulted. It's just what I do"
         case "Anchoring":              return "A reference price made it feel fair"
-        case "Scarcity Heuristic":     return "Urgency ('only a few left') pushed me"
+        case "Bandwagon Effect":     return "Urgency ('only a few left') pushed me"
         case "Ego Depletion":          return "I was tired, stressed, or decision-fatigued"
         case "Mental Accounting":      return "This money felt 'different' (bonus, refund, fun money)"
         case "Moral Licensing":        return "I'd earned it. Recent good behaviour justified this"

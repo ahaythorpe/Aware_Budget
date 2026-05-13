@@ -26,7 +26,7 @@ enum BiasRotation {
     static func statusFallback(for status: MoneyEvent.PlannedStatus) -> [String] {
         switch status {
         case .impulse:
-            return ["Present Bias", "Ego Depletion", "Scarcity Heuristic", "Social Proof", "Loss Aversion", "Framing Effect", "Moral Licensing"]
+            return ["Present Bias", "Ego Depletion", "Bandwagon Effect", "Social Proof", "Loss Aversion", "Framing Effect", "Moral Licensing"]
         case .surprise:
             return ["Availability Heuristic", "Planning Fallacy", "Ostrich Effect", "Loss Aversion", "Framing Effect", "Overconfidence Bias"]
         case .planned:

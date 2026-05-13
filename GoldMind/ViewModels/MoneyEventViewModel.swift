@@ -364,7 +364,7 @@ let driverInsights: [String: DriverInsight] = [
         means: "The original price made this feel like a win.",
         fix: "Decide your price before seeing theirs."
     ),
-    "Scarcity Heuristic": DriverInsight(
+    "Bandwagon Effect": DriverInsight(
         means: "Limited availability inflated perceived value.",
         fix: "Wait 24hrs. Real scarcity rarely expires in an hour."
     ),
@@ -411,7 +411,7 @@ let driverInsights: [String: DriverInsight] = [
 private let biasOneLiners: [String: String] = [
     "Present Bias": "We treat future-us like a stranger. Worth noticing.",
     "Status Quo Bias": "Defaults cost real money. Just by existing.",
-    "Scarcity Heuristic": "Urgency is almost always manufactured.",
+    "Bandwagon Effect": "Urgency is almost always manufactured.",
     "Anchoring": "The first number you saw set the frame.",
     "Ego Depletion": "Tired brains make expensive decisions.",
     "Social Proof": "Everyone else is performing too.",

@@ -74,7 +74,7 @@ enum Archetype: String, Codable, CaseIterable, Identifiable {
         case .reactor:    ["Loss Aversion", "Anchoring", "Overconfidence Bias"]
         case .bookkeeper: ["Mental Accounting", "Denomination Effect", "Framing Effect"]
         case .now:        ["Present Bias", "Planning Fallacy"]
-        case .bandwagon:  ["Social Proof", "Scarcity Heuristic"]
+        case .bandwagon:  ["Social Proof", "Bandwagon Effect"]
         case .autopilot:  ["Status Quo Bias", "Moral Licensing"]
         }
     }

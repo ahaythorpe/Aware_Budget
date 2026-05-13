@@ -94,7 +94,7 @@ enum BiasMappings {
               confidence: .medium),
 
         // MARK: Shopping
-        .init(category: "Shopping", status: .impulse, bias: "Scarcity Heuristic",
+        .init(category: "Shopping", status: .impulse, bias: "Bandwagon Effect",
               citation: "Cialdini 2001 ('only a few left', 'limited time' as scarcity cues)",
               confidence: .high),
         .init(category: "Shopping", status: .impulse, bias: "Framing Effect",
@@ -111,7 +111,7 @@ enum BiasMappings {
               confidence: .medium),
 
         // MARK: Clothing
-        .init(category: "Clothing", status: .impulse, bias: "Scarcity Heuristic",
+        .init(category: "Clothing", status: .impulse, bias: "Bandwagon Effect",
               citation: "Cialdini 2001 (size availability scarcity, drop releases)",
               confidence: .high),
         .init(category: "Clothing", status: .impulse, bias: "Social Proof",
@@ -159,7 +159,7 @@ enum BiasMappings {
         .init(category: "Travel", status: .impulse, bias: "Present Bias",
               citation: "O'Donoghue & Rabin 1999 (last-minute trip booking = immediate-reward bias)",
               confidence: .medium),
-        .init(category: "Travel", status: .impulse, bias: "Scarcity Heuristic",
+        .init(category: "Travel", status: .impulse, bias: "Bandwagon Effect",
               citation: "Cialdini 2001 ('only 2 seats left at this price' booking pressure)",
               confidence: .high),
 
@@ -194,7 +194,7 @@ enum BiasMappings {
         .init(category: "Big purchase", status: .planned, bias: "Planning Fallacy",
               citation: "Buehler/Griffin/Ross 1994 (large project cost overruns)",
               confidence: .high),
-        .init(category: "Big purchase", status: .impulse, bias: "Scarcity Heuristic",
+        .init(category: "Big purchase", status: .impulse, bias: "Bandwagon Effect",
               citation: "Cialdini 2001 (limited-quantity / closing-soon framing)",
               confidence: .medium),
 

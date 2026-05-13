@@ -906,7 +906,7 @@ struct ResearchView: View {
     // MARK: - Spot & Overcome
 
     private var spotAndOvercomeSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 14) {
             sectionLabel("HOW TO COUNTERACT YOUR BIASES")
 
             NudgeSaysCard(
@@ -973,7 +973,7 @@ struct ResearchView: View {
                     .background(DS.cardBg, in: RoundedRectangle(cornerRadius: DS.cardRadius))
                     .overlay(
                         RoundedRectangle(cornerRadius: DS.cardRadius)
-                            .stroke(DS.goldBase.opacity(0.18), lineWidth: 0.5)
+                            .stroke(DS.goldBase, lineWidth: 1.5)
                     )
                     .premiumCardShadow()
                 }

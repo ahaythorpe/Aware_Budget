@@ -80,7 +80,7 @@ enum BiasQuestionMatrix {
             "Clothing": "Did trends or influencers shape this purchase?",
             "_default": "Was this influenced by what others are doing or buying?"
         ],
-        "Scarcity Heuristic": [
+        "Bandwagon Effect": [
             "Shopping": "Did 'only a few left' or 'limited edition' push you to buy?",
             "Travel": "Did 'last room available' create urgency?",
             "Entertainment": "Did 'selling out fast' make you book sooner?",

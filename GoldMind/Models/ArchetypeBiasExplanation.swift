@@ -40,7 +40,7 @@ enum ArchetypeBiasExplanation {
         // Bandwagon -> Social
         "Bandwagon::Social Proof":
             "When everyone's buying the ETF, the Bandwagon buys too. The crowd's confidence feels like signal. It's usually just confidence.",
-        "Bandwagon::Scarcity Heuristic":
+        "Bandwagon::Bandwagon Effect":
             "'Only 3 left' lands harder on Bandwagons. Scarcity cues exploit the social fear of missing out. The countdown is the lever, not the offer.",
 
         // Autopilot -> Defaults & Habits
